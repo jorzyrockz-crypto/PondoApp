@@ -4298,7 +4298,7 @@ body.dark-mode .dashboard-contribution-open,body.dark-mode .dashboard-view-all,b
 
 .shortcut-help-link{border:0;background:transparent;color:var(--accent);padding:6px 0;font-size:12px;font-weight:700;cursor:pointer}.shortcut-help-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px}body.dark-mode .shortcut-help-link{color:#6ee7b7}#appDialogMessage{white-space:pre-line}
 
-.pondo-identity{display:flex;align-items:center;gap:12px;min-width:0}.pondo-identity-text{min-width:0}.pondo-brand{font-weight:800!important;letter-spacing:-.03em!important}.pondo-header-actions{display:flex;align-items:center;gap:8px}.header-more-wrap{position:relative}.header-more-menu[hidden]{display:none!important}.header-more-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:60;min-width:160px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 12px 32px #0003}.header-menu-item{display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:9px;background:transparent;color:var(--ink);padding:12px;font-size:13px;font-weight:700;text-align:left;cursor:pointer}.header-menu-item:hover,.header-menu-item:focus-visible{background:var(--surface2);outline:2px solid var(--accent);outline-offset:-2px}#headerMoreBtn{color:var(--ink)}#headerMoreBtn svg{fill:currentColor}#orgNameHeader{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pondo-identity{display:flex;align-items:center;gap:12px;min-width:0}.pondo-identity-text{min-width:0}.pondo-brand{font-weight:800!important;letter-spacing:-.03em!important}.pondo-header-actions{display:flex;align-items:center;gap:8px}.header-more-wrap{position:relative}.header-more-menu[hidden]{display:none!important}.header-more-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:60;min-width:160px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 12px 32px #0003}.header-menu-item{display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:9px;background:transparent;color:var(--ink);padding:12px;font-size:13px;font-weight:700;text-align:left;cursor:pointer}.header-menu-item:hover,.header-menu-item:focus-visible{background:var(--surface2);outline:2px solid var(--accent);outline-offset:-2px}#headerMoreBtn{color:var(--ink)}#headerMoreBtn svg{fill:currentColor}#orgNameHeader{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-tagline{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}@media (max-width:480px){.app-tagline{max-width:140px}}
 
 /* Keep navigation balanced on phones and use a compact centered dock on tablets. */
 @media screen{
@@ -4343,6 +4343,15 @@ body.dark-mode .team-member-row{background:#111827;}
 .team-header-badge.offline .team-header-dot{background:#dc2626;}
 #teamHeaderBadgeText{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 @media(max-width:480px){#teamHeaderBadgeText{max-width:64px;}}
+.team-switcher-wrap{position:relative;}
+.team-switcher-menu{min-width:220px;max-width:280px;}
+.team-switch-item{justify-content:flex-start;}
+.team-switch-item .tsi-check{width:16px;flex-shrink:0;color:var(--accent,#059669);font-weight:800;}
+.team-switch-item .tsi-text{display:flex;flex-direction:column;gap:1px;min-width:0;}
+.team-switch-item .tsi-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.team-switch-item .tsi-role{font-size:11px;font-weight:600;color:var(--ink2);}
+.team-switch-item.active{background:var(--surface2,#f4f4f2);}
+.team-switch-divider{height:1px;background:var(--line);margin:6px 2px;}
 body.role-reviewer #fab{display:none!important;}
 #reviewerBanner{position:fixed;left:0;right:0;bottom:0;z-index:500;background:#fffbeb;color:#92400e;text-align:center;padding:8px 12px;font-size:12px;font-weight:600;}
 #reviewerBanner[hidden]{display:none!important;}
@@ -4369,15 +4378,19 @@ body.role-reviewer #fab{display:none!important;}
 <header class="topbar no-print">
   <div class="topbar-inner">
     <div class="pondo-identity">
-      <div class="logo" id="orgLogo">P</div>
+      <div class="logo has-logo" id="appHeaderLogo"><img src="icons/icon-96.png" alt="" class="org-logo-image"></div>
       <div class="pondo-identity-text">
         <div class="org-name pondo-brand">Pondo</div>
-        <div class="org-meta"><span class="dot"></span><span id="orgNameHeader">Your organization</span></div>
+        <div class="org-meta app-tagline">Track and manage your funds with Pondo.</div>
+        <div class="org-meta" id="orgIdentityMeta" hidden><span class="dot"></span><span id="orgNameHeader">Your organization</span></div>
         <span id="orgLocHeader" hidden></span>
       </div>
     </div>
     <div class="pondo-header-actions">
-      <button id="teamHeaderBadge" type="button" class="team-header-badge" hidden onclick="openSettings();switchSettingsTab('team')" title="Team collaboration status — tap to manage"><span id="teamHeaderBadgeDot" class="team-header-dot"></span><span id="teamHeaderBadgeText">Solo</span></button>
+      <div class="team-switcher-wrap">
+        <button id="teamHeaderBadge" type="button" class="team-header-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="teamSwitcherMenu" onclick="toggleTeamSwitcher()" title="Switch workspace or manage your team"><span id="teamHeaderBadgeDot" class="team-header-dot"></span><span id="teamHeaderBadgeText">Solo</span></button>
+        <div id="teamSwitcherMenu" class="header-more-menu team-switcher-menu" hidden></div>
+      </div>
       <div id="userChip" class="user-chip" hidden><img id="userChipAvatar" alt="" hidden><span id="userChipName"></span></div>
       <button class="icon-btn" onclick="openSettings()" title="Settings" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/><circle cx="12" cy="12" r="7"/></svg></button>
       <div class="header-more-wrap"><button id="headerMoreBtn" class="icon-btn" type="button" aria-label="More options" aria-expanded="false" aria-controls="headerMoreMenu" onclick="toggleHeaderMore()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div id="headerMoreMenu" class="header-more-menu" hidden><button class="header-menu-item" id="presentBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg><span>Present</span></button><button class="header-menu-item" id="signOutMenuItem" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button></div></div>
@@ -4616,11 +4629,45 @@ body.role-reviewer #fab{display:none!important;}
       </div>
       <div id="settings-team" class="settings-panel" style="display:none; flex-direction:column; gap:14px">
         <div id="teamSignedOutNotice" class="team-card" hidden><p style="margin:0;font-size:13px;color:var(--ink2)">Sign in to set up team collaboration.</p></div>
-        <div id="teamLoading" class="team-card"><p style="margin:0;font-size:13px;color:var(--ink2)">Checking your organization…</p></div>
-        <div id="teamNoOrg" hidden style="display:flex;flex-direction:column;gap:14px">
+        <div id="teamLoading" class="team-card"><p style="margin:0;font-size:13px;color:var(--ink2)">Checking your organizations…</p></div>
+        <div id="teamSignedInPanel" hidden style="display:flex;flex-direction:column;gap:14px">
           <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Start collaborating</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Create an organization to sync this fund tracker's data in real time with your team. Everyone who joins sees the same live funds, transactions, projects and payables.</p>
+            <p style="font-weight:700;font-size:14px;margin:0 0 10px">Your workspaces</p>
+            <div id="teamWorkspaceList" style="display:flex;flex-direction:column;gap:8px"></div>
+            <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:10px 0 0">Each organization keeps its own separate data. "Personal" is local to this device only and is never shared.</p>
+          </div>
+          <div id="teamActiveOrgPanel" hidden style="display:flex;flex-direction:column;gap:14px">
+            <div class="team-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <p style="font-weight:700;font-size:15px;margin:0" id="teamOrgName">—</p>
+                <span id="teamSyncBadge" class="team-sync-badge">●</span>
+              </div>
+              <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
+              <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
+            </div>
+            <div class="team-card" id="teamInviteCard" hidden>
+              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
+              <label style="font-size:12px;font-weight:700;display:block;margin:0 0 6px">Role for this invite</label>
+              <select id="teamInviteRole" class="input" style="margin-bottom:10px">
+                <option value="disbursing">Disbursing Officer — full edit access</option>
+                <option value="project-manager">Project Manager — full edit access</option>
+                <option value="reviewer">Reviewer — read only</option>
+              </select>
+              <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
+              <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
+                <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
+                <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button>
+              </div>
+            </div>
+            <div class="team-card">
+              <p style="font-weight:700;font-size:14px;margin:0 0 10px">Members</p>
+              <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+            <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
+          </div>
+          <div class="team-card">
+            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Create an organization</p>
+            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Sync this fund tracker's data in real time with a team. Everyone who joins sees the same live funds, transactions, projects and payables. You can belong to more than one.</p>
             <input id="teamNewOrgName" class="input" placeholder="Organization name" maxlength="120">
             <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">Create Organization</button>
           </div>
@@ -4629,35 +4676,6 @@ body.role-reviewer #fab{display:none!important;}
             <input id="teamJoinCode" class="input" placeholder="Paste invite code or link">
             <button class="btn btn-light" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.joinWithPastedInput()">Join Organization</button>
           </div>
-        </div>
-        <div id="teamHasOrg" hidden style="display:flex;flex-direction:column;gap:14px">
-          <div class="team-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-              <p style="font-weight:700;font-size:15px;margin:0" id="teamOrgName">—</p>
-              <span id="teamSyncBadge" class="team-sync-badge">●</span>
-            </div>
-            <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
-            <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
-          </div>
-          <div class="team-card" id="teamInviteCard" hidden>
-            <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
-            <label style="font-size:12px;font-weight:700;display:block;margin:0 0 6px">Role for this invite</label>
-            <select id="teamInviteRole" class="input" style="margin-bottom:10px">
-              <option value="disbursing">Disbursing Officer — full edit access</option>
-              <option value="project-manager">Project Manager — full edit access</option>
-              <option value="reviewer">Reviewer — read only</option>
-            </select>
-            <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
-            <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
-              <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
-              <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button>
-            </div>
-          </div>
-          <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 10px">Members</p>
-            <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-          <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
         </div>
         <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Note: receipt images and the organization logo are not synced between devices yet — only funds, transactions, projects, payables and contribution records sync in real time.</p>
       </div>
@@ -4789,11 +4807,26 @@ function testSound(){ playSound('pop'); }
 let storageWarningOpen=false,trackerDB=null,trackerRevision=0,trackerQueue=Promise.resolve(),trackerPending=0,trackerFatal=false;
 function currentSnapshot(){return {org,funds,txs,sigs,projects,allocations,payables,auditLog,contributionActivities,contributors,contributionPayments}}
 function applySnapshot(x){({org,funds,txs,sigs,projects,allocations,payables,auditLog,contributionActivities,contributors,contributionPayments}=x)}
+function blankWorkspaceSnapshot(){return {org:{name:'Your organization',location:'Set location in settings',periodFrom:localDate().slice(0,4)+'-01-01',periodTo:localDate().slice(0,4)+'-12-31',initials:'ORG'},funds:[],txs:[],sigs:[],projects:[],allocations:[],payables:[],auditLog:[],contributionActivities:[],contributors:[],contributionPayments:[]}}
+// Per-workspace local cache, so switching between "Personal (this device)" and
+// any organization you belong to doesn't lose or mix up each one's data.
+window.pondoWorkspace={
+  save(key){try{localStorage.setItem('ft_ws_cache:'+key,JSON.stringify(currentSnapshot()))}catch(e){/* non-fatal: best-effort cache */}},
+  load(key){try{const raw=localStorage.getItem('ft_ws_cache:'+key);return raw?JSON.parse(raw):null}catch(e){return null}},
+  blank:blankWorkspaceSnapshot,
+};
+(function seedPersonalWorkspaceCache(){
+  // The very first time this runs on a device, whatever is already in local
+  // storage becomes the baseline "Personal" workspace copy (works both for a
+  // brand-new install with blank defaults, and for an existing install whose
+  // local data predates multi-org support).
+  try{if(!localStorage.getItem('ft_ws_cache:personal'))localStorage.setItem('ft_ws_cache:personal',JSON.stringify(currentSnapshot()))}catch(e){/* ignore */}
+})();
 function downloadCurrentSnapshot(){let x={...currentSnapshot(),appSettings,exportedAt:new Date().toISOString()},url=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='Pondo_Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function showFatalSave(error){if(trackerFatal)return;trackerFatal=true;storageWarningOpen=true;let veil=document.createElement('section');veil.setAttribute('role','alertdialog');veil.setAttribute('aria-modal','true');veil.style.cssText='position:fixed;inset:0;z-index:10000;background:#f5f7f5;color:#17231d;display:flex;align-items:center;justify-content:center;padding:20px';let box=document.createElement('div');box.style.cssText='width:min(100%,520px);background:white;padding:24px;border-radius:18px;font:15px/1.5 system-ui';let title=document.createElement('h1');title.textContent='Changes could not be saved';let msg=document.createElement('p');msg.textContent=(error?.name==='StorageConflict'?'Another copy changed the stored records. ':'Storage is unavailable or full. ')+'Current changes may only exist in memory. Export a backup before reloading; do not continue editing.';let b=document.createElement('button');b.textContent='Export current data, including unsaved changes';b.style.cssText='padding:12px;background:#087f5b;color:white;border:0;border-radius:10px';b.onclick=downloadCurrentSnapshot;box.append(title,msg,b);veil.append(box);[...document.body.children].filter(el=>el.tagName!=='SCRIPT').forEach(el=>el.inert=true);document.body.append(veil);veil.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();b.focus()}});b.focus()}
-function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
+function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(snap))}catch(e){/* non-fatal */}trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
 window.addEventListener('beforeunload',e=>{if(trackerPending){e.preventDefault();e.returnValue=''}});
-function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
+function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(currentSnapshot()))}catch(cacheErr){/* non-fatal */}return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
 function fmt(n){ return '₱'+Number(n).toLocaleString('en-PH'); }
 function switchTab(tab){
   document.querySelectorAll('.tab-section').forEach(s=>s.style.display='none');
@@ -4830,8 +4863,31 @@ function showKeyboardShortcuts(){appAlert('Keyboard shortcuts\n\nAlt + Shift + 1
  });
 })();
 function closeHeaderMore(restoreFocus=false){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');let open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open){closeNavMore();menu.querySelector('button').focus()}}
+function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');let open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open){closeNavMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();menu.querySelector('button').focus()}}
 document.addEventListener('click',e=>{if(!e.target.closest('.header-more-wrap'))closeHeaderMore()});
+
+function escapeTeamText(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderTeamSwitcherMenu(){
+  const menu=document.getElementById('teamSwitcherMenu');
+  if(!menu)return;
+  const state=window.pondoTeamState||{orgId:null,memberships:[]};
+  const roleLabels=window.ROLE_LABELS||{};
+  const activeKey=state.orgId||'personal';
+  const rows=[{key:'personal',label:'Personal (this device)',sub:''}].concat((state.memberships||[]).map(m=>({key:m.orgId,label:m.name||'Organization',sub:roleLabels[m.role]||m.role||''})));
+  menu.innerHTML=rows.map(r=>{
+    const active=r.key===activeKey;
+    const keyAttr=escapeTeamText(r.key).replace(/"/g,'&quot;');
+    return '<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span></button>';
+  }).join('')
+  +'<div class="team-switch-divider"></div>'
+  +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>';
+}
+function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
+function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+window.closeTeamSwitcher=closeTeamSwitcher;
+window.renderTeamSwitcherMenu=renderTeamSwitcherMenu;
+document.addEventListener('click',e=>{if(!e.target.closest('.team-switcher-wrap'))closeTeamSwitcher()});
+document.addEventListener('keydown',e=>{const m=document.getElementById('teamSwitcherMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeTeamSwitcher(true)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('headerMoreMenu').hidden){e.preventDefault();e.stopPropagation();closeHeaderMore(true)}});
 function updateFundRailHint(){ const rail=document.getElementById('fundCards'); const hint=document.getElementById('fundsSwipeHint'); if(rail && hint && rail.clientWidth) hint.hidden=rail.scrollWidth<=rail.clientWidth+1; }
 window.addEventListener('resize',updateFundRailHint);
@@ -4922,7 +4978,7 @@ function logoMarkup(){
   const initials=(org.name||'Organization').trim().split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').toUpperCase();
   return escapeText(initials||'ORG');
 }
-function updateOrgLogos(){for(const id of ['orgLogo','reportLogo','presLogo']){const el=document.getElementById(id);if(el){el.innerHTML=logoMarkup();el.classList.toggle('has-logo',!!org.logoData);}} document.querySelectorAll('.logo-remove').forEach(el=>el.disabled=!org.logoData);}
+function updateOrgLogos(){for(const id of ['reportLogo','presLogo']){const el=document.getElementById(id);if(el){el.innerHTML=logoMarkup();el.classList.toggle('has-logo',!!org.logoData);}} document.querySelectorAll('.logo-remove').forEach(el=>el.disabled=!org.logoData);}
 function uploadOrgLogo(input){
   const file=input.files&&input.files[0]; if(!file)return;
   if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>3*1024*1024){appAlert('Choose a PNG, JPEG or WebP image up to 3 MB.');input.value='';return;}
@@ -5651,6 +5707,8 @@ const pondoTeamState = {
   orgName: '',
   role: null,
   members: [],
+  orgMemberships: [], // every orgId this user belongs to (not just the active one)
+  memberships: [], // resolved {orgId, name, role} for each entry above, for the workspace switcher
   unsubMembers: null,
   unsubOrgDoc: null,
   unsubData: null,
@@ -5658,6 +5716,7 @@ const pondoTeamState = {
   pushTimer: null,
   online: navigator.onLine,
 };
+window.pondoTeamState = pondoTeamState;
 
 function stripHeavyFields(snap) {
   const clone = JSON.parse(JSON.stringify(snap));
@@ -5730,6 +5789,7 @@ window.addEventListener('online', () => { pondoTeamState.online = true; if (pond
 window.addEventListener('offline', () => { pondoTeamState.online = false; if (pondoTeamState.orgId) setSyncBadge('offline'); updateHeaderTeamBadge(); });
 
 const ROLE_LABELS = { owner: 'Owner', disbursing: 'Disbursing Officer', reviewer: 'Reviewer', 'project-manager': 'Project Manager' };
+window.ROLE_LABELS = ROLE_LABELS;
 
 function updateHeaderTeamBadge() {
   const badge = document.getElementById('teamHeaderBadge');
@@ -5739,11 +5799,12 @@ function updateHeaderTeamBadge() {
   badge.hidden = false;
   badge.classList.remove('live', 'offline');
   if (!pondoTeamState.orgId) {
-    badge.title = 'You are the only person who can see this data. Tap to set up team collaboration.';
-    text.textContent = 'Solo · Add team';
+    const hasOtherOrgs = pondoTeamState.orgMemberships && pondoTeamState.orgMemberships.length > 0;
+    badge.title = hasOtherOrgs ? 'Working with personal, local-only data. Tap to switch workspace.' : 'You are the only person who can see this data. Tap to set up team collaboration.';
+    text.textContent = hasOtherOrgs ? 'Personal · Switch' : 'Solo · Add team';
   } else {
     const roleLabel = ROLE_LABELS[pondoTeamState.role] || '';
-    badge.title = 'Shared with your team. Tap to manage members and invites.';
+    badge.title = 'Shared with your team. Tap to switch workspace or manage members.';
     text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
   }
@@ -5837,16 +5898,100 @@ function subscribeToOrg(orgId) {
   }, (err) => console.warn('Org data listener error:', err));
 }
 
-async function handleRemovedFromOrg() {
+// Switches which workspace's data is loaded: 'personal' for this device's
+// local-only data, or an orgId for one of the organizations this user
+// belongs to. Each workspace keeps its own cached copy in localStorage so
+// switching back and forth doesn't lose anything, and org workspaces also
+// reconcile with their live Firestore data once subscribeToOrg() connects.
+async function switchActiveWorkspace(key) {
+  const current = pondoTeamState.orgId || 'personal';
+  if (key === current) { if (window.closeTeamSwitcher) window.closeTeamSwitcher(); return; }
+  if (!window.pondoWorkspace || !window.applySnapshot || !window.renderAll) return;
+
+  window.pondoWorkspace.save(current); // keep a local copy of the workspace we're leaving
+
   teardownOrgSubscriptions();
-  pondoTeamState.orgId = null;
   pondoTeamState.role = null;
   pondoTeamState.members = [];
+  // Set this before applySnapshot()/renderAll() below (which internally calls
+  // saveAll()) so its workspace-cache write lands under the right key instead
+  // of mistakenly overwriting "personal" with org data (or vice versa).
+  pondoTeamState.orgId = key === 'personal' ? null : key;
   applyRoleUI();
+
+  window.__pondoSuppressFeedback = true;
   try {
-    await setDoc(doc(firestoreDb, 'users', pondoTeamState.uid), { organizationId: null }, { merge: true });
-  } catch (e) { /* non-fatal */ }
+    const cached = window.pondoWorkspace.load(key);
+    window.applySnapshot(cached || window.pondoWorkspace.blank());
+    window.renderAll();
+  } finally {
+    setTimeout(() => { window.__pondoSuppressFeedback = false; }, 50);
+  }
+
+  if (key !== 'personal') {
+    subscribeToOrg(key); // re-attaches listeners; also re-sets pondoTeamState.orgId (no-op here)
+  } else {
+    setSyncBadge('none');
+  }
+
+  if (pondoTeamState.uid) {
+    try {
+      await setDoc(doc(firestoreDb, 'users', pondoTeamState.uid), { activeOrganizationId: key === 'personal' ? null : key }, { merge: true });
+    } catch (e) { /* non-fatal */ }
+  }
+  if (window.closeTeamSwitcher) window.closeTeamSwitcher();
   renderTeamPanel();
+  updateHeaderTeamBadge();
+}
+
+// Looks up name + role for every org this user belongs to, so the
+// switcher and Settings > Team can list them. Self-heals orgMemberships if
+// a membership doc was removed (e.g. an owner removed this user) while this
+// device wasn't actively subscribed to that org.
+async function refreshMemberships() {
+  const uid = pondoTeamState.uid;
+  if (!uid) { pondoTeamState.memberships = []; return; }
+  const ids = pondoTeamState.orgMemberships.slice();
+  const results = [];
+  let changed = false;
+  for (const orgId of ids) {
+    try {
+      const [orgSnap, memberSnap] = await Promise.all([
+        getDoc(doc(firestoreDb, 'organizations', orgId)),
+        getDoc(doc(firestoreDb, 'organizations', orgId, 'members', uid)),
+      ]);
+      if (!memberSnap.exists()) { changed = true; continue; }
+      results.push({
+        orgId,
+        name: orgSnap.exists() ? (orgSnap.data().name || 'Organization') : 'Organization',
+        role: memberSnap.data().role || 'member',
+      });
+    } catch (e) {
+      // Offline or a transient read error — keep it in the list rather than dropping it.
+      results.push({ orgId, name: pondoTeamState.orgId === orgId ? (pondoTeamState.orgName || 'Organization') : 'Organization', role: pondoTeamState.orgId === orgId ? pondoTeamState.role : '' });
+    }
+  }
+  pondoTeamState.memberships = results;
+  if (changed) {
+    pondoTeamState.orgMemberships = results.map((m) => m.orgId);
+    try { await setDoc(doc(firestoreDb, 'users', uid), { orgMemberships: pondoTeamState.orgMemberships }, { merge: true }); } catch (e) { /* non-fatal */ }
+  }
+  if (window.renderTeamSwitcherMenu) window.renderTeamSwitcherMenu();
+  renderTeamPanel();
+}
+
+async function handleRemovedFromOrg() {
+  const removedOrgId = pondoTeamState.orgId;
+  pondoTeamState.orgMemberships = pondoTeamState.orgMemberships.filter((id) => id !== removedOrgId);
+  const fallback = pondoTeamState.orgMemberships[0] || 'personal';
+  try {
+    await setDoc(doc(firestoreDb, 'users', pondoTeamState.uid), {
+      orgMemberships: pondoTeamState.orgMemberships,
+      activeOrganizationId: fallback === 'personal' ? null : fallback,
+    }, { merge: true });
+  } catch (e) { /* non-fatal */ }
+  await switchActiveWorkspace(fallback);
+  await refreshMemberships();
 }
 
 function randomInviteCode() {
@@ -5897,8 +6042,13 @@ async function createOrganization() {
       displayName: user.displayName || null, photoURL: user.photoURL || null,
       joinedAt: serverTimestamp(),
     });
-    await setDoc(doc(firestoreDb, 'users', user.uid), { organizationId: orgRef.id }, { merge: true });
-    subscribeToOrg(orgRef.id);
+    pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, orgRef.id]));
+    await setDoc(doc(firestoreDb, 'users', user.uid), {
+      orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgRef.id,
+    }, { merge: true });
+    if (input) input.value = '';
+    await switchActiveWorkspace(orgRef.id);
+    await refreshMemberships();
   } catch (err) {
     notify('Could not create the organization: ' + (err && err.message ? err.message : err));
   }
@@ -5915,14 +6065,21 @@ async function joinWithInviteCode(code) {
   if (invite.expiresAt && invite.expiresAt.toMillis && invite.expiresAt.toMillis() < Date.now()) throw new Error('This invite has expired.');
   if (invite.maxUses != null && (invite.usedCount || 0) >= invite.maxUses) throw new Error('This invite has already been used.');
 
-  await setDoc(doc(firestoreDb, 'organizations', invite.orgId, 'members', user.uid), {
-    uid: user.uid, role: invite.role, email: user.email || null,
-    displayName: user.displayName || null, photoURL: user.photoURL || null,
-    joinedAt: serverTimestamp(), inviteCode: code,
-  });
-  try { await updateDoc(inviteRef, { usedCount: increment(1) }); } catch (e) { /* non-fatal */ }
-  await setDoc(doc(firestoreDb, 'users', user.uid), { organizationId: invite.orgId }, { merge: true });
-  subscribeToOrg(invite.orgId);
+  const alreadyMember = pondoTeamState.orgMemberships.includes(invite.orgId);
+  if (!alreadyMember) {
+    await setDoc(doc(firestoreDb, 'organizations', invite.orgId, 'members', user.uid), {
+      uid: user.uid, role: invite.role, email: user.email || null,
+      displayName: user.displayName || null, photoURL: user.photoURL || null,
+      joinedAt: serverTimestamp(), inviteCode: code,
+    });
+    try { await updateDoc(inviteRef, { usedCount: increment(1) }); } catch (e) { /* non-fatal */ }
+    pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, invite.orgId]));
+  }
+  await setDoc(doc(firestoreDb, 'users', user.uid), {
+    orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: invite.orgId,
+  }, { merge: true });
+  await switchActiveWorkspace(invite.orgId);
+  await refreshMemberships();
 }
 
 async function joinWithPastedInput() {
@@ -5995,20 +6152,61 @@ async function leaveOrganization() {
 function renderTeamPanel() {
   updateHeaderTeamBadge();
   const loading = document.getElementById('teamLoading');
-  const noOrg = document.getElementById('teamNoOrg');
-  const hasOrg = document.getElementById('teamHasOrg');
+  const signedInPanel = document.getElementById('teamSignedInPanel');
   const signedOut = document.getElementById('teamSignedOutNotice');
-  if (!loading || !noOrg || !hasOrg || !signedOut) return;
+  if (!loading || !signedInPanel || !signedOut) return;
 
   if (!window.pondoCurrentUser) {
-    signedOut.hidden = false; loading.hidden = true; noOrg.hidden = true; hasOrg.hidden = true;
+    signedOut.hidden = false; loading.hidden = true; signedInPanel.hidden = true;
     return;
   }
   signedOut.hidden = true;
   loading.hidden = true;
+  signedInPanel.hidden = false;
+
+  // Workspace list: "Personal (this device)" plus every organization this user belongs to.
+  const activeKey = pondoTeamState.orgId || 'personal';
+  const wsList = document.getElementById('teamWorkspaceList');
+  if (wsList) {
+    wsList.innerHTML = '';
+    const rows = [{ key: 'personal', name: 'Personal (this device)', role: '' }]
+      .concat(pondoTeamState.memberships.map((m) => ({ key: m.orgId, name: m.name, role: ROLE_LABELS[m.role] || m.role })));
+    rows.forEach((r) => {
+      const row = document.createElement('div');
+      row.className = 'team-member-row';
+      const info = document.createElement('div');
+      info.style.minWidth = '0';
+      const name = document.createElement('div');
+      name.className = 'tm-name';
+      name.textContent = r.name;
+      const meta = document.createElement('div');
+      meta.className = 'tm-meta';
+      meta.textContent = r.role;
+      info.append(name, meta);
+      row.appendChild(info);
+      if (r.key === activeKey) {
+        const badge = document.createElement('span');
+        badge.className = 'tm-meta';
+        badge.style.fontWeight = '700';
+        badge.textContent = 'Active';
+        row.appendChild(badge);
+      } else {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-light';
+        btn.style.cssText = 'height:32px;padding:0 12px;font-size:12px;flex-shrink:0';
+        btn.textContent = 'Switch';
+        btn.addEventListener('click', () => switchActiveWorkspace(r.key));
+        row.appendChild(btn);
+      }
+      wsList.appendChild(row);
+    });
+  }
+
+  const activeOrgPanel = document.getElementById('teamActiveOrgPanel');
+  if (activeOrgPanel) activeOrgPanel.hidden = !pondoTeamState.orgId;
 
   if (!pondoTeamState.orgId) {
-    noOrg.hidden = false; hasOrg.hidden = true;
     const nameInput = document.getElementById('teamNewOrgName');
     if (nameInput && !nameInput.value) {
       try {
@@ -6020,7 +6218,6 @@ function renderTeamPanel() {
     }
     return;
   }
-  noOrg.hidden = true; hasOrg.hidden = false;
 
   document.getElementById('teamOrgName').textContent = pondoTeamState.orgName || 'Organization';
   const roleLabels = { owner: 'Owner', disbursing: 'Disbursing Officer', reviewer: 'Reviewer (read-only)', 'project-manager': 'Project Manager' };
@@ -6082,18 +6279,35 @@ window.pondoTeam = {
   generateInvite,
   copyInviteLink,
   leaveOrganization,
+  switchActiveWorkspace,
   refreshPanel: renderTeamPanel,
 };
 
 function maybeShowTeamOnboarding() {
-  if (pondoTeamState.orgId) return;
+  if (pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // already has at least one org
   if (localStorage.getItem('ft_team_onboarding_seen')) return;
   try { localStorage.setItem('ft_team_onboarding_seen', '1'); } catch (e) { /* ignore */ }
   setTimeout(async () => {
-    if (pondoTeamState.orgId) return; // may have joined via an invite link in the meantime
+    if (pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // may have joined via an invite link in the meantime
     const proceed = await confirmAction('Set up team collaboration? Invite others to view or edit this fund tracker together in real time, with roles like Disbursing Officer or read-only Reviewer. You can always do this later from Settings > Team.');
     if (proceed) { openSettings(); switchSettingsTab('team'); }
   }, 700);
+}
+
+// Normalizes a /users/{uid} doc into the multi-org membership shape,
+// transparently migrating accounts created before multi-org support (which
+// only ever stored a single "organizationId" pointer).
+function legacyMigrateUserDoc(userSnap) {
+  const data = userSnap.exists() ? userSnap.data() : {};
+  let orgMemberships = Array.isArray(data.orgMemberships) ? data.orgMemberships.slice() : null;
+  let activeOrganizationId = Object.prototype.hasOwnProperty.call(data, 'activeOrganizationId') ? data.activeOrganizationId : undefined;
+  if (orgMemberships === null) {
+    orgMemberships = data.organizationId ? [data.organizationId] : [];
+  }
+  if (activeOrganizationId === undefined) {
+    activeOrganizationId = data.organizationId || (orgMemberships[0] || null);
+  }
+  return { orgMemberships, activeOrganizationId };
 }
 
 async function initCollaboration(user) {
@@ -6102,13 +6316,19 @@ async function initCollaboration(user) {
   try {
     const userRef = doc(firestoreDb, 'users', user.uid);
     const userSnap = await getDoc(userRef);
-    let orgId = userSnap.exists() ? (userSnap.data().organizationId || null) : null;
+    const migrated = legacyMigrateUserDoc(userSnap);
+    pondoTeamState.orgMemberships = migrated.orgMemberships;
+    let orgId = migrated.activeOrganizationId;
+    try {
+      await setDoc(userRef, { orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgId || null }, { merge: true });
+    } catch (e) { /* non-fatal */ }
 
     const pendingInvite = getPendingInviteCode();
-    if (!orgId && pendingInvite) {
+    if (pendingInvite) {
       try {
         await joinWithInviteCode(pendingInvite);
         clearInviteFromUrl();
+        await refreshMemberships();
         return;
       } catch (err) {
         console.warn('Could not join via invite link:', err);
@@ -6120,8 +6340,9 @@ async function initCollaboration(user) {
       try {
         const memberSnap = await getDoc(doc(firestoreDb, 'organizations', orgId, 'members', user.uid));
         if (!memberSnap.exists()) {
-          await setDoc(userRef, { organizationId: null }, { merge: true });
-          orgId = null;
+          pondoTeamState.orgMemberships = pondoTeamState.orgMemberships.filter((id) => id !== orgId);
+          orgId = pondoTeamState.orgMemberships[0] || null;
+          try { await setDoc(userRef, { orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgId }, { merge: true }); } catch (e) { /* non-fatal */ }
         }
       } catch (e) {
         orgId = null;
@@ -6134,6 +6355,7 @@ async function initCollaboration(user) {
       renderTeamPanel();
       maybeShowTeamOnboarding();
     }
+    await refreshMemberships();
   } catch (err) {
     console.warn('Could not initialize collaboration:', err);
     renderTeamPanel();
@@ -6146,6 +6368,8 @@ function teardownCollaboration() {
   pondoTeamState.orgId = null;
   pondoTeamState.role = null;
   pondoTeamState.members = [];
+  pondoTeamState.orgMemberships = [];
+  pondoTeamState.memberships = [];
   applyRoleUI();
   renderTeamPanel();
 }

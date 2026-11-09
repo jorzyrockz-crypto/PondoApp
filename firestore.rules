@@ -8,9 +8,20 @@ rules_version = '2';
 // instead; that is what fixes an "auth/operation-not-allowed" error.
 //
 // Data model:
-//   /users/{uid}                                   — profile + organizationId pointer, self-access only
+//   /users/{uid}                                   — profile + orgMemberships (every org this
+//                                                     user belongs to) + activeOrganizationId
+//                                                     (which one is currently loaded on this
+//                                                     device, or null for the local-only
+//                                                     "Personal" workspace); self-access only.
+//                                                     Legacy accounts may only have a single
+//                                                     "organizationId" field — the client
+//                                                     migrates that into the fields above.
 //   /organizations/{orgId}                         — org profile (name, createdBy, createdAt)
-//   /organizations/{orgId}/members/{uid}           — membership + role for that org
+//   /organizations/{orgId}/members/{uid}           — membership + role for that org. A uid can
+//                                                     have a members/{uid} doc under any number
+//                                                     of organizations — that's what makes
+//                                                     belonging to several orgs possible, each
+//                                                     with its own fully isolated data below.
 //   /organizations/{orgId}/data/{docId}            — shared fund-tracker data (e.g. "snapshot")
 //   /invites/{code}                                — single-use-ish invite link/code -> org + role
 //
