@@ -5495,6 +5495,13 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCnBYuNlOYUoLKKcaua5nMqnTSlFi4Di80",
@@ -5508,6 +5515,35 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
+const firestoreDb = getFirestore(firebaseApp);
+
+// Create/update a per-user profile document at /users/{uid}. This is the
+// only Firestore write Pondo makes today — it matches the firestore.rules
+// "users own their own /users/{uid} subtree" model. Fund/transaction data
+// itself still lives only in this browser's IndexedDB (see the main app
+// script above); this does not sync fund records across devices yet.
+async function upsertUserProfile(user) {
+  try {
+    const userRef = doc(firestoreDb, 'users', user.uid);
+    const existing = await getDoc(userRef);
+    const profile = {
+      uid: user.uid,
+      displayName: user.displayName || null,
+      email: user.email || null,
+      photoURL: user.photoURL || null,
+      lastLoginAt: serverTimestamp(),
+    };
+    if (!existing.exists()) {
+      profile.createdAt = serverTimestamp();
+    }
+    await setDoc(userRef, profile, { merge: true });
+  } catch (err) {
+    // Non-fatal: the app remains fully usable from local storage even if
+    // the Firestore profile write fails (e.g. offline, or rules not yet
+    // published).
+    console.warn('Could not sync user profile to Firestore:', err);
+  }
+}
 
 const authGate = document.getElementById('authGate');
 const pondoApp = document.getElementById('pondoApp');
@@ -5578,6 +5614,7 @@ onAuthStateChanged(auth, (user) => {
       userChipAvatar.hidden = true;
     }
     window.pondoCurrentUser = user;
+    upsertUserProfile(user);
   } else {
     authGate.style.display = 'flex';
     pondoApp.inert = true;
