@@ -4,6 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pondo — Fund Tracker</title>
+<meta name="description" content="Track and manage your funds with Pondo.">
+
+<!-- PWA: manifest -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#059669">
+<meta name="background-color" content="#f7f7f5">
+
+<!-- Favicons -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="shortcut icon" href="favicon.ico">
+
+<!-- iOS / Apple -->
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pondo">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Windows / Microsoft Tiles -->
+<meta name="msapplication-config" content="browserconfig.xml">
+<meta name="msapplication-TileColor" content="#059669">
+<meta name="msapplication-TileImage" content="icons/mstile-150x150.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Tailwind inlined below - no CDN needed for offline preview -->
 <style>
@@ -5412,6 +5439,16 @@ window.trackerReady=false;
  let acquired=false;navigator.locks.request('fund-tracker-editor-v1',{ifAvailable:true,mode:'exclusive'},async lock=>{if(!lock){show('Tracker already open','Another tab is using this tracker. Close that tab first, then reload this page to avoid conflicting edits.',()=>location.reload(),'Reload');return}acquired=true;await open();await new Promise(resolve=>window.addEventListener('pagehide',resolve,{once:true}));}).catch(()=>{if(!acquired)fallback()});
  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
 })();
+</script>
+<script>
+// PWA: register service worker for offline app-shell caching.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
