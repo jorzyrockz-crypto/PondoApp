@@ -4791,7 +4791,7 @@ function currentSnapshot(){return {org,funds,txs,sigs,projects,allocations,payab
 function applySnapshot(x){({org,funds,txs,sigs,projects,allocations,payables,auditLog,contributionActivities,contributors,contributionPayments}=x)}
 function downloadCurrentSnapshot(){let x={...currentSnapshot(),appSettings,exportedAt:new Date().toISOString()},url=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='Pondo_Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function showFatalSave(error){if(trackerFatal)return;trackerFatal=true;storageWarningOpen=true;let veil=document.createElement('section');veil.setAttribute('role','alertdialog');veil.setAttribute('aria-modal','true');veil.style.cssText='position:fixed;inset:0;z-index:10000;background:#f5f7f5;color:#17231d;display:flex;align-items:center;justify-content:center;padding:20px';let box=document.createElement('div');box.style.cssText='width:min(100%,520px);background:white;padding:24px;border-radius:18px;font:15px/1.5 system-ui';let title=document.createElement('h1');title.textContent='Changes could not be saved';let msg=document.createElement('p');msg.textContent=(error?.name==='StorageConflict'?'Another copy changed the stored records. ':'Storage is unavailable or full. ')+'Current changes may only exist in memory. Export a backup before reloading; do not continue editing.';let b=document.createElement('button');b.textContent='Export current data, including unsaved changes';b.style.cssText='padding:12px;background:#087f5b;color:white;border:0;border-radius:10px';b.onclick=downloadCurrentSnapshot;box.append(title,msg,b);veil.append(box);[...document.body.children].filter(el=>el.tagName!=='SCRIPT').forEach(el=>el.inert=true);document.body.append(veil);veil.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();b.focus()}});b.focus()}
-function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');if(badge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(badge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
+function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
 window.addEventListener('beforeunload',e=>{if(trackerPending){e.preventDefault();e.returnValue=''}});
 function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
 function fmt(n){ return '₱'+Number(n).toLocaleString('en-PH'); }
@@ -5492,6 +5492,7 @@ function applyAppearance(){
 function applyChartSettings(){ document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';}); }
 let countRun=0;
 function animateTotals(){
+  if(window.__pondoSuppressFeedback) return;
   const run=++countRun;
   if(!appSettings.animation.countUp || appSettings.motion.reduceMotion) return;
   const els=['totalReceived','totalSpent','totalRemaining'].map(id=>document.getElementById(id));
@@ -5750,6 +5751,9 @@ function updateHeaderTeamBadge() {
 
 function schedulePush(snapshotArg) {
   if (!canWriteOrgData()) return;
+  // This save was triggered by us applying an incoming remote update, not by
+  // a genuine local edit — don't echo it straight back to Firestore.
+  if (window.__pondoSuppressFeedback) return;
   clearTimeout(pondoTeamState.pushTimer);
   pondoTeamState.pushTimer = setTimeout(() => doPush(snapshotArg), 500);
 }
@@ -5817,8 +5821,18 @@ function subscribeToOrg(orgId) {
     pondoTeamState.lastSyncedJSON = JSON.stringify(rest);
     const merged = reattachLocalImages(rest);
     if (window.applySnapshot && window.renderAll) {
-      window.applySnapshot(merged);
-      window.renderAll();
+      // Applying this remote update runs through the same renderAll()/saveAll()
+      // path as a local edit, which would otherwise re-trigger the "Saving…"
+      // badge, the number count-up animation and its completion beep, and
+      // try to echo this exact data straight back to Firestore. Suppress all
+      // of that for updates that originated elsewhere.
+      window.__pondoSuppressFeedback = true;
+      try {
+        window.applySnapshot(merged);
+        window.renderAll();
+      } finally {
+        setTimeout(() => { window.__pondoSuppressFeedback = false; }, 50);
+      }
     }
   }, (err) => console.warn('Org data listener error:', err));
 }
