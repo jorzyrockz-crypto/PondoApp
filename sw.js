@@ -2,7 +2,7 @@
 // Provides an offline-first app shell cache. All user data lives in IndexedDB
 // (handled by the app itself) — this worker only caches static assets.
 
-const CACHE_VERSION = 'pondo-v2';
+const CACHE_VERSION = 'pondo-v3';
 const APP_SHELL = [
   './',
   './index.html',
