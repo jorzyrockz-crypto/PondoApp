@@ -4372,6 +4372,7 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
 .team-switch-item .tsi-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .team-switch-item .tsi-role{font-size:11px;font-weight:600;color:var(--ink2);}
 .team-switch-item.active{background:var(--surface2,#f4f4f2);}
+.team-switch-facepile{display:flex;align-items:center;padding:0 12px 8px 38px;}
 .team-switch-divider{height:1px;background:var(--line);margin:6px 2px;}
 body.role-reviewer #fab{display:none!important;}
 /* Reviewer is a real server-enforced read-only role (firestore.rules blocks
@@ -4450,7 +4451,7 @@ body.role-reviewer .card-color-setting select{pointer-events:none;opacity:.6;}
     </div>
     <div class="pondo-header-actions">
       <div class="team-switcher-wrap">
-        <button id="teamHeaderBadge" type="button" class="team-header-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="teamSwitcherMenu" onclick="toggleTeamSwitcher()" title="Switch workspace or manage your team"><span id="teamHeaderBadgeDot" class="team-header-dot"></span><span id="teamHeaderBadgeText">Solo</span><span id="teamCollabFacepile" class="team-collab-facepile" hidden></span></button>
+        <button id="teamHeaderBadge" type="button" class="team-header-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="teamSwitcherMenu" onclick="toggleTeamSwitcher()" title="Switch workspace or manage your team"><span id="teamHeaderBadgeDot" class="team-header-dot"></span><span id="teamHeaderBadgeText">Solo</span></button>
         <div id="teamSwitcherMenu" class="header-more-menu team-switcher-menu" hidden></div>
       </div>
       <div id="userChip" class="user-chip" hidden><img id="userChipAvatar" alt="" hidden><span id="userChipName"></span></div>
@@ -4959,10 +4960,12 @@ function renderTeamSwitcherMenu(){
   const roleLabels=window.ROLE_LABELS||{};
   const activeKey=state.orgId||'personal';
   const rows=[{key:'personal',label:'Personal (this device)',sub:''}].concat((state.memberships||[]).map(m=>({key:m.orgId,label:m.name||'Organization',sub:roleLabels[m.role]||m.role||''})));
+  const facepileHtml=(state.orgId&&typeof buildTeamFacepileHtml==='function')?buildTeamFacepileHtml(state.members||[]):'';
   menu.innerHTML=rows.map(r=>{
     const active=r.key===activeKey;
     const keyAttr=escapeTeamText(r.key).replace(/"/g,'&quot;');
-    return '<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span></button>';
+    const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span></button>';
+    return rowHtml+((active&&facepileHtml)?'<div class="team-switch-facepile">'+facepileHtml+'</div>':'');
   }).join('')
   +'<div class="team-switch-divider"></div>'
   +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>';
@@ -5926,22 +5929,17 @@ function updateHeaderTeamBadge() {
     text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
   }
-  renderCollaboratorFacepile();
 }
 
-// Small overlapping avatar stack shown in the header whenever you're in a
-// shared workspace with teammates, so collaborators are visible at a glance
-// app-wide (not only inside Settings > Team).
-function renderCollaboratorFacepile() {
-  const el = document.getElementById('teamCollabFacepile');
-  if (!el) return;
-  const members = pondoTeamState.members || [];
-  if (!pondoTeamState.orgId || members.length < 2) { el.hidden = true; el.innerHTML = ''; return; }
-  el.hidden = false;
+// Small overlapping avatar stack markup for the active workspace's teammates.
+// Shown inside the workspace-switcher dropdown, under the active row, rather
+// than in the header itself, so the header pill stays compact.
+function buildTeamFacepileHtml(members) {
+  if (!members || members.length < 2) return '';
   const max = 4;
   const shown = members.slice(0, max);
   const esc = window.escapeTeamText || ((s) => String(s == null ? '' : s));
-  el.innerHTML = shown.map((m) => {
+  return shown.map((m) => {
     const label = esc(m.displayName || m.email || 'Member');
     if (m.photoURL) return '<img class="team-collab-avatar" src="' + esc(m.photoURL).replace(/"/g, '&quot;') + '" alt="" title="' + label + '">';
     const initial = (m.displayName || m.email || '?').trim().charAt(0).toUpperCase();
