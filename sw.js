@@ -2,7 +2,7 @@
 // Provides an offline-first app shell cache. All user data lives in IndexedDB
 // (handled by the app itself) — this worker only caches static assets.
 
-const CACHE_VERSION = 'pondo-v1';
+const CACHE_VERSION = 'pondo-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,6 +24,10 @@ const APP_SHELL = [
   './icons/icon-192-maskable.png',
   './icons/icon-512-maskable.png',
 ];
+
+// Firebase Auth SDK (loaded from the CDN) is cached at runtime too, see the
+// fetch handler below, so sign-in still works offline after a first visit.
+const RUNTIME_CACHEABLE_ORIGINS = ['https://www.gstatic.com'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -54,6 +58,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   const isSameOrigin = url.origin === self.location.origin;
+  const isRuntimeCacheable = RUNTIME_CACHEABLE_ORIGINS.includes(url.origin);
 
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -68,11 +73,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (isSameOrigin) {
+  if (isSameOrigin || isRuntimeCacheable) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
-        return fetch(request).then((response) => {
+        return fetch(request, isRuntimeCacheable ? { mode: 'cors' } : undefined).then((response) => {
           if (response && response.status === 200) {
             const copy = response.clone();
             caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
