@@ -5303,32 +5303,35 @@ function renderAll(){
   document.getElementById('heroSub').innerText='Across '+funds.length+' funds • '+txs.length+' transactions • Organization period (label): '+org.periodFrom+' to '+org.periodTo;
   document.getElementById('fundsCount').innerText=funds.length+' funds';
 
-  let fundCards=document.getElementById('fundCards'); fundCards.innerHTML='';
+  let fundCards=document.getElementById('fundCards'); let fundCardsHtml='';
   funds.forEach(f=>{
     let ins=txs.filter(t=>t.fundId===f.id&&t.type==='IN').reduce((s,t)=>s+t.amount,0);
     let outs=txs.filter(t=>t.fundId===f.id&&t.type==='OUT').reduce((s,t)=>s+t.amount,0);
     let total=f.initialAmount+ins; let rem=total-outs; let p=total>0?Math.round(outs/total*100):0;
     let _fl = getFundLucide(f), fc=cardColor(f); _fl.color=fc.hex;_fl.bg=fc.bg;
-    fundCards.innerHTML+=`<div class="card fund-card" style="--card-color:${fc.hex}" role="button" tabindex="0" aria-label="View fund details" data-fund-id="${attr(f.id)}"><div class="fund-top"><div style="display:flex; gap:12px; align-items:flex-start"><span class="fund-icon" style="background:${_fl.bg};color:${_fl.color}">${LICON(_fl.icon, _fl.color, 22)}</span><div><div class="fund-name">${escapeText(f.name)}</div><div class="fund-purpose">${escapeText(f.purpose||'')}</div></div></div></div><div class="fund-amounts"><div class="fund-amount">Received<b>${fmt(total)}</b></div><div class="fund-amount">Spent<b>${fmt(outs)}</b></div><div class="fund-amount">Remaining<b>${fmt(rem)}</b></div></div><div class="progress"><div class="progress-fill" style="width:${p}%"></div></div><div class="progress-meta"><span><b>${p}%</b> used</span><span>${fmt(rem)} left</span></div>${createdByBadge(f)}<div class="card-open-hint">View fund details →</div></div>`;
+    fundCardsHtml+=`<div class="card fund-card" style="--card-color:${fc.hex};border-top-color:${fc.hex}" role="button" tabindex="0" aria-label="View fund details" data-fund-id="${attr(f.id)}"><div class="fund-top"><div style="display:flex; gap:12px; align-items:flex-start"><span class="fund-icon" style="background:${_fl.bg};color:${_fl.color}">${LICON(_fl.icon, _fl.color, 22)}</span><div><div class="fund-name">${escapeText(f.name)}</div><div class="fund-purpose">${escapeText(f.purpose||'')}</div></div></div></div><div class="fund-amounts"><div class="fund-amount">Received<b>${fmt(total)}</b></div><div class="fund-amount">Spent<b>${fmt(outs)}</b></div><div class="fund-amount">Remaining<b>${fmt(rem)}</b></div></div><div class="progress"><div class="progress-fill" style="width:${p}%"></div></div><div class="progress-meta"><span><b>${p}%</b> used</span><span>${fmt(rem)} left</span></div>${createdByBadge(f)}<div class="card-open-hint">View fund details →</div></div>`;
   });
+  fundCards.innerHTML=fundCardsHtml;
   fundCards.querySelectorAll('.fund-card').forEach(card=>{card.addEventListener('click',()=>openFundDetails(card.dataset.fundId));card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openFundDetails(card.dataset.fundId)}})});
   requestAnimationFrame(updateFundRailHint);
   let byCat=Object.create(null); txs.filter(t=>t.type==='OUT').forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
-  let catDiv=document.getElementById('byCategory'); catDiv.innerHTML='';
+  let catDiv=document.getElementById('byCategory'); let catDivHtml='';
   let maxCat=Math.max(...Object.values(byCat),1);
   Object.entries(byCat).sort((a,b)=>b[1]-a[1]).forEach(([cat,amt],i)=>{
     let cls = i===0 ? 'green' : i===1 ? 'teal' : 'amber';
     let _cl = getCategoryLucide(cat);
-    catDiv.innerHTML+=`<div class="bar-row"><div class="bar-top"><span style="display:flex;align-items:center;gap:8px"><span class="cat-icon" style="background:${_cl.bg};color:${_cl.color}">${LICON(_cl.icon, _cl.color, 16)}</span>${escapeText(cat)}</span><span>${fmt(amt)}</span></div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${amt/maxCat*100}%"></div></div></div>`;
+    catDivHtml+=`<div class="bar-row"><div class="bar-top"><span style="display:flex;align-items:center;gap:8px"><span class="cat-icon" style="background:${_cl.bg};color:${_cl.color}">${LICON(_cl.icon, _cl.color, 16)}</span>${escapeText(cat)}</span><span>${fmt(amt)}</span></div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${amt/maxCat*100}%"></div></div></div>`;
   });
-  if(Object.keys(byCat).length===0) catDiv.innerHTML='<p style="font-size:13px; color:var(--ink2)">No spending yet</p>';
-  let byFundDiv=document.getElementById('byFund'); byFundDiv.innerHTML='';
-  funds.forEach(f=>{ let amt=txs.filter(t=>t.fundId===f.id&&t.type==='OUT').reduce((s,t)=>s+t.amount,0); if(amt>0){ let _bf=getFundLucide(f), fc=cardColor(f);_bf.color=fc.hex;_bf.bg=fc.bg; let chartColor=fc.hex; byFundDiv.innerHTML+=`<div class="bar-row"><div class="bar-top"><span style="display:flex;align-items:center;gap:8px"><span class="cat-icon" style="background:${_bf.bg};color:${_bf.color}">${LICON(_bf.icon, _bf.color, 16)}</span>${escapeText(f.name)}</span><span>${fmt(amt)}</span></div><div class="bar-track"><div class="bar-fill green" style="--fund-chart-color:${chartColor};width:${amt/Math.max(totalSpent,1)*100}%"></div></div></div>`; } });
-  let recent=document.getElementById('recentTx'); recent.innerHTML='';
+  catDiv.innerHTML=Object.keys(byCat).length===0?'<p style="font-size:13px; color:var(--ink2)">No spending yet</p>':catDivHtml;
+  let byFundDiv=document.getElementById('byFund'); let byFundHtml='';
+  funds.forEach(f=>{ let amt=txs.filter(t=>t.fundId===f.id&&t.type==='OUT').reduce((s,t)=>s+t.amount,0); if(amt>0){ let _bf=getFundLucide(f), fc=cardColor(f);_bf.color=fc.hex;_bf.bg=fc.bg; let chartColor=fc.hex; byFundHtml+=`<div class="bar-row"><div class="bar-top"><span style="display:flex;align-items:center;gap:8px"><span class="cat-icon" style="background:${_bf.bg};color:${_bf.color}">${LICON(_bf.icon, _bf.color, 16)}</span>${escapeText(f.name)}</span><span>${fmt(amt)}</span></div><div class="bar-track"><div class="bar-fill green" style="--fund-chart-color:${chartColor};width:${amt/Math.max(totalSpent,1)*100}%"></div></div></div>`; } });
+  byFundDiv.innerHTML=byFundHtml;
+  let recent=document.getElementById('recentTx'); let recentHtml='';
   txs.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).forEach(t=>{
     let icon = t.type==='OUT' ? LICON('arrow-down-right','#dc2626',20) : LICON('arrow-up-right','#059669',20); let cls = t.type==='OUT' ? 'out' : 'in';
-    recent.innerHTML+=`<div class="tx-row"><div style="display:flex; gap:12px; align-items:center"><div class="tx-icon ${cls}">${icon}</div><div><div class="tx-title">${escapeText(t.description)}</div><div class="tx-meta">${escapeText(t.date)} • ${escapeText(t.category)} • ${escapeText(t.payee||'')}</div>${createdByBadge(t)}</div></div><span class="tx-amount ${cls}">${t.type==='OUT'?'-':'+'}${fmt(t.amount)}</span></div>`;
+    recentHtml+=`<div class="tx-row"><div style="display:flex; gap:12px; align-items:center"><div class="tx-icon ${cls}">${icon}</div><div><div class="tx-title">${escapeText(t.description)}</div><div class="tx-meta">${escapeText(t.date)} • ${escapeText(t.category)} • ${escapeText(t.payee||'')}</div>${createdByBadge(t)}</div></div><span class="tx-amount ${cls}">${t.type==='OUT'?'-':'+'}${fmt(t.amount)}</span></div>`;
   });
+  recent.innerHTML=recentHtml;
   let fundsList=document.getElementById('fundsList'); fundsList.innerHTML='';
   const fundQuery=(document.getElementById('fundSearch').value||'').trim().toLowerCase();
   funds.filter(f=>[f.name,f.purpose].some(x=>String(x||'').toLowerCase().includes(fundQuery))).forEach(f=>{
