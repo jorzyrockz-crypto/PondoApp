@@ -3792,6 +3792,13 @@ body.dark-mode .topbar, body.dark-mode .bottomnav{ background:rgba(18,18,18,.92)
 body.dark-mode .input, body.dark-mode .search-input{ background:#2a2a2e !important; border-color:#3a3a3c !important; color:#f4f4f5 !important; }
 body.dark-mode .report-paper{ background:#1c1c1e !important; color:#f4f4f5 !important; }
 .fab-sheet{ position:fixed; inset:0; z-index:200; display:none; } .fab-sheet.open{ display:block; } .fab-sheet-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+/* "Add" sheet tabs: each type keeps the color it already uses elsewhere in the
+   app (Transaction = blue, Fund = emerald accent, Project = amber), instead of
+   every tab turning the same black when selected. */
+#fabSheet .fab-tab{background:#f4f4f2;color:#111;border-color:transparent;transition:background .15s,color .15s,border-color .15s}
+#fabSheet button#fabTab-tx.active{background:#2563eb;color:#fff;border-color:#2563eb}
+#fabSheet button#fabTab-fund.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+#fabSheet button#fabTab-project.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
 .fab-sheet-card{ position:absolute; left:0; right:0; bottom:0; background:white; border-radius:28px 28px 0 0; padding:8px 20px calc(20px + env(safe-area-inset-bottom)); }
 body[data-card-style="glass"] .card{background:rgba(255,255,255,.68)!important;backdrop-filter:blur(12px)}
 body.dark-mode[data-card-style="glass"] .card{background:rgba(35,35,38,.85)!important}
@@ -3855,7 +3862,11 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   body.dark-mode #settingsSigs > div, body.dark-mode #slideOrderList button,
   body.dark-mode #previewBox{background:#344047!important;color:var(--ink)!important;border-color:var(--line2)!important}
   body.dark-mode #whatContent button:not(.scope-selected), body.dark-mode #fabSheet button.fab-tab:not(.active){background:#293338!important;color:var(--ink)!important;border-color:var(--line2)!important}
-  body.dark-mode #whatContent button.scope-selected, body.dark-mode #fabSheet button.fab-tab.active{background:#285746!important;color:#fff!important;border-color:#63d8a5!important}
+  body.dark-mode #whatContent button.scope-selected{background:#285746!important;color:#fff!important;border-color:#63d8a5!important}
+  body.dark-mode #fabSheet button.fab-tab.active{background:#285746!important;color:#fff!important;border-color:#63d8a5!important}
+  body.dark-mode #fabSheet button#fabTab-tx.active{background:#3b82f6!important;color:#fff!important;border-color:#3b82f6!important}
+  body.dark-mode #fabSheet button#fabTab-fund.active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
+  body.dark-mode #fabSheet button#fabTab-project.active{background:#f59e0b!important;color:#111!important;border-color:#f59e0b!important}
   body.dark-mode #settings-data button[onclick="clearTransactionsOnly()"]{background:#4d3918!important;color:#ffdb92!important}
   body.dark-mode #settings-data button[onclick="clearAllData()"], body.dark-mode #settings-about button[onclick="resetAllSettings()"]{background:#512a2e!important;color:#ffb3b3!important}
   body.dark-mode .accent-dot.selected{box-shadow:0 0 0 2px #1b2024,0 0 0 4px #e7f1ed!important}
@@ -4892,7 +4903,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElemen
 function updateFundRailHint(){ const rail=document.getElementById('fundCards'); const hint=document.getElementById('fundsSwipeHint'); if(rail && hint && rail.clientWidth) hint.hidden=rail.scrollWidth<=rail.clientWidth+1; }
 window.addEventListener('resize',updateFundRailHint);
 function handleFab(){if(document.getElementById('tab-contributions').style.display!=='none')openContributionForm('activity');else openFabSheet('tx');}
-function fabShowForm(mode){ ['tx','fund','project'].forEach(m=>{ let f=document.getElementById('fabForm-'+m); if(f) f.style.display=(m===mode?'block':'none'); let b=document.getElementById('fabTab-'+m); if(b){ b.classList.add('fab-tab'); b.classList.toggle('active',m===mode); } if(b) b.style.background=(m===mode?'#111':'#f4f4f2'); if(b) b.style.color=(m===mode?'white':'#111'); }); }
+function fabShowForm(mode){ ['tx','fund','project'].forEach(m=>{ let f=document.getElementById('fabForm-'+m); if(f) f.style.display=(m===mode?'block':'none'); let b=document.getElementById('fabTab-'+m); if(b){ b.classList.add('fab-tab'); b.classList.toggle('active',m===mode); } }); }
 let fabPreviousFocus=null,payablePreviousFocus=null;
 function openFabSheet(mode){ fabPreviousFocus=document.activeElement;let el=document.getElementById('fabSheet'); if(el) el.classList.add('open'); document.body.classList.add('modal-open'); let sel=document.getElementById('fabTxFund'); if(sel){ sel.innerHTML=''; funds.forEach(f=>{ let o=document.createElement('option'); o.value=f.id; o.textContent=f.name; sel.appendChild(o); }); } document.getElementById('fabTxDate').value=localDate(); document.getElementById('fabFundDate').value=localDate(); document.getElementById('fabTxType').value='OUT'; document.getElementById('fabTxProject').value=''; syncTxProjectChoices(); fabShowForm(mode||'tx'); let focusId=mode==='project'?'fabProjectName':mode==='fund'?'fabFundName':'fabTxDesc';document.getElementById(focusId).focus(); }
 function closeFabSheet(){ let el=document.getElementById('fabSheet'); if(el) el.classList.remove('open'); document.body.classList.remove('modal-open');if(!detailReturnProject&&fabPreviousFocus?.isConnected)fabPreviousFocus.focus();scheduleProjectReturn(); }
