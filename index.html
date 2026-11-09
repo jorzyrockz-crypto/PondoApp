@@ -4972,8 +4972,10 @@ function renderTeamSwitcherMenu(){
 }
 function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
 function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function refreshTeamSwitcherMenuIfOpen(){const menu=document.getElementById('teamSwitcherMenu');if(menu&&!menu.hidden)renderTeamSwitcherMenu();}
 window.closeTeamSwitcher=closeTeamSwitcher;
 window.renderTeamSwitcherMenu=renderTeamSwitcherMenu;
+window.refreshTeamSwitcherMenuIfOpen=refreshTeamSwitcherMenuIfOpen;
 document.addEventListener('click',e=>{if(!e.target.closest('.team-switcher-wrap'))closeTeamSwitcher()});
 document.addEventListener('keydown',e=>{const m=document.getElementById('teamSwitcherMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeTeamSwitcher(true)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('headerMoreMenu').hidden){e.preventDefault();e.stopPropagation();closeHeaderMore(true)}});
@@ -5931,11 +5933,13 @@ function updateHeaderTeamBadge() {
   }
 }
 
-// Small overlapping avatar stack markup for the active workspace's teammates.
+// Small overlapping avatar stack markup for the active workspace's members.
 // Shown inside the workspace-switcher dropdown, under the active row, rather
-// than in the header itself, so the header pill stays compact.
+// than in the header itself, so the header pill stays compact. Always shows
+// at least your own avatar (even when you're the workspace's only member)
+// so there's a consistent visual identity cue, not just name text.
 function buildTeamFacepileHtml(members) {
-  if (!members || members.length < 2) return '';
+  if (!members || members.length < 1) return '';
   const max = 4;
   const shown = members.slice(0, max);
   const esc = window.escapeTeamText || ((s) => String(s == null ? '' : s));
@@ -6008,6 +6012,11 @@ function subscribeToOrg(orgId) {
     pondoTeamState.role = mine.role;
     applyRoleUI();
     renderTeamPanel();
+    // Members load from Firestore asynchronously and can arrive after the
+    // header badge/dropdown have already rendered (e.g. right after sign-in,
+    // or while the dropdown happens to be open) -- keep the open dropdown's
+    // teammate facepile in sync instead of leaving it stuck empty/stale.
+    if (window.refreshTeamSwitcherMenuIfOpen) window.refreshTeamSwitcherMenuIfOpen();
   }, (err) => console.warn('Members listener error:', err));
 
   pondoTeamState.unsubData = onSnapshot(doc(firestoreDb, 'organizations', orgId, 'data', 'snapshot'), (snap) => {
