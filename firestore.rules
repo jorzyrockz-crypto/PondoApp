@@ -7,28 +7,98 @@ rules_version = '2';
 // Google provider under Firebase Console > Authentication > Sign-in method
 // instead; that is what fixes an "auth/operation-not-allowed" error.
 //
-// These rules apply once (if) the app starts reading/writing Firestore —
-// e.g. to sync each user's fund tracker data to the cloud. They default to
-// a per-user data model: every signed-in user can only read and write
-// documents that live under their own /users/{uid} path. Everything else
-// is denied by default.
+// Data model:
+//   /users/{uid}                                   — profile + organizationId pointer, self-access only
+//   /organizations/{orgId}                         — org profile (name, createdBy, createdAt)
+//   /organizations/{orgId}/members/{uid}           — membership + role for that org
+//   /organizations/{orgId}/data/{docId}            — shared fund-tracker data (e.g. "snapshot")
+//   /invites/{code}                                — single-use-ish invite link/code -> org + role
+//
+// Roles: "owner" (manage members, full data edit), "disbursing" and
+// "project-manager" (full data edit), "reviewer" (read-only — enforced
+// here, not just hidden in the UI).
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Deny everything unless a more specific rule below matches.
-    match /{document=**} {
-      allow read, write: if false;
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    function memberDoc(orgId) {
+      return get(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()));
+    }
+    function isMember(orgId) {
+      return signedIn() && exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()));
+    }
+    function roleIn(orgId) {
+      return memberDoc(orgId).data.role;
+    }
+    function isOwner(orgId) {
+      return isMember(orgId) && roleIn(orgId) == 'owner';
+    }
+    function canEditData(orgId) {
+      return isMember(orgId) && roleIn(orgId) != 'reviewer';
     }
 
-    // Each user owns a subtree keyed by their own Firebase Auth uid.
-    // e.g. /users/{uid}/profile, /users/{uid}/funds/{fundId}, etc.
-    match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    // ---- user profiles: each user owns their own /users/{uid} subtree ----
+    match /users/{userId} {
+      allow read, write: if signedIn() && uid() == userId;
+    }
 
-      match /{document=**} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+    // ---- organizations ----
+    match /organizations/{orgId} {
+      allow read: if isMember(orgId);
+      allow create: if signedIn() && request.resource.data.createdBy == uid();
+      allow update, delete: if isOwner(orgId);
+
+      match /members/{memberId} {
+        // Members can list each other; a user can always check their own
+        // membership doc (even if it doesn't exist, e.g. after being removed).
+        allow read: if isMember(orgId) || (signedIn() && memberId == uid());
+
+        // Case 1: becoming the owner of a brand-new org you just created.
+        allow create: if signedIn() && memberId == uid()
+                       && request.resource.data.role == 'owner'
+                       && get(/databases/$(database)/documents/organizations/$(orgId)).data.createdBy == uid();
+
+        // Case 2: joining via a valid, unexpired, unused-up invite whose
+        // role matches exactly what the invite grants.
+        allow create: if signedIn() && memberId == uid()
+                       && request.resource.data.role == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.role
+                       && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.orgId == orgId
+                       && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.revoked != true
+                       && (get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses == null
+                           || get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
+                              < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses);
+
+        allow update: if isOwner(orgId);
+        allow delete: if isOwner(orgId) || (signedIn() && memberId == uid());
       }
+
+      match /data/{docId} {
+        allow read: if isMember(orgId);
+        allow write: if canEditData(orgId);
+      }
+    }
+
+    // ---- invites ----
+    match /invites/{code} {
+      // Needs to be readable by a signed-in user who is redeeming it (before
+      // they are a member of the target org).
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn() && request.resource.data.createdBy == uid() && isOwner(request.resource.data.orgId);
+      // A joining member may only increment usedCount by exactly 1 and may
+      // not change anything else about the invite.
+      allow update: if signedIn()
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount'])
+                     && request.resource.data.usedCount == resource.data.usedCount + 1
+                     && (resource.data.maxUses == null || resource.data.usedCount < resource.data.maxUses);
+      allow delete: if signedIn() && isOwner(resource.data.orgId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
