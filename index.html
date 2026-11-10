@@ -4431,6 +4431,27 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
 .team-switch-item .tsi-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .team-switch-item .tsi-role{font-size:11px;font-weight:600;color:var(--ink2);}
 .team-switch-item.active{background:var(--surface2,#f4f4f2);}
+.header-avatar-wrap{position:relative;}
+.header-avatar-btn{display:none;position:relative;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border-radius:50%;border:0;cursor:pointer;background:var(--surface2,#f4f4f2);overflow:hidden;flex-shrink:0;}
+.header-avatar-btn:hover,.header-avatar-btn:focus-visible{outline:2px solid var(--accent,#059669);outline-offset:1px;}
+.header-avatar-btn img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+.header-avatar-initial{font:600 13px/1 system-ui,sans-serif;color:var(--ink,#141414);}
+.header-avatar-dot{position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:50%;background:#9ca3af;border:2px solid var(--surface,#fff);z-index:1;}
+.header-avatar-btn.live .header-avatar-dot{background:#059669;}
+.header-avatar-btn.offline .header-avatar-dot{background:#dc2626;}
+.header-avatar-btn[hidden]{display:none!important;}
+.header-avatar-menu{min-width:220px;max-width:280px;}
+.header-avatar-menu[hidden]{display:none!important;}
+.avatar-menu-user{display:flex;align-items:center;gap:10px;padding:8px 10px 12px;}
+.avatar-menu-user img{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;display:block;}
+.avatar-menu-initial{width:34px;height:34px;border-radius:50%;background:var(--surface2,#f4f4f2);display:flex;align-items:center;justify-content:center;font:600 14px/1 system-ui,sans-serif;flex-shrink:0;}
+.avatar-menu-user-text{min-width:0;display:flex;flex-direction:column;gap:1px;}
+.avatar-menu-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.avatar-menu-email{font-size:11px;font-weight:600;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media (max-width:480px){
+  .team-switcher-wrap,#userChip{display:none!important;}
+  .header-avatar-btn{display:inline-flex;}
+}
 .team-switch-facepile{display:flex;align-items:center;padding:0 12px 8px 38px;}
 .team-switch-divider{height:1px;background:var(--line);margin:6px 2px;}
 body.role-reviewer #fab{display:none!important;}
@@ -4525,8 +4546,15 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
         <div id="teamSwitcherMenu" class="header-more-menu team-switcher-menu" hidden></div>
       </div>
       <div id="userChip" class="user-chip" hidden><img id="userChipAvatar" alt="" hidden><span id="userChipName"></span></div>
-      <button class="icon-btn" onclick="openSettings()" title="Settings" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/><circle cx="12" cy="12" r="7"/></svg></button>
-      <div class="header-more-wrap"><button id="headerMoreBtn" class="icon-btn" type="button" aria-label="More options" aria-expanded="false" aria-controls="headerMoreMenu" onclick="toggleHeaderMore()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div id="headerMoreMenu" class="header-more-menu" hidden><button class="header-menu-item" id="presentBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg><span>Present</span></button><button class="header-menu-item" id="installAppMenuItem" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span>Install app</span></button><button class="header-menu-item" id="signOutMenuItem" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button></div></div>
+      <div class="header-avatar-wrap">
+        <button id="headerAvatarBtn" type="button" class="header-avatar-btn" hidden aria-haspopup="true" aria-expanded="false" aria-controls="headerAvatarMenu" onclick="toggleHeaderAvatarMenu()" title="Account &amp; workspace">
+          <span id="headerAvatarDot" class="header-avatar-dot"></span>
+          <img id="headerAvatarImg" alt="" hidden>
+          <span id="headerAvatarInitial" class="header-avatar-initial"></span>
+        </button>
+        <div id="headerAvatarMenu" class="header-more-menu header-avatar-menu" hidden></div>
+      </div>
+      <div class="header-more-wrap"><button id="headerMoreBtn" class="icon-btn" type="button" aria-label="More options" aria-expanded="false" aria-controls="headerMoreMenu" onclick="toggleHeaderMore()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div id="headerMoreMenu" class="header-more-menu" hidden><button class="header-menu-item" id="settingsMenuItem" type="button" onclick="closeHeaderMore();openSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/><circle cx="12" cy="12" r="7"/></svg><span>Settings</span></button><button class="header-menu-item" id="presentBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg><span>Present</span></button><button class="header-menu-item" id="installAppMenuItem" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span>Install app</span></button><button class="header-menu-item" id="signOutMenuItem" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button></div></div>
     </div>
   </div>
 </header>
@@ -5035,7 +5063,7 @@ function showKeyboardShortcuts(){appAlert('Keyboard shortcuts\n\nAlt + Shift + 1
  });
 })();
 function closeHeaderMore(restoreFocus=false){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');let open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open){closeNavMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();menu.querySelector('button').focus()}}
+function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');let open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open){closeNavMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();menu.querySelector('button').focus()}}
 document.addEventListener('click',e=>{if(!e.target.closest('.header-more-wrap'))closeHeaderMore()});
 
 function escapeTeamText(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -5080,13 +5108,54 @@ function renderTeamSwitcherMenu(){
   +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>';
 }
 function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
-function refreshTeamSwitcherMenuIfOpen(){const menu=document.getElementById('teamSwitcherMenu');if(menu&&!menu.hidden)renderTeamSwitcherMenu();}
+function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function refreshTeamSwitcherMenuIfOpen(){const menu=document.getElementById('teamSwitcherMenu');if(menu&&!menu.hidden)renderTeamSwitcherMenu();if(window.refreshHeaderAvatarMenuIfOpen)window.refreshHeaderAvatarMenuIfOpen();}
 window.closeTeamSwitcher=closeTeamSwitcher;
 window.renderTeamSwitcherMenu=renderTeamSwitcherMenu;
 window.refreshTeamSwitcherMenuIfOpen=refreshTeamSwitcherMenuIfOpen;
 document.addEventListener('click',e=>{if(!e.target.closest('.team-switcher-wrap'))closeTeamSwitcher()});
 document.addEventListener('keydown',e=>{const m=document.getElementById('teamSwitcherMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeTeamSwitcher(true)}});
+
+// Narrow-screen merged control: combines the workspace switcher (above) and the
+// user chip into a single avatar button, since on small screens there isn't
+// room for the separate workspace pill + user chip + settings icon without
+// crowding. Wider screens keep the fuller layout and never show this button
+// (see the max-width:480px CSS rule) but the dropdown content/logic below is
+// shared so the two stay in sync regardless of which one is visible.
+function renderHeaderAvatarMenu(){
+  const menu=document.getElementById('headerAvatarMenu');
+  if(!menu)return;
+  const state=window.pondoTeamState||{orgId:null,memberships:[]};
+  const roleLabels=window.ROLE_LABELS||{};
+  const activeKey=state.orgId||'personal';
+  const rows=[{key:'personal',label:'Personal (this device)',sub:''}].concat((state.memberships||[]).map(m=>({key:m.orgId,label:m.name||'Organization',sub:roleLabels[m.role]||m.role||''})));
+  const facepileHtml=(state.orgId&&typeof buildTeamFacepileHtml==='function')?buildTeamFacepileHtml(state.members||[]):'';
+  const rowsHtml=rows.map(r=>{
+    const active=r.key===activeKey;
+    const keyAttr=escapeTeamText(r.key).replace(/"/g,'&quot;');
+    const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span></button>';
+    return rowHtml+((active&&facepileHtml)?'<div class="team-switch-facepile">'+facepileHtml+'</div>':'');
+  }).join('');
+  const user=window.pondoCurrentUser;
+  const userName=escapeTeamText((user&&(user.displayName||user.email))||'Signed in');
+  const userEmail=(user&&user.displayName&&user.email)?escapeTeamText(user.email):'';
+  const avatarImgHtml=(user&&user.photoURL)?('<img src="'+escapeTeamText(user.photoURL).replace(/"/g,'&quot;')+'" alt="">'):('<span class="avatar-menu-initial">'+escapeTeamText(userName.trim().charAt(0).toUpperCase()||'?')+'</span>');
+  menu.innerHTML=
+    '<div class="avatar-menu-user">'+avatarImgHtml+'<span class="avatar-menu-user-text"><span class="avatar-menu-name">'+userName+'</span>'+(userEmail?'<span class="avatar-menu-email">'+userEmail+'</span>':'')+'</span></div>'
+    +'<div class="team-switch-divider"></div>'
+    +rowsHtml
+    +'<div class="team-switch-divider"></div>'
+    +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>'
+    +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();if(window.pondoSignOut)window.pondoSignOut();"><span class="tsi-text">Sign out</span></button>';
+}
+function closeHeaderAvatarMenu(restoreFocus=false){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
+function toggleHeaderAvatarMenu(){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderHeaderAvatarMenu();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function refreshHeaderAvatarMenuIfOpen(){const menu=document.getElementById('headerAvatarMenu');if(menu&&!menu.hidden)renderHeaderAvatarMenu();}
+window.closeHeaderAvatarMenu=closeHeaderAvatarMenu;
+window.renderHeaderAvatarMenu=renderHeaderAvatarMenu;
+window.refreshHeaderAvatarMenuIfOpen=refreshHeaderAvatarMenuIfOpen;
+document.addEventListener('click',e=>{if(!e.target.closest('.header-avatar-wrap'))closeHeaderAvatarMenu()});
+document.addEventListener('keydown',e=>{const m=document.getElementById('headerAvatarMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeHeaderAvatarMenu(true)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('headerMoreMenu').hidden){e.preventDefault();e.stopPropagation();closeHeaderMore(true)}});
 function updateFundRailHint(){ const rail=document.getElementById('fundCards'); const hint=document.getElementById('fundsSwipeHint'); if(rail && hint && rail.clientWidth) hint.hidden=rail.scrollWidth<=rail.clientWidth+1; }
 window.addEventListener('resize',updateFundRailHint);
@@ -5783,7 +5852,7 @@ if(appSettings.version<5){ try{ appSettings.motion.appTransition='cinematic'; ap
 function saveAppSettings(){ try{ localStorage.setItem('ft_app_settings', JSON.stringify(appSettings)); }catch(e){} try{ syncSettingsUI(); }catch(e){} try{ applyAppearance(); }catch(e){} }
 function openSettings(){ document.getElementById('settingsModal').style.display='block'; document.body.classList.add('modal-open'); try{ syncSettingsUI(); }catch(e){} }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; document.body.classList.remove('modal-open'); try{ saveAppSettings(); }catch(e){} }
-document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented||!document.getElementById('appDialogOverlay').hidden)return;if(document.getElementById('settingsModal').style.display!=='none'){e.preventDefault();closeSettings();document.querySelector('.icon-btn[onclick="openSettings()"]').focus()}else if(document.getElementById('presentModal').style.display!=='none'){e.preventDefault();closePresent();document.getElementById('headerMoreBtn').focus()}});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented||!document.getElementById('appDialogOverlay').hidden)return;if(document.getElementById('settingsModal').style.display!=='none'){e.preventDefault();closeSettings();(document.getElementById('settingsMenuItem')||document.getElementById('headerMoreBtn'))?.focus()}else if(document.getElementById('presentModal').style.display!=='none'){e.preventDefault();closePresent();document.getElementById('headerMoreBtn').focus()}});
 function switchSettingsTab(tab){ try{ let ss=document.getElementById('settingsSearch'); if(ss) ss.value=''; document.querySelectorAll('.settings-panel').forEach(p=>{p.style.display='none'}); let el=document.getElementById('settings-'+tab); if(el) el.style.display='flex'; document.querySelectorAll('.settings-tab-btn').forEach(b=>{ b.classList.remove('active'); }); let btn=document.querySelector('[data-stab="'+tab+'"]'); if(btn) btn.classList.add('active'); if(tab==='present') renderSlideOrder(); if(tab==='data') updateStorageInfo(); if(tab==='about') syncAboutSettings(); if(tab==='team'&&window.pondoTeam) window.pondoTeam.refreshPanel(); }catch(err){} }
 function filterSettings(){ let q=(document.getElementById('settingsSearch').value||'').toLowerCase(); if(!q){ let active=document.querySelector('.settings-tab-btn.active')?.dataset.stab||'appearance'; document.querySelectorAll('.settings-panel').forEach(p=>{p.style.display='none'}); let el=document.getElementById('settings-'+active); if(el) el.style.display='flex'; return; } document.querySelectorAll('.settings-panel').forEach(p=>{ p.style.display = p.innerText.toLowerCase().includes(q) ? 'flex' : 'none'; }); }
 function toggleSetting(section,key){ try{ if(section==='appearance' && key==='dynamicAccent') appSettings.appearance.dynamicAccent=!appSettings.appearance.dynamicAccent; else if(section==='appearance' && key==='matchChart') appSettings.appearance.matchChart=!appSettings.appearance.matchChart; else if(section==='sound' && key==='enabled') appSettings.sound.enabled=!appSettings.sound.enabled; else if(section==='sound' && key==='haptics') appSettings.sound.haptics=!appSettings.sound.haptics; else if(section==='motion' && key==='reduceMotion') appSettings.motion.reduceMotion=!appSettings.motion.reduceMotion; else if(section==='motion' && key==='parallax') appSettings.motion.parallax=!appSettings.motion.parallax; else if(section==='animation' && key==='countUp') appSettings.animation.countUp=!appSettings.animation.countUp; else if(section==='animation' && key==='confetti') appSettings.animation.confetti=!appSettings.animation.confetti; else if(section==='presentation') appSettings.presentation[key]=!appSettings.presentation[key]; if(appSettings.sound.haptics && navigator.vibrate) navigator.vibrate(10); }catch(err){} saveAppSettings(); }
@@ -6386,10 +6455,16 @@ window.ROLE_LABELS = ROLE_LABELS;
 function updateHeaderTeamBadge() {
   const badge = document.getElementById('teamHeaderBadge');
   const text = document.getElementById('teamHeaderBadgeText');
+  const avatarBtn = document.getElementById('headerAvatarBtn');
   if (!badge || !text) return;
-  if (!window.pondoCurrentUser) { badge.hidden = true; return; }
+  if (!window.pondoCurrentUser) {
+    badge.hidden = true;
+    if (avatarBtn) avatarBtn.hidden = true;
+    return;
+  }
   badge.hidden = false;
   badge.classList.remove('live', 'offline');
+  if (avatarBtn) { avatarBtn.hidden = false; avatarBtn.classList.remove('live', 'offline'); }
   if (!pondoTeamState.orgId) {
     const hasOtherOrgs = pondoTeamState.orgMemberships && pondoTeamState.orgMemberships.length > 0;
     badge.title = hasOtherOrgs ? 'Working with personal, local-only data. Tap to switch workspace.' : 'You are the only person who can see this data. Tap to set up team collaboration.';
@@ -6399,7 +6474,9 @@ function updateHeaderTeamBadge() {
     badge.title = 'Shared with your team. Tap to switch workspace or manage members.';
     text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
+    if (avatarBtn) avatarBtn.classList.add(navigator.onLine ? 'live' : 'offline');
   }
+  if (window.refreshHeaderAvatarMenuIfOpen) window.refreshHeaderAvatarMenuIfOpen();
 }
 
 // Small overlapping avatar stack markup for the active workspace's members.
@@ -6520,7 +6597,7 @@ function subscribeToOrg(orgId) {
 // reconcile with their live Firestore data once subscribeToOrg() connects.
 async function switchActiveWorkspace(key) {
   const current = pondoTeamState.orgId || 'personal';
-  if (key === current) { if (window.closeTeamSwitcher) window.closeTeamSwitcher(); return; }
+  if (key === current) { if (window.closeTeamSwitcher) window.closeTeamSwitcher(); if (window.closeHeaderAvatarMenu) window.closeHeaderAvatarMenu(); return; }
   if (!window.pondoWorkspace || !window.applySnapshot || !window.renderAll) return;
 
   window.pondoWorkspace.save(current); // keep a local copy of the workspace we're leaving
@@ -6555,6 +6632,7 @@ async function switchActiveWorkspace(key) {
     } catch (e) { /* non-fatal */ }
   }
   if (window.closeTeamSwitcher) window.closeTeamSwitcher();
+  if (window.closeHeaderAvatarMenu) window.closeHeaderAvatarMenu();
   renderTeamPanel();
   updateHeaderTeamBadge();
 }
@@ -6592,6 +6670,7 @@ async function refreshMemberships() {
     try { await setDoc(doc(firestoreDb, 'users', uid), { orgMemberships: pondoTeamState.orgMemberships }, { merge: true }); } catch (e) { /* non-fatal */ }
   }
   if (window.renderTeamSwitcherMenu) window.renderTeamSwitcherMenu();
+  if (window.refreshHeaderAvatarMenuIfOpen) window.refreshHeaderAvatarMenuIfOpen();
   renderTeamPanel();
 }
 
@@ -7102,19 +7181,31 @@ async function handleSignIn() {
 
 authSignInBtn.addEventListener('click', handleSignIn);
 
-signOutMenuItem?.addEventListener('click', async () => {
+// Shared sign-out action: used by both the "⋯" overflow menu's Sign out item
+// and the narrow-screen merged avatar menu's Sign out item (see
+// renderHeaderAvatarMenu above), so there's one place that actually calls
+// Firebase's signOut().
+async function handlePondoSignOut() {
   try {
-    if (typeof closeHeaderMore === 'function') closeHeaderMore();
     await signOut(auth);
   } catch (err) {
     console.warn('Sign-out failed:', err);
   }
+}
+window.pondoSignOut = handlePondoSignOut;
+
+signOutMenuItem?.addEventListener('click', () => {
+  if (typeof closeHeaderMore === 'function') closeHeaderMore();
+  handlePondoSignOut();
 });
 
 getRedirectResult(auth).catch((err) => console.warn('Redirect sign-in error:', err));
 
 onAuthStateChanged(auth, (user) => {
   disarmSignInWatchdog();
+  const headerAvatarBtn = document.getElementById('headerAvatarBtn');
+  const headerAvatarImg = document.getElementById('headerAvatarImg');
+  const headerAvatarInitial = document.getElementById('headerAvatarInitial');
   if (user) {
     authGate.style.display = 'none';
     pondoApp.inert = false;
@@ -7126,6 +7217,16 @@ onAuthStateChanged(auth, (user) => {
     } else {
       userChipAvatar.hidden = true;
     }
+    if (headerAvatarImg && headerAvatarInitial) {
+      if (user.photoURL) {
+        headerAvatarImg.src = user.photoURL;
+        headerAvatarImg.hidden = false;
+        headerAvatarInitial.textContent = '';
+      } else {
+        headerAvatarImg.hidden = true;
+        headerAvatarInitial.textContent = (user.displayName || user.email || '?').trim().charAt(0).toUpperCase();
+      }
+    }
     window.pondoCurrentUser = user;
     upsertUserProfile(user);
     initCollaboration(user);
@@ -7136,6 +7237,7 @@ onAuthStateChanged(auth, (user) => {
     authGate.style.display = 'flex';
     pondoApp.inert = true;
     userChip.hidden = true;
+    if (headerAvatarBtn) headerAvatarBtn.hidden = true;
     setGateBusy(false, '');
     window.pondoCurrentUser = null;
     teardownCollaboration();
