@@ -6910,8 +6910,33 @@ function showAuthError(message) {
   authError.textContent = message;
 }
 
+// An installed/standalone PWA window cannot host the Google sign-in popup:
+// there is no window.opener for it to report back to, so signInWithPopup()
+// either hangs forever (notably on iOS home-screen apps) or rejects with an
+// error code this app wasn't already watching for (e.g. on Android WebAPKs).
+// Detect that case up front and go straight to the redirect flow instead of
+// waiting for a popup attempt that was never going to resolve.
+function isStandalonePwa() {
+  try {
+    if (window.navigator.standalone) return true; // iOS "Add to Home Screen"
+    if (window.matchMedia && ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay']
+      .some(mode => window.matchMedia('(display-mode: ' + mode + ')').matches)) return true;
+  } catch (e) { /* matchMedia/navigator quirks: fall through to popup */ }
+  return false;
+}
+
 async function handleSignIn() {
   authError.hidden = true;
+  if (isStandalonePwa()) {
+    try {
+      setGateBusy(true, 'Redirecting to Google sign-in…');
+      await signInWithRedirect(auth, googleProvider);
+    } catch (err) {
+      setGateBusy(false, '');
+      showAuthError('Sign-in failed: ' + (err && err.message ? err.message : 'Please try again.'));
+    }
+    return;
+  }
   setGateBusy(true, 'Opening Google sign-in…');
   try {
     await signInWithPopup(auth, googleProvider);
