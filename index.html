@@ -6063,11 +6063,20 @@ setInterval(()=>{if(appSettings.appearance.mode==='auto') applyAppearance();if(d
 
 document.addEventListener('keydown', e=>{ if(document.getElementById('presentation').style.display!=='none'){ if(e.key==='ArrowRight') nextSlide(); if(e.key==='ArrowLeft') prevSlide(); if(e.key==='Escape') closePresentation(); } });
 // Only one upgraded tracker tab may edit this browser origin at a time when Web Locks is available.
+// This guard (and the "another tab is open" lock contention it can report) only matters once
+// there is actual local tracker data to protect, i.e. once the user is signed in - started from
+// the Firebase auth script's onAuthStateChanged handler below, not unconditionally on page load.
+// Running it eagerly for every visit used to mean that simply opening the sign-in screen in a
+// second tab (e.g. the "open sign-in in your browser" fallback) could show "tracker already open"
+// and block that tab's login screen before the user ever got a chance to sign in.
 window.trackerReady=false;
-(function startWithTabGuard(){
+window.startTabGuard=(function(){
+ let started=false;
+ return function startWithTabGuard(){
+ if(started)return;started=true;
  const gate=document.createElement('section');gate.setAttribute('role','dialog');gate.setAttribute('aria-modal','true');gate.setAttribute('aria-labelledby','tabGuardTitle');gate.style.cssText='position:fixed;inset:0;z-index:9998;background:#f5f7f5;color:#17231d;display:flex;align-items:center;justify-content:center;padding:20px';
  const box=document.createElement('div');box.style.cssText='width:min(100%,480px);background:white;border:1px solid #ccd9d0;border-radius:18px;padding:24px;font:15px/1.5 system-ui,sans-serif';box.innerHTML='<h1 id="tabGuardTitle" style="font-size:20px;margin:0 0 12px">Opening tracker…</h1><p class="tab-guard-message">Checking whether another tab is editing these records.</p><div class="tab-guard-actions"></div>';gate.appendChild(box);
- const blocked=[...document.body.children].filter(el=>el!==gate&&el.tagName!=='SCRIPT').map(el=>[el,el.inert]);blocked.forEach(([el])=>el.inert=true);document.body.appendChild(gate);
+ const blocked=[...document.body.children].filter(el=>el!==gate&&el.id!=='authGate'&&el.tagName!=='SCRIPT').map(el=>[el,el.inert]);blocked.forEach(([el])=>el.inert=true);document.body.appendChild(gate);
  const show=(title,message,action,label)=>{box.querySelector('h1').textContent=title;box.querySelector('p').textContent=message;let button=document.createElement('button');button.type='button';button.textContent=label;button.style.cssText='padding:12px 16px;border:0;border-radius:10px;background:#087f5b;color:white;font-weight:700;cursor:pointer';button.onclick=action;box.querySelector('.tab-guard-actions').appendChild(button);button.focus()};
  const openUI=()=>{blocked.forEach(([el,was])=>el.inert=was);gate.remove();renderAll();syncSettingsUI();applyAppearance();window.trackerReady=true};
  const open=async()=>{try{let db=await TransactionalFundStore.open('fund-tracker-transactional-v1'),loaded=await db.load();if(loaded.snapshot){trackerDB=db;trackerRevision=loaded.revision;applySnapshot(loaded.snapshot);openUI();return}
@@ -6079,6 +6088,7 @@ window.trackerReady=false;
  if(!navigator.locks?.request){fallback();return}
  let acquired=false;navigator.locks.request('fund-tracker-editor-v1',{ifAvailable:true,mode:'exclusive'},async lock=>{if(!lock){show('Tracker already open','Another tab is using this tracker. Close that tab first, then reload this page to avoid conflicting edits.',()=>location.reload(),'Reload');return}acquired=true;await open();await new Promise(resolve=>window.addEventListener('pagehide',resolve,{once:true}));}).catch(()=>{if(!acquired)fallback()});
  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+ };
 })();
 </script>
 <script>
@@ -7018,6 +7028,9 @@ onAuthStateChanged(auth, (user) => {
     window.pondoCurrentUser = user;
     upsertUserProfile(user);
     initCollaboration(user);
+    // Local tracker storage (and its single-tab edit lock) is only relevant once someone is
+    // actually signed in - see the definition above for why this isn't started unconditionally.
+    if (typeof window.startTabGuard === 'function') window.startTabGuard();
   } else {
     authGate.style.display = 'flex';
     pondoApp.inert = true;
