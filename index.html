@@ -3119,6 +3119,13 @@ body{background:var(--page); color:var(--ink); font-family:'Instrument Sans',sys
 .hero-stat-value{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; margin-top:4px}
 .hero-stat-sub{font-size:11px; opacity:.75; margin-top:2px}
 
+/* Quick actions row under the dashboard hero -- right-aligned so it reads
+   as a toolbar for the hero above it rather than competing with the
+   left-aligned "Funds" section title just below. */
+.dashboard-hero-actions{display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin:14px 2px 0}
+.dashboard-hero-actions .btn{white-space:nowrap}
+@media(max-width:560px){.dashboard-hero-actions{justify-content:stretch}.dashboard-hero-actions .btn{flex:1 1 0}}
+
 /* Section */
 .section-title{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:28px 0 12px; display:flex; justify-content:space-between; align-items:center}
 .section-title span:last-child{font-weight:500; text-transform:none; letter-spacing:0; font-size:12px}
@@ -4516,6 +4523,7 @@ body.role-reviewer .recurrence-btn,
 body.role-reviewer #detailProjectStatus,
 body.role-reviewer .payable-actions,
 body.role-reviewer #requestRefundBtn,
+body.role-reviewer #dashboardRequestRefundBtn,
 body.role-reviewer .fab-tab-refund,
 body.role-reviewer .contrib-tools .contrib-add-person,
 body.role-reviewer .contrib-tools .contrib-bulk,
@@ -4618,6 +4626,11 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
         <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg><div class="hero-stat-label">Spent</div></div><div class="hero-stat-value" id="totalSpent">₱20,200</div><div class="hero-stat-sub" id="spentPct">22.8% used</div></div>
         <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><div class="hero-stat-label">Transactions</div></div><div class="hero-stat-value" id="txCount">6</div><div class="hero-stat-sub">All recorded dates</div></div>
       </div>
+    </div>
+
+    <div class="dashboard-hero-actions no-print">
+      <button type="button" id="dashboardRequestRefundBtn" class="btn btn-light" onclick="openRefundRequest()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z"/></svg> Request Refund</button>
+      <button type="button" class="btn btn-emerald" onclick="openTxModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add Transaction</button>
     </div>
 
     <div id="setupChecklist" class="setup-checklist" hidden><div class="setup-heading"><div><strong>Get started</strong><p>Set up the basics, then record activity when you need to.</p></div><button type="button" class="setup-dismiss" onclick="dismissSetupChecklist()" aria-label="Dismiss getting started checklist">×</button></div><div class="setup-steps"><button type="button" onclick="openSetupOrganization()"><span id="setupOrgMark">1</span><span><strong>Set organization details</strong><small>Name and location for your reports</small></span></button><button type="button" onclick="openFundModal()"><span id="setupFundMark">2</span><span><strong>Add a fund</strong><small>Record where money came from</small></span></button><button type="button" onclick="switchTab('contributions')"><span id="setupContributionMark">3</span><span><strong>Add a contribution activity</strong><small>Track who has paid</small></span></button></div></div><div id="backupReminder" class="backup-reminder" hidden><div><strong>Protect your records</strong><span id="backupReminderText">Export a JSON backup to keep a copy of your data.</span></div><button type="button" class="btn btn-emerald" onclick="exportJSONFull()">Export backup</button><button type="button" class="btn btn-light" onclick="snoozeBackupReminder()">Remind me in 7 days</button></div><div class="section-title"><span>Funds</span><span id="fundsCount">3 funds</span></div>
@@ -6079,6 +6092,13 @@ function dismissSetupChecklist(){try{localStorage.setItem('ft_setup_dismissed','
 function openSetupOrganization(){openSettings();switchSettingsTab('about')}
 
 function renderAll(){
+  // Mirrors the label logic already used for #requestRefundBtn on the
+  // Refund History page -- a teammate whose request needs sign-off sees
+  // "Request Refund"/"Request a refund" phrasing; an Owner, Disbursing
+  // Officer or solo workspace (no approval step) sees "Personal advance"
+  // instead, since nothing is actually being "requested" from anyone.
+  const dashboardRefundBtn=document.getElementById('dashboardRequestRefundBtn');
+  if(dashboardRefundBtn)dashboardRefundBtn.lastChild.textContent=refundRequestRequiresApproval()?' Request Refund':' Personal Advance';
   let totalRec = funds.reduce((s,f)=>s+f.initialAmount,0) + txs.filter(t=>t.type==='IN').reduce((s,t)=>s+t.amount,0);
   let totalSpent = txs.filter(t=>t.type==='OUT').reduce((s,t)=>s+t.amount,0);
   let remaining = totalRec-totalSpent;
