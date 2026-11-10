@@ -6651,10 +6651,20 @@ function applyAppearance(){
     // byte-for-byte unchanged.
     const pct=effectiveFontScale(), scale=pct/100;
     document.body.style.zoom=pct+'%';
-    if(scale===1){ document.body.style.removeProperty('width'); document.body.style.removeProperty('min-height'); }
+    if(scale===1){ document.body.style.removeProperty('width'); document.body.style.removeProperty('min-height'); document.body.style.removeProperty('margin-left'); }
     else {
       document.body.style.setProperty('width','calc(100% / '+scale+')','important');
       document.body.style.setProperty('min-height','calc(100dvh / '+scale+')','important');
+      // Inflating width makes body's own (pre-zoom) box WIDER than <html>
+      // whenever scale<1 -- and a block element wider than its container
+      // can't actually be centered by its own "margin:auto" (the spec
+      // resolves auto margins to 0 when there's no room, so it would just
+      // overflow off the right edge, exactly the "dragged into the left
+      // corner" look). Centering it explicitly with a calculated negative
+      // margin keeps it centered under zoom at any scale, independent of
+      // that overflow/auto-margin edge case, regardless of how inner
+      // elements like .wrap size or center themselves.
+      document.body.style.setProperty('margin-left','calc((100% - (100% / '+scale+')) / 2)','important');
     }
   })();
   document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';});
@@ -6686,11 +6696,15 @@ function applyAppearance(){
     let bm=document.querySelector('meta[name="background-color"]'); if(bm) bm.setAttribute('content',chrome);
     // Mobile browsers (notably iOS Safari) rubber-band the page past its
     // top/bottom edge on scroll, briefly exposing the <html> element behind
-    // <body>. <html> never picked up the data-background colors, so that
-    // gap always flashed the default near-white page color — most visible
-    // with image-backed options like Soft Wave where background-attachment:
-    // fixed is also more prone to leaving a gap during that bounce. Keep
-    // <html> tinted to match so the bounce blends in instead of flashing white.
+    // <body>, and Interface Scale (zoom, above) can likewise leave a sliver
+    // of <html> showing around a rounding edge even after compensation.
+    // <html> never picked up the data-background colors, so that gap used
+    // to flash the default near-white page color, or a flat approximate
+    // tint that didn't match gradient backgrounds. Copy body's exact,
+    // current background (gradient, image, or solid) onto <html> too, so
+    // any such sliver is visually seamless instead of a mismatched patch,
+    // while still keeping the plain theme-color metas on a flat fallback.
+    document.documentElement.style.background=document.body.style.background||chrome;
     document.documentElement.style.backgroundColor=chrome;
   })();
   document.documentElement.style.fontSize='16px';
