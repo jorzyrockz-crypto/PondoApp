@@ -4459,6 +4459,17 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
 .notif-badge[hidden]{display:none!important;}
 .notif-center-menu{min-width:300px;max-width:340px;max-height:420px;overflow:auto;padding:0;}
 .notif-center-menu[hidden]{display:none!important;}
+/* On narrow screens, .notif-center-menu's 300-340px width combined with the
+   inherited .header-more-menu right:0 anchor (positioned against the small
+   bell-icon wrapper, not the viewport) made it stretch almost edge-to-edge
+   and look like a slab glued to the left side of the screen, disconnected
+   from the bell that opened it. Switching to position:fixed with explicit
+   left/right margins anchors it to the viewport itself instead, giving it a
+   consistent gutter on both sides. The exact top offset is set inline by
+   positionNotifCenterMenu() (below) to track the header's real height. */
+@media (max-width:480px){
+  .notif-center-menu{position:fixed;left:12px;right:12px;top:64px;max-width:none;min-width:0;width:auto;}
+}
 .notif-center-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 8px;position:sticky;top:0;background:var(--surface);z-index:1;}
 .notif-center-head strong{font-size:13px;}
 .notif-mark-all{border:0;background:transparent;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;padding:4px;}
@@ -5266,7 +5277,33 @@ function openNotification(id){
 }
 window.openNotification=openNotification;
 function closeNotifCenter(restoreFocus=false){const menu=document.getElementById('notifCenterMenu'),button=document.getElementById('notifBellBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleNotifCenter(){const menu=document.getElementById('notifCenterMenu'),button=document.getElementById('notifBellBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderNotifCenter();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+// On narrow screens (see the @media(max-width:480px) rule for
+// .notif-center-menu) the panel is position:fixed against the viewport
+// rather than the small bell-icon wrapper, so it needs its own top offset
+// instead of the CSS "top:calc(100% + 10px)" the desktop/tablet dropdown
+// uses. Measured off the real header each time it opens (and on resize
+// while open) so it tracks the header's actual height instead of a guessed
+// constant -- the header can wrap to a second line on very narrow/zoomed
+// screens.
+function positionNotifCenterMenu(){
+  const menu=document.getElementById('notifCenterMenu');
+  if(!menu||menu.hidden)return;
+  if(!window.matchMedia('(max-width:480px)').matches){
+    // Back above the mobile breakpoint (e.g. rotated to landscape, or the
+    // window was resized while the panel stayed open): clear the inline
+    // top so the desktop/tablet stylesheet rule (top:calc(100% + 10px),
+    // anchored to the bell icon) applies again instead of being stuck with
+    // a leftover pixel value from the fixed-position mobile layout, which
+    // would otherwise win via inline-style specificity.
+    menu.style.top='';
+    return;
+  }
+  const header=document.querySelector('.topbar');
+  if(!header)return;
+  menu.style.top=(header.getBoundingClientRect().bottom+8)+'px';
+}
+window.addEventListener('resize',positionNotifCenterMenu);
+function toggleNotifCenter(){const menu=document.getElementById('notifCenterMenu'),button=document.getElementById('notifBellBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderNotifCenter();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open)positionNotifCenterMenu()}
 function refreshNotifCenterIfOpen(){const menu=document.getElementById('notifCenterMenu');if(menu&&!menu.hidden)renderNotifCenter()}
 window.closeNotifCenter=closeNotifCenter;
 window.toggleNotifCenter=toggleNotifCenter;
