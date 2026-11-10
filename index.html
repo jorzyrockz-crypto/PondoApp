@@ -4452,6 +4452,28 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
   .team-switcher-wrap,#userChip{display:none!important;}
   .header-avatar-btn{display:inline-flex;}
 }
+.header-bell-wrap{position:relative;}
+.header-bell-btn{position:relative;}
+.header-bell-btn[hidden]{display:none!important;}
+.notif-badge{position:absolute;top:1px;right:1px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#dc2626;color:#fff;font:700 10px/16px system-ui,sans-serif;text-align:center;box-shadow:0 0 0 2px var(--surface,#fff);pointer-events:none;}
+.notif-badge[hidden]{display:none!important;}
+.notif-center-menu{min-width:300px;max-width:340px;max-height:420px;overflow:auto;padding:0;}
+.notif-center-menu[hidden]{display:none!important;}
+.notif-center-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 8px;position:sticky;top:0;background:var(--surface);z-index:1;}
+.notif-center-head strong{font-size:13px;}
+.notif-mark-all{border:0;background:transparent;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;padding:4px;}
+.notif-permission-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;margin:0 8px 6px;background:var(--surface2);border-radius:10px;font-size:11px;color:var(--ink2);line-height:1.4;}
+.notif-permission-row button{border:0;background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;}
+.notif-empty{padding:28px 16px;text-align:center;font-size:12px;color:var(--ink2);}
+.notif-item{display:flex;gap:8px;align-items:flex-start;width:100%;border:0;border-radius:9px;background:transparent;color:var(--ink);padding:9px 12px;font-size:12px;text-align:left;cursor:pointer;}
+.notif-item:hover,.notif-item:focus-visible{background:var(--surface2);outline:none;}
+.notif-item.unread{background:var(--surface2);}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent,#059669);flex-shrink:0;margin-top:5px;}
+.notif-item:not(.unread) .notif-dot{background:transparent;}
+.notif-text{min-width:0;flex:1;}
+.notif-title{font-weight:700;display:block;overflow-wrap:anywhere;}
+.notif-body{color:var(--ink2);display:block;margin-top:2px;line-height:1.4;overflow-wrap:anywhere;}
+.notif-time{color:var(--ink2);display:block;margin-top:4px;font-size:10px;}
 .team-switch-facepile{display:flex;align-items:center;padding:0 12px 8px 38px;}
 .team-switch-divider{height:1px;background:var(--line);margin:6px 2px;}
 body.role-reviewer #fab{display:none!important;}
@@ -4553,6 +4575,13 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
           <span id="headerAvatarInitial" class="header-avatar-initial"></span>
         </button>
         <div id="headerAvatarMenu" class="header-more-menu header-avatar-menu" hidden></div>
+      </div>
+      <div class="header-bell-wrap">
+        <button id="notifBellBtn" type="button" class="icon-btn header-bell-btn" hidden aria-haspopup="true" aria-expanded="false" aria-controls="notifCenterMenu" onclick="toggleNotifCenter()" title="Notifications" aria-label="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span id="notifBellCount" class="notif-badge" hidden>0</span>
+        </button>
+        <div id="notifCenterMenu" class="header-more-menu notif-center-menu" hidden></div>
       </div>
       <div class="header-more-wrap"><button id="headerMoreBtn" class="icon-btn" type="button" aria-label="More options" aria-expanded="false" aria-controls="headerMoreMenu" onclick="toggleHeaderMore()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div id="headerMoreMenu" class="header-more-menu" hidden><button class="header-menu-item" id="settingsMenuItem" type="button" onclick="closeHeaderMore();openSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/><circle cx="12" cy="12" r="7"/></svg><span>Settings</span></button><button class="header-menu-item" id="keyboardShortcutsMenuItem" type="button" onclick="closeHeaderMore();showKeyboardShortcuts()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg><span>Keyboard shortcuts</span></button><button class="header-menu-item" id="presentBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg><span>Present</span></button><button class="header-menu-item" id="installAppMenuItem" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span>Install app</span></button><button class="header-menu-item" id="signOutMenuItem" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button></div></div>
     </div>
@@ -5068,7 +5097,7 @@ function showKeyboardShortcuts(){appAlert('Keyboard shortcuts\n\nAlt + Shift + 1
  document.addEventListener('keydown',e=>{if(e.key!=='F1'||!window.trackerReady||trackerFatal||e.defaultPrevented||e.repeat||e.isComposing)return;if(document.body.classList.contains('modal-open')||!document.getElementById('appDialogOverlay').hidden)return;let target=e.target instanceof Element?e.target:null;if(target?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]'))return;e.preventDefault();closeNavMore();if(typeof closeHeaderMore==='function')closeHeaderMore();showKeyboardShortcuts();});
 })();
 function closeHeaderMore(restoreFocus=false){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');let open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open){closeNavMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();menu.querySelector('button').focus()}}
+function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu'),button=document.getElementById('headerMoreBtn');let open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open));if(open){closeNavMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();if(window.closeNotifCenter)window.closeNotifCenter();menu.querySelector('button').focus()}}
 document.addEventListener('click',e=>{if(!e.target.closest('.header-more-wrap'))closeHeaderMore()});
 
 function escapeTeamText(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -5113,7 +5142,7 @@ function renderTeamSwitcherMenu(){
   +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>';
 }
 function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();if(window.closeNotifCenter)window.closeNotifCenter();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
 function refreshTeamSwitcherMenuIfOpen(){const menu=document.getElementById('teamSwitcherMenu');if(menu&&!menu.hidden)renderTeamSwitcherMenu();if(window.refreshHeaderAvatarMenuIfOpen)window.refreshHeaderAvatarMenuIfOpen();}
 window.closeTeamSwitcher=closeTeamSwitcher;
 window.renderTeamSwitcherMenu=renderTeamSwitcherMenu;
@@ -5154,7 +5183,7 @@ function renderHeaderAvatarMenu(){
     +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();if(window.pondoSignOut)window.pondoSignOut();"><span class="tsi-text">Sign out</span></button>';
 }
 function closeHeaderAvatarMenu(restoreFocus=false){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleHeaderAvatarMenu(){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderHeaderAvatarMenu();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function toggleHeaderAvatarMenu(){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderHeaderAvatarMenu();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeNotifCenter)window.closeNotifCenter();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
 function refreshHeaderAvatarMenuIfOpen(){const menu=document.getElementById('headerAvatarMenu');if(menu&&!menu.hidden)renderHeaderAvatarMenu();}
 window.closeHeaderAvatarMenu=closeHeaderAvatarMenu;
 window.renderHeaderAvatarMenu=renderHeaderAvatarMenu;
@@ -5162,6 +5191,93 @@ window.refreshHeaderAvatarMenuIfOpen=refreshHeaderAvatarMenuIfOpen;
 document.addEventListener('click',e=>{if(!e.target.closest('.header-avatar-wrap'))closeHeaderAvatarMenu()});
 document.addEventListener('keydown',e=>{const m=document.getElementById('headerAvatarMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeHeaderAvatarMenu(true)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('headerMoreMenu').hidden){e.preventDefault();e.stopPropagation();closeHeaderMore(true)}});
+
+// --- Notification center --------------------------------------------------
+// A device-local notification feed -- there's no backend push server behind
+// this app (static hosting + Firestore only, see sw.js), so this covers two
+// kinds of events without one:
+//   - "team": built from the live Firestore listeners in subscribeToOrg()
+//     (module script below) when a teammate joins/leaves/changes role, or
+//     edits shared workspace data.
+//   - "reminder": built locally from things already computed elsewhere
+//     (backup due, contribution due dates) instead of a one-off banner each.
+// Stored in localStorage so the list/unread count survive a reload, capped
+// so it can't grow without bound. In addition to the in-app bell, entries
+// also fire a real OS/browser notification when permission has been granted
+// (see maybeFireOSNotification) -- that only works while this tab or
+// another tab of the app is open/backgrounded, not when fully closed.
+const NOTIF_STORAGE_KEY='ft_notifications_v1';
+const NOTIF_MAX=60;
+function loadNotifications(){try{const raw=localStorage.getItem(NOTIF_STORAGE_KEY);const list=raw?JSON.parse(raw):[];return Array.isArray(list)?list:[]}catch(e){return[]}}
+function saveNotifications(list){try{localStorage.setItem(NOTIF_STORAGE_KEY,JSON.stringify(list.slice(0,NOTIF_MAX)))}catch(e){}}
+function unreadNotificationCount(){return loadNotifications().filter(n=>!n.read).length}
+function pushNotification({type,title,body,action}={}){
+  if(!title)return null;
+  const entry={id:'n_'+Math.random().toString(36).slice(2)+Date.now().toString(36),type:type||'system',title,body:body||'',ts:Date.now(),read:false,action:action||null};
+  const list=loadNotifications();
+  list.unshift(entry);
+  saveNotifications(list);
+  updateNotifBadge();
+  if(window.refreshNotifCenterIfOpen)window.refreshNotifCenterIfOpen();
+  maybeFireOSNotification(entry);
+  return entry;
+}
+window.pushNotification=pushNotification;
+function markNotificationRead(id){const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
+function markAllNotificationsRead(){const list=loadNotifications();let changed=false;list.forEach(n=>{if(!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
+window.markAllNotificationsRead=markAllNotificationsRead;
+function updateNotifBadge(){const btn=document.getElementById('notifBellBtn'),badge=document.getElementById('notifBellCount');if(!btn||!badge)return;const count=unreadNotificationCount();badge.hidden=count===0;badge.textContent=count>99?'99+':String(count)}
+window.updateNotifBadge=updateNotifBadge;
+function notifTimeAgo(ts){const diff=Math.max(0,Date.now()-ts),min=Math.floor(diff/60000);if(min<1)return'Just now';if(min<60)return min+'m ago';const hr=Math.floor(min/60);if(hr<24)return hr+'h ago';const day=Math.floor(hr/24);if(day<7)return day+'d ago';return new Date(ts).toLocaleDateString()}
+function notifIcon(type){if(type==='team')return'👥';if(type==='reminder')return'⏰';return'🔔'}
+function renderNotifCenter(){
+  const menu=document.getElementById('notifCenterMenu');
+  if(!menu)return;
+  const list=loadNotifications();
+  const canAskPermission=('Notification' in window)&&Notification.permission==='default';
+  const permissionDenied=('Notification' in window)&&Notification.permission==='denied';
+  let html='<div class="notif-center-head"><strong>Notifications</strong>'+(list.some(n=>!n.read)?'<button type="button" class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>':'')+'</div>';
+  if(canAskPermission){
+    html+='<div class="notif-permission-row"><span>Get alerts here even when this tab isn\u2019t focused.</span><button type="button" onclick="requestNotifPermission()">Enable</button></div>';
+  }else if(permissionDenied){
+    html+='<div class="notif-permission-row"><span>Browser notifications are blocked. Allow them in this site\u2019s browser settings to get alerts outside the app.</span></div>';
+  }
+  if(!list.length){
+    html+='<div class="notif-empty">No notifications yet. Team activity and reminders will show up here.</div>';
+  }else{
+    html+=list.map(n=>{
+      const safeTitle=escapeTeamText(n.title),safeBody=n.body?escapeTeamText(n.body):'';
+      return '<button type="button" class="notif-item'+(n.read?'':' unread')+'" data-notif-id="'+n.id+'" onclick="openNotification(\''+n.id+'\')"><span class="notif-dot"></span><span class="notif-text"><span class="notif-title">'+notifIcon(n.type)+' '+safeTitle+'</span>'+(safeBody?'<span class="notif-body">'+safeBody+'</span>':'')+'<span class="notif-time">'+notifTimeAgo(n.ts)+'</span></span></button>';
+    }).join('');
+  }
+  menu.innerHTML=html;
+}
+window.renderNotifCenter=renderNotifCenter;
+function openNotification(id){
+  markNotificationRead(id);
+  renderNotifCenter();
+  const list=loadNotifications();
+  const n=list.find(x=>x.id===id);
+  if(n&&n.action&&n.action.tab){closeNotifCenter();switchTab(n.action.tab)}
+}
+window.openNotification=openNotification;
+function closeNotifCenter(restoreFocus=false){const menu=document.getElementById('notifCenterMenu'),button=document.getElementById('notifBellBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
+function toggleNotifCenter(){const menu=document.getElementById('notifCenterMenu'),button=document.getElementById('notifBellBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderNotifCenter();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function refreshNotifCenterIfOpen(){const menu=document.getElementById('notifCenterMenu');if(menu&&!menu.hidden)renderNotifCenter()}
+window.closeNotifCenter=closeNotifCenter;
+window.toggleNotifCenter=toggleNotifCenter;
+window.refreshNotifCenterIfOpen=refreshNotifCenterIfOpen;
+document.addEventListener('click',e=>{if(!e.target.closest('.header-bell-wrap'))closeNotifCenter()});
+document.addEventListener('keydown',e=>{const m=document.getElementById('notifCenterMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeNotifCenter(true)}});
+function requestNotifPermission(){if(!('Notification' in window))return;Notification.requestPermission().then(()=>{renderNotifCenter()})}
+window.requestNotifPermission=requestNotifPermission;
+function maybeFireOSNotification(entry){
+  try{
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    const n=new Notification(entry.title,{body:entry.body||'',icon:'icons/icon-192.png',tag:entry.id});
+    n.onclick=()=>{try{window.focus()}catch(e){}openNotification(entry.id);n.close()};
+  }catch(e){/* Notification constructor can throw on some mobile browsers; fail silently */}
+}
 function updateFundRailHint(){ const rail=document.getElementById('fundCards'); const hint=document.getElementById('fundsSwipeHint'); if(rail && hint && rail.clientWidth) hint.hidden=rail.scrollWidth<=rail.clientWidth+1; }
 window.addEventListener('resize',updateFundRailHint);
 function handleFab(){if(document.getElementById('tab-contributions').style.display!=='none')openContributionForm('activity');else openFabSheet('tx');}
@@ -5576,7 +5692,43 @@ function printContribution(id){let r=contributionReport(id);if(!r)return;let tar
 
 function receiptMarkup(data){return typeof data==='string'&&/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(data)?`<a class="receipt-link" download="contribution-receipt.jpg" href="${data}">Download receipt image</a>`:''}
 function updateBackupReminder(){let box=document.getElementById('backupReminder');if(!box)return;let hasData=funds.length||txs.length||projects.length||contributionActivities.length||sigs.length||org.name!=='Your organization'||!!org.logoData;if(!hasData){box.hidden=true;return}let now=Date.now(),last=Number(localStorage.getItem('ft_last_backup_ts')||0),until=Number(localStorage.getItem('ft_backup_reminder_until')||0),week=7*86400000;box.hidden=until>now||(last>0&&now-last<week);if(!box.hidden)document.getElementById('backupReminderText').textContent=last?'Your last backup export was over 7 days ago. Export a new JSON copy.':'No dated backup export found. Export a JSON copy of your records.'}
-function snoozeBackupReminder(){try{localStorage.setItem('ft_backup_reminder_until',String(Date.now()+7*86400000))}catch(e){appAlert('Could not save the reminder setting in this browser.');return}updateBackupReminder()}
+function snoozeBackupReminder(){try{localStorage.setItem('ft_backup_reminder_until',String(Date.now()+7*86400000));localStorage.removeItem('ft_backup_overdue_notified')}catch(e){appAlert('Could not save the reminder setting in this browser.');return}updateBackupReminder()}
+// Turns a few things we already compute (the backup reminder, and each
+// contribution activity's due-date ranking used on the dashboard cards)
+// into one-shot entries in the notification center, instead of leaving them
+// as banners that are easy to miss if you're not on that tab. Each uses a
+// localStorage marker so it only fires once per occurrence rather than
+// every time this runs (e.g. once a minute via the interval below).
+function checkReminderNotifications(){
+  if(!window.pushNotification)return;
+  try{
+    let hasData=funds.length||txs.length||projects.length||contributionActivities.length||sigs.length||org.name!=='Your organization'||!!org.logoData;
+    if(hasData){
+      let now=Date.now(),last=Number(localStorage.getItem('ft_last_backup_ts')||0),until=Number(localStorage.getItem('ft_backup_reminder_until')||0),week=7*86400000;
+      let due=!(until>now||(last>0&&now-last<week));
+      if(due&&localStorage.getItem('ft_backup_overdue_notified')!=='1'){
+        pushNotification({type:'reminder',title:'Back up your records',body:last?'Your last backup export was over 7 days ago.':'No dated backup export found yet.'});
+        try{localStorage.setItem('ft_backup_overdue_notified','1')}catch(e){}
+      }
+    }
+  }catch(e){}
+  try{
+    let seen;try{seen=JSON.parse(localStorage.getItem('ft_notified_due_keys')||'[]')}catch(e){seen=[]}
+    if(!Array.isArray(seen))seen=[];
+    let seenSet=new Set(seen),changed=false;
+    contributionActivities.filter(a=>!a.archived).forEach(a=>{
+      let due=contributionDueInfo(a,contributionTotals(a.id));
+      if(!due.label)return;
+      let key=a.id+':'+due.label;
+      if(seenSet.has(key))return;
+      seenSet.add(key);changed=true;
+      if(due.label==='Paid')return;
+      pushNotification({type:'reminder',title:a.title+' — '+due.label,body:a.dueDate?('Due '+a.dueDate):'',action:{tab:'contributions'}});
+    });
+    if(changed){try{localStorage.setItem('ft_notified_due_keys',JSON.stringify([...seenSet].slice(-500)))}catch(e){}}
+  }catch(e){}
+}
+window.checkReminderNotifications=checkReminderNotifications;
 async function toggleContributionArchive(id){let a=contributionActivities.find(x=>x.id===id);if(!a)return;let restore=!!a.archived;if(!await appConfirm(restore?'Restore this activity to the active list and dashboard?':'Archive this activity? It will be hidden from active totals and the dashboard. Its contributors, payments and fund balances remain unchanged.'))return;a.archived=!restore;renderAll()}
 // Permanently removes a contribution activity and its contributors. Unlike
 // archiving (which just hides an activity while preserving its financial
@@ -5712,7 +5864,7 @@ function renderAll(){
   if(!fundsList.children.length) fundsList.innerHTML=fundQuery?'<div class="empty-state"><strong>No matching funds</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>';
   if(!funds.length) fundCards.innerHTML='<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>';
   if(!byFundDiv.children.length) byFundDiv.innerHTML='<p style="font-size:13px;color:var(--ink2)">No spending yet</p>';
-  renderProjectCards(); renderProjectReport(); renderPayableReport(); renderSeriesComparison(); renderContributionPage(); renderContributionDashboard(); updateBackupReminder();updateDataSafetyWarnings();updateSetupChecklist();
+  renderProjectCards(); renderProjectReport(); renderPayableReport(); renderSeriesComparison(); renderContributionPage(); renderContributionDashboard(); updateBackupReminder();updateDataSafetyWarnings();updateSetupChecklist();if(window.checkReminderNotifications)window.checkReminderNotifications();
   let sigsList=document.getElementById('sigsList'); sigsList.innerHTML='';
   sigs.forEach(s=>{let row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;background:var(--surface2)';let span=document.createElement('span');span.style.fontSize='13px';span.textContent=s.name+' — '+s.title;let button=document.createElement('button');button.type='button';button.textContent='Remove';button.style.cssText='background:none;border:0;color:#dc2626;font-size:12px;cursor:pointer';button.onclick=()=>deleteSig(s.id);row.append(span,button);sigsList.appendChild(row)});
   renderFilteredReport();
@@ -5882,7 +6034,7 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
 function updateStorageInfo(){ let el=document.getElementById('storageInfo'); if(el) el.innerText='Funds: '+funds.length+' • Transactions: '+txs.length+' • Projects: '+projects.length+' • Signatories: '+sigs.length+' • Storage: '+(trackerDB?'Transactional':'Legacy'); }
 function syncAboutSettings(){ document.getElementById('settingsOrgName').value=org.name; document.getElementById('settingsOrgLoc').value=org.location; document.getElementById('settingsPeriodFrom').value=org.periodFrom; document.getElementById('settingsPeriodTo').value=org.periodTo; let s=document.getElementById('settingsSigs'); s.innerHTML=''; sigs.forEach(sig=>{ s.innerHTML+='<div style="display:flex; justify-content:space-between; padding:8px 10px; border-radius:10px; background:white"><span style="font-size:13px">'+escapeText(sig.name)+' — '+escapeText(sig.title)+'</span></div>'; }); document.getElementById('lastBackup').innerText=localStorage.getItem('ft_last_backup')||'Never'; }
 async function saveOrgFromSettings(){ org.name=document.getElementById('settingsOrgName').value; org.location=document.getElementById('settingsOrgLoc').value; org.periodFrom=document.getElementById('settingsPeriodFrom').value; org.periodTo=document.getElementById('settingsPeriodTo').value; saveAll(); renderAll(); if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Organization saved'); }
-function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem('ft_last_backup', new Date().toLocaleString());localStorage.setItem('ft_last_backup_ts',String(Date.now()));localStorage.removeItem('ft_backup_reminder_until')}catch(e){} updateBackupReminder();appAlert('Backup export started. Keep the downloaded file in a safe place.'); }
+function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem('ft_last_backup', new Date().toLocaleString());localStorage.setItem('ft_last_backup_ts',String(Date.now()));localStorage.removeItem('ft_backup_reminder_until');localStorage.removeItem('ft_backup_overdue_notified')}catch(e){} updateBackupReminder();appAlert('Backup export started. Keep the downloaded file in a safe place.'); }
 // Validate the staged core records before replacing any live state.
 function validateCoreBackup(fundsIn,txsIn,projectsIn,sigsIn,allocsIn,billsIn,orgIn){
  const idList=(label,arr)=>{if(arr.some(x=>!x||typeof x!=='object'||Array.isArray(x)||typeof x.id!=='string'||!x.id.trim())||new Set(arr.map(x=>x.id)).size!==arr.length)throw Error('Invalid or duplicate '+label+' ID.');};
@@ -6133,7 +6285,7 @@ document.addEventListener('click',e=>{if(e.target.closest('button') && appSettin
   document.addEventListener('touchcancel', reset, {passive:true});
 })();
 if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)'); if(mq.addEventListener) mq.addEventListener('change',()=>{if(appSettings.appearance.mode==='system') applyAppearance();});}
-setInterval(()=>{if(appSettings.appearance.mode==='auto') applyAppearance();if(document.getElementById('tab-dashboard').style.display!=='none'&&!document.getElementById('dashboardContributionCards').contains(document.activeElement))renderContributionDashboard();updateBackupReminder();updateDataSafetyWarnings();},60000);
+setInterval(()=>{if(appSettings.appearance.mode==='auto') applyAppearance();if(document.getElementById('tab-dashboard').style.display!=='none'&&!document.getElementById('dashboardContributionCards').contains(document.activeElement))renderContributionDashboard();updateBackupReminder();updateDataSafetyWarnings();if(window.checkReminderNotifications)window.checkReminderNotifications();},60000);
 
 document.addEventListener('keydown', e=>{ if(document.getElementById('presentation').style.display!=='none'){ if(e.key==='ArrowRight') nextSlide(); if(e.key==='ArrowLeft') prevSlide(); if(e.key==='Escape') closePresentation(); } });
 // Only one upgraded tracker tab may edit this browser origin at a time when Web Locks is available.
@@ -6363,6 +6515,11 @@ async function upsertUserProfile(user) {
 // incoming updates so they are never deleted by a remote sync.
 const CLIENT_ID = 'c_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
 const HEAVY_IMAGE_KEYS = ['payables', 'txs', 'contributionPayments'];
+// Session-only (not persisted) memory of the last member list seen per org,
+// used only to decide whether a members-snapshot update is a genuine change
+// worth a "X joined/left" notification, or just the very first snapshot
+// after subscribing (which would otherwise look like everyone "just joined").
+const teamActivityMemory = { membersByOrg: {} };
 const notify = (msg) => { if (window.appAlert) window.appAlert(msg); else alert(msg); };
 const confirmAction = (msg) => (window.appConfirm ? window.appConfirm(msg) : Promise.resolve(confirm(msg)));
 
@@ -6461,15 +6618,21 @@ function updateHeaderTeamBadge() {
   const badge = document.getElementById('teamHeaderBadge');
   const text = document.getElementById('teamHeaderBadgeText');
   const avatarBtn = document.getElementById('headerAvatarBtn');
+  const notifBellBtn = document.getElementById('notifBellBtn');
   if (!badge || !text) return;
   if (!window.pondoCurrentUser) {
     badge.hidden = true;
     if (avatarBtn) avatarBtn.hidden = true;
+    if (notifBellBtn) notifBellBtn.hidden = true;
     return;
   }
   badge.hidden = false;
   badge.classList.remove('live', 'offline');
   if (avatarBtn) { avatarBtn.hidden = false; avatarBtn.classList.remove('live', 'offline'); }
+  // Notifications (reminders especially) are useful even in solo/personal
+  // mode, not just when part of a team -- show the bell for any signed-in
+  // user and refresh its unread badge from localStorage.
+  if (notifBellBtn) { notifBellBtn.hidden = false; if (window.updateNotifBadge) window.updateNotifBadge(); }
   if (!pondoTeamState.orgId) {
     const hasOtherOrgs = pondoTeamState.orgMemberships && pondoTeamState.orgMemberships.length > 0;
     badge.title = hasOtherOrgs ? 'Working with personal, local-only data. Tap to switch workspace.' : 'You are the only person who can see this data. Tap to set up team collaboration.';
@@ -6557,6 +6720,34 @@ function subscribeToOrg(orgId) {
   pondoTeamState.unsubMembers = onSnapshot(collection(firestoreDb, 'organizations', orgId, 'members'), (snap) => {
     const members = [];
     snap.forEach((d) => members.push(d.data()));
+    // Notify about teammates joining/leaving/changing role -- but only once
+    // we've already seen a members list for this org in this session, so the
+    // very first snapshot after subscribing doesn't look like a mass-join.
+    const prevMembers = teamActivityMemory.membersByOrg[orgId];
+    if (prevMembers && window.pushNotification) {
+      const prevByUid = new Map(prevMembers.map((m) => [m.uid, m]));
+      const nextByUid = new Map(members.map((m) => [m.uid, m]));
+      const orgLabel = pondoTeamState.orgName || 'your workspace';
+      nextByUid.forEach((m, uid) => {
+        if (uid === pondoTeamState.uid) return; // don't notify about our own membership
+        const label = m.displayName || m.email || 'A teammate';
+        const prev = prevByUid.get(uid);
+        if (!prev) {
+          window.pushNotification({ type: 'team', title: label + ' joined ' + orgLabel });
+        } else if (prev.role !== m.role) {
+          const roleLabel = (window.ROLE_LABELS && window.ROLE_LABELS[m.role]) || m.role;
+          window.pushNotification({ type: 'team', title: label + '\u2019s role changed to ' + roleLabel });
+        }
+      });
+      prevByUid.forEach((m, uid) => {
+        if (uid === pondoTeamState.uid) return;
+        if (!nextByUid.has(uid)) {
+          const label = m.displayName || m.email || 'A teammate';
+          window.pushNotification({ type: 'team', title: label + ' left ' + orgLabel });
+        }
+      });
+    }
+    teamActivityMemory.membersByOrg[orgId] = members;
     pondoTeamState.members = members;
     const mine = members.find((m) => m.uid === pondoTeamState.uid);
     if (!mine) { handleRemovedFromOrg(); return; }
@@ -6576,6 +6767,12 @@ function subscribeToOrg(orgId) {
     const data = snap.data();
     if (data.writerClientId === CLIENT_ID) return; // our own echo
     const { updatedAt, updatedBy, writerClientId, ...rest } = data;
+    // Captured before being overwritten below -- lets us diff record counts
+    // against what we last applied, to describe what a teammate changed.
+    // Will be falsy on the first snapshot after subscribing (reset to null
+    // in subscribeToOrg()), which correctly skips the notification for the
+    // initial sync instead of describing the whole workspace as "new".
+    const prevJSON = pondoTeamState.lastSyncedJSON;
     pondoTeamState.lastSyncedJSON = JSON.stringify(rest);
     const merged = reattachLocalImages(rest);
     if (window.applySnapshot && window.renderAll) {
@@ -6590,6 +6787,32 @@ function subscribeToOrg(orgId) {
         window.renderAll();
       } finally {
         setTimeout(() => { window.__pondoSuppressFeedback = false; }, 50);
+      }
+      if (prevJSON && window.pushNotification) {
+        try {
+          const prev = JSON.parse(prevJSON);
+          const labels = {
+            funds: ['fund', 'funds'],
+            txs: ['transaction', 'transactions'],
+            projects: ['project', 'projects'],
+            contributionActivities: ['contribution activity', 'contribution activities'],
+            contributionPayments: ['contribution payment', 'contribution payments'],
+          };
+          const parts = [];
+          Object.keys(labels).forEach((k) => {
+            const before = Array.isArray(prev[k]) ? prev[k].length : 0;
+            const after = Array.isArray(rest[k]) ? rest[k].length : 0;
+            const diff = after - before;
+            if (diff > 0) parts.push(diff + ' new ' + (diff > 1 ? labels[k][1] : labels[k][0]));
+          });
+          const writer = (pondoTeamState.members || []).find((m) => m.uid === updatedBy);
+          const writerName = writer ? (writer.displayName || writer.email || 'A teammate') : 'A teammate';
+          window.pushNotification({
+            type: 'team',
+            title: writerName + ' updated ' + (pondoTeamState.orgName || 'your workspace'),
+            body: parts.length ? parts.join(', ') : 'Shared records were updated.',
+          });
+        } catch (e) { /* non-fatal: skip the notification if diffing failed */ }
       }
     }
   }, (err) => console.warn('Org data listener error:', err));
@@ -7243,6 +7466,9 @@ onAuthStateChanged(auth, (user) => {
     pondoApp.inert = true;
     userChip.hidden = true;
     if (headerAvatarBtn) headerAvatarBtn.hidden = true;
+    const notifBellBtn = document.getElementById('notifBellBtn');
+    if (notifBellBtn) notifBellBtn.hidden = true;
+    if (window.closeNotifCenter) window.closeNotifCenter();
     setGateBusy(false, '');
     window.pondoCurrentUser = null;
     teardownCollaboration();
