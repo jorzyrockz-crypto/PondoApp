@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v26';
+const CACHE_VERSION = 'pondo-v27';
 const APP_SHELL = [
   './',
   './index.html',
@@ -36,10 +36,31 @@ const APP_SHELL = [
 // fetch handler below, so sign-in still works offline after a first visit.
 const RUNTIME_CACHEABLE_ORIGINS = ['https://www.gstatic.com'];
 
+// Best-effort precache of the pinned Firebase SDK modules the app imports on
+// every load (see the module script in index.html). These are cached
+// opportunistically anyway on first successful fetch (fetch handler below),
+// but precaching them here too means a browser that installs this app over
+// a flaky connection -- then goes offline before ever completing a load
+// that happens to fetch all three -- still has them. Fetched with
+// Promise.allSettled rather than cache.addAll() so one failing request
+// (e.g. offline during install) can't abort the app-shell install itself.
+const FIREBASE_SDK_URLS = [
+  'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js',
+  'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js',
+  'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js',
+];
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then((cache) => cache.addAll(APP_SHELL).then(() => cache))
+      .then((cache) => Promise.allSettled(
+        FIREBASE_SDK_URLS.map((url) =>
+          fetch(url, { mode: 'cors' }).then((response) => {
+            if (response && response.status === 200) return cache.put(url, response);
+          }).catch(() => {})
+        )
+      ))
       .then(() => self.skipWaiting())
   );
 });

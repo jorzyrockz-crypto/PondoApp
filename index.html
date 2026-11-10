@@ -4474,6 +4474,10 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
 .notif-title{font-weight:700;display:block;overflow-wrap:anywhere;}
 .notif-body{color:var(--ink2);display:block;margin-top:2px;line-height:1.4;overflow-wrap:anywhere;}
 .notif-time{color:var(--ink2);display:block;margin-top:4px;font-size:10px;}
+.offline-status{position:fixed;left:12px;bottom:12px;z-index:500;display:flex;align-items:center;gap:7px;background:#2b2b2b;color:#fff;padding:9px 14px;border-radius:10px;font:600 12px/1.35 system-ui,sans-serif;box-shadow:0 3px 14px #0004;max-width:calc(100vw - 24px);}
+.offline-status[hidden]{display:none!important;}
+body.dark-mode .offline-status{background:#e5e5e3;color:#141414;}
+@media(max-width:480px){.offline-status{left:8px;bottom:8px;font-size:11px;padding:8px 12px;}}
 .team-switch-facepile{display:flex;align-items:center;padding:0 12px 8px 38px;}
 .team-switch-divider{height:1px;background:var(--line);margin:6px 2px;}
 body.role-reviewer #fab{display:none!important;}
@@ -4551,6 +4555,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
 <div id="pondoApp" inert>
 <div id="reviewerBanner" hidden role="status">Reviewer access — you can view this organization's data but cannot make changes.</div>
 <div id="saveStatus" hidden role="status" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;background:#153c2c;color:#fff;padding:8px 14px;border-radius:10px;font:12px system-ui;box-shadow:0 3px 12px #0003">Saving changes…</div>
+<div id="offlineStatus" class="offline-status" hidden role="status">📴 <span>You're offline. Pondo keeps working — your data is saved on this device.</span></div>
 <header class="topbar no-print">
   <div class="topbar-inner">
     <div class="pondo-identity">
@@ -6335,6 +6340,23 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
+// PWA: lightweight, app-wide "you're offline" indicator. This is separate
+// from the team-workspace sync badge (setSyncBadge, in the main app script)
+// which only exists for signed-in team members and talks about Firestore
+// sync specifically -- this one is for every user, including solo/
+// local-only ones, since the service worker above means the whole app
+// keeps working offline regardless of workspace mode.
+(function offlineIndicatorSetup(){
+  function update(){
+    const el = document.getElementById('offlineStatus');
+    if (el) el.hidden = navigator.onLine;
+  }
+  window.addEventListener('online', update);
+  window.addEventListener('offline', update);
+  update();
+})();
+</script>
+<script>
 // PWA: guide signed-in browser-tab users toward installing the app, instead of
 // trying (and sometimes failing) to sign in from inside an already-installed
 // instance. See the Firebase auth script for why signing in first is the
@@ -6443,6 +6465,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   doc,
   collection,
   getDoc,
@@ -6466,7 +6491,27 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
-const firestoreDb = getFirestore(firebaseApp);
+// Offline support, part 2: the service worker (sw.js) caches the app shell
+// so the page itself always loads offline, but team/org data goes through
+// Firestore, which by default only keeps an in-memory cache + write queue —
+// fine while the tab stays open, but gone on reload/relaunch while offline.
+// initializeFirestore's persistentLocalCache backs that cache with IndexedDB
+// instead, so a previously-synced workspace stays readable offline even
+// after a fresh launch, and edits made offline queue durably and flush
+// automatically once back online. persistentMultipleTabManager lets that
+// cache be shared safely if more than one tab/window has Pondo open at
+// once, instead of the older single-tab persistence API failing outright.
+// Falls back to the plain in-memory client (today's behavior) if this can't
+// be set up, e.g. private/incognito browsing or a browser without IndexedDB.
+let firestoreDb;
+try {
+  firestoreDb = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  });
+} catch (err) {
+  console.warn('Firestore offline persistence unavailable, falling back to in-memory cache:', err);
+  firestoreDb = getFirestore(firebaseApp);
+}
 
 // Create/update a per-user profile document at /users/{uid}. This is the
 // only Firestore write Pondo makes today — it matches the firestore.rules
