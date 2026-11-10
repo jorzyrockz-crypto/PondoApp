@@ -5666,7 +5666,7 @@ const defaultAppSettings = {
   animation: {countUp:true, countDuration:1.5, easing:'easeOut', chartStagger:100, cardEntrance:'fadeRise', textReveal:'none', confetti:true, confettiIntensity:'med'},
   presentation: {defaultScope:'all', includeTx:true, includeSigs:true, includeProjects:true, includeCategory:true, slideOrder:['Title','Executive Summary','Funds Breakdown','Spending by Category','By Fund Source','Recent Transactions','Projects','Signatories','Thank You']},
   rolePreview: 'none',
-  version: 3
+  version: 4
 };
 function normalizeSettings(saved){
   const defaults=JSON.parse(JSON.stringify(defaultAppSettings));
@@ -5677,12 +5677,16 @@ function normalizeSettings(saved){
   defaults.sound.events={...defaultAppSettings.sound.events,...(saved.sound && saved.sound.events || {})};
   if(['none','disbursing','reviewer','project-manager'].includes(saved.rolePreview)) defaults.rolePreview=saved.rolePreview;
   if(!Array.isArray(defaults.presentation.slideOrder)) defaults.presentation.slideOrder=[...defaultAppSettings.presentation.slideOrder];
+  // Carry the saved schema version forward (not the current default's), so the
+  // version-gated migrations below can actually detect an old save and run.
+  defaults.version=typeof saved.version==='number'?saved.version:0;
   return defaults;
 }
 let storedSettings; try{ storedSettings=JSON.parse(localStorage.getItem('ft_app_settings')||'null'); }catch(e){ storedSettings=null; }
 let appSettings=normalizeSettings(storedSettings);
 let importMode='merge';
 if(!appSettings.version || appSettings.version<3){ try{ appSettings.appearance.fontScale=100; appSettings.version=3; }catch(e){} }
+if(appSettings.version<4){ try{ appSettings.appearance.accent='emerald'; appSettings.appearance.background='softWave'; appSettings.version=4; }catch(e){} }
 function saveAppSettings(){ try{ localStorage.setItem('ft_app_settings', JSON.stringify(appSettings)); }catch(e){} try{ syncSettingsUI(); }catch(e){} try{ applyAppearance(); }catch(e){} }
 function openSettings(){ document.getElementById('settingsModal').style.display='block'; document.body.classList.add('modal-open'); try{ syncSettingsUI(); }catch(e){} }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; document.body.classList.remove('modal-open'); try{ saveAppSettings(); }catch(e){} }
