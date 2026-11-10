@@ -12,7 +12,11 @@ rules_version = '2';
 //                                                     user belongs to) + activeOrganizationId
 //                                                     (which one is currently loaded on this
 //                                                     device, or null for the local-only
-//                                                     "Personal" workspace); self-access only.
+//                                                     "Personal" workspace) + appSettings (the
+//                                                     signed-in user's app preferences —
+//                                                     appearance/sound/motion/animation/
+//                                                     presentation — synced across their
+//                                                     devices/browsers); self-access only.
 //                                                     Legacy accounts may only have a single
 //                                                     "organizationId" field — the client
 //                                                     migrates that into the fields above.
