@@ -4389,6 +4389,9 @@ body.dark-mode .auth-gate{background:linear-gradient(180deg,rgba(15,23,42,.35),r
 .auth-google-btn:disabled{opacity:.6;cursor:not-allowed;}
 .auth-status-text{min-height:18px;font-size:12px;color:var(--ink2,#6b7280);margin:14px 0 0;}
 .auth-error{font-size:12px;color:#dc2626;background:#fef2f2;border-radius:10px;padding:10px 12px;margin:14px 0 0;line-height:1.4;}
+.auth-manual-fallback{font-size:12px;color:var(--ink2,#6b7280);background:var(--surface2,#f3f4f6);border-radius:10px;padding:10px 12px;margin:14px 0 0;line-height:1.5;text-align:left;}
+.auth-manual-fallback-btn{display:inline;background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:var(--accent,#059669);text-decoration:underline;cursor:pointer;}
+body.dark-mode .auth-manual-fallback{color:#d1d5db;}
 #pondoApp{min-height:100%;}
 .user-chip{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;background:var(--surface2,#f4f4f2);max-width:160px;}
 .user-chip img{width:26px;height:26px;border-radius:50%;display:block;}
@@ -4499,6 +4502,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
     </button>
     <p id="authStatusText" class="auth-status-text" aria-live="polite"></p>
     <p id="authError" class="auth-error" role="alert" hidden></p>
+    <p id="authManualFallback" class="auth-manual-fallback" hidden>Still nothing after a few seconds? <button type="button" id="authManualFallbackBtn" class="auth-manual-fallback-btn">Open sign-in in your browser</button> instead, then come back and reopen this app — it will pick up the signed-in session.</p>
   </div>
 </div>
 <div id="pondoApp" inert>
@@ -6895,6 +6899,8 @@ const pondoApp = document.getElementById('pondoApp');
 const authSignInBtn = document.getElementById('authSignInBtn');
 const authStatusText = document.getElementById('authStatusText');
 const authError = document.getElementById('authError');
+const authManualFallback = document.getElementById('authManualFallback');
+const authManualFallbackBtn = document.getElementById('authManualFallbackBtn');
 const userChip = document.getElementById('userChip');
 const userChipAvatar = document.getElementById('userChipAvatar');
 const userChipName = document.getElementById('userChipName');
@@ -6919,27 +6925,50 @@ function showAuthError(message) {
 function isStandalonePwa() {
   try {
     if (window.navigator.standalone) return true; // iOS "Add to Home Screen"
+    if (document.referrer && document.referrer.startsWith('android-app://')) return true; // Android TWA
     if (window.matchMedia && ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay']
       .some(mode => window.matchMedia('(display-mode: ' + mode + ')').matches)) return true;
   } catch (e) { /* matchMedia/navigator quirks: fall through to popup */ }
   return false;
 }
 
+// Safety net: whichever path handleSignIn takes (popup or redirect) is
+// expected to either hand off to Google within a couple of seconds or
+// report an error. If neither happens - some installed-app/browser
+// combinations silently stall instead of rejecting - surface a manual
+// escape hatch rather than leaving the sign-in button looking inert.
+let signInWatchdog = null;
+function armSignInWatchdog() {
+  clearTimeout(signInWatchdog);
+  authManualFallback.hidden = true;
+  signInWatchdog = setTimeout(() => { authManualFallback.hidden = false; }, 3500);
+}
+function disarmSignInWatchdog() {
+  clearTimeout(signInWatchdog);
+}
+authManualFallbackBtn?.addEventListener('click', () => {
+  window.open(location.href, '_blank', 'noopener');
+});
+
 async function handleSignIn() {
   authError.hidden = true;
+  armSignInWatchdog();
   if (isStandalonePwa()) {
     try {
       setGateBusy(true, 'Redirecting to Google sign-in…');
       await signInWithRedirect(auth, googleProvider);
     } catch (err) {
+      disarmSignInWatchdog();
       setGateBusy(false, '');
       showAuthError('Sign-in failed: ' + (err && err.message ? err.message : 'Please try again.'));
+      authManualFallback.hidden = false;
     }
     return;
   }
   setGateBusy(true, 'Opening Google sign-in…');
   try {
     await signInWithPopup(auth, googleProvider);
+    disarmSignInWatchdog();
   } catch (err) {
     const code = err && err.code;
     if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
@@ -6951,9 +6980,11 @@ async function handleSignIn() {
         err = redirectErr;
       }
     }
+    disarmSignInWatchdog();
     setGateBusy(false, '');
     if (code !== 'auth/cancelled-popup-request' && code !== 'auth/popup-closed-by-user') {
       showAuthError('Sign-in failed: ' + (err && err.message ? err.message : 'Please try again.'));
+      authManualFallback.hidden = false;
     }
   }
 }
@@ -6972,6 +7003,7 @@ signOutMenuItem?.addEventListener('click', async () => {
 getRedirectResult(auth).catch((err) => console.warn('Redirect sign-in error:', err));
 
 onAuthStateChanged(auth, (user) => {
+  disarmSignInWatchdog();
   if (user) {
     authGate.style.display = 'none';
     pondoApp.inert = false;
