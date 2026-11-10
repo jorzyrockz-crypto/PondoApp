@@ -3824,7 +3824,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   body.dark-mode[data-background="gradientMesh"]{background:linear-gradient(135deg,#102e26,#292619,#211b31)!important}
   body.dark-mode[data-background="paper"]{background:#201e1b!important}
   body.dark-mode[data-background="midnight"]{background:#0b1220!important}
-  body.dark-mode[data-background="softWave"]{background:linear-gradient(180deg,rgba(16,19,21,.82),rgba(16,19,21,.92)),url('assets/branding/login-bg.jpg') center/cover fixed no-repeat!important}
+  body.dark-mode[data-background="softWave"]{background:linear-gradient(180deg,rgba(16,19,21,.3),rgba(16,19,21,.5)),url('assets/branding/login-bg-dark.jpg') center/cover fixed no-repeat!important}
   body.dark-mode .topbar, body.dark-mode .bottomnav{background:rgba(16,21,24,.96)!important;border-color:var(--line)!important}
   body.dark-mode .card, body.dark-mode .report-paper, body.dark-mode .sheet,
   body.dark-mode .fab-sheet-card, body.dark-mode .pres, body.dark-mode .pres-card{background:var(--surface)!important;color:var(--ink)!important;border-color:var(--line)!important}
@@ -4326,7 +4326,7 @@ body.dark-mode .dashboard-contribution-open,body.dark-mode .dashboard-view-all,b
 
 /* Firebase auth gate */
 .auth-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,rgba(236,253,245,.55),rgba(247,247,245,.75)),url('assets/branding/login-bg.jpg') center/cover no-repeat;}
-body.dark-mode .auth-gate{background:linear-gradient(180deg,rgba(15,23,42,.82),rgba(17,24,39,.9)),url('assets/branding/login-bg.jpg') center/cover no-repeat;}
+body.dark-mode .auth-gate{background:linear-gradient(180deg,rgba(15,23,42,.35),rgba(17,24,39,.55)),url('assets/branding/login-bg-dark.jpg') center/cover no-repeat;}
 .auth-gate-card{width:100%;max-width:360px;background:var(--surface,#fff);border-radius:24px;padding:36px 28px;text-align:center;box-shadow:0 20px 60px #0003;backdrop-filter:blur(2px);}
 .auth-gate-title{font-family:'Fraunces',serif;font-size:28px;font-weight:800;margin:0 0 8px;color:var(--ink,#141414);}
 .auth-gate-sub{font-size:14px;color:var(--ink2,#6b7280);margin:0 0 24px;line-height:1.5;}
@@ -5849,7 +5849,9 @@ function applyAppearance(){
   else if(a.background==='gradientMesh') document.body.style.background='linear-gradient(135deg,#ecfdf5, #fef3c7, #ede9fe)';
   else if(a.background==='paper') document.body.style.background='#f5f0e8';
   else if(a.background==='midnight') document.body.style.background='#0f172a';
-  else if(a.background==='softWave') document.body.style.background="linear-gradient(180deg,rgba(247,247,245,.35),rgba(247,247,245,.82)),url('assets/branding/login-bg.jpg') center/cover fixed no-repeat";
+  else if(a.background==='softWave') document.body.style.background=document.body.classList.contains('dark-mode')
+    ?"linear-gradient(180deg,rgba(16,19,21,.3),rgba(16,19,21,.5)),url('assets/branding/login-bg-dark.jpg') center/cover fixed no-repeat"
+    :"linear-gradient(180deg,rgba(247,247,245,.35),rgba(247,247,245,.82)),url('assets/branding/login-bg.jpg') center/cover fixed no-repeat";
   else document.body.style.background='#f7f7f5';
   document.documentElement.style.fontSize='16px';
   if(typeof soundPack!=='undefined') soundPack=appSettings.sound.pack;
