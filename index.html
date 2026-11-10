@@ -3932,6 +3932,12 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   body.density-compact .grid-funds,body.density-compact .grid-2{gap:8px!important}
   body.density-compact .section-title{margin-top:18px!important;margin-bottom:8px!important}
   body.dark-mode .settings-panel .opt.selected,body.dark-mode .settings-panel button.selected{background:color-mix(in srgb,var(--accent-strong) 35%,#202b30)!important;border-color:var(--accent-readable)!important;outline-color:var(--accent-readable)!important}
+  /* Let the accent color show through the top bar / bottom nav: a subtle
+     tint on their background, and the active tab's highlight pill. */
+  body:not(.dark-mode) .topbar,body:not(.dark-mode) .bottomnav{background:color-mix(in srgb,var(--accent-strong) 10%,rgba(255,255,255,.86))!important}
+  body.dark-mode .topbar,body.dark-mode .bottomnav{background:color-mix(in srgb,var(--accent-strong) 16%,rgba(16,21,24,.95))!important}
+  body .nav-btn.active{background:linear-gradient(135deg,var(--accent-strong),var(--accent-deep))!important}
+  body.dark-mode .nav-btn.active{background:linear-gradient(135deg,var(--accent-strong),var(--accent-deep))!important}
 }
 
 /* Dashboard funds: a single, touch-friendly horizontal rail. */
