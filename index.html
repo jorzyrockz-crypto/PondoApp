@@ -2762,6 +2762,12 @@ body{
     background:white !important;
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
+    /* The Interface Scale setting applies via body{zoom}, which (unlike a
+       pure display preference) also affects print layout and pagination.
+       Printed/exported reports should always come out at their real,
+       designed size regardless of a user's on-screen scale preference, so
+       force zoom back to 100% for print. */
+    zoom:100% !important;
   }
 
   .no-print,
@@ -4823,7 +4829,8 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Background</p><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px"><div class="opt bg-option" data-bg="white" onclick="setAppearance('background','white')">White</div><div class="opt selected bg-option" data-bg="softWave" onclick="setAppearance('background','softWave')">Soft Wave</div><div class="opt bg-option" data-bg="emeraldGlow" onclick="setAppearance('background','emeraldGlow')">Emerald Glow</div><div class="opt bg-option" data-bg="dotGrid" onclick="setAppearance('background','dotGrid')">Dot Grid</div><div class="opt bg-option" data-bg="gradientMesh" onclick="setAppearance('background','gradientMesh')">Gradient Mesh</div><div class="opt bg-option" data-bg="paper" onclick="setAppearance('background','paper')">Paper</div><div class="opt bg-option" data-bg="midnight" onclick="setAppearance('background','midnight')">Midnight</div><div class="opt bg-option" data-bg="lime" onclick="setAppearance('background','lime')">Lime</div><div class="opt bg-option" data-bg="logoGlow" onclick="setAppearance('background','logoGlow')" title="Soft yellow-to-lavender wash sampled from the app logo">Logo Glow</div></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Card Style</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px"><div class="opt selected card-option" data-card="softShadow" onclick="setAppearance('cardStyle','softShadow')">Soft Shadow</div><div class="opt card-option" data-card="glass" onclick="setAppearance('cardStyle','glass')">Glass</div><div class="opt card-option" data-card="flat" onclick="setAppearance('cardStyle','flat')">Flat</div><div class="opt card-option" data-card="bordered" onclick="setAppearance('cardStyle','bordered')">Bordered</div></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Density</p><div style="display:flex; gap:8px"><button class="opt densityBtn" style="flex:1" data-density="comfortable" onclick="setAppearance('density','comfortable')">Comfortable</button><button class="opt densityBtn" style="flex:1" data-density="compact" onclick="setAppearance('density','compact')">Compact</button></div></div>
-        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Interface Scale <span id="fontScaleVal">100%</span></p><input type="range" id="fontScale" min="85" max="115" value="100" style="width:100%" oninput="setFontScale(this.value)"></div>
+        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Interface Scale <span id="fontScaleVal">100%</span></p><input type="range" id="fontScale" min="85" max="115" value="100" style="width:100%" oninput="setFontScale(this.value)"><p id="fontScaleLockHint" style="display:none; font-size:11px; color:var(--ink2); margin:6px 0 0">Locked to this device — won't change when settings sync from your account.</p></div>
+        <label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Lock scale to this device <button class="switch" id="toggle-fontScaleLock" onclick="toggleFontScaleLock()"></button></label>
         <div style="display:flex; flex-direction:column; gap:8px"><label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Use first fund color as accent <button class="switch" id="toggle-dynamicAccent" onclick="toggleSetting('appearance','dynamicAccent')"></button></label><label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Match Chart Colors to Fund Colors <button class="switch on" id="toggle-matchChart" onclick="toggleSetting('appearance','matchChart')"></button></label></div>
       </div>
       <div id="settings-sound" class="settings-panel" style="display:none; flex-direction:column; gap:14px">
@@ -6343,6 +6350,11 @@ function normalizeSettings(saved){
   // export, a hand-edited import, or a code this version of CURRENCIES no
   // longer lists) silently breaking fmt() everywhere -- fall back to PHP.
   if(defaults.appearance.currency!=='CUSTOM' && !CURRENCIES[defaults.appearance.currency]) defaults.appearance.currency='PHP';
+  // Guard against a corrupted/out-of-range Interface Scale value (bad import,
+  // hand-edited localStorage, or a value written by a future app version
+  // with a wider slider range syncing down to this one) leaving the UI
+  // stuck unreadably tiny/huge with no way back except clearing storage.
+  defaults.appearance.fontScale=Number.isFinite(defaults.appearance.fontScale)?Math.min(115,Math.max(85,Math.round(defaults.appearance.fontScale))):100;
   defaults.appearance.customCurrencySymbol=typeof defaults.appearance.customCurrencySymbol==='string'?defaults.appearance.customCurrencySymbol.slice(0,6):'';
   if(['none','disbursing','reviewer','project-manager'].includes(saved.rolePreview)) defaults.rolePreview=saved.rolePreview;
   if(!Array.isArray(defaults.presentation.slideOrder)) defaults.presentation.slideOrder=[...defaultAppSettings.presentation.slideOrder];
@@ -6428,7 +6440,39 @@ function setAppearance(key,val){
   applyAppearance();
 }
 function setCustomAccent(hex){ document.documentElement.style.setProperty('--accent', hex); document.documentElement.style.setProperty('--accent-dark', hex); document.documentElement.style.setProperty('--accent-soft', hex+'22'); appSettings.appearance.accent='custom'; appSettings.appearance.customAccent=hex; appSettings.appearance.dynamicAccent=false; saveAppSettings(); }
-function setFontScale(v){ appSettings.appearance.fontScale=parseInt(v); document.getElementById('fontScaleVal').innerText=v+'%'; saveAppSettings(); }
+// Interface Scale is normally part of appSettings.appearance, which is
+// synced whole-document to this account's Firestore profile (see
+// pushSettingsNow/upsertUserProfile below) and reconciled last-write-wins
+// across every device you sign into. That is fine for most appearance
+// choices, but screen size/eyesight preferences are genuinely per-device
+// (e.g. a phone wants 115%, a shared office laptop wants 100%) -- without
+// an escape hatch, changing scale on one device silently overwrites every
+// other signed-in device the next time it syncs. "Lock this device's scale"
+// stores the override in localStorage only (outside appSettings entirely),
+// so it is never read from or written to the synced blob and survives
+// incoming remote-settings syncs untouched.
+function clampFontScale(v){ return Number.isFinite(v)?Math.min(115,Math.max(85,Math.round(v))):100; }
+function deviceFontScaleLocked(){ try{ return localStorage.getItem('ft_device_scale_lock')==='1'; }catch(e){ return false; } }
+function deviceFontScaleValue(){ try{ let v=parseInt(localStorage.getItem('ft_device_scale_value'),10); return Number.isFinite(v)?clampFontScale(v):null; }catch(e){ return null; } }
+function effectiveFontScale(){ if(deviceFontScaleLocked()){ let v=deviceFontScaleValue(); if(v!=null) return v; } return clampFontScale(appSettings.appearance.fontScale); }
+function toggleFontScaleLock(){
+  if(deviceFontScaleLocked()){
+    // Unlocking: carry the value you were just seeing on this device back
+    // into the regular synced setting, so it doesn't jump to whatever
+    // another device may have synced in while this one was locked.
+    let v=deviceFontScaleValue();
+    try{ localStorage.removeItem('ft_device_scale_lock'); localStorage.removeItem('ft_device_scale_value'); }catch(e){ appAlert('Could not change this in this browser.'); return; }
+    if(v!=null){ appSettings.appearance.fontScale=v; saveAppSettings(); return; }
+  } else {
+    try{ localStorage.setItem('ft_device_scale_lock','1'); localStorage.setItem('ft_device_scale_value', String(appSettings.appearance.fontScale||100)); }catch(e){ appAlert('Could not change this in this browser.'); return; }
+  }
+  syncSettingsUI(); applyAppearance();
+}
+function setFontScale(v){
+  v=clampFontScale(parseInt(v,10));
+  if(deviceFontScaleLocked()){ try{ localStorage.setItem('ft_device_scale_value', String(v)); }catch(e){} syncSettingsUI(); applyAppearance(); return; }
+  appSettings.appearance.fontScale=v; saveAppSettings();
+}
 function setSoundPackFull(pack){ appSettings.sound.pack=pack; saveAppSettings(); soundPack=pack; if(pack!=='none') playSound('pop'); }
 function setSettingsVolume(v){ appSettings.sound.volume=parseInt(v); document.getElementById('settingsVolVal').innerText=v+'%'; document.getElementById('volume').value=v; document.getElementById('volVal').innerText=v+'%'; saveAppSettings(); }
 function testAllSounds(){ if(!appSettings.sound.enabled){appAlert('Enable sound first.');return;} ['softPop','keynoteClick','typewriter','chime'].forEach((p,i)=>setTimeout(()=>playSound(p),i*500)); }
@@ -6516,6 +6560,10 @@ async function resetAllSettings(){ if(await appConfirm('Reset ALL settings?')){
   // reset was meant to clear. A fresh timestamp makes this reset win and
   // propagate to the cloud instead.
   try{ const fresh=JSON.parse(JSON.stringify(defaultAppSettings)); fresh.updatedAt=Date.now(); localStorage.setItem('ft_app_settings', JSON.stringify(fresh)); }catch(e){ localStorage.removeItem('ft_app_settings'); }
+  // "Reset ALL settings" should also release a device scale lock -- it's a
+  // device-only override, but leaving it in place here would mean Interface
+  // Scale silently stays put while every other appearance setting resets.
+  try{ localStorage.removeItem('ft_device_scale_lock'); localStorage.removeItem('ft_device_scale_value'); }catch(e){}
   location.reload();
 } }
 function syncRolePreview(){
@@ -6532,7 +6580,9 @@ function syncSettingsUI(){
   let se=document.getElementById('toggle-sound-enabled'); if(se) se.className='switch'+(appSettings.sound.enabled?' on':'');
   let ha=document.getElementById('toggle-haptics'); if(ha) ha.className='switch'+(appSettings.sound.haptics?' on':'');
   let vol=document.getElementById('settingsVolume'); if(vol) vol.value=appSettings.sound.volume; let volVal=document.getElementById('settingsVolVal'); if(volVal) volVal.innerText=appSettings.sound.volume+'%';
-  let fs=document.getElementById('fontScale'); if(fs) fs.value=appSettings.appearance.fontScale; let fsv=document.getElementById('fontScaleVal'); if(fsv) fsv.innerText=appSettings.appearance.fontScale+'%';
+  let fs=document.getElementById('fontScale'); if(fs) fs.value=effectiveFontScale(); let fsv=document.getElementById('fontScaleVal'); if(fsv) fsv.innerText=effectiveFontScale()+'%';
+  let fsl=document.getElementById('toggle-fontScaleLock'); if(fsl) fsl.className='switch'+(deviceFontScaleLocked()?' on':'');
+  let fsh=document.getElementById('fontScaleLockHint'); if(fsh) fsh.style.display=deviceFontScaleLocked()?'':'none';
   ['tabSwitch','add','delete','slideChange','countFinish','celebrate','tap'].forEach(ev=>{ let el=document.getElementById('toggle-sound-'+ev); if(el) el.className='switch'+(appSettings.sound.events[ev]?' on':''); });
   let rm=document.getElementById('toggle-motion-reduceMotion'); if(rm) rm.className='switch'+(appSettings.motion.reduceMotion?' on':'');
   let pa=document.getElementById('toggle-motion-parallax'); if(pa) pa.className='switch'+(appSettings.motion.parallax?' on':'');
@@ -6586,7 +6636,7 @@ function applyAppearance(){
   document.body.classList.toggle('density-compact', a.density==='compact');
   document.body.classList.toggle('match-chart', !!a.matchChart);
   document.body.classList.toggle('reduce-motion', !!appSettings.motion.reduceMotion);
-  document.body.style.zoom=(a.fontScale||100)+'%';
+  document.body.style.zoom=effectiveFontScale()+'%';
   document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';});
   document.body.classList.remove('dark-mode');
   if(a.mode==='dark' || (a.mode==='auto' && (new Date().getHours()>=18 || new Date().getHours()<6))) document.body.classList.add('dark-mode');
