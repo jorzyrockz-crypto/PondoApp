@@ -6667,6 +6667,35 @@ function applyAppearance(){
       document.body.style.setProperty('margin-left','calc((100% - (100% / '+scale+')) / 2)','important');
     }
   })();
+  (function scaleDebugOverlay(){
+    // TEMPORARY diagnostic HUD to get real on-screen measurements instead
+    // of guessing from CSS zoom theory again -- remove once the scale
+    // centering issue is confirmed fixed with real numbers in hand.
+    let box=document.getElementById('scaleDebugBox');
+    if(!box){
+      box=document.createElement('div');
+      box.id='scaleDebugBox';
+      box.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483647;background:#000;color:#0f0;font:11px/1.5 ui-monospace,monospace;padding:10px 12px;border-radius:10px;max-width:280px;white-space:pre-wrap;pointer-events:none;opacity:.94;box-shadow:0 4px 18px rgba(0,0,0,.4)';
+      document.body.appendChild(box);
+    }
+    try{
+      const wrapEl=document.querySelector('main.wrap');
+      const bodyRect=document.body.getBoundingClientRect();
+      const wrapRect=wrapEl?wrapEl.getBoundingClientRect():null;
+      const htmlRect=document.documentElement.getBoundingClientRect();
+      box.textContent='SCALE DEBUG (temporary)\n'
+        +'effectiveFontScale: '+effectiveFontScale()+'\n'
+        +'body.style.zoom: '+document.body.style.zoom+'\n'
+        +'body.style.width: '+document.body.style.width+'\n'
+        +'body.style.marginLeft: '+document.body.style.marginLeft+'\n'
+        +'window.innerWidth: '+window.innerWidth+'\n'
+        +'devicePixelRatio: '+window.devicePixelRatio+'\n'
+        +'visualViewport.scale: '+(window.visualViewport?window.visualViewport.scale:'n/a')+'\n'
+        +'html rect: L'+htmlRect.left.toFixed(1)+' W'+htmlRect.width.toFixed(1)+'\n'
+        +'body rect: L'+bodyRect.left.toFixed(1)+' W'+bodyRect.width.toFixed(1)+'\n'
+        +(wrapRect?('wrap rect: L'+wrapRect.left.toFixed(1)+' W'+wrapRect.width.toFixed(1)):'wrap: not found');
+    }catch(e){ box.textContent='debug error: '+e.message; }
+  })();
   document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';});
   document.body.classList.remove('dark-mode');
   if(a.mode==='dark' || (a.mode==='auto' && (new Date().getHours()>=18 || new Date().getHours()<6))) document.body.classList.add('dark-mode');
