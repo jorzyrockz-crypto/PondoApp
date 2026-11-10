@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v5';
+const CACHE_VERSION = 'pondo-v6';
 const APP_SHELL = [
   './',
   './index.html',
@@ -28,6 +28,7 @@ const APP_SHELL = [
   './icons/icon-512.png',
   './icons/icon-192-maskable.png',
   './icons/icon-512-maskable.png',
+  './assets/branding/login-bg.jpg',
 ];
 
 // Firebase Auth SDK (loaded from the CDN) is cached at runtime too, see the
