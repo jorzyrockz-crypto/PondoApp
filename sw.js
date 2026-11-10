@@ -1,6 +1,11 @@
 // Pondo — Fund Tracker service worker
 // Provides an offline-first app shell cache. All user data lives in IndexedDB
 // (handled by the app itself) — this worker only caches static assets.
+//
+// Note: a prior push to main hit a transient "Deployment failed, try again
+// later" error from GitHub Pages' deploy step (the build itself succeeded).
+// This comment-only change exists solely to produce a new commit so Pages
+// retries the deploy from scratch.
 
 const CACHE_VERSION = 'pondo-v4';
 const APP_SHELL = [
