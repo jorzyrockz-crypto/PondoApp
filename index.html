@@ -3108,7 +3108,7 @@ body{background:var(--page); color:var(--ink); font-family:'Instrument Sans',sys
 /* Hero - Premium */
 .hero{background:linear-gradient(135deg,#059669 0%, #0d9488 48%, #0f766e 100%); border-radius:32px; padding:28px; color:white; position:relative; overflow:hidden; box-shadow:var(--shadow-hero)}
 .hero::before{content:''; position:absolute; inset:0; background:radial-gradient(520px 220px at 85% -20%, rgba(255,255,255,.22), transparent 65%), radial-gradient(420px 220px at 10% 110%, rgba(255,255,255,.12), transparent 60%)}
-.hero::after{content:'₱'; position:absolute; right:18px; bottom:-18px; font-family:'Fraunces',serif; font-size:180px; line-height:1; color:rgba(255,255,255,.08); font-weight:700}
+.hero::after{content:var(--currency-watermark,'₱'); position:absolute; right:18px; bottom:-18px; font-family:'Fraunces',serif; font-size:180px; line-height:1; color:rgba(255,255,255,.08); font-weight:700}
 .hero-label{font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.75; font-weight:600; position:relative}
 .hero-amount{font-family:'Fraunces',serif; font-size:48px; font-weight:700; line-height:1; letter-spacing:-.03em; margin-top:8px; position:relative}
 @media(min-width:768px){ .hero-amount{font-size:60px} .hero{padding:32px} }
@@ -3221,7 +3221,7 @@ body{background:var(--page); color:var(--ink); font-family:'Instrument Sans',sys
 .opt.selected{border-color:var(--accent); background:var(--tint)}
 .opt:hover{border-color:var(--accent)}
 .preview-card{background:linear-gradient(135deg,#059669,#0d9488); color:white; border-radius:22px; padding:18px; position:relative; overflow:hidden}
-.preview-card::after{content:'₱'; position:absolute; right:10px; bottom:-10px; font-family:'Fraunces',serif; font-size:90px; color:rgba(255,255,255,.08)}
+.preview-card::after{content:var(--currency-watermark,'₱'); position:absolute; right:10px; bottom:-10px; font-family:'Fraunces',serif; font-size:90px; color:rgba(255,255,255,.08)}
 
 /* Report */
 .report-paper{background:white; border:1px solid var(--line); border-radius:28px; padding:28px; box-shadow:var(--shadow-md)}
@@ -4789,6 +4789,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       <div id="settings-appearance" class="settings-panel" style="display:flex; flex-direction:column; gap:18px">
         <div class="preview-card"><p style="font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.75; margin:0">Preview</p><p style="font-family:'Fraunces',serif; font-weight:700; font-size:22px; margin:6px 0 0">Samahan ng Kabataan ng Baco</p><div style="display:flex; gap:6px; margin-top:12px"><span style="padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.18); font-size:11px">Balance ₱68,300</span><span style="padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.18); font-size:11px">Spent ₱20,200</span></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Mode — Dynamic Theme</p><div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px"><button class="modeBtn opt" data-mode="light" onclick="setAppearance('mode','light')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> Light</button><button class="modeBtn opt" data-mode="dark" onclick="setAppearance('mode','dark')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Dark</button><button class="modeBtn opt" data-mode="system" onclick="setAppearance('mode','system')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg> System</button><button class="modeBtn opt" data-mode="auto" onclick="setAppearance('mode','auto')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Auto</button></div><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">Auto = Dark 6pm-6am, Light otherwise</p></div>
+        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Currency</p><select id="currencySelect" class="input" aria-label="Currency" onchange="setCurrency(this.value)"></select><div id="customCurrencySymbolWrap" hidden style="margin-top:8px"><input type="text" id="customCurrencySymbolInput" class="input" maxlength="6" placeholder="Symbol, e.g. kr or Fr" aria-label="Custom currency symbol" oninput="setCustomCurrencySymbol(this.value)"></div><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">Changes how amounts are shown throughout Pondo — for global/non-Philippine users. This only changes the display symbol and number formatting; it does not convert amounts between currencies.</p></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Accent Color</p><div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center"><div class="accent-dot selected" data-accent="emerald" style="background:#059669" onclick="setAppearance('accent','emerald')">✓</div><div class="accent-dot" data-accent="teal" style="background:#0d9488" onclick="setAppearance('accent','teal')"></div><div class="accent-dot" data-accent="amber" style="background:#f59e0b" onclick="setAppearance('accent','amber')"></div><div class="accent-dot" data-accent="violet" style="background:#7c3aed" onclick="setAppearance('accent','violet')"></div><div class="accent-dot" data-accent="blue" style="background:#2563eb" onclick="setAppearance('accent','blue')"></div><div class="accent-dot" data-accent="rose" style="background:#e11d48" onclick="setAppearance('accent','rose')"></div><div class="accent-dot" data-accent="forest" style="background:#033b0c" onclick="setAppearance('accent','forest')"></div><div class="accent-dot" data-accent="lavender" style="background:#b089fd" onclick="setAppearance('accent','lavender')" title="Lavender — sampled from the app logo"></div><input type="color" id="customAccent" style="width:36px; height:36px; border-radius:999px; border:1px solid var(--line); padding:2px" onchange="setCustomAccent(this.value)"></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Background</p><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px"><div class="opt bg-option" data-bg="white" onclick="setAppearance('background','white')">White</div><div class="opt selected bg-option" data-bg="softWave" onclick="setAppearance('background','softWave')">Soft Wave</div><div class="opt bg-option" data-bg="emeraldGlow" onclick="setAppearance('background','emeraldGlow')">Emerald Glow</div><div class="opt bg-option" data-bg="dotGrid" onclick="setAppearance('background','dotGrid')">Dot Grid</div><div class="opt bg-option" data-bg="gradientMesh" onclick="setAppearance('background','gradientMesh')">Gradient Mesh</div><div class="opt bg-option" data-bg="paper" onclick="setAppearance('background','paper')">Paper</div><div class="opt bg-option" data-bg="midnight" onclick="setAppearance('background','midnight')">Midnight</div><div class="opt bg-option" data-bg="lime" onclick="setAppearance('background','lime')">Lime</div><div class="opt bg-option" data-bg="logoGlow" onclick="setAppearance('background','logoGlow')" title="Soft yellow-to-lavender wash sampled from the app logo">Logo Glow</div></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Card Style</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px"><div class="opt selected card-option" data-card="softShadow" onclick="setAppearance('cardStyle','softShadow')">Soft Shadow</div><div class="opt card-option" data-card="glass" onclick="setAppearance('cardStyle','glass')">Glass</div><div class="opt card-option" data-card="flat" onclick="setAppearance('cardStyle','flat')">Flat</div><div class="opt card-option" data-card="bordered" onclick="setAppearance('cardStyle','bordered')">Bordered</div></div></div>
@@ -5061,7 +5062,21 @@ function showFatalSave(error){if(trackerFatal)return;trackerFatal=true;storageWa
 function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(snap))}catch(e){/* non-fatal */}trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
 window.addEventListener('beforeunload',e=>{if(trackerPending){e.preventDefault();e.returnValue=''}});
 function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(currentSnapshot()))}catch(cacheErr){/* non-fatal */}return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
-function fmt(n){ return '₱'+Number(n).toLocaleString('en-PH'); }
+// appSettings (defined further down, in the APP SETTINGS section) is read
+// here by reference at call time, not at parse time -- fmt() itself is
+// hoisted and only ever invoked later, once appSettings has been assigned,
+// so this works even though its declaration appears after this function in
+// the file. See CURRENCIES, above the APP SETTINGS section, for the
+// supported currency list and setCurrency()/settings-appearance panel for
+// the UI that changes it.
+function fmt(n){
+  const code=(typeof appSettings!=='undefined' && appSettings.appearance && appSettings.appearance.currency)||'PHP';
+  const isCustom=code==='CUSTOM';
+  const cur=CURRENCIES[code]||CURRENCIES.PHP;
+  const symbol=isCustom?(appSettings.appearance.customCurrencySymbol||''):cur.symbol;
+  const locale=isCustom?'en-US':cur.locale;
+  return symbol+Number(n).toLocaleString(locale);
+}
 const CINEMA_TAB_ORDER=['dashboard','funds','projects','contributions','transactions','report'];
 function cinemaDirection(fromTab,toTab){ let i=CINEMA_TAB_ORDER.indexOf(fromTab),j=CINEMA_TAB_ORDER.indexOf(toTab); if(i<0||j<0||j===i) return 1; return j>i?1:-1; }
 function switchTab(tab){
@@ -6018,8 +6033,34 @@ document.getElementById('periodFrom').onchange=e=>{ org.periodFrom=e.target.valu
 document.getElementById('periodTo').onchange=e=>{ org.periodTo=e.target.value; renderAll(); };
 
 // ===== APP SETTINGS =====
+// Currency catalog for the Settings > Appearance currency changer. Pondo
+// started as a peso-only tracker (fmt() used to hardcode '₱' + en-PH
+// formatting); this is prep for non-Philippine/global users who want their
+// own symbol and number-grouping convention. locale only controls digit
+// grouping/decimal punctuation via toLocaleString -- it does not convert
+// amounts between currencies, there is no exchange-rate conversion here.
+const CURRENCIES = {
+  PHP: {symbol:'₱', locale:'en-PH', name:'Philippine Peso'},
+  USD: {symbol:'$', locale:'en-US', name:'US Dollar'},
+  EUR: {symbol:'€', locale:'en-IE', name:'Euro'},
+  GBP: {symbol:'£', locale:'en-GB', name:'British Pound'},
+  JPY: {symbol:'¥', locale:'ja-JP', name:'Japanese Yen'},
+  CNY: {symbol:'¥', locale:'zh-CN', name:'Chinese Yuan'},
+  KRW: {symbol:'₩', locale:'ko-KR', name:'South Korean Won'},
+  INR: {symbol:'₹', locale:'en-IN', name:'Indian Rupee'},
+  IDR: {symbol:'Rp', locale:'id-ID', name:'Indonesian Rupiah'},
+  MYR: {symbol:'RM', locale:'en-MY', name:'Malaysian Ringgit'},
+  SGD: {symbol:'S$', locale:'en-SG', name:'Singapore Dollar'},
+  THB: {symbol:'฿', locale:'th-TH', name:'Thai Baht'},
+  VND: {symbol:'₫', locale:'vi-VN', name:'Vietnamese Dong'},
+  AUD: {symbol:'A$', locale:'en-AU', name:'Australian Dollar'},
+  NZD: {symbol:'NZ$', locale:'en-NZ', name:'New Zealand Dollar'},
+  CAD: {symbol:'C$', locale:'en-CA', name:'Canadian Dollar'},
+  AED: {symbol:'د.إ', locale:'ar-AE', name:'UAE Dirham'},
+  ZAR: {symbol:'R', locale:'en-ZA', name:'South African Rand'},
+};
 const defaultAppSettings = {
-  appearance: {mode:'light', accent:'emerald', background:'softWave', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true},
+  appearance: {mode:'light', accent:'emerald', background:'softWave', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true, currency:'PHP', customCurrencySymbol:''},
   sound: {enabled:true, pack:'softPop', volume:70, haptics:false, events:{tabSwitch:true, add:true, delete:true, slideChange:true, countFinish:true, celebrate:true, tap:false}},
   motion: {reduceMotion:false, appTransition:'cinematic', appDuration:'normal', presTransition:'slide', presDuration:'normal', direction:'h', parallax:false, autoAdvance:'off'},
   animation: {countUp:true, countDuration:1.5, easing:'easeOut', chartStagger:100, cardEntrance:'fadeRise', textReveal:'none', confetti:true, confettiIntensity:'med'},
@@ -6040,6 +6081,11 @@ function normalizeSettings(saved){
     if(saved[key] && typeof saved[key]==='object' && !Array.isArray(saved[key])) defaults[key]={...defaults[key],...saved[key]};
   }
   defaults.sound.events={...defaultAppSettings.sound.events,...(saved.sound && saved.sound.events || {})};
+  // Guard against a corrupted/unrecognized currency code (e.g. an older
+  // export, a hand-edited import, or a code this version of CURRENCIES no
+  // longer lists) silently breaking fmt() everywhere -- fall back to PHP.
+  if(defaults.appearance.currency!=='CUSTOM' && !CURRENCIES[defaults.appearance.currency]) defaults.appearance.currency='PHP';
+  defaults.appearance.customCurrencySymbol=typeof defaults.appearance.customCurrencySymbol==='string'?defaults.appearance.customCurrencySymbol.slice(0,6):'';
   if(['none','disbursing','reviewer','project-manager'].includes(saved.rolePreview)) defaults.rolePreview=saved.rolePreview;
   if(!Array.isArray(defaults.presentation.slideOrder)) defaults.presentation.slideOrder=[...defaultAppSettings.presentation.slideOrder];
   // Carry the saved schema version forward (not the current default's), so the
@@ -6051,6 +6097,36 @@ function normalizeSettings(saved){
 let storedSettings; try{ storedSettings=JSON.parse(localStorage.getItem('ft_app_settings')||'null'); }catch(e){ storedSettings=null; }
 let appSettings=normalizeSettings(storedSettings);
 let importMode='merge';
+// Currency changer (Settings > Appearance): populate the dropdown once from
+// the CURRENCIES catalog (defined above, before defaultAppSettings) rather
+// than hand-writing 18+ <option> tags in the markup. The settings modal's
+// markup is already parsed by the time this classic script runs (it appears
+// earlier in <body>), so the element exists here without waiting for a load
+// event.
+(function populateCurrencySelect(){
+  const sel=document.getElementById('currencySelect');
+  if(!sel) return;
+  sel.innerHTML=Object.entries(CURRENCIES).map(([code,c])=>'<option value="'+code+'">'+code+' — '+c.name+' ('+c.symbol+')</option>').join('')+'<option value="CUSTOM">Custom symbol…</option>';
+})();
+function syncCurrencyUI(){
+  const sel=document.getElementById('currencySelect'), wrap=document.getElementById('customCurrencySymbolWrap'), input=document.getElementById('customCurrencySymbolInput');
+  const code=appSettings.appearance.currency||'PHP';
+  if(sel) sel.value=code;
+  if(wrap) wrap.hidden=code!=='CUSTOM';
+  if(input && document.activeElement!==input) input.value=appSettings.appearance.customCurrencySymbol||'';
+}
+function setCurrency(code){
+  if(code!=='CUSTOM' && !CURRENCIES[code]) code='PHP';
+  appSettings.appearance.currency=code;
+  saveAppSettings();
+  syncCurrencyUI();
+  renderAll();
+}
+function setCustomCurrencySymbol(sym){
+  appSettings.appearance.customCurrencySymbol=String(sym||'').slice(0,6);
+  saveAppSettings();
+  renderAll();
+}
 if(!appSettings.version || appSettings.version<3){ try{ appSettings.appearance.fontScale=100; appSettings.version=3; }catch(e){} }
 if(appSettings.version<4){ try{ appSettings.appearance.accent='emerald'; appSettings.appearance.background='softWave'; appSettings.version=4; }catch(e){} }
 if(appSettings.version<5){ try{ appSettings.motion.appTransition='cinematic'; appSettings.version=5; }catch(e){} }
@@ -6189,6 +6265,7 @@ function syncRolePreview(){
 function setRolePreview(value){if(!['none','disbursing','reviewer','project-manager'].includes(value))return;let previous=appSettings.rolePreview;appSettings.rolePreview=value;try{localStorage.setItem('ft_app_settings',JSON.stringify(appSettings))}catch(e){appSettings.rolePreview=previous;syncRolePreview();appAlert('Could not save the role preview in this browser.');return}syncRolePreview()}
 function syncSettingsUI(){
   syncRolePreview();
+  syncCurrencyUI();
   let t=document.getElementById('toggle-dynamicAccent'); if(t) t.className='switch'+(appSettings.appearance.dynamicAccent?' on':'');
   let m=document.getElementById('toggle-matchChart'); if(m) m.className='switch'+(appSettings.appearance.matchChart?' on':'');
   let se=document.getElementById('toggle-sound-enabled'); if(se) se.className='switch'+(appSettings.sound.enabled?' on':'');
@@ -6234,6 +6311,12 @@ function applyAppearance(){
   root.setProperty('--accent',strong); root.setProperty('--accent-strong',strong); root.setProperty('--accent-deep',deep);
   root.setProperty('--accent-readable',accent); root.setProperty('--accent-dark',deep);
   root.setProperty('--accent-soft',accent+'22'); root.setProperty('--tint',accent+'22');
+  // Decorative oversized currency-symbol watermark on the dashboard hero
+  // card and the settings preview card (see .hero::after/.preview-card::after)
+  // -- was hardcoded to '₱'; now reflects the chosen currency so it doesn't
+  // look wrong for non-Philippine/global users who switch currencies.
+  const watermarkSymbol=a.currency==='CUSTOM'?(a.customCurrencySymbol||''):(CURRENCIES[a.currency]||CURRENCIES.PHP).symbol;
+  root.setProperty('--currency-watermark', JSON.stringify(watermarkSymbol));
   const preview=document.querySelector('.preview-card'); if(preview){let name=preview.querySelectorAll('p')[1]; if(name) name.textContent=org.name; let received=funds.reduce((n,f)=>n+Number(f.initialAmount||0),0)+txs.filter(t=>t.type==='IN').reduce((n,t)=>n+Number(t.amount||0),0); let spent=txs.filter(t=>t.type==='OUT').reduce((n,t)=>n+Number(t.amount||0),0); let spans=preview.querySelectorAll('span'); if(spans[0]) spans[0].textContent='Balance '+fmt(received-spent); if(spans[1]) spans[1].textContent='Spent '+fmt(spent);}
 
   document.body.dataset.cardStyle=a.cardStyle||'softShadow';
