@@ -6636,7 +6636,27 @@ function applyAppearance(){
   document.body.classList.toggle('density-compact', a.density==='compact');
   document.body.classList.toggle('match-chart', !!a.matchChart);
   document.body.classList.toggle('reduce-motion', !!appSettings.motion.reduceMotion);
-  document.body.style.zoom=effectiveFontScale()+'%';
+  (function applyScaleZoom(){
+    // CSS zoom scales body's own rendered box, not just its content: at
+    // e.g. 85%, body's box becomes 85% as wide/tall as before, and since
+    // body still only occupies its own (now smaller) box within <html>,
+    // the remaining 15% of the viewport on the right/bottom is left
+    // uncovered -- revealing <html>'s background (a flat tint meant only
+    // as a fallback for the mobile overscroll bounce, see
+    // syncSystemThemeColor below) instead of the app. Compensate by
+    // inflating body's own width/min-height by 1/scale *before* zoom
+    // shrinks it back down, so the rendered box still exactly fills the
+    // viewport at every scale -- the same technique real browser zoom
+    // uses internally. Skipped entirely at 100% so default behavior is
+    // byte-for-byte unchanged.
+    const pct=effectiveFontScale(), scale=pct/100;
+    document.body.style.zoom=pct+'%';
+    if(scale===1){ document.body.style.removeProperty('width'); document.body.style.removeProperty('min-height'); }
+    else {
+      document.body.style.setProperty('width','calc(100% / '+scale+')','important');
+      document.body.style.setProperty('min-height','calc(100dvh / '+scale+')','important');
+    }
+  })();
   document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';});
   document.body.classList.remove('dark-mode');
   if(a.mode==='dark' || (a.mode==='auto' && (new Date().getHours()>=18 || new Date().getHours()<6))) document.body.classList.add('dark-mode');
