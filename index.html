@@ -5859,6 +5859,14 @@ function applyAppearance(){
     ?"linear-gradient(180deg,rgba(16,19,21,.3),rgba(16,19,21,.5)),url('assets/branding/login-bg-dark.jpg') center/cover fixed no-repeat"
     :"linear-gradient(180deg,rgba(247,247,245,.35),rgba(247,247,245,.82)),url('assets/branding/login-bg.jpg') center/cover fixed no-repeat";
   else document.body.style.background='#f7f7f5';
+  (function syncSystemThemeColor(){
+    const isDark=document.body.classList.contains('dark-mode');
+    const chromeLight={white:'#f7f7f5', emeraldGlow:'#dcfaec', dotGrid:'#f7f7f5', gradientMesh:'#d8faed', paper:'#eee4d2', midnight:'#142139', lime:'#f4fcdd', softWave:'#f7f7f5'};
+    const chromeDark={white:'#101315', emeraldGlow:'#0d2b22', dotGrid:'#101315', gradientMesh:'#102e26', paper:'#201e1b', midnight:'#0b1220', lime:'#1e240d', softWave:'#101315'};
+    const chrome=(isDark?chromeDark:chromeLight)[a.background]||(isDark?'#101315':'#f7f7f5');
+    let tm=document.querySelector('meta[name="theme-color"]'); if(tm) tm.setAttribute('content',chrome);
+    let bm=document.querySelector('meta[name="background-color"]'); if(bm) bm.setAttribute('content',chrome);
+  })();
   document.documentElement.style.fontSize='16px';
   if(typeof soundPack!=='undefined') soundPack=appSettings.sound.pack;
   document.getElementById('volume').value=appSettings.sound.volume; document.getElementById('volVal').innerText=appSettings.sound.volume+'%';
