@@ -5989,7 +5989,13 @@ const defaultAppSettings = {
   animation: {countUp:true, countDuration:1.5, easing:'easeOut', chartStagger:100, cardEntrance:'fadeRise', textReveal:'none', confetti:true, confettiIntensity:'med'},
   presentation: {defaultScope:'all', includeTx:true, includeSigs:true, includeProjects:true, includeCategory:true, slideOrder:['Title','Executive Summary','Funds Breakdown','Spending by Category','By Fund Source','Recent Transactions','Projects','Signatories','Thank You']},
   rolePreview: 'none',
-  version: 4
+  version: 4,
+  // Epoch-ms of the last genuine local change, used to decide — when signing
+  // in — whether this device's settings or the ones already saved on the
+  // signed-in profile are newer. 0 means "never explicitly changed on this
+  // device", so a cloud copy (even an old one) always wins over a brand-new
+  // default install. See applyRemoteAppSettings / saveAppSettings below.
+  updatedAt: 0
 };
 function normalizeSettings(saved){
   const defaults=JSON.parse(JSON.stringify(defaultAppSettings));
@@ -6003,6 +6009,7 @@ function normalizeSettings(saved){
   // Carry the saved schema version forward (not the current default's), so the
   // version-gated migrations below can actually detect an old save and run.
   defaults.version=typeof saved.version==='number'?saved.version:0;
+  defaults.updatedAt=typeof saved.updatedAt==='number'?saved.updatedAt:0;
   return defaults;
 }
 let storedSettings; try{ storedSettings=JSON.parse(localStorage.getItem('ft_app_settings')||'null'); }catch(e){ storedSettings=null; }
@@ -6011,7 +6018,33 @@ let importMode='merge';
 if(!appSettings.version || appSettings.version<3){ try{ appSettings.appearance.fontScale=100; appSettings.version=3; }catch(e){} }
 if(appSettings.version<4){ try{ appSettings.appearance.accent='emerald'; appSettings.appearance.background='softWave'; appSettings.version=4; }catch(e){} }
 if(appSettings.version<5){ try{ appSettings.motion.appTransition='cinematic'; appSettings.version=5; }catch(e){} }
-function saveAppSettings(){ try{ localStorage.setItem('ft_app_settings', JSON.stringify(appSettings)); }catch(e){} try{ syncSettingsUI(); }catch(e){} try{ applyAppearance(); }catch(e){} }
+function saveAppSettings(){
+  // window.__pondoApplyingRemoteSettings is set while applyRemoteAppSettings
+  // (below) is writing a settings snapshot that just came FROM the cloud —
+  // in that case this is an echo, not a genuine local edit, so don't bump
+  // the "last changed here" timestamp or push it straight back to Firestore.
+  if(!window.__pondoApplyingRemoteSettings){ appSettings.updatedAt=Date.now(); }
+  try{ localStorage.setItem('ft_app_settings', JSON.stringify(appSettings)); }catch(e){}
+  try{ syncSettingsUI(); }catch(e){}
+  try{ applyAppearance(); }catch(e){}
+  if(!window.__pondoApplyingRemoteSettings){ try{ if(window.pondoSettingsSync) window.pondoSettingsSync.push(appSettings); }catch(e){} }
+}
+// Cross-script bridge for the Firebase module script below (classic <script>
+// top-level `let`/`function` declarations aren't reachable from a <script
+// type="module">, which runs in its own module scope) — lets it read the
+// current settings on sign-in and apply a settings snapshot pulled from the
+// signed-in user's /users/{uid} profile doc.
+window.getAppSettings=function(){ return appSettings; };
+window.applyRemoteAppSettings=function(remote){
+  if(!remote || typeof remote!=='object') return;
+  window.__pondoApplyingRemoteSettings=true;
+  try{
+    appSettings=normalizeSettings(remote);
+    saveAppSettings();
+  } finally {
+    window.__pondoApplyingRemoteSettings=false;
+  }
+};
 function openSettings(){ document.getElementById('settingsModal').style.display='block'; document.body.classList.add('modal-open'); try{ syncSettingsUI(); }catch(e){} }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; document.body.classList.remove('modal-open'); try{ saveAppSettings(); }catch(e){} }
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented||!document.getElementById('appDialogOverlay').hidden)return;if(document.getElementById('settingsModal').style.display!=='none'){e.preventDefault();closeSettings();(document.getElementById('settingsMenuItem')||document.getElementById('headerMoreBtn'))?.focus()}else if(document.getElementById('presentModal').style.display!=='none'){e.preventDefault();closePresent();document.getElementById('headerMoreBtn').focus()}});
@@ -6101,7 +6134,17 @@ function resetSettingsSection(){
   for(const section of sections[active]) appSettings[section]=JSON.parse(JSON.stringify(defaultAppSettings[section]));
   saveAppSettings(); if(active==='present') renderSlideOrder(); if(active==='sound'){document.getElementById('volume').value=appSettings.sound.volume; document.getElementById('volVal').innerText=appSettings.sound.volume+'%';} appAlert('Section reset');
 }
-async function resetAllSettings(){ if(await appConfirm('Reset ALL settings?')){ localStorage.removeItem('ft_app_settings'); location.reload(); } }
+async function resetAllSettings(){ if(await appConfirm('Reset ALL settings?')){
+  // Stamp the restored defaults with a fresh updatedAt instead of just
+  // removing the key outright: otherwise, if this profile is signed in and
+  // has settings previously synced to the cloud (see the Firestore settings
+  // sync above), the next sign-in would see a local updatedAt of 0, decide
+  // the cloud copy is newer, and silently restore the very settings this
+  // reset was meant to clear. A fresh timestamp makes this reset win and
+  // propagate to the cloud instead.
+  try{ const fresh=JSON.parse(JSON.stringify(defaultAppSettings)); fresh.updatedAt=Date.now(); localStorage.setItem('ft_app_settings', JSON.stringify(fresh)); }catch(e){ localStorage.removeItem('ft_app_settings'); }
+  location.reload();
+} }
 function syncRolePreview(){
  const roles={none:{name:'',description:'No role idea selected.'},disbursing:{name:'Disbursing Officer',description:'Possible future role: records and manages fund activity.'},reviewer:{name:'Reviewer',description:'Possible future role: reviews reports without editing.'},'project-manager':{name:'Project Manager',description:'Possible future role: plans and monitors assigned projects. Assignments and permissions are not available yet.'}};
  const role=roles[appSettings.rolePreview]||roles.none,select=document.getElementById('rolePreviewSelect'),description=document.getElementById('rolePreviewDescription'),banner=document.getElementById('rolePreviewBanner');
@@ -6513,15 +6556,17 @@ try {
   firestoreDb = getFirestore(firebaseApp);
 }
 
-// Create/update a per-user profile document at /users/{uid}. This is the
-// only Firestore write Pondo makes today — it matches the firestore.rules
-// "users own their own /users/{uid} subtree" model. Fund/transaction data
-// itself still lives only in this browser's IndexedDB (see the main app
-// script above); this does not sync fund records across devices yet.
+// Create/update a per-user profile document at /users/{uid}. This also
+// carries the user's app preferences (theme, sound, motion, etc.) — see
+// the "settings sync" block below — so fund/transaction data itself still
+// lives only in this browser's IndexedDB (see the main app script above);
+// this does not sync fund records across devices, just the profile and
+// app-level preferences.
 async function upsertUserProfile(user) {
   try {
     const userRef = doc(firestoreDb, 'users', user.uid);
     const existing = await getDoc(userRef);
+    const existingData = existing.exists() ? existing.data() : null;
     const profile = {
       uid: user.uid,
       displayName: user.displayName || null,
@@ -6532,6 +6577,27 @@ async function upsertUserProfile(user) {
     if (!existing.exists()) {
       profile.createdAt = serverTimestamp();
     }
+    // Settings sync: on every sign-in, reconcile this device's app settings
+    // (appearance/sound/motion/animation/presentation) with whatever is
+    // already saved on the profile, using whichever side has the newer
+    // updatedAt timestamp. If the profile has no settings yet (brand-new
+    // account, or first sign-in since this feature shipped), seed it from
+    // this device instead of waiting for a future local change.
+    try {
+      const cloudSettings = existingData && existingData.appSettings;
+      const cloudUpdatedAt = (cloudSettings && typeof cloudSettings.updatedAt === 'number') ? cloudSettings.updatedAt : 0;
+      const localSettings = window.getAppSettings ? window.getAppSettings() : null;
+      const localUpdatedAt = (localSettings && typeof localSettings.updatedAt === 'number') ? localSettings.updatedAt : 0;
+      if (!cloudSettings && localSettings) {
+        profile.appSettings = localSettings;
+      } else if (cloudSettings && cloudUpdatedAt > localUpdatedAt) {
+        if (window.applyRemoteAppSettings) window.applyRemoteAppSettings(cloudSettings);
+      } else if (localSettings && localUpdatedAt > cloudUpdatedAt) {
+        profile.appSettings = localSettings;
+      }
+    } catch (settingsErr) {
+      console.warn('Could not reconcile app settings with Firestore profile:', settingsErr);
+    }
     await setDoc(userRef, profile, { merge: true });
   } catch (err) {
     // Non-fatal: the app remains fully usable from local storage even if
@@ -6540,6 +6606,30 @@ async function upsertUserProfile(user) {
     console.warn('Could not sync user profile to Firestore:', err);
   }
 }
+
+// Ongoing settings sync: whenever a setting changes locally after sign-in
+// (saveAppSettings, in the main app script, calls window.pondoSettingsSync.
+// push), debounce and write just the appSettings field to this user's
+// profile doc so other signed-in devices/browsers pick it up on their next
+// sign-in or reload. Separate from upsertUserProfile's one-time reconcile
+// above, which only runs once per sign-in.
+let settingsPushTimer = null;
+function scheduleSettingsPush(settings) {
+  const user = window.pondoCurrentUser;
+  if (!user || !settings) return;
+  clearTimeout(settingsPushTimer);
+  settingsPushTimer = setTimeout(() => pushSettingsNow(user.uid, settings), 800);
+}
+async function pushSettingsNow(uid, settings) {
+  try {
+    await setDoc(doc(firestoreDb, 'users', uid), { appSettings: settings }, { merge: true });
+  } catch (err) {
+    // Non-fatal: settings remain fully usable from localStorage on this
+    // device even if the cloud copy fails to update (e.g. offline).
+    console.warn('Could not sync app settings to Firestore:', err);
+  }
+}
+window.pondoSettingsSync = { push: scheduleSettingsPush };
 
 // ---------------------------------------------------------------------
 // Team collaboration: real-time multi-user sync backed by Firestore.
@@ -7516,6 +7606,7 @@ onAuthStateChanged(auth, (user) => {
     if (window.closeNotifCenter) window.closeNotifCenter();
     setGateBusy(false, '');
     window.pondoCurrentUser = null;
+    clearTimeout(settingsPushTimer);
     teardownCollaboration();
   }
 });
