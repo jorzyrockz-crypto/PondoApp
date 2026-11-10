@@ -4474,10 +4474,9 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
 .notif-title{font-weight:700;display:block;overflow-wrap:anywhere;}
 .notif-body{color:var(--ink2);display:block;margin-top:2px;line-height:1.4;overflow-wrap:anywhere;}
 .notif-time{color:var(--ink2);display:block;margin-top:4px;font-size:10px;}
-.offline-status{position:fixed;left:12px;bottom:12px;z-index:500;display:flex;align-items:center;gap:7px;background:#2b2b2b;color:#fff;padding:9px 14px;border-radius:10px;font:600 12px/1.35 system-ui,sans-serif;box-shadow:0 3px 14px #0004;max-width:calc(100vw - 24px);}
-.offline-status[hidden]{display:none!important;}
-body.dark-mode .offline-status{background:#e5e5e3;color:#141414;}
-@media(max-width:480px){.offline-status{left:8px;bottom:8px;font-size:11px;padding:8px 12px;}}
+.header-avatar-offline-badge{position:absolute;left:-2px;top:-2px;width:14px;height:14px;border-radius:50%;background:#374151;border:2px solid var(--surface,#fff);z-index:2;display:flex;align-items:center;justify-content:center;}
+.header-avatar-offline-badge[hidden]{display:none!important;}
+body.dark-mode .header-avatar-offline-badge{background:#4b5563;border-color:#1b1b1b;}
 .team-switch-facepile{display:flex;align-items:center;padding:0 12px 8px 38px;}
 .team-switch-divider{height:1px;background:var(--line);margin:6px 2px;}
 body.role-reviewer #fab{display:none!important;}
@@ -4555,7 +4554,6 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
 <div id="pondoApp" inert>
 <div id="reviewerBanner" hidden role="status">Reviewer access — you can view this organization's data but cannot make changes.</div>
 <div id="saveStatus" hidden role="status" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;background:#153c2c;color:#fff;padding:8px 14px;border-radius:10px;font:12px system-ui;box-shadow:0 3px 12px #0003">Saving changes…</div>
-<div id="offlineStatus" class="offline-status" hidden role="status">📴 <span>You're offline. Pondo keeps working — your data is saved on this device.</span></div>
 <header class="topbar no-print">
   <div class="topbar-inner">
     <div class="pondo-identity">
@@ -4576,6 +4574,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       <div class="header-avatar-wrap">
         <button id="headerAvatarBtn" type="button" class="header-avatar-btn" hidden aria-haspopup="true" aria-expanded="false" aria-controls="headerAvatarMenu" onclick="toggleHeaderAvatarMenu()" title="Account &amp; workspace">
           <span id="headerAvatarDot" class="header-avatar-dot"></span>
+          <span id="headerAvatarOfflineBadge" class="header-avatar-offline-badge" hidden aria-hidden="true" title="You're offline — Pondo keeps working, your data is saved on this device"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
           <img id="headerAvatarImg" alt="" hidden>
           <span id="headerAvatarInitial" class="header-avatar-initial"></span>
         </button>
@@ -6383,15 +6382,20 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
-// PWA: lightweight, app-wide "you're offline" indicator. This is separate
-// from the team-workspace sync badge (setSyncBadge, in the main app script)
-// which only exists for signed-in team members and talks about Firestore
-// sync specifically -- this one is for every user, including solo/
-// local-only ones, since the service worker above means the whole app
-// keeps working offline regardless of workspace mode.
+// PWA: app-wide "you're offline" indicator, shown as a small icon badge on
+// the header account avatar rather than a banner/pill. This is separate
+// from the team-workspace sync dot (setSyncBadge/updateHeaderTeamBadge, in
+// the main app script), which only lights up for signed-in team members and
+// talks about Firestore sync specifically -- this badge is for every
+// signed-in user, including solo/local-only ones, since the service worker
+// means the whole app keeps working offline regardless of workspace mode.
+// Note: the header avatar button itself is a mobile-width-only control (see
+// .header-avatar-btn's CSS -- it only renders at <=480px; wider viewports
+// show the text-based team switcher badge instead), so in practice this
+// indicator is a mobile-specific adjustment.
 (function offlineIndicatorSetup(){
   function update(){
-    const el = document.getElementById('offlineStatus');
+    const el = document.getElementById('headerAvatarOfflineBadge');
     if (el) el.hidden = navigator.onLine;
   }
   window.addEventListener('online', update);
