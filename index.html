@@ -6092,13 +6092,6 @@ function dismissSetupChecklist(){try{localStorage.setItem('ft_setup_dismissed','
 function openSetupOrganization(){openSettings();switchSettingsTab('about')}
 
 function renderAll(){
-  // Mirrors the label logic already used for #requestRefundBtn on the
-  // Refund History page -- a teammate whose request needs sign-off sees
-  // "Request Refund"/"Request a refund" phrasing; an Owner, Disbursing
-  // Officer or solo workspace (no approval step) sees "Personal advance"
-  // instead, since nothing is actually being "requested" from anyone.
-  const dashboardRefundBtn=document.getElementById('dashboardRequestRefundBtn');
-  if(dashboardRefundBtn)dashboardRefundBtn.lastChild.textContent=refundRequestRequiresApproval()?' Request Refund':' Personal Advance';
   let totalRec = funds.reduce((s,f)=>s+f.initialAmount,0) + txs.filter(t=>t.type==='IN').reduce((s,t)=>s+t.amount,0);
   let totalSpent = txs.filter(t=>t.type==='OUT').reduce((s,t)=>s+t.amount,0);
   let remaining = totalRec-totalSpent;
