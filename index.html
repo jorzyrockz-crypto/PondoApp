@@ -5008,7 +5008,11 @@ function switchTab(tab){
  function isHorizontalScroller(target,section){for(let el=target;el&&el!==section;el=el.parentElement){const css=getComputedStyle(el);if(/auto|scroll/.test(css.overflowX)&&el.scrollWidth>el.clientWidth+2)return true}return false}
  function blocked(){return !window.trackerReady||document.body.classList.contains('modal-open')||!document.getElementById('appDialogOverlay').hidden||!document.getElementById('navMoreMenu').hidden||!document.getElementById('headerMoreMenu').hidden||trackerFatal}
  document.addEventListener('touchstart',e=>{
-  start=null;if(e.touches.length!==1||blocked())return;let target=e.target instanceof Element?e.target:null,section=target?.closest('.tab-section');if(!section||section.style.display==='none'||target.closest(excluded)||isHorizontalScroller(target,section))return;
+  start=null;if(e.touches.length!==1||blocked())return;let target=e.target instanceof Element?e.target:null;if(!target||target.closest(excluded)||target.closest('.topbar,.bottomnav'))return;
+  // On wide/tablet screens the centered .wrap leaves blank margin outside any .tab-section;
+  // fall back to the currently visible section so a swipe starting in that margin still works.
+  let section=target.closest('.tab-section')||[...document.querySelectorAll('.tab-section')].find(s=>s.style.display!=='none');
+  if(!section||section.style.display==='none'||isHorizontalScroller(target,section))return;
   const t=e.touches[0];if(t.clientX<24||t.clientX>window.innerWidth-24)return;start={x:t.clientX,y:t.clientY,time:Date.now(),section:section.id};
  },{passive:true});
  document.addEventListener('touchcancel',()=>{start=null},{passive:true});
