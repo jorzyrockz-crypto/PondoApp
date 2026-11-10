@@ -3823,6 +3823,31 @@ body.match-chart #byFund .bar-fill{background:var(--fund-chart-color,var(--accen
 .bar-row{animation:cardIn .45s ease both}
 body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 .tab-section.app-fade{animation:fadeIn .35s ease both}.tab-section.app-slide{animation:slideIn .35s ease both}.tab-section.app-none{animation:none}
+@keyframes cinematicInFwd{from{opacity:0; transform:translateX(34px) scale(.965)} to{opacity:1; transform:none}}
+@keyframes cinematicInBack{from{opacity:0; transform:translateX(-34px) scale(.965)} to{opacity:1; transform:none}}
+.tab-section.app-cinematic-fwd{animation:cinematicInFwd .46s cubic-bezier(.16,1,.3,1) both}
+.tab-section.app-cinematic-back{animation:cinematicInBack .46s cubic-bezier(.16,1,.3,1) both}
+/* Matching entrances for sheets/dialogs when Cinematic is the active App
+   Transition. Pure CSS: these fire automatically whenever the element's
+   display flips from none to visible, so no JS wiring is needed in any of
+   the individual open*() functions. translate/scale (not transform) are
+   used on .sheet/.fab-sheet-card specifically because those already carry
+   a transform for centering themselves as a dialog on wide screens -
+   animating "transform" there would clobber that centering for as long as
+   the animation's fill-forwards value stays in effect. */
+@keyframes cinemaBackdropIn{from{opacity:0} to{opacity:1}}
+@keyframes cinemaSheetIn{from{opacity:0; translate:0 40px; scale:.97} to{opacity:1; translate:0 0; scale:1}}
+@keyframes cinemaDialogIn{from{opacity:0; translate:0 18px; scale:.95} to{opacity:1; translate:0 0; scale:1}}
+body[data-app-transition="cinematic"] .sheet-backdrop,
+body[data-app-transition="cinematic"] .fab-sheet-backdrop,
+body[data-app-transition="cinematic"] .detail-overlay,
+body[data-app-transition="cinematic"] .contribution-form-overlay,
+body[data-app-transition="cinematic"] .app-dialog-overlay{animation:cinemaBackdropIn .32s ease both}
+body[data-app-transition="cinematic"] .sheet,
+body[data-app-transition="cinematic"] .fab-sheet-card{animation:cinemaSheetIn .4s cubic-bezier(.16,1,.3,1) both}
+body[data-app-transition="cinematic"] .detail-dialog,
+body[data-app-transition="cinematic"] .contribution-form-dialog,
+body[data-app-transition="cinematic"] .app-dialog{animation:cinemaDialogIn .36s cubic-bezier(.16,1,.3,1) both}
 .trans-cube{animation:flipIn .55s ease both}.vertical-slide{animation:riseIn .45s ease both}
 .settings-panel button.selected, .settings-panel .opt.selected{outline:2px solid var(--accent);outline-offset:1px}
 /* Night theme: semantic colors and component overrides. Kept together so late
@@ -4705,7 +4730,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       </div>
       <div id="settings-motion" class="settings-panel" style="display:none; flex-direction:column; gap:14px">
         <label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Reduce Motion <button class="switch" id="toggle-motion-reduceMotion" onclick="toggleSetting('motion','reduceMotion')"></button></label>
-        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">App Transition</p><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px"><button class="opt motionAppBtn" data-v="slide" onclick="setMotion('appTransition','slide')">Slide</button><button class="opt motionAppBtn" data-v="fade" onclick="setMotion('appTransition','fade')">Fade</button><button class="opt motionAppBtn" data-v="none" onclick="setMotion('appTransition','none')">None</button></div></div>
+        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">App Transition</p><div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px"><button class="opt motionAppBtn" data-v="cinematic" onclick="setMotion('appTransition','cinematic')" title="Directional scale + fade between views, plus matching entrances for sheets and dialogs">Cinematic</button><button class="opt motionAppBtn" data-v="slide" onclick="setMotion('appTransition','slide')">Slide</button><button class="opt motionAppBtn" data-v="fade" onclick="setMotion('appTransition','fade')">Fade</button><button class="opt motionAppBtn" data-v="none" onclick="setMotion('appTransition','none')">None</button></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Presentation Transition</p><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px"><button class="opt presTransBtn" data-v="slide" onclick="setMotion('presTransition','slide')">Slide</button><button class="opt presTransBtn" data-v="fade" onclick="setMotion('presTransition','fade')">Fade</button><button class="opt presTransBtn" data-v="zoom" onclick="setMotion('presTransition','zoom')">Zoom</button><button class="opt presTransBtn" data-v="flip" onclick="setMotion('presTransition','flip')">Flip</button><button class="opt presTransBtn" data-v="rise" onclick="setMotion('presTransition','rise')">Rise</button><button class="opt presTransBtn" data-v="cube" onclick="setMotion('presTransition','cube')">Cube</button></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Direction</p><div style="display:flex; gap:8px"><button class="opt dirBtn" style="flex:1" data-v="h" onclick="setMotion('direction','h')">Horizontal</button><button class="opt dirBtn" style="flex:1" data-v="v" onclick="setMotion('direction','v')">Vertical</button></div></div>
         <label style="display:flex; justify-content:space-between; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Parallax <button class="switch" id="toggle-motion-parallax" onclick="toggleSetting('motion','parallax')"></button></label>
@@ -4961,12 +4986,18 @@ function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Prom
 window.addEventListener('beforeunload',e=>{if(trackerPending){e.preventDefault();e.returnValue=''}});
 function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(currentSnapshot()))}catch(cacheErr){/* non-fatal */}return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
 function fmt(n){ return '₱'+Number(n).toLocaleString('en-PH'); }
+const CINEMA_TAB_ORDER=['dashboard','funds','projects','contributions','transactions','report'];
+function cinemaDirection(fromTab,toTab){ let i=CINEMA_TAB_ORDER.indexOf(fromTab),j=CINEMA_TAB_ORDER.indexOf(toTab); if(i<0||j<0||j===i) return 1; return j>i?1:-1; }
 function switchTab(tab){
+  let prevSection=[...document.querySelectorAll('.tab-section')].find(s=>s.style.display!=='none');
+  let prevTab=prevSection?prevSection.id.slice(4):null;
   document.querySelectorAll('.tab-section').forEach(s=>s.style.display='none');
   document.getElementById('tab-'+tab).style.display='block';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab||(b.id==='navMore'&&(tab==='transactions'||tab==='report'))));closeNavMore();closeHeaderMore();
   if(appSettings.sound.events.tabSwitch) playSound();
-  let section=document.getElementById('tab-'+tab); section.classList.remove('app-slide','app-fade','app-none'); void section.offsetWidth; section.classList.add('app-'+appSettings.motion.appTransition);
+  let section=document.getElementById('tab-'+tab); section.classList.remove('app-slide','app-fade','app-none','app-cinematic-fwd','app-cinematic-back'); void section.offsetWidth;
+  if(appSettings.motion.appTransition==='cinematic') section.classList.add(cinemaDirection(prevTab,tab)>=0?'app-cinematic-fwd':'app-cinematic-back');
+  else section.classList.add('app-'+appSettings.motion.appTransition);
   window.scrollTo(0,0); if(tab==='dashboard'){renderContributionDashboard();requestAnimationFrame(updateFundRailHint);}
 }
 // Touch-only section navigation. Horizontal rails, inputs and modal content keep their own gestures.
@@ -5715,7 +5746,7 @@ document.getElementById('periodTo').onchange=e=>{ org.periodTo=e.target.value; r
 const defaultAppSettings = {
   appearance: {mode:'light', accent:'emerald', background:'softWave', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true},
   sound: {enabled:true, pack:'softPop', volume:70, haptics:false, events:{tabSwitch:true, add:true, delete:true, slideChange:true, countFinish:true, celebrate:true, tap:false}},
-  motion: {reduceMotion:false, appTransition:'slide', appDuration:'normal', presTransition:'slide', presDuration:'normal', direction:'h', parallax:false, autoAdvance:'off'},
+  motion: {reduceMotion:false, appTransition:'cinematic', appDuration:'normal', presTransition:'slide', presDuration:'normal', direction:'h', parallax:false, autoAdvance:'off'},
   animation: {countUp:true, countDuration:1.5, easing:'easeOut', chartStagger:100, cardEntrance:'fadeRise', textReveal:'none', confetti:true, confettiIntensity:'med'},
   presentation: {defaultScope:'all', includeTx:true, includeSigs:true, includeProjects:true, includeCategory:true, slideOrder:['Title','Executive Summary','Funds Breakdown','Spending by Category','By Fund Source','Recent Transactions','Projects','Signatories','Thank You']},
   rolePreview: 'none',
@@ -5740,6 +5771,7 @@ let appSettings=normalizeSettings(storedSettings);
 let importMode='merge';
 if(!appSettings.version || appSettings.version<3){ try{ appSettings.appearance.fontScale=100; appSettings.version=3; }catch(e){} }
 if(appSettings.version<4){ try{ appSettings.appearance.accent='emerald'; appSettings.appearance.background='softWave'; appSettings.version=4; }catch(e){} }
+if(appSettings.version<5){ try{ appSettings.motion.appTransition='cinematic'; appSettings.version=5; }catch(e){} }
 function saveAppSettings(){ try{ localStorage.setItem('ft_app_settings', JSON.stringify(appSettings)); }catch(e){} try{ syncSettingsUI(); }catch(e){} try{ applyAppearance(); }catch(e){} }
 function openSettings(){ document.getElementById('settingsModal').style.display='block'; document.body.classList.add('modal-open'); try{ syncSettingsUI(); }catch(e){} }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; document.body.classList.remove('modal-open'); try{ saveAppSettings(); }catch(e){} }
@@ -5887,6 +5919,7 @@ function applyAppearance(){
   const preview=document.querySelector('.preview-card'); if(preview){let name=preview.querySelectorAll('p')[1]; if(name) name.textContent=org.name; let received=funds.reduce((n,f)=>n+Number(f.initialAmount||0),0)+txs.filter(t=>t.type==='IN').reduce((n,t)=>n+Number(t.amount||0),0); let spent=txs.filter(t=>t.type==='OUT').reduce((n,t)=>n+Number(t.amount||0),0); let spans=preview.querySelectorAll('span'); if(spans[0]) spans[0].textContent='Balance '+fmt(received-spent); if(spans[1]) spans[1].textContent='Spent '+fmt(spent);}
 
   document.body.dataset.cardStyle=a.cardStyle||'softShadow';
+  document.body.dataset.appTransition=appSettings.motion.appTransition||'slide';
   document.body.dataset.background=a.background||'white';
   document.body.classList.toggle('density-compact', a.density==='compact');
   document.body.classList.toggle('match-chart', !!a.matchChart);
