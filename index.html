@@ -4640,6 +4640,12 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">Recent Transactions</h4><button onclick="switchTab('transactions')" style="background:none; border:none; color:var(--accent); font-weight:600; font-size:12.5px; cursor:pointer">View all <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button></div>
       <div id="recentTx" style="margin-top:14px; display:flex; flex-direction:column; gap:8px"></div>
     </div>
+
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">Refund Transactions</h4><button onclick="switchTab('refunds')" style="background:none; border:none; color:var(--accent); font-weight:600; font-size:12.5px; cursor:pointer">View all <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button></div>
+      <p style="font-size:11px;color:var(--ink2);margin:6px 0 0">Personal-advance reimbursements that have been paid out. Pending and awaiting-payment requests are on the Refund History page.</p>
+      <div id="recentRefundTx" style="margin-top:14px; display:flex; flex-direction:column; gap:8px"></div>
+    </div>
   </section>
 
   <!-- FUNDS -->
@@ -6120,6 +6126,18 @@ function renderAll(){
     recentHtml+=`<div class="tx-row"><div style="display:flex; gap:12px; align-items:center"><div class="tx-icon ${cls}">${icon}</div><div><div class="tx-title">${escapeText(t.description)}</div><div class="tx-meta">${escapeText(t.date)} • ${escapeText(t.category)} • ${escapeText(t.payee||'')}</div>${createdByBadge(t)}</div></div><span class="tx-amount ${cls}">${t.type==='OUT'?'-':'+'}${fmt(t.amount)}</span></div>`;
   });
   recent.innerHTML=recentHtml;
+  // Refund Transactions: cash that has actually moved for personal-advance
+  // reimbursements (paid, not just requested) -- a payment tx always carries
+  // the payableId of the bill it settles, so filter to the ones whose bill
+  // is kind 'advance'. Pending/awaiting-payment refund requests have no tx
+  // yet and belong on the dedicated Refund History page (linked below).
+  let recentRefund=document.getElementById('recentRefundTx'); let recentRefundHtml='';
+  txs.filter(t=>t.payableId&&payables.find(p=>p.id===t.payableId)?.kind==='advance').slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).forEach(t=>{
+    let bill=payables.find(p=>p.id===t.payableId), project=t.projectId?projects.find(p=>p.id===t.projectId):null;
+    let meta=[t.date,project?project.name:'No project',bill?.reimburseTo?'Reimbursed '+bill.reimburseTo:''].filter(Boolean).map(escapeText).join(' • ');
+    recentRefundHtml+=`<div class="tx-row"><div style="display:flex; gap:12px; align-items:center"><div class="tx-icon out">${LICON('arrow-down-right','#dc2626',20)}</div><div><div class="tx-title">${escapeText(t.description)}</div><div class="tx-meta">${meta}</div>${createdByBadge(t)}</div></div><span class="tx-amount out">-${fmt(t.amount)}</span></div>`;
+  });
+  recentRefund.innerHTML=recentRefundHtml;
   let fundsList=document.getElementById('fundsList'); fundsList.innerHTML='';
   const fundQuery=(document.getElementById('fundSearch').value||'').trim().toLowerCase();
   funds.filter(f=>[f.name,f.purpose].some(x=>String(x||'').toLowerCase().includes(fundQuery))).forEach(f=>{
@@ -6143,6 +6161,7 @@ function renderAll(){
   renderRefundHistory();
   if(!txList.children.length) txList.innerHTML='<div class="empty-state"><strong>No transactions found</strong>Try another search or add a transaction.</div>';
   if(!recent.children.length) recent.innerHTML='<div class="empty-state"><strong>No transactions yet</strong>Your recent activity will appear here.</div>';
+  if(!recentRefund.children.length) recentRefund.innerHTML='<div class="empty-state"><strong>No refund payments yet</strong>Paid personal-advance reimbursements will appear here.</div>';
   if(!fundsList.children.length) fundsList.innerHTML=fundQuery?'<div class="empty-state"><strong>No matching funds</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>';
   if(!funds.length) fundCards.innerHTML='<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>';
   if(!byFundDiv.children.length) byFundDiv.innerHTML='<p style="font-size:13px;color:var(--ink2)">No spending yet</p>';
