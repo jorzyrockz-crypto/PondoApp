@@ -5866,6 +5866,14 @@ function applyAppearance(){
     const chrome=(isDark?chromeDark:chromeLight)[a.background]||(isDark?'#101315':'#f7f7f5');
     let tm=document.querySelector('meta[name="theme-color"]'); if(tm) tm.setAttribute('content',chrome);
     let bm=document.querySelector('meta[name="background-color"]'); if(bm) bm.setAttribute('content',chrome);
+    // Mobile browsers (notably iOS Safari) rubber-band the page past its
+    // top/bottom edge on scroll, briefly exposing the <html> element behind
+    // <body>. <html> never picked up the data-background colors, so that
+    // gap always flashed the default near-white page color — most visible
+    // with image-backed options like Soft Wave where background-attachment:
+    // fixed is also more prone to leaving a gap during that bounce. Keep
+    // <html> tinted to match so the bounce blends in instead of flashing white.
+    document.documentElement.style.backgroundColor=chrome;
   })();
   document.documentElement.style.fontSize='16px';
   if(typeof soundPack!=='undefined') soundPack=appSettings.sound.pack;
