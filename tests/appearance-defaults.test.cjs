@@ -24,3 +24,9 @@ test('light artwork keeps secondary text readable over the darkest image pixels'
  const darkestBackground=[248,247,252].map(c=>Math.floor(c*0.85));
  assert.ok((luminance(darkestBackground)+0.05)/(luminance([83,84,90])+0.05)>=4.5);
 });
+
+test('hero skin defaults to classic and preserves valid saved choices',()=>{
+ assert.equal(normalize(null).appearance.heroSkin,'classic');
+ assert.equal(normalize({appearance:{heroSkin:'vibrant'}}).appearance.heroSkin,'vibrant');
+ assert.equal(normalize({appearance:{heroSkin:'unexpected'}}).appearance.heroSkin,'classic');
+});

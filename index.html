@@ -4497,6 +4497,54 @@ body.dark-mode #appHeaderLogo,body.dark-mode #authGateLogo{background:#1c1c1c!im
  body.dark-mode .bottomnav{background:#101518!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 }
 
+/* Dashboard balance: accent-driven depth while keeping the figures legible. */
+@media screen{
+ .hero-stat-art{display:none}
+ .hero--vibrant .hero-stat-art{display:block}
+ body .hero.hero--vibrant{
+  background:radial-gradient(ellipse at 12% 0%,rgba(255,255,255,.06),transparent 50%),linear-gradient(120deg,rgba(17,9,33,.16) 0%,rgba(18,10,38,.32) 58%,rgba(9,8,25,.48) 100%),linear-gradient(135deg,var(--accent-strong),var(--accent-deep))!important;
+  border:1px solid rgba(255,255,255,.24);box-shadow:0 14px 36px rgba(9,8,28,.24)!important;
+ }
+ .hero.hero--vibrant::before{background:radial-gradient(ellipse at 18% 0%,rgba(255,255,255,.05),transparent 55%),radial-gradient(ellipse at 100% 100%,rgba(0,0,0,.10),transparent 58%)!important;pointer-events:none}
+ .hero.hero--vibrant::after{top:-12px!important;bottom:auto!important;right:-18px!important;width:clamp(90px,12vw,132px);height:clamp(90px,12vw,132px);display:grid;place-items:center;overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.035);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.055);transform:rotate(24deg);font-family:system-ui,sans-serif;font-size:clamp(56px,7vw,95.2px)!important;color:rgba(255,255,255,.25)!important;line-height:1;pointer-events:none}
+ .hero.hero--vibrant>*{position:relative;z-index:1}
+ .hero--vibrant .hero-label{opacity:1!important;color:#fff;font-weight:750!important;letter-spacing:.15em!important}
+ .hero--vibrant .hero-amount{font-size:clamp(38px,6vw,68px)!important;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;text-shadow:0 3px 18px rgba(0,0,0,.20)}
+ .hero--vibrant .hero-sub{opacity:1!important;color:#fff}
+ .hero--vibrant .hero-stats{gap:10px!important}
+ .hero--vibrant .hero-stat{background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.26)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 6px 18px rgba(0,0,0,.08)!important}
+ /* Colour-block tiles and angled graphic accents inspired by the reference. */
+ .hero--vibrant .hero-stat{position:relative;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;min-height:154px;padding:18px!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:14px!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ .hero--vibrant .hero-stat:nth-child(1){background:linear-gradient(120deg,#094d41,#00634d)!important}
+ .hero--vibrant .hero-stat:nth-child(2){background:linear-gradient(120deg,#69233e,#870039)!important}
+ .hero--vibrant .hero-stat:nth-child(3){background:linear-gradient(120deg,#19304e,#293d83)!important}
+ /* Retain the solid gradients as a fallback where backdrop blur is unavailable. */
+ @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .hero--vibrant .hero-stat{backdrop-filter:blur(22px) saturate(1.3)!important;-webkit-backdrop-filter:blur(22px) saturate(1.3)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 24px rgba(0,0,0,.16)!important}
+  .hero--vibrant .hero-stat:nth-child(1){background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 55%),linear-gradient(rgba(5,8,16,.34),rgba(5,8,16,.34)),linear-gradient(120deg,rgba(9,77,65,.55),rgba(0,99,77,.55))!important}
+  .hero--vibrant .hero-stat:nth-child(2){background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 55%),linear-gradient(rgba(5,8,16,.34),rgba(5,8,16,.34)),linear-gradient(120deg,rgba(105,35,62,.55),rgba(135,0,57,.55))!important}
+  .hero--vibrant .hero-stat:nth-child(3){background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 55%),linear-gradient(rgba(5,8,16,.34),rgba(5,8,16,.34)),linear-gradient(120deg,rgba(25,48,78,.55),rgba(41,61,131,.55))!important}
+ }
+ @media (prefers-reduced-transparency:reduce), (prefers-contrast:more){
+  .hero.hero--vibrant::after{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .hero--vibrant .hero-stat{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .hero--vibrant .hero-stat:nth-child(1){background:linear-gradient(120deg,#094d41,#00634d)!important}
+  .hero--vibrant .hero-stat:nth-child(2){background:linear-gradient(120deg,#69233e,#870039)!important}
+  .hero--vibrant .hero-stat:nth-child(3){background:linear-gradient(120deg,#19304e,#293d83)!important}
+ }
+ .hero--vibrant .hero-stat>div{position:relative;z-index:1}
+ .hero-stat-art{position:absolute;right:-13px;bottom:-10px;width:94px;height:94px;padding:14px;border-radius:15px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.17);color:#fff;transform:rotate(24deg);opacity:.72;pointer-events:none;z-index:0}
+ .hero--vibrant .hero-stat:nth-child(1) .hero-stat-art{color:#80f6c4}
+ .hero--vibrant .hero-stat:nth-child(2) .hero-stat-art{color:#ffa0aa}
+ .hero--vibrant .hero-stat:nth-child(3) .hero-stat-art{color:#bcd2ff}
+ .hero--vibrant .hero-stat-label{opacity:1!important;color:#fff;font-weight:700;font-size:11px!important;line-height:1.25;letter-spacing:.06em!important}
+ .hero--vibrant .hero-stat-value{font-size:clamp(21px,2.4vw,27px)!important;font-weight:750!important;line-height:1.15;margin-top:12px!important;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+ .hero--vibrant .hero-stat-sub{opacity:1!important;color:rgba(255,255,255,.95);font-size:12px!important;line-height:1.35;margin-top:auto!important;padding-top:9px;overflow-wrap:anywhere}
+ @media(max-width:600px){.hero.hero--vibrant::after{width:76px;height:76px;font-size:56px!important;right:-18px!important;top:-13px!important}.hero--vibrant .hero-stats{gap:6px!important}.hero--vibrant .hero-stat{min-height:110px;padding:12px 9px!important}.hero--vibrant .hero-stat-label{font-size:10px!important}.hero--vibrant .hero-stat-value{font-size:clamp(14px,4vw,19px)!important;margin-top:10px!important}.hero--vibrant .hero-stat-sub{font-size:10px!important;padding-top:7px}.hero-stat-art{width:50px;height:50px;padding:9px;right:-14px;bottom:-8px;opacity:.42}}
+ @media(prefers-reduced-motion:reduce){.hero--vibrant .hero-stat{transition:none!important}.hero--vibrant .hero-stat:hover{transform:none!important}}
+ body.reduce-motion .hero--vibrant .hero-stat{transition:none!important}body.reduce-motion .hero--vibrant .hero-stat:hover{transform:none!important}
+}
+
 /* Firebase auth gate */
 .auth-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px;background:#0c0b26 url('assets/branding/login-landscape.jpg') center/cover no-repeat;}
 @media (orientation:portrait){.auth-gate{background-image:url('assets/branding/login-portrait.jpg');}}
@@ -4746,9 +4794,9 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       <div class="hero-amount" id="totalRemaining">₱68,300</div>
       <div class="hero-sub" id="heroSub">Across 3 funds • 6 transactions • Period 2025-01-01 to 2025-12-31</div>
       <div class="hero-stats">
-        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><div class="hero-stat-label">Received</div></div><div class="hero-stat-value" id="totalReceived">₱88,500</div><div class="hero-stat-sub">All sources</div></div>
-        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg><div class="hero-stat-label">Spent</div></div><div class="hero-stat-value" id="totalSpent">₱20,200</div><div class="hero-stat-sub" id="spentPct">22.8% used</div></div>
-        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><div class="hero-stat-label">Transactions</div></div><div class="hero-stat-value" id="txCount">6</div><div class="hero-stat-sub">All recorded dates</div></div>
+        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><div class="hero-stat-label">Received</div></div><div class="hero-stat-value" id="totalReceived">₱88,500</div><div class="hero-stat-sub">All sources</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 16 6-6 4 4 8-8M15 6h6v6"/></svg></div>
+        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg><div class="hero-stat-label">Spent</div></div><div class="hero-stat-value" id="totalSpent">₱20,200</div><div class="hero-stat-sub" id="spentPct">22.8% used</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 8 6 6 4-4 8 8M15 18h6v-6"/></svg></div>
+        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><div class="hero-stat-label">Transactions</div></div><div class="hero-stat-value" id="txCount">6</div><div class="hero-stat-sub">All recorded dates</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m7 3-4 4 4 4M3 7h17M17 21l4-4-4-4m4 4H4"/></svg></div>
       </div>
     </div>
 
@@ -4945,6 +4993,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Currency</p><select id="currencySelect" class="input" aria-label="Currency" onchange="setCurrency(this.value)"></select><div id="customCurrencySymbolWrap" hidden style="margin-top:8px"><input type="text" id="customCurrencySymbolInput" class="input" maxlength="6" placeholder="Symbol, e.g. kr or Fr" aria-label="Custom currency symbol" oninput="setCustomCurrencySymbol(this.value)"></div><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">Changes how amounts are shown throughout Pondo — for global/non-Philippine users. This only changes the display symbol and number formatting; it does not convert amounts between currencies.</p></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Accent Color</p><div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center"><div class="accent-dot" data-accent="emerald" style="background:#059669" onclick="setAppearance('accent','emerald')"></div><div class="accent-dot" data-accent="teal" style="background:#0d9488" onclick="setAppearance('accent','teal')"></div><div class="accent-dot" data-accent="amber" style="background:#f59e0b" onclick="setAppearance('accent','amber')"></div><div class="accent-dot" data-accent="violet" style="background:#7c3aed" onclick="setAppearance('accent','violet')"></div><div class="accent-dot" data-accent="blue" style="background:#2563eb" onclick="setAppearance('accent','blue')"></div><div class="accent-dot" data-accent="rose" style="background:#e11d48" onclick="setAppearance('accent','rose')"></div><div class="accent-dot" data-accent="forest" style="background:#033b0c" onclick="setAppearance('accent','forest')"></div><div class="accent-dot selected" data-accent="lavender" style="background:#b089fd" onclick="setAppearance('accent','lavender')" title="Lavender — sampled from the app logo">✓</div><input type="color" id="customAccent" style="width:36px; height:36px; border-radius:999px; border:1px solid var(--line); padding:2px" onchange="setCustomAccent(this.value)"></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Background</p><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px"><div class="opt bg-option" data-bg="white" onclick="setAppearance('background','white')">White</div><div class="opt bg-option" data-bg="softWave" onclick="setAppearance('background','softWave')">Soft Wave</div><div class="opt bg-option" data-bg="emeraldGlow" onclick="setAppearance('background','emeraldGlow')">Emerald Glow</div><div class="opt bg-option" data-bg="dotGrid" onclick="setAppearance('background','dotGrid')">Dot Grid</div><div class="opt bg-option" data-bg="gradientMesh" onclick="setAppearance('background','gradientMesh')">Gradient Mesh</div><div class="opt bg-option" data-bg="paper" onclick="setAppearance('background','paper')">Paper</div><div class="opt bg-option" data-bg="midnight" onclick="setAppearance('background','midnight')">Midnight</div><div class="opt bg-option" data-bg="lime" onclick="setAppearance('background','lime')">Lime</div><div class="opt bg-option" data-bg="logoGlow" onclick="setAppearance('background','logoGlow')" title="Soft yellow-to-lavender wash sampled from the app logo">Logo Glow</div><div class="opt selected bg-option" data-bg="pondoArtwork" onclick="setAppearance('background','pondoArtwork')" title="Subtle version of the login artwork">Pondo Artwork</div></div><p style="font-size:11px;color:var(--ink2);margin:6px 0 0">Pondo Artwork uses a faded version of the login background.</p></div>
+        <div><p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:0 0 8px">Dashboard balance skin</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button type="button" class="opt selected" onclick="setAppearance('heroSkin','classic')" aria-pressed="true">Classic</button><button type="button" class="opt" onclick="setAppearance('heroSkin','vibrant')" aria-pressed="false">Vibrant Glass</button></div><p style="font-size:11px;color:var(--ink2);margin:6px 0 0">Changes the dashboard balance banner only.</p></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Card Style</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px"><div class="opt selected card-option" data-card="softShadow" onclick="setAppearance('cardStyle','softShadow')">Soft Shadow</div><div class="opt card-option" data-card="glass" onclick="setAppearance('cardStyle','glass')">Glass</div><div class="opt card-option" data-card="flat" onclick="setAppearance('cardStyle','flat')">Flat</div><div class="opt card-option" data-card="bordered" onclick="setAppearance('cardStyle','bordered')">Bordered</div></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Density</p><div style="display:flex; gap:8px; flex-wrap:wrap"><button class="opt densityBtn" style="flex:1 1 100px" data-density="comfortable" onclick="setAppearance('density','comfortable')">Comfortable</button><button class="opt densityBtn" style="flex:1 1 100px" data-density="compact" onclick="setAppearance('density','compact')">Compact</button><button class="opt densityBtn" style="flex:1 1 100px" data-density="extra-compact" onclick="setAppearance('density','extra-compact')">Extra compact</button></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Interface Scale <span id="fontScaleVal">100%</span></p><input type="range" id="fontScale" min="90" max="115" value="100" style="width:100%" oninput="setFontScale(this.value)"><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">Density and interface scale are saved only on this device.</p></div>
@@ -6488,7 +6537,7 @@ const CURRENCIES = {
   ZAR: {symbol:'R', locale:'en-ZA', name:'South African Rand'},
 };
 const defaultAppSettings = {
-  appearance: {mode:'dark', accent:'lavender', background:'pondoArtwork', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true, currency:'PHP', customCurrencySymbol:''},
+  appearance: {mode:'dark', accent:'lavender', background:'pondoArtwork', heroSkin:'classic', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true, currency:'PHP', customCurrencySymbol:''},
   sound: {enabled:true, pack:'softPop', volume:70, haptics:false, events:{tabSwitch:true, add:true, delete:true, slideChange:true, countFinish:true, celebrate:true, tap:false}},
   motion: {reduceMotion:false, appTransition:'cinematic', appDuration:'normal', presTransition:'slide', presDuration:'normal', direction:'h', parallax:false, autoAdvance:'off'},
   animation: {countUp:true, countDuration:1.5, easing:'easeOut', chartStagger:100, cardEntrance:'fadeRise', textReveal:'none', confetti:true, confettiIntensity:'med'},
@@ -6519,6 +6568,7 @@ function normalizeSettings(saved){
   // stuck unreadably tiny/huge with no way back except clearing storage.
   defaults.appearance.fontScale=Number.isFinite(defaults.appearance.fontScale)?Math.min(115,Math.max(90,Math.round(defaults.appearance.fontScale))):100;
   defaults.appearance.customCurrencySymbol=typeof defaults.appearance.customCurrencySymbol==='string'?defaults.appearance.customCurrencySymbol.slice(0,6):'';
+  if(!['classic','vibrant'].includes(defaults.appearance.heroSkin)) defaults.appearance.heroSkin='classic';
   if(['none','disbursing','reviewer','project-manager'].includes(saved.rolePreview)) defaults.rolePreview=saved.rolePreview;
   if(!Array.isArray(defaults.presentation.slideOrder)) defaults.presentation.slideOrder=[...defaultAppSettings.presentation.slideOrder];
   // Carry the saved schema version forward (not the current default's), so the
@@ -6599,6 +6649,7 @@ function toggleSetting(section,key){ try{ if(section==='appearance' && key==='dy
 function toggleSoundEvent(ev){ appSettings.sound.events[ev]=!appSettings.sound.events[ev]; saveAppSettings(); }
 function setAppearance(key,val){
   if(key==='density'){ setDeviceDensity(val); return; }
+  if(key==='heroSkin'&&!['classic','vibrant'].includes(val))return;
   appSettings.appearance[key]=val; if(key==='accent') appSettings.appearance.dynamicAccent=false; saveAppSettings();
   if(key==='accent'){ let map={emerald:'#059669',teal:'#0d9488',amber:'#f59e0b',violet:'#7c3aed',blue:'#2563eb',rose:'#e11d48'}; document.querySelectorAll('.accent-dot').forEach(c=>{ c.textContent=''; c.classList.toggle('selected', c.dataset.accent===val); if(c.dataset.accent===val) c.textContent='✓'; }); }
   applyAppearance();
@@ -6808,6 +6859,7 @@ function applyAppearance(){
   root.setProperty('--currency-watermark', JSON.stringify(watermarkSymbol));
   const preview=document.querySelector('.preview-card'); if(preview){let name=preview.querySelectorAll('p')[1]; if(name) name.textContent=org.name; let received=funds.reduce((n,f)=>n+Number(f.initialAmount||0),0)+txs.filter(t=>t.type==='IN').reduce((n,t)=>n+Number(t.amount||0),0); let spent=txs.filter(t=>t.type==='OUT').reduce((n,t)=>n+Number(t.amount||0),0); let spans=preview.querySelectorAll('span'); if(spans[0]) spans[0].textContent='Balance '+fmt(received-spent); if(spans[1]) spans[1].textContent='Spent '+fmt(spent);}
 
+  document.querySelector('.hero')?.classList.toggle('hero--vibrant',a.heroSkin==='vibrant');
   document.body.dataset.cardStyle=a.cardStyle||'softShadow';
   document.body.dataset.appTransition=appSettings.motion.appTransition||'slide';
   document.body.dataset.background=a.background||'white';
