@@ -3733,7 +3733,7 @@ tr:last-child td{border-bottom:none !important}
 .topbar{
   position:sticky !important;
   top:0 !important; left:0 !important; right:0 !important;
-  width:100% !important; max-width:100vw !important;
+  width:100% !important; max-width:none !important;
   box-sizing:border-box !important;
   overflow:hidden !important;
 }
@@ -3974,6 +3974,10 @@ body[data-app-transition="cinematic"] .app-dialog{animation:cinemaDialogIn .36s 
   body.density-compact .tx-row{padding:8px 10px!important}
   body.density-compact .grid-funds,body.density-compact .grid-2{gap:8px!important}
   body.density-compact .section-title{margin-top:18px!important;margin-bottom:8px!important}
+  body.density-extra-compact .card{padding:10px 12px!important}
+  body.density-extra-compact .tx-row{padding:6px 8px!important}
+  body.density-extra-compact .grid-funds,body.density-extra-compact .grid-2{gap:6px!important}
+  body.density-extra-compact .section-title{margin-top:14px!important;margin-bottom:6px!important}
   body.dark-mode .settings-panel .opt.selected,body.dark-mode .settings-panel button.selected{background:color-mix(in srgb,var(--accent-strong) 35%,#202b30)!important;border-color:var(--accent-readable)!important;outline-color:var(--accent-readable)!important}
   /* Let the accent color show through the top bar / bottom nav: a subtle
      tint on their background, and the active tab's highlight pill. */
@@ -4028,7 +4032,7 @@ html:has(body.modal-open){ overflow:hidden !important; }
   :root{--ui-radius:18px;--ui-space:20px}
   body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;letter-spacing:-.012em!important}
   .topbar{border-bottom:1px solid var(--line)!important;box-shadow:none!important}
-  .topbar-inner{max-width:1120px!important;min-height:76px!important;margin:auto!important;padding:10px 16px!important;gap:12px!important}
+  .topbar-inner{max-width:none!important;min-height:76px!important;margin:auto!important;padding:10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left))!important;gap:12px!important}
   .topbar-inner>div:first-child{min-width:0;flex:1}
   .topbar-inner>div:first-child>div:last-child{min-width:0}
   .org-name{font-family:inherit!important;font-size:15px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4113,7 +4117,7 @@ html:has(body.modal-open){ overflow:hidden !important; }
     .fab-sheet-card{width:min(560px,calc(100% - 48px));left:50%!important;right:auto!important;bottom:50%!important;transform:translate(-50%,50%);border-radius:24px!important}
   }
   @media(max-width:600px){
-    .topbar-inner{min-height:66px!important;gap:8px!important;padding:8px 12px!important}
+    .topbar-inner{min-height:66px!important;gap:8px!important;padding:8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left))!important}
     .topbar-inner>div:first-child{gap:8px!important}
     .org-name{font-size:13px!important}.org-meta{font-size:10px!important}
     .logo{width:36px!important;height:36px!important;font-size:13px!important}
@@ -4833,9 +4837,8 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Accent Color</p><div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center"><div class="accent-dot selected" data-accent="emerald" style="background:#059669" onclick="setAppearance('accent','emerald')">✓</div><div class="accent-dot" data-accent="teal" style="background:#0d9488" onclick="setAppearance('accent','teal')"></div><div class="accent-dot" data-accent="amber" style="background:#f59e0b" onclick="setAppearance('accent','amber')"></div><div class="accent-dot" data-accent="violet" style="background:#7c3aed" onclick="setAppearance('accent','violet')"></div><div class="accent-dot" data-accent="blue" style="background:#2563eb" onclick="setAppearance('accent','blue')"></div><div class="accent-dot" data-accent="rose" style="background:#e11d48" onclick="setAppearance('accent','rose')"></div><div class="accent-dot" data-accent="forest" style="background:#033b0c" onclick="setAppearance('accent','forest')"></div><div class="accent-dot" data-accent="lavender" style="background:#b089fd" onclick="setAppearance('accent','lavender')" title="Lavender — sampled from the app logo"></div><input type="color" id="customAccent" style="width:36px; height:36px; border-radius:999px; border:1px solid var(--line); padding:2px" onchange="setCustomAccent(this.value)"></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Background</p><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px"><div class="opt bg-option" data-bg="white" onclick="setAppearance('background','white')">White</div><div class="opt selected bg-option" data-bg="softWave" onclick="setAppearance('background','softWave')">Soft Wave</div><div class="opt bg-option" data-bg="emeraldGlow" onclick="setAppearance('background','emeraldGlow')">Emerald Glow</div><div class="opt bg-option" data-bg="dotGrid" onclick="setAppearance('background','dotGrid')">Dot Grid</div><div class="opt bg-option" data-bg="gradientMesh" onclick="setAppearance('background','gradientMesh')">Gradient Mesh</div><div class="opt bg-option" data-bg="paper" onclick="setAppearance('background','paper')">Paper</div><div class="opt bg-option" data-bg="midnight" onclick="setAppearance('background','midnight')">Midnight</div><div class="opt bg-option" data-bg="lime" onclick="setAppearance('background','lime')">Lime</div><div class="opt bg-option" data-bg="logoGlow" onclick="setAppearance('background','logoGlow')" title="Soft yellow-to-lavender wash sampled from the app logo">Logo Glow</div></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Card Style</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px"><div class="opt selected card-option" data-card="softShadow" onclick="setAppearance('cardStyle','softShadow')">Soft Shadow</div><div class="opt card-option" data-card="glass" onclick="setAppearance('cardStyle','glass')">Glass</div><div class="opt card-option" data-card="flat" onclick="setAppearance('cardStyle','flat')">Flat</div><div class="opt card-option" data-card="bordered" onclick="setAppearance('cardStyle','bordered')">Bordered</div></div></div>
-        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Density</p><div style="display:flex; gap:8px"><button class="opt densityBtn" style="flex:1" data-density="comfortable" onclick="setAppearance('density','comfortable')">Comfortable</button><button class="opt densityBtn" style="flex:1" data-density="compact" onclick="setAppearance('density','compact')">Compact</button></div></div>
-        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Interface Scale <span id="fontScaleVal">100%</span></p><input type="range" id="fontScale" min="85" max="115" value="100" style="width:100%" oninput="setFontScale(this.value)"><p id="fontScaleLockHint" style="display:none; font-size:11px; color:var(--ink2); margin:6px 0 0">Locked to this device — won't change when settings sync from your account.</p></div>
-        <label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Lock scale to this device <button class="switch" id="toggle-fontScaleLock" onclick="toggleFontScaleLock()"></button></label>
+        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Density</p><div style="display:flex; gap:8px; flex-wrap:wrap"><button class="opt densityBtn" style="flex:1 1 100px" data-density="comfortable" onclick="setAppearance('density','comfortable')">Comfortable</button><button class="opt densityBtn" style="flex:1 1 100px" data-density="compact" onclick="setAppearance('density','compact')">Compact</button><button class="opt densityBtn" style="flex:1 1 100px" data-density="extra-compact" onclick="setAppearance('density','extra-compact')">Extra compact</button></div></div>
+        <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Interface Scale <span id="fontScaleVal">100%</span></p><input type="range" id="fontScale" min="90" max="115" value="100" style="width:100%" oninput="setFontScale(this.value)"><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">Density and interface scale are saved only on this device.</p></div>
         <div style="display:flex; flex-direction:column; gap:8px"><label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Use first fund color as accent <button class="switch" id="toggle-dynamicAccent" onclick="toggleSetting('appearance','dynamicAccent')"></button></label><label style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f7f7f5; border-radius:16px; font-size:14px">Match Chart Colors to Fund Colors <button class="switch on" id="toggle-matchChart" onclick="toggleSetting('appearance','matchChart')"></button></label></div>
       </div>
       <div id="settings-sound" class="settings-panel" style="display:none; flex-direction:column; gap:14px">
@@ -6359,7 +6362,7 @@ function normalizeSettings(saved){
   // hand-edited localStorage, or a value written by a future app version
   // with a wider slider range syncing down to this one) leaving the UI
   // stuck unreadably tiny/huge with no way back except clearing storage.
-  defaults.appearance.fontScale=Number.isFinite(defaults.appearance.fontScale)?Math.min(115,Math.max(85,Math.round(defaults.appearance.fontScale))):100;
+  defaults.appearance.fontScale=Number.isFinite(defaults.appearance.fontScale)?Math.min(115,Math.max(90,Math.round(defaults.appearance.fontScale))):100;
   defaults.appearance.customCurrencySymbol=typeof defaults.appearance.customCurrencySymbol==='string'?defaults.appearance.customCurrencySymbol.slice(0,6):'';
   if(['none','disbursing','reviewer','project-manager'].includes(saved.rolePreview)) defaults.rolePreview=saved.rolePreview;
   if(!Array.isArray(defaults.presentation.slideOrder)) defaults.presentation.slideOrder=[...defaultAppSettings.presentation.slideOrder];
@@ -6440,44 +6443,61 @@ function filterSettings(){ let q=(document.getElementById('settingsSearch').valu
 function toggleSetting(section,key){ try{ if(section==='appearance' && key==='dynamicAccent') appSettings.appearance.dynamicAccent=!appSettings.appearance.dynamicAccent; else if(section==='appearance' && key==='matchChart') appSettings.appearance.matchChart=!appSettings.appearance.matchChart; else if(section==='sound' && key==='enabled') appSettings.sound.enabled=!appSettings.sound.enabled; else if(section==='sound' && key==='haptics') appSettings.sound.haptics=!appSettings.sound.haptics; else if(section==='motion' && key==='reduceMotion') appSettings.motion.reduceMotion=!appSettings.motion.reduceMotion; else if(section==='motion' && key==='parallax') appSettings.motion.parallax=!appSettings.motion.parallax; else if(section==='animation' && key==='countUp') appSettings.animation.countUp=!appSettings.animation.countUp; else if(section==='animation' && key==='confetti') appSettings.animation.confetti=!appSettings.animation.confetti; else if(section==='presentation') appSettings.presentation[key]=!appSettings.presentation[key]; if(appSettings.sound.haptics && navigator.vibrate) navigator.vibrate(10); }catch(err){} saveAppSettings(); }
 function toggleSoundEvent(ev){ appSettings.sound.events[ev]=!appSettings.sound.events[ev]; saveAppSettings(); }
 function setAppearance(key,val){
+  if(key==='density'){ setDeviceDensity(val); return; }
   appSettings.appearance[key]=val; if(key==='accent') appSettings.appearance.dynamicAccent=false; saveAppSettings();
   if(key==='accent'){ let map={emerald:'#059669',teal:'#0d9488',amber:'#f59e0b',violet:'#7c3aed',blue:'#2563eb',rose:'#e11d48'}; document.querySelectorAll('.accent-dot').forEach(c=>{ c.textContent=''; c.classList.toggle('selected', c.dataset.accent===val); if(c.dataset.accent===val) c.textContent='✓'; }); }
   applyAppearance();
 }
 function setCustomAccent(hex){ document.documentElement.style.setProperty('--accent', hex); document.documentElement.style.setProperty('--accent-dark', hex); document.documentElement.style.setProperty('--accent-soft', hex+'22'); appSettings.appearance.accent='custom'; appSettings.appearance.customAccent=hex; appSettings.appearance.dynamicAccent=false; saveAppSettings(); }
-// Interface Scale is normally part of appSettings.appearance, which is
-// synced whole-document to this account's Firestore profile (see
-// pushSettingsNow/upsertUserProfile below) and reconciled last-write-wins
-// across every device you sign into. That is fine for most appearance
-// choices, but screen size/eyesight preferences are genuinely per-device
-// (e.g. a phone wants 115%, a shared office laptop wants 100%) -- without
-// an escape hatch, changing scale on one device silently overwrites every
-// other signed-in device the next time it syncs. "Lock this device's scale"
-// stores the override in localStorage only (outside appSettings entirely),
-// so it is never read from or written to the synced blob and survives
-// incoming remote-settings syncs untouched.
-function clampFontScale(v){ return Number.isFinite(v)?Math.min(115,Math.max(85,Math.round(v))):100; }
-function deviceFontScaleLocked(){ try{ return localStorage.getItem('ft_device_scale_lock')==='1'; }catch(e){ return false; } }
-function deviceFontScaleValue(){ try{ let v=parseInt(localStorage.getItem('ft_device_scale_value'),10); return Number.isFinite(v)?clampFontScale(v):null; }catch(e){ return null; } }
-function effectiveFontScale(){ if(deviceFontScaleLocked()){ let v=deviceFontScaleValue(); if(v!=null) return v; } return clampFontScale(appSettings.appearance.fontScale); }
-function toggleFontScaleLock(){
-  if(deviceFontScaleLocked()){
-    // Unlocking: carry the value you were just seeing on this device back
-    // into the regular synced setting, so it doesn't jump to whatever
-    // another device may have synced in while this one was locked.
-    let v=deviceFontScaleValue();
-    try{ localStorage.removeItem('ft_device_scale_lock'); localStorage.removeItem('ft_device_scale_value'); }catch(e){ appAlert('Could not change this in this browser.'); return; }
-    if(v!=null){ appSettings.appearance.fontScale=v; saveAppSettings(); return; }
-  } else {
-    try{ localStorage.setItem('ft_device_scale_lock','1'); localStorage.setItem('ft_device_scale_value', String(appSettings.appearance.fontScale||100)); }catch(e){ appAlert('Could not change this in this browser.'); return; }
-  }
+// Density and scale are local device preferences, not account settings. Seed
+// them once from the old local settings (and the old scale lock, if enabled).
+function clampFontScale(v){ return Number.isFinite(v)?Math.min(115,Math.max(90,Math.round(v))):100; }
+function validDensity(v){ return ['comfortable','compact','extra-compact'].includes(v)?v:'comfortable'; }
+const DEVICE_APPEARANCE_KEY='ft_device_appearance';
+function readDeviceAppearance(){
+  let saved=null, legacyScale=null;
+  try{
+    saved=JSON.parse(localStorage.getItem(DEVICE_APPEARANCE_KEY)||'null');
+    if(localStorage.getItem('ft_device_scale_lock')==='1'){
+      const raw=localStorage.getItem('ft_device_scale_value');
+      if(raw!==null && raw.trim()!=='') legacyScale=Number(raw);
+    }
+  }catch(e){}
+  const source=saved && typeof saved==='object' && !Array.isArray(saved)?saved:null;
+  return {
+    fontScale:clampFontScale(source?source.fontScale:(Number.isFinite(legacyScale)?legacyScale:appSettings.appearance.fontScale)),
+    density:validDensity(source?source.density:appSettings.appearance.density)
+  };
+}
+let deviceAppearance=readDeviceAppearance();
+// Persist the migration before a remote profile can replace appSettings.
+try{ localStorage.setItem(DEVICE_APPEARANCE_KEY,JSON.stringify(deviceAppearance)); }catch(e){}
+function effectiveFontScale(){ return deviceAppearance.fontScale; }
+function effectiveDensity(){ return deviceAppearance.density; }
+function saveDeviceAppearance(next){
+  try{ localStorage.setItem(DEVICE_APPEARANCE_KEY,JSON.stringify(next)); }
+  catch(e){ appAlert('Could not save device appearance in this browser.'); return false; }
+  deviceAppearance=next;
   syncSettingsUI(); applyAppearance();
+  return true;
+}
+function setDeviceDensity(v){
+  if(!['comfortable','compact','extra-compact'].includes(v)) return;
+  saveDeviceAppearance({...deviceAppearance,density:v});
 }
 function setFontScale(v){
-  v=clampFontScale(parseInt(v,10));
-  if(deviceFontScaleLocked()){ try{ localStorage.setItem('ft_device_scale_value', String(v)); }catch(e){} syncSettingsUI(); applyAppearance(); return; }
-  appSettings.appearance.fontScale=v; saveAppSettings();
+  saveDeviceAppearance({...deviceAppearance,fontScale:clampFontScale(Number(v))});
 }
+function resetDeviceAppearance(){
+  deviceAppearance={fontScale:100,density:'comfortable'};
+  try{
+    localStorage.setItem(DEVICE_APPEARANCE_KEY,JSON.stringify(deviceAppearance));
+    localStorage.removeItem('ft_device_scale_lock'); localStorage.removeItem('ft_device_scale_value');
+  }catch(e){ appAlert('Could not save device appearance in this browser.'); }
+}
+window.addEventListener('storage',e=>{
+  if(e.key===DEVICE_APPEARANCE_KEY){ deviceAppearance=readDeviceAppearance(); syncSettingsUI(); applyAppearance(); }
+});
 function setSoundPackFull(pack){ appSettings.sound.pack=pack; saveAppSettings(); soundPack=pack; if(pack!=='none') playSound('pop'); }
 function setSettingsVolume(v){ appSettings.sound.volume=parseInt(v); document.getElementById('settingsVolVal').innerText=v+'%'; document.getElementById('volume').value=v; document.getElementById('volVal').innerText=v+'%'; saveAppSettings(); }
 function testAllSounds(){ if(!appSettings.sound.enabled){appAlert('Enable sound first.');return;} ['softPop','keynoteClick','typewriter','chime'].forEach((p,i)=>setTimeout(()=>playSound(p),i*500)); }
@@ -6554,6 +6574,7 @@ function resetSettingsSection(){
   const sections={appearance:['appearance'],sound:['sound'],motion:['motion','animation'],present:['presentation']};
   if(!sections[active]){ appAlert('No settings to reset in this section.'); return; }
   for(const section of sections[active]) appSettings[section]=JSON.parse(JSON.stringify(defaultAppSettings[section]));
+  if(active==='appearance') resetDeviceAppearance();
   saveAppSettings(); if(active==='present') renderSlideOrder(); if(active==='sound'){document.getElementById('volume').value=appSettings.sound.volume; document.getElementById('volVal').innerText=appSettings.sound.volume+'%';} appAlert('Section reset');
 }
 async function resetAllSettings(){ if(await appConfirm('Reset ALL settings?')){
@@ -6565,10 +6586,7 @@ async function resetAllSettings(){ if(await appConfirm('Reset ALL settings?')){
   // reset was meant to clear. A fresh timestamp makes this reset win and
   // propagate to the cloud instead.
   try{ const fresh=JSON.parse(JSON.stringify(defaultAppSettings)); fresh.updatedAt=Date.now(); localStorage.setItem('ft_app_settings', JSON.stringify(fresh)); }catch(e){ localStorage.removeItem('ft_app_settings'); }
-  // "Reset ALL settings" should also release a device scale lock -- it's a
-  // device-only override, but leaving it in place here would mean Interface
-  // Scale silently stays put while every other appearance setting resets.
-  try{ localStorage.removeItem('ft_device_scale_lock'); localStorage.removeItem('ft_device_scale_value'); }catch(e){}
+  resetDeviceAppearance();
   location.reload();
 } }
 function syncRolePreview(){
@@ -6586,8 +6604,6 @@ function syncSettingsUI(){
   let ha=document.getElementById('toggle-haptics'); if(ha) ha.className='switch'+(appSettings.sound.haptics?' on':'');
   let vol=document.getElementById('settingsVolume'); if(vol) vol.value=appSettings.sound.volume; let volVal=document.getElementById('settingsVolVal'); if(volVal) volVal.innerText=appSettings.sound.volume+'%';
   let fs=document.getElementById('fontScale'); if(fs) fs.value=effectiveFontScale(); let fsv=document.getElementById('fontScaleVal'); if(fsv) fsv.innerText=effectiveFontScale()+'%';
-  let fsl=document.getElementById('toggle-fontScaleLock'); if(fsl) fsl.className='switch'+(deviceFontScaleLocked()?' on':'');
-  let fsh=document.getElementById('fontScaleLockHint'); if(fsh) fsh.style.display=deviceFontScaleLocked()?'':'none';
   ['tabSwitch','add','delete','slideChange','countFinish','celebrate','tap'].forEach(ev=>{ let el=document.getElementById('toggle-sound-'+ev); if(el) el.className='switch'+(appSettings.sound.events[ev]?' on':''); });
   let rm=document.getElementById('toggle-motion-reduceMotion'); if(rm) rm.className='switch'+(appSettings.motion.reduceMotion?' on':'');
   let pa=document.getElementById('toggle-motion-parallax'); if(pa) pa.className='switch'+(appSettings.motion.parallax?' on':'');
@@ -6604,7 +6620,7 @@ function syncSettingsUI(){
   const custom=document.getElementById('customAccent'); if(custom) custom.value=appSettings.appearance.customAccent||'#059669';
   const auto=document.getElementById('autoAdvDefault'); if(auto) auto.value=appSettings.motion.autoAdvance;
   for(const [id,key,suffix] of [['countDuration','countDuration','s'],['chartStagger','chartStagger','ms']]) { const el=document.getElementById(id); if(el) el.value=appSettings.animation[key]; const label=document.getElementById(id==='countDuration'?'countDurVal':'staggerVal'); if(label) label.innerText=appSettings.animation[key]+suffix; }
-  document.querySelectorAll('#settingsModal [onclick]').forEach(el=>{ const code=el.getAttribute('onclick')||''; const m=code.match(/^(setAppearance|setMotion|setPresentDefault|setSoundPackFull)\('([^']+)'(?:,'([^']+)')?\)/); if(!m)return; let selected=m[1]==='setSoundPackFull'?appSettings.sound.pack===m[2]:m[1]==='setAppearance'?appSettings.appearance[m[2]]===m[3]:m[1]==='setMotion'?appSettings.motion[m[2]]===m[3]:appSettings.presentation[m[2]]===m[3]; el.classList.toggle('selected',selected); el.setAttribute('aria-pressed',String(selected)); });
+  document.querySelectorAll('#settingsModal [onclick]').forEach(el=>{ const code=el.getAttribute('onclick')||''; const m=code.match(/^(setAppearance|setMotion|setPresentDefault|setSoundPackFull)\('([^']+)'(?:,'([^']+)')?\)/); if(!m)return; let selected=m[1]==='setSoundPackFull'?appSettings.sound.pack===m[2]:m[1]==='setAppearance'?(m[2]==='density'?effectiveDensity():appSettings.appearance[m[2]])===m[3]:m[1]==='setMotion'?appSettings.motion[m[2]]===m[3]:appSettings.presentation[m[2]]===m[3]; el.classList.toggle('selected',selected); el.setAttribute('aria-pressed',String(selected)); });
 
 }
 // Derive a readable dark shade from any selected or custom color.
@@ -6638,7 +6654,8 @@ function applyAppearance(){
   document.body.dataset.cardStyle=a.cardStyle||'softShadow';
   document.body.dataset.appTransition=appSettings.motion.appTransition||'slide';
   document.body.dataset.background=a.background||'white';
-  document.body.classList.toggle('density-compact', a.density==='compact');
+  document.body.classList.toggle('density-compact', effectiveDensity()==='compact');
+  document.body.classList.toggle('density-extra-compact', effectiveDensity()==='extra-compact');
   document.body.classList.toggle('match-chart', !!a.matchChart);
   document.body.classList.toggle('reduce-motion', !!appSettings.motion.reduceMotion);
   (function applyScaleZoom(){
@@ -6654,37 +6671,6 @@ function applyAppearance(){
       document.body.dataset.interfaceScaled='';
       document.body.style.setProperty('--interface-scale',String(scale));
     }
-  })();
-  (function scaleDebugOverlay(){
-    // TEMPORARY diagnostic HUD to get real on-screen measurements instead
-    // of guessing from CSS zoom theory again -- remove once the scale
-    // centering issue is confirmed fixed with real numbers in hand.
-    let box=document.getElementById('scaleDebugBox');
-    if(!box){
-      box=document.createElement('div');
-      box.id='scaleDebugBox';
-      box.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483647;background:#000;color:#0f0;font:11px/1.5 ui-monospace,monospace;padding:10px 12px;border-radius:10px;max-width:280px;white-space:pre-wrap;pointer-events:none;opacity:.94;box-shadow:0 4px 18px rgba(0,0,0,.4)';
-      document.body.appendChild(box);
-    }
-    try{
-      const wrapEl=document.querySelector('main.wrap');
-      const bodyRect=document.body.getBoundingClientRect();
-      const wrapRect=wrapEl?wrapEl.getBoundingClientRect():null;
-      const htmlRect=document.documentElement.getBoundingClientRect();
-      box.textContent='SCALE DEBUG (temporary)\n'
-        +'effectiveFontScale: '+effectiveFontScale()+'\n'
-        +'body.style.zoom: '+document.body.style.zoom+'\n'
-        +'body.style.width: '+document.body.style.width+'\n'
-        +'body.style.marginLeft: '+document.body.style.marginLeft+'\n'
-        +'body computed width: '+getComputedStyle(document.body).width+'\n'
-        +'body computed maxWidth: '+getComputedStyle(document.body).maxWidth+'\n'
-        +'window.innerWidth: '+window.innerWidth+'\n'
-        +'devicePixelRatio: '+window.devicePixelRatio+'\n'
-        +'visualViewport.scale: '+(window.visualViewport?window.visualViewport.scale:'n/a')+'\n'
-        +'html rect: L'+htmlRect.left.toFixed(1)+' W'+htmlRect.width.toFixed(1)+'\n'
-        +'body rect: L'+bodyRect.left.toFixed(1)+' W'+bodyRect.width.toFixed(1)+'\n'
-        +(wrapRect?('wrap rect: L'+wrapRect.left.toFixed(1)+' W'+wrapRect.width.toFixed(1)):'wrap: not found');
-    }catch(e){ box.textContent='debug error: '+e.message; }
   })();
   document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';});
   document.body.classList.remove('dark-mode');
