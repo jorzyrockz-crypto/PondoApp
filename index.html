@@ -3106,6 +3106,14 @@ body{
 @media(max-width:480px){body.app-update-available .app-tagline{display:none}body.app-update-available .pondo-header-actions{gap:4px}body.app-update-available #headerUpdateBtn{font-size:11px;padding:7px 8px}}
 #titlebarUpdateArea button{pointer-events:auto;max-height:100%;-webkit-app-region:no-drag;app-region:no-drag}
 @media print{#titlebarUpdateArea,.pondo-update-button{display:none!important}}
+/* Pending team approvals on the dashboard. */
+.dashboard-actions-card[hidden]{display:none!important}
+.dashboard-actions-card{margin:20px 0;padding:20px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);box-shadow:0 5px 18px #00000008}
+.dashboard-actions-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.dashboard-actions-head h2{margin:0;font-size:17px}.dashboard-actions-head p{margin:5px 0 0;font-size:12px;color:var(--ink2);line-height:1.5}.dashboard-actions-count{flex:none;min-width:28px;padding:5px 9px;border-radius:999px;background:var(--accent,#059669);color:#fff;text-align:center;font-size:12px;font-weight:800}
+.dashboard-actions-status,.dashboard-actions-empty{font-size:13px;color:var(--ink2);line-height:1.5;margin:14px 0 0}.dashboard-actions-status:not([hidden]){padding:10px 12px;border-radius:10px;background:#fff4d6;color:#654619}body.dark-mode .dashboard-actions-status:not([hidden]){background:#3d321d;color:#ffe0a3}
+.dashboard-actions-list{display:grid;gap:10px;margin-top:14px;max-height:480px;overflow:auto}.dashboard-action-row{border:1px solid var(--line);border-radius:14px;padding:13px;display:flex;gap:12px;align-items:center;justify-content:space-between}.dashboard-action-info{min-width:0;overflow-wrap:anywhere}.dashboard-action-info strong{font-size:13px}.dashboard-action-info p{font-size:12px;color:var(--ink2);margin:4px 0 0;line-height:1.45}.dashboard-action-buttons{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}.dashboard-action-buttons .btn{min-height:36px;height:auto;padding:8px 11px;font-size:12px}.dashboard-action-buttons button:disabled{opacity:.5;cursor:not-allowed}.dark-mode .dashboard-actions-card{background:#1c1c1e;color:#f4f4f5;border-color:#2a2a2e}.dark-mode .dashboard-action-info p,.dark-mode .dashboard-actions-empty,.dark-mode .dashboard-actions-head p{color:#b4b4b8}.dark-mode .dashboard-action-row{border-color:#3a3a3c}
+@media(max-width:600px){.dashboard-action-row{align-items:stretch;flex-direction:column}.dashboard-action-buttons{justify-content:flex-start}}
+@media print{.dashboard-actions-card{display:none!important}}
 </style>
 <style>
 :root{
@@ -4818,6 +4826,13 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       <button type="button" class="btn btn-emerald" onclick="openTxModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add Transaction</button>
     </div>
 
+    <section id="dashboardActionsCard" class="dashboard-actions-card no-print" aria-labelledby="dashboardActionsTitle" hidden>
+      <div class="dashboard-actions-head"><div><h2 id="dashboardActionsTitle">Needs your review</h2><p>Pending team refund and deletion requests</p></div><span id="dashboardActionsCount" class="dashboard-actions-count" aria-label="Pending requests">0</span></div>
+      <p id="dashboardActionsStatus" class="dashboard-actions-status" role="status" hidden></p>
+      <p id="dashboardActionsEmpty" class="dashboard-actions-empty" hidden>No requests are waiting for review.</p>
+      <div id="dashboardActionsList" class="dashboard-actions-list" aria-label="Pending requests"></div>
+    </section>
+
     <div id="setupChecklist" class="setup-checklist" hidden><div class="setup-heading"><div><strong>Get started</strong><p>Set up the basics, then record activity when you need to.</p></div><button type="button" class="setup-dismiss" onclick="dismissSetupChecklist()" aria-label="Dismiss getting started checklist">×</button></div><div class="setup-steps"><button type="button" onclick="openSetupOrganization()"><span id="setupOrgMark">1</span><span><strong>Set organization details</strong><small>Name and location for your reports</small></span></button><button type="button" onclick="openFundModal()"><span id="setupFundMark">2</span><span><strong>Add a fund</strong><small>Record where money came from</small></span></button><button type="button" onclick="switchTab('contributions')"><span id="setupContributionMark">3</span><span><strong>Add a contribution activity</strong><small>Track who has paid</small></span></button></div></div><div id="backupReminder" class="backup-reminder" hidden><div><strong>Protect your records</strong><span id="backupReminderText">Export a JSON backup to keep a copy of your data.</span></div><button type="button" class="btn btn-emerald" onclick="exportJSONFull()">Export backup</button><button type="button" class="btn btn-light" onclick="snoozeBackupReminder()">Remind me in 7 days</button></div><div class="section-title"><span>Funds</span><span id="fundsCount">3 funds</span></div>
     <p id="fundsSwipeHint" class="funds-swipe-hint">More funds →</p>
     <div id="fundCards" class="grid-funds" tabindex="0" role="region" aria-label="Funds: scroll horizontally to see more" aria-describedby="fundsSwipeHint"></div>
@@ -4858,7 +4873,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
   <section id="tab-transactions" class="tab-section" style="display:none">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px"><h2 class="font-serif" style="font-size:24px; font-weight:700; margin:0">Transactions</h2><button class="btn btn-emerald" onclick="openTxModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add Transaction</button></div>
     <div class="filter-row"><div class="search-wrap" style="margin-bottom:14px;position:relative"><span class="search-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span><input id="txSearch" class="search-input" placeholder="Search transactions" aria-label="Search transactions" oninput="renderAll()"></div><select id="txTypeFilter" aria-label="Filter by transaction type" onchange="renderAll()"><option value="all">All types</option><option value="IN">Income</option><option value="OUT">Expenses</option></select></div>
-    <div id="txList" style="display:flex; flex-direction:column; gap:8px"></div><details class="audit-panel"><summary>Voided transaction and expense history</summary><div id="auditList"></div></details>
+    <div id="txList" style="display:flex; flex-direction:column; gap:8px"></div><details class="audit-panel"><summary>Audit and void history</summary><div id="auditList"></div></details>
   </section>
 
   <!-- REFUND HISTORY -->
@@ -5104,7 +5119,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Future roles · preview only</p><p>Explore possible roles for online sync. This does not assign a person, change the screen, or protect any records.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><p>Actual sign-in, project assignments and permissions require a secure online system.</p></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 10px">Organization</p><div style="display:flex; flex-direction:column; gap:8px"><input id="settingsOrgName" class="input" placeholder="Org Name"><input id="settingsOrgLoc" class="input" placeholder="Location"><div style="display:flex; gap:8px"><input id="settingsPeriodFrom" type="date" class="input" style="flex:1"><input id="settingsPeriodTo" type="date" class="input" style="flex:1"></div><button class="btn btn-dark" style="height:44px" onclick="saveOrgFromSettings()">Save Organization</button></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 8px">Signatories</p><div id="settingsSigs" style="display:flex; flex-direction:column; gap:8px"></div></div>
-        <div style="padding:16px; border-radius:20px; background:#f7f7f5; font-size:12px; color:var(--ink2)"><p style="margin:0">Pondo · Fund tracking</p><p style="margin:6px 0 0">Financial data: transactional browser storage after upgrade; settings remain in browser storage.</p><p style="margin:6px 0 0">Last Backup: <span id="lastBackup">Never</span></p></div>
+        <div style="padding:16px; border-radius:20px; background:#f7f7f5; font-size:12px; color:var(--ink2)"><p style="margin:0">Pondo · Fund tracking</p><p style="margin:6px 0 0">Financial data: transactional browser storage after upgrade; settings remain in browser storage.</p><p style="margin:6px 0 0">Last backup export in this workspace: <span id="lastBackup">Never</span></p></div>
         <button class="btn btn-light" style="width:100%; height:48px" onclick="resetSettingsSection()">Reset Current Section</button>
         <button class="btn" style="width:100%; height:48px; background:#fef2f2; color:#dc2626" onclick="resetAllSettings()">Reset All Settings</button>
       </div>
@@ -5461,17 +5476,30 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElemen
 // also fire a real OS/browser notification when permission has been granted
 // (see maybeFireOSNotification) -- that only works while this tab or
 // another tab of the app is open/backgrounded, not when fully closed.
-const NOTIF_STORAGE_KEY='ft_notifications_v1';
+// Old unscoped notifications are deliberately not shown: their owner and
+// workspace cannot be established safely on a shared browser profile.
 const NOTIF_MAX=60;
-function loadNotifications(){try{const raw=localStorage.getItem(NOTIF_STORAGE_KEY);const list=raw?JSON.parse(raw):[];return Array.isArray(list)?list:[]}catch(e){return[]}}
-function saveNotifications(list){try{localStorage.setItem(NOTIF_STORAGE_KEY,JSON.stringify(list.slice(0,NOTIF_MAX)))}catch(e){}}
-function unreadNotificationCount(){return loadNotifications().filter(n=>!n.read).length}
-function pushNotification({type,title,body,action}={}){
-  if(!title)return null;
-  const entry={id:'n_'+Math.random().toString(36).slice(2)+Date.now().toString(36),type:type||'system',title,body:body||'',ts:Date.now(),read:false,action:action||null};
+function notificationStorageKey(){
+  const uid=window.pondoCurrentUser?.uid;
+  if(!uid)return null;
+  return 'ft_notifications_v2:'+encodeURIComponent(uid)+':'+encodeURIComponent(window.pondoTeamState?.orgId||'personal');
+}
+function loadNotifications(){try{const key=notificationStorageKey(),raw=key&&localStorage.getItem(key);const list=raw?JSON.parse(raw):[];return Array.isArray(list)?list:[]}catch(e){return[]}}
+function saveNotifications(list){try{const key=notificationStorageKey();if(!key)return false;localStorage.setItem(key,JSON.stringify(list.slice(0,NOTIF_MAX)));return true}catch(e){return false}}
+function visibleNotifications(){
+  const state=window.pondoTeamState, uid=window.pondoCurrentUser?.uid;
+  return loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
+}
+function unreadNotificationCount(){return visibleNotifications().filter(n=>!n.read).length}
+function pushNotification({type,title,body,action,recipientUid,orgId,approverOnly}={}){
+  recipientUid=recipientUid||window.pondoCurrentUser?.uid;
+  if(!title||!recipientUid||recipientUid!==window.pondoCurrentUser?.uid)return null;
+  if(orgId===undefined)orgId=window.pondoTeamState?.orgId||null;
+  if((orgId||null)!==(window.pondoTeamState?.orgId||null) || (orgId&&!window.pondoTeamState?.memberConfirmed))return null;
+  const entry={id:'n_'+Math.random().toString(36).slice(2)+Date.now().toString(36),type:type||'system',title,body:body||'',ts:Date.now(),read:false,action:action||null,recipientUid,orgId,approverOnly:!!approverOnly};
   const list=loadNotifications();
   list.unshift(entry);
-  saveNotifications(list);
+  if(!saveNotifications(list))return null;
   updateNotifBadge();
   if(window.refreshNotifCenterIfOpen)window.refreshNotifCenterIfOpen();
   maybeFireOSNotification(entry);
@@ -5479,7 +5507,7 @@ function pushNotification({type,title,body,action}={}){
 }
 window.pushNotification=pushNotification;
 function markNotificationRead(id){const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
-function markAllNotificationsRead(){const list=loadNotifications();let changed=false;list.forEach(n=>{if(!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
+function markAllNotificationsRead(){const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
 function updateNotifBadge(){const btn=document.getElementById('notifBellBtn'),badge=document.getElementById('notifBellCount');if(!btn||!badge)return;const count=unreadNotificationCount();badge.hidden=count===0;badge.textContent=count>99?'99+':String(count)}
 window.updateNotifBadge=updateNotifBadge;
@@ -5488,10 +5516,11 @@ function notifIcon(type){if(type==='team')return'👥';if(type==='reminder')retu
 function renderNotifCenter(){
   const menu=document.getElementById('notifCenterMenu');
   if(!menu)return;
-  const list=loadNotifications();
+  const list=visibleNotifications();
   const canAskPermission=('Notification' in window)&&Notification.permission==='default';
   const permissionDenied=('Notification' in window)&&Notification.permission==='denied';
   let html='<div class="notif-center-head"><strong>Notifications</strong>'+(list.some(n=>!n.read)?'<button type="button" class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>':'')+'</div>';
+  html+='<div class="notif-permission-row"><span>Alerts are device-local. Open the team workspace to check for updates. Older unscoped alerts are hidden for privacy.</span></div>';
   if(canAskPermission){
     html+='<div class="notif-permission-row"><span>Get alerts here even when this tab isn\u2019t focused.</span><button type="button" onclick="requestNotifPermission()">Enable</button></div>';
   }else if(permissionDenied){
@@ -5509,11 +5538,15 @@ function renderNotifCenter(){
 }
 window.renderNotifCenter=renderNotifCenter;
 function openNotification(id){
+  const n=visibleNotifications().find(x=>x.id===id);
+  if(!n) return;
   markNotificationRead(id);
   renderNotifCenter();
-  const list=loadNotifications();
-  const n=list.find(x=>x.id===id);
-  if(n&&n.action&&n.action.tab){closeNotifCenter();switchTab(n.action.tab)}
+  if(n.action&&n.action.tab){
+    closeNotifCenter();switchTab(n.action.tab);
+    if(n.action.reviewQueue) document.getElementById('dashboardActionsCard')?.scrollIntoView({block:'start'});
+    if(n.action.audit){const panel=document.querySelector('#tab-transactions .audit-panel');if(panel){panel.open=true;panel.scrollIntoView({block:'start'});}}
+  }
 }
 window.openNotification=openNotification;
 function closeNotifCenter(restoreFocus=false){const menu=document.getElementById('notifCenterMenu'),button=document.getElementById('notifBellBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
@@ -5559,6 +5592,100 @@ function maybeFireOSNotification(entry){
     n.onclick=()=>{try{window.focus()}catch(e){}openNotification(entry.id);n.close()};
   }catch(e){/* Notification constructor can throw on some mobile browsers; fail silently */}
 }
+// Per-account, per-workspace cursors are device-local. They detect confirmed
+// requests and decisions while this workspace is open, and catch up on return.
+const reviewNotificationMemory=new Map();
+function processReviewNotifications(snapshot,state){
+  if(!snapshot || !state?.uid || !state.orgId || !state.role || !state.memberConfirmed || !state.baselineReady || state.syncError || state.listenerError || state.recoveryLocked) return;
+  const key='ft_review_notif_v1:'+encodeURIComponent(state.uid)+':'+encodeURIComponent(state.orgId);
+  let previous=reviewNotificationMemory.get(key);
+  if(!previous){try{const stored=JSON.parse(localStorage.getItem(key)||'null');if(stored&&Array.isArray(stored.auditIds)&&Array.isArray(stored.pendingKeys))previous=stored;}catch(e){}}
+  // Only decision entries are needed; cap catch-up to avoid unbounded storage.
+  const decisions=(Array.isArray(snapshot.auditLog)?snapshot.auditLog:[]).filter(e=>e && typeof e.id==='string' && ['approve refund request','reject refund request','approve deletion request','reject deletion request'].includes(e.action)).slice(-1000);
+  const seenAudit=new Set(previous?.auditIds||[]), seenPending=new Set(previous?.pendingKeys||[]);
+  const requests=dashboardPendingRequests({payables:snapshot.payables||[],projects:snapshot.projects||[],funds:snapshot.funds||[],contributionActivities:snapshot.contributionActivities||[],contributors:snapshot.contributors||[]});
+  const currentKeys=[];
+  const approver=['owner','disbursing'].includes(state.role);
+  const notifyEntry=entry=>pushNotification({...entry,recipientUid:state.uid,orgId:state.orgId});
+  for(const item of requests){
+    const requestKey=JSON.stringify([item.type,item.record.id,item.request.requestedAt||'']);
+    currentKeys.push(requestKey);
+    if(approver && !seenPending.has(requestKey)){
+      if(item.request.requestedBy?.uid===state.uid){seenPending.add(requestKey);continue;}
+      const label=({refund:'Refund request',fund:'Fund deletion request',project:'Project deletion request',contributionActivity:'Contribution activity deletion request',contributor:'Contributor deletion request'})[item.type];
+      const name=item.type==='refund'?item.record.description:(item.record.name||item.record.title);
+      if(notifyEntry({type:'team',title:label+' needs your review',body:(name||'Untitled')+' · '+(state.orgName||'Team workspace'),action:{tab:'dashboard',reviewQueue:true},approverOnly:true}))seenPending.add(requestKey);
+    }
+  }
+  // The first confirmed snapshot seeds historical decisions rather than
+  // replaying the entire audit trail. Later snapshots include offline catch-up.
+  const failedDecisions=new Set();
+  if(previous){
+    for(const event of decisions){
+      if(seenAudit.has(event.id)) continue;
+      const record=event.record||{};
+      const requester=record.requestedBy||record.pendingApproval?.requestedBy;
+      if(!requester?.uid || requester.uid!==state.uid || event.by?.uid===state.uid) continue;
+      const refund=event.action.includes('refund'),approved=event.action.startsWith('approve');
+      const name=refund?record.description:record.label;
+      let body=(name||'Untitled')+' · '+(state.orgName||'Team workspace');
+      if(refund && approved) body+=' · Approval is not payment.';
+      if(refund && !approved && event.reason) body+=' · Reason: '+event.reason;
+      if(!notifyEntry({type:'team',title:(refund?'Refund request':'Deletion request')+(approved?' approved':' rejected'),body,action:refund?{tab:'refunds'}:{tab:'transactions',audit:true}}))failedDecisions.add(event.id);
+    }
+  }
+  const next={auditIds:decisions.filter(e=>!failedDecisions.has(e.id)).map(e=>e.id),pendingKeys:currentKeys.filter(k=>seenPending.has(k))};
+  reviewNotificationMemory.set(key,next);
+  try{localStorage.setItem(key,JSON.stringify(next));}catch(e){/* best effort; the in-memory cursor still works until reload */}
+  processRefundActivityNotifications(snapshot,state);
+}
+window.processReviewNotifications=processReviewNotifications;
+
+// Notify the known submitter (not a free-text payee) when a teammate records
+// or reverses a refund payment, or voids/cancels their refund. A recorded
+// payment is a ledger entry, not proof that money actually arrived.
+const refundActivityMemory=new Map();
+function processRefundActivityNotifications(snapshot,state){
+  const key='ft_refund_activity_v1:'+encodeURIComponent(state.uid)+':'+encodeURIComponent(state.orgId);
+  let previous=refundActivityMemory.get(key);
+  if(!previous){try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v&&Array.isArray(v.txIds)&&Array.isArray(v.auditIds))previous=v}catch(e){}}
+  const bills=new Map((snapshot.payables||[]).filter(b=>b.kind==='advance').map(b=>[b.id,b]));
+  const payments=(snapshot.txs||[]).filter(t=>t.type==='OUT'&&t.payableId&&bills.has(t.payableId)&&typeof t.id==='string').slice(-1000);
+  const reversals=(snapshot.auditLog||[]).filter(e=>e&&typeof e.id==='string'&&['void transaction','void payable'].includes(e.action)).slice(-1000);
+  const seenTx=new Set(previous?.txIds||[]),seenAudit=new Set(previous?.auditIds||[]);
+  const submitter=b=>b?.pendingApproval?.requestedBy?.uid||b?.createdBy?.uid;
+  const failedTx=new Set(),failedAudit=new Set();
+  if(previous){
+    for(const payment of payments){
+      const bill=bills.get(payment.payableId);
+      if(seenTx.has(payment.id)||submitter(bill)!==state.uid||payment.createdBy?.uid===state.uid)continue;
+      if(!pushNotification({type:'team',title:'Refund payment recorded',body:(bill.description||'Refund')+' · '+fmt(payment.amount)+' recorded in '+(state.orgName||'your workspace')+'. Check Refund History for details.',action:{tab:'refunds'},recipientUid:state.uid,orgId:state.orgId}))failedTx.add(payment.id);
+    }
+    for(const e of reversals){
+      if(seenAudit.has(e.id)||e.by?.uid===state.uid)continue;
+      const record=e.record||{}, bill=e.action==='void payable'?record:(bills.get(record.payableId)||e.refundContext);
+      if(!bill||bill.kind!=='advance'||submitter(bill)!==state.uid)continue;
+      if(e.action==='void transaction' && (record.type!=='OUT'||!record.payableId))continue;
+      const title=e.action==='void transaction'?'Refund payment voided':(bill.pendingApproval?'Refund request cancelled':'Refund request voided');
+      if(!pushNotification({type:'team',title,body:(bill.description||'Refund')+' · '+(state.orgName||'Team workspace')+(e.reason?' · Reason: '+e.reason:''),action:e.action==='void transaction'?{tab:'transactions',audit:true}:{tab:'refunds'},recipientUid:state.uid,orgId:state.orgId}))failedAudit.add(e.id);
+    }
+  }
+  const next={txIds:payments.filter(t=>!failedTx.has(t.id)).map(t=>t.id),auditIds:reversals.filter(e=>!failedAudit.has(e.id)).map(e=>e.id)};
+  refundActivityMemory.set(key,next);try{localStorage.setItem(key,JSON.stringify(next))}catch(e){}
+}
+const memberRoleNotificationMemory=new Map();
+function processMemberRoleNotification(state){
+  if(!state?.uid||!state.orgId||!state.role)return;
+  const key='ft_member_role_v1:'+encodeURIComponent(state.uid)+':'+encodeURIComponent(state.orgId);
+  let before=memberRoleNotificationMemory.get(key);if(!before){try{before=localStorage.getItem(key)}catch(e){}}
+  if(before && before!==state.role){
+    const labels={owner:'Owner',disbursing:'Disbursing Officer','project-manager':'Project Manager',reviewer:'Reviewer'};
+    if(!pushNotification({type:'team',title:'Your team role changed',body:(state.orgName||'Team workspace')+' · Your role is now '+(labels[state.role]||state.role)+'.',action:{tab:'dashboard'},recipientUid:state.uid,orgId:state.orgId}))return;
+  }
+  memberRoleNotificationMemory.set(key,state.role);try{localStorage.setItem(key,state.role)}catch(e){}
+}
+window.processMemberRoleNotification=processMemberRoleNotification;
+
 function updateFundRailHint(){ const rail=document.getElementById('fundCards'); const hint=document.getElementById('fundsSwipeHint'); if(rail && hint && rail.clientWidth) hint.hidden=rail.scrollWidth<=rail.clientWidth+1; }
 window.addEventListener('resize',updateFundRailHint);
 function handleFab(){if(document.getElementById('tab-contributions').style.display!=='none')openContributionForm('activity');else openFabSheet('tx');}
@@ -5634,21 +5761,25 @@ async function requestOrForceDelete(type,id,kindLabel,reasonPresets){
   renderAll();
   appAlert('Deletion request submitted. An Owner or Disbursing Officer can approve or reject it.');
 }
-async function approveDeletionRequest(type,id){
+async function approveDeletionRequest(type,id,guard){
   if(!canApproveDeletions()){ appAlert('Only an Owner or Disbursing Officer can approve a deletion request.'); return; }
   const record=PENDING_DELETION_TYPES[type]().find(x=>x.id===id);
   if(!record||!record.pendingDeletion) return;
   const label=PENDING_DELETION_LABEL(type,record);
+  const approvalWorkspace=pondoTeamState.orgId, pendingRequest=record.pendingDeletion;
   if(!await appConfirm('Approve permanent deletion of "'+label+'"? This cannot be undone.')) return;
+  if((guard&&!guard())||!canApproveDeletions()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||PENDING_DELETION_TYPES[type]().find(x=>x.id===id)!==record||record.pendingDeletion!==pendingRequest){appAlert('This request or your access changed. Review it again.');return;}
   auditLog.push({id:makeId('audit'),action:'approve deletion request',timestamp:new Date().toISOString(),reason:'Approved by '+(currentUserDisplayName()||'an Owner/Disbursing Officer'),record:{type,id,label,requestedBy:record.pendingDeletion.requestedBy,requestReason:record.pendingDeletion.reason},...(currentActorStamp()?{by:currentActorStamp()}:{})});
   PENDING_DELETION_FORCE[type](id);
 }
-async function rejectDeletionRequest(type,id){
+async function rejectDeletionRequest(type,id,guard){
   if(!canApproveDeletions()){ appAlert('Only an Owner or Disbursing Officer can reject a deletion request.'); return; }
   const record=PENDING_DELETION_TYPES[type]().find(x=>x.id===id);
   if(!record||!record.pendingDeletion) return;
   const label=PENDING_DELETION_LABEL(type,record);
+  const approvalWorkspace=pondoTeamState.orgId, pendingRequest=record.pendingDeletion;
   if(!await appConfirm('Reject the deletion request for "'+label+'"? It will stay as it is.')) return;
+  if((guard&&!guard())||!canApproveDeletions()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||PENDING_DELETION_TYPES[type]().find(x=>x.id===id)!==record||record.pendingDeletion!==pendingRequest){appAlert('This request or your access changed. Review it again.');return;}
   auditLog.push({id:makeId('audit'),action:'reject deletion request',timestamp:new Date().toISOString(),reason:'Rejected by '+(currentUserDisplayName()||'an Owner/Disbursing Officer'),record:{type,id,label,requestedBy:record.pendingDeletion.requestedBy,requestReason:record.pendingDeletion.reason},...(currentActorStamp()?{by:currentActorStamp()}:{})});
   delete record.pendingDeletion;
   renderAll();
@@ -5676,24 +5807,28 @@ function pendingApprovalBadge(bill){
   const actions=canApproveRefunds()?'<div class="pending-deletion-actions"><button type="button" class="btn btn-light refund-approve" data-id="'+attr(bill.id)+'">Approve refund</button><button type="button" class="btn btn-light refund-reject" data-id="'+attr(bill.id)+'">Reject</button></div>':'';
   return '<div class="pending-deletion-badge">'+LICON('clock','#92400e',16)+'<div class="pending-deletion-text"><strong>Pending approval to refund</strong><small>Requested by '+who+(when?' · '+when:'')+(req.reason?' · '+escapeText(req.reason):'')+'</small>'+actions+'</div></div>';
 }
-async function approveRefundRequest(id){
+async function approveRefundRequest(id,guard){
   if(!canApproveRefunds()){ appAlert('Only an Owner or Disbursing Officer can approve a refund request.'); return; }
   const bill=payables.find(x=>x.id===id);
   if(!bill||!bill.pendingApproval) return;
+  const approvalWorkspace=pondoTeamState.orgId, pendingRequest=bill.pendingApproval;
   if(!await appConfirm('Approve this refund request for '+fmt(bill.amount)+'? It will become payable from an allocated fund.')) return;
+  if((guard&&!guard())||!canApproveRefunds()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||payables.find(x=>x.id===id)!==bill||bill.pendingApproval!==pendingRequest){appAlert('This request or your access changed. Review it again.');return;}
   auditLog.push({id:makeId('audit'),action:'approve refund request',timestamp:new Date().toISOString(),reason:'Approved by '+(currentUserDisplayName()||'an Owner/Disbursing Officer'),projectName:projects.find(p=>p.id===bill.projectId)?.name||'',record:{id:bill.id,description:bill.description,amount:bill.amount,reimburseTo:bill.reimburseTo,requestedBy:bill.pendingApproval.requestedBy,requestReason:bill.pendingApproval.reason},...(currentActorStamp()?{by:currentActorStamp()}:{})});
   delete bill.pendingApproval;
   renderAll();
   soundEvent('add');
 }
-async function rejectRefundRequest(id){
+async function rejectRefundRequest(id,guard){
   if(!canApproveRefunds()){ appAlert('Only an Owner or Disbursing Officer can reject a refund request.'); return; }
   const bill=payables.find(x=>x.id===id);
   if(!bill||!bill.pendingApproval) return;
+  const approvalWorkspace=pondoTeamState.orgId, pendingRequest=bill.pendingApproval;
   const reason=await appReasonPrompt('Why are you rejecting this refund request? A history entry will be kept.',['Missing or unclear receipt','Not an approved project expense','Wrong amount','Duplicate request']);
   if(reason===null) return;
   if(!reason.trim()){ appAlert('A reason is required.'); return; }
   if(!await appConfirm('Reject this refund request? It will be removed from totals but preserved in history.')) return;
+  if((guard&&!guard())||!canApproveRefunds()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||payables.find(x=>x.id===id)!==bill||bill.pendingApproval!==pendingRequest){appAlert('This request or your access changed. Review it again.');return;}
   auditLog.push({id:makeId('audit'),action:'reject refund request',timestamp:new Date().toISOString(),reason:reason.trim(),projectName:projects.find(p=>p.id===bill.projectId)?.name||'',record:JSON.parse(JSON.stringify(bill)),...(currentActorStamp()?{by:currentActorStamp()}:{})});
   payables=payables.filter(x=>x.id!==id);
   renderAll();
@@ -5956,8 +6091,8 @@ function readReceipt(id){
  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(Error('Could not read the receipt image.'));reader.onload=()=>{let image=new Image();image.onerror=()=>reject(Error('Could not open the receipt image.'));image.onload=()=>{try{let scale=Math.min(1,1200/Math.max(image.width,image.height)),data='';for(let tries=0;tries<6;tries++){let canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));let ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);data=canvas.toDataURL('image/jpeg',.72);if(data.length<=350000){resolve(data);return}scale*=.8}reject(Error('The receipt could not be compressed enough. Try a smaller image.'));}catch(e){reject(Error('Could not process the receipt image.'))}};image.src=reader.result};reader.readAsDataURL(file)});
 }
 function addReceiptLink(parent,data){if(typeof data!=='string'||!/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(data))return;const a=document.createElement('a');a.href=data;a.download='receipt-image';a.textContent='Receipt image';a.className='receipt-link';parent.appendChild(a)}
-async function voidTransaction(id){let t=txs.find(x=>x.id===id);if(!t)return;let reason=await appReasonPrompt('Why are you voiding this transaction? A history entry will be kept.',['Recorded by mistake or duplicate entry','Wrong amount','Wrong fund or project','Payment did not go through or was reversed']);if(reason===null)return;if(!reason.trim()){appAlert('A reason is required.');return;}if(t.type==='IN'&&wouldOverdrawAtDate(t.fundId,t.date,cents(t.amount))){appAlert('Cannot void this income: doing so would leave negative cash on a recorded date.');return;}if(t.type==='IN'&&fundCash(t.fundId)-cents(t.amount)<fundReserved(t.fundId)){appAlert('Cannot void this income while the remaining cash would be below reserved project allocations.');return;}if(!await appConfirm(t.contributionPaymentId?'Void this fund transaction and its linked contribution payment? The contributor’s balance will reopen. Both records will be preserved in history.':'Void this transaction? It will be removed from balances and preserved in history.' ))return;let linkedContribution=contributionPayments.find(m=>m.txId===id);auditLog.push({id:makeId('audit'),action:'void transaction',timestamp:new Date().toISOString(),reason:reason.trim(),linkedContribution:linkedContribution?JSON.parse(JSON.stringify(linkedContribution)):null,fundName:funds.find(f=>f.id===t.fundId)?.name||'',projectName:projects.find(p=>p.id===t.projectId)?.name||'',record:JSON.parse(JSON.stringify(t)),...(currentActorStamp()?{by:currentActorStamp()}:{})});txs=txs.filter(x=>x.id!==id);if(linkedContribution)contributionPayments=contributionPayments.filter(x=>x.id!==linkedContribution.id);renderAll();}
-function renderAudit(){const el=document.getElementById('auditList');el.innerHTML='';if(!auditLog.length){el.textContent='No voided records.';return}auditLog.slice().reverse().forEach(x=>{let row=document.createElement('div');row.className='audit-row';row.textContent=(x.timestamp||'')+' · '+(x.action||'void')+' · '+(x.record?.description||'Transaction')+(x.fundName?' · '+x.fundName:'')+(x.projectName?' · '+x.projectName:'')+' · '+fmt(x.record?.amount||0)+' · Reason: '+(x.reason||'')+(x.by?.name?' · By: '+x.by.name:'');el.appendChild(row)})}
+async function voidTransaction(id){let t=txs.find(x=>x.id===id);if(!t)return;let reason=await appReasonPrompt('Why are you voiding this transaction? A history entry will be kept.',['Recorded by mistake or duplicate entry','Wrong amount','Wrong fund or project','Payment did not go through or was reversed']);if(reason===null)return;if(!reason.trim()){appAlert('A reason is required.');return;}if(t.type==='IN'&&wouldOverdrawAtDate(t.fundId,t.date,cents(t.amount))){appAlert('Cannot void this income: doing so would leave negative cash on a recorded date.');return;}if(t.type==='IN'&&fundCash(t.fundId)-cents(t.amount)<fundReserved(t.fundId)){appAlert('Cannot void this income while the remaining cash would be below reserved project allocations.');return;}if(!await appConfirm(t.contributionPaymentId?'Void this fund transaction and its linked contribution payment? The contributor’s balance will reopen. Both records will be preserved in history.':'Void this transaction? It will be removed from balances and preserved in history.' ))return;let linkedContribution=contributionPayments.find(m=>m.txId===id),refundBill=payables.find(p=>p.id===t.payableId&&p.kind==='advance');auditLog.push({id:makeId('audit'),action:'void transaction',timestamp:new Date().toISOString(),reason:reason.trim(),linkedContribution:linkedContribution?JSON.parse(JSON.stringify(linkedContribution)):null,...(refundBill?{refundContext:{kind:'advance',description:refundBill.description,createdBy:refundBill.createdBy||null}}:{}),fundName:funds.find(f=>f.id===t.fundId)?.name||'',projectName:projects.find(p=>p.id===t.projectId)?.name||'',record:JSON.parse(JSON.stringify(t)),...(currentActorStamp()?{by:currentActorStamp()}:{})});txs=txs.filter(x=>x.id!==id);if(linkedContribution)contributionPayments=contributionPayments.filter(x=>x.id!==linkedContribution.id);renderAll();}
+function renderAudit(){const el=document.getElementById('auditList');el.innerHTML='';if(!auditLog.length){el.textContent='No voided records.';return}auditLog.slice().reverse().forEach(x=>{let row=document.createElement('div');row.className='audit-row';row.textContent=(x.timestamp||'')+' · '+(x.action||'void')+' · '+(x.record?.description||x.record?.label||'Transaction')+(x.fundName?' · '+x.fundName:'')+(x.projectName?' · '+x.projectName:'')+' · '+fmt(x.record?.amount||0)+' · Reason: '+(x.reason||'')+(x.by?.name?' · By: '+x.by.name:'');el.appendChild(row)})}
 // ===== Refund History (dedicated view for personal-advance payables) =====
 // A view separate from the main Transactions tab, scoped only to refund
 // requests/reimbursements: everything still in flight (pending approval,
@@ -5985,6 +6120,11 @@ function renderRefundHistory(){
       const paid=payablePaid(bill.id),remaining=payableOutstanding(bill),status=payableStatus(bill);
       const row=document.createElement('div');row.className='payable-row';
       row.innerHTML=`<div class="payable-row-info"><strong>Reimburse ${escapeText(bill.reimburseTo||'—')}</strong><small>${escapeText(projectLabel)} · ${escapeText(bill.description)} · Date ${escapeText(bill.invoiceDate)}</small><small>Incurred ${fmt(bill.amount)} · Paid ${fmt(paid/100)} · Outstanding ${fmt(remaining/100)}</small>${createdByBadge(bill)}${pendingApprovalBadge(bill)}</div><span class="payable-status">${status}</span><div class="payable-actions"></div>`;
+      const info=row.querySelector('.payable-row-info');
+      if(bill.receiptNo){const ref=document.createElement('small');ref.textContent='Reference: '+bill.receiptNo;info.appendChild(ref);}
+      if(bill.receiptImage) addReceiptLink(info,bill.receiptImage);
+      // Team receipt images are device-local, even when a reference exists.
+      if(pondoTeamState.orgId&&!bill.receiptImage){const note=document.createElement('small');note.textContent='Receipt images are not synced between devices.';info.appendChild(note);}
       const actions=row.querySelector('.payable-actions');
       // No project yet: this was intentionally allowed at request time (see
       // openRefundRequest/savePayable) -- offer an inline way to identify
@@ -6232,41 +6372,37 @@ function exportContributionCSV(id){let r=contributionReport(id);if(!r)return;let
 function printContribution(id){let r=contributionReport(id);if(!r)return;let target=document.getElementById('contributionPrint');target.innerHTML=`<h1>${escapeText(r.a.title)} — Contribution report</h1><p>${escapeText(org.name)} · ${escapeText(r.a.description||'')}${r.a.projectId?'<br>Related project (context only): '+escapeText(projects.find(p=>p.id===r.a.projectId)?.name||'Unknown'):''}<br>Expected per person ${fmt(r.a.amount)}${r.a.dueDate&&!monthlyContribution(r.a)?' · Due '+escapeText(r.a.dueDate):monthlyContribution(r.a)?' · Monthly, all periods':''}<br>Expected ${fmt(r.totals.expected/100)} · Total paid ${fmt(r.totals.paid/100)} · Outstanding ${fmt(r.totals.outstanding/100)}<br>Personal paid ${fmt(r.totals.personalPaid/100)} · Fund paid ${fmt(r.totals.fundPaid/100)}</p><h2>Contributors</h2><table><thead><tr><th>Name</th><th>Expected</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead><tbody>${r.people.map(p=>`<tr><td>${escapeText(p.period?p.name+' ('+p.period+')':p.name)}</td><td>${fmt(p.expected)}</td><td>${fmt(contributionPaid(p.id)/100)}</td><td>${fmt(contributionBalance(p)/100)}</td><td>${contributionStatusOf(p)}</td></tr>`).join('')||'<tr><td colspan="5">No contributors</td></tr>'}</tbody></table><h2>Payment history</h2><table><thead><tr><th>Date</th><th>Contributor</th><th>Amount</th><th>Paid by</th><th>Received by</th><th>Reference / notes</th></tr></thead><tbody>${r.payments.map(m=>`<tr><td>${escapeText(m.date)}</td><td>${escapeText((()=>{let p=r.people.find(x=>x.id===m.contributorId);return p?(p.period?p.name+' ('+p.period+')':p.name):''})())}</td><td>${fmt(m.amount)}</td><td>${m.method==='fund'?'Fund: '+escapeText(funds.find(f=>f.id===m.fundId)?.name||'Unknown'):'Personal'}</td><td>${escapeText(m.receivedBy)}</td><td>${escapeText([m.reference,m.notes].filter(Boolean).join(' · '))}</td></tr>`).join('')||'<tr><td colspan="6">No payments</td></tr>'}</tbody></table><p>Personal payments are tracked separately from fund cash. Fund-funded payments are linked to a fund expense.</p>${futureRecordCount()?'<p>Warning: current totals include existing future-dated records.</p>':''}<p style="font-size:11px;color:#64748b">${currentUserDisplayName()?'Prepared by '+escapeText(currentUserDisplayName())+' · '+escapeText(new Date().toLocaleDateString('en-PH')):''}</p>`;document.body.classList.add('contribution-printing');let cleanup=()=>document.body.classList.remove('contribution-printing');window.addEventListener('afterprint',cleanup,{once:true});try{window.print()}finally{setTimeout(cleanup,60000)}}
 
 function receiptMarkup(data){return typeof data==='string'&&/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(data)?`<a class="receipt-link" download="contribution-receipt.jpg" href="${data}">Download receipt image</a>`:''}
-function updateBackupReminder(){let box=document.getElementById('backupReminder');if(!box)return;let hasData=funds.length||txs.length||projects.length||contributionActivities.length||sigs.length||org.name!=='Your organization'||!!org.logoData;if(!hasData){box.hidden=true;return}let now=Date.now(),last=Number(localStorage.getItem('ft_last_backup_ts')||0),until=Number(localStorage.getItem('ft_backup_reminder_until')||0),week=7*86400000;box.hidden=until>now||(last>0&&now-last<week);if(!box.hidden)document.getElementById('backupReminderText').textContent=last?'Your last backup export was over 7 days ago. Export a new JSON copy.':'No dated backup export found. Export a JSON copy of your records.'}
-function snoozeBackupReminder(){try{localStorage.setItem('ft_backup_reminder_until',String(Date.now()+7*86400000));localStorage.removeItem('ft_backup_overdue_notified')}catch(e){appAlert('Could not save the reminder setting in this browser.');return}updateBackupReminder()}
-// Turns a few things we already compute (the backup reminder, and each
-// contribution activity's due-date ranking used on the dashboard cards)
-// into one-shot entries in the notification center, instead of leaving them
-// as banners that are easy to miss if you're not on that tab. Each uses a
-// localStorage marker so it only fires once per occurrence rather than
-// every time this runs (e.g. once a minute via the interval below).
+// A backup contains only the active workspace. Keep reminders separate for
+// each signed-in account/workspace (and the isolated offline tracker).
+function reminderStorageKey(name){
+  const uid=window.pondoCurrentUser?.uid || (window.pondoGuestMode?'offline-guest':null);
+  if(!uid)return null;
+  return name+':'+encodeURIComponent(uid)+':'+encodeURIComponent(window.pondoTeamState?.orgId||'personal');
+}
+function updateBackupReminder(){let box=document.getElementById('backupReminder');if(!box)return;let hasData=funds.length||txs.length||projects.length||contributionActivities.length||sigs.length||org.name!=='Your organization'||!!org.logoData;if(!hasData){box.hidden=true;return}let now=Date.now(),last=Number(localStorage.getItem(reminderStorageKey('ft_last_backup_ts'))||0),until=Number(localStorage.getItem(reminderStorageKey('ft_backup_reminder_until'))||0),week=7*86400000;box.hidden=until>now||(last>0&&now-last<week);if(!box.hidden)document.getElementById('backupReminderText').textContent=last?'Your last backup export was over 7 days ago. Export a new JSON copy.':'No dated backup export found. Export a JSON copy of your records.'}
+function snoozeBackupReminder(){const key=reminderStorageKey('ft_backup_reminder_until'),notified=reminderStorageKey('ft_backup_overdue_notified');if(!key)return;try{localStorage.setItem(key,String(Date.now()+7*86400000));localStorage.removeItem(notified)}catch(e){appAlert('Could not save the reminder setting in this browser.');return}updateBackupReminder()}
 function checkReminderNotifications(){
-  if(!window.pushNotification)return;
+  if(!window.pushNotification || !window.pondoCurrentUser?.uid)return;
+  const backupKey=reminderStorageKey('ft_backup_overdue_notified'),dueKey=reminderStorageKey('ft_notified_due_keys');
   try{
     let hasData=funds.length||txs.length||projects.length||contributionActivities.length||sigs.length||org.name!=='Your organization'||!!org.logoData;
     if(hasData){
-      let now=Date.now(),last=Number(localStorage.getItem('ft_last_backup_ts')||0),until=Number(localStorage.getItem('ft_backup_reminder_until')||0),week=7*86400000;
-      let due=!(until>now||(last>0&&now-last<week));
-      if(due&&localStorage.getItem('ft_backup_overdue_notified')!=='1'){
-        pushNotification({type:'reminder',title:'Back up your records',body:last?'Your last backup export was over 7 days ago.':'No dated backup export found yet.'});
-        try{localStorage.setItem('ft_backup_overdue_notified','1')}catch(e){}
+      let now=Date.now(),last=Number(localStorage.getItem(reminderStorageKey('ft_last_backup_ts'))||0),until=Number(localStorage.getItem(reminderStorageKey('ft_backup_reminder_until'))||0),week=7*86400000;
+      if(!(until>now||(last>0&&now-last<week)) && localStorage.getItem(backupKey)!=='1'){
+        if(pushNotification({type:'reminder',title:'Back up your records',body:last?'Your last backup export was over 7 days ago.':'No dated backup export found yet.'})) localStorage.setItem(backupKey,'1');
       }
     }
   }catch(e){}
   try{
-    let seen;try{seen=JSON.parse(localStorage.getItem('ft_notified_due_keys')||'[]')}catch(e){seen=[]}
-    if(!Array.isArray(seen))seen=[];
-    let seenSet=new Set(seen),changed=false;
+    let seen;try{seen=JSON.parse(localStorage.getItem(dueKey)||'[]')}catch(e){seen=[]}
+    const previous=new Set(Array.isArray(seen)?seen:[]),active=[];
     contributionActivities.filter(a=>!a.archived).forEach(a=>{
-      let due=contributionDueInfo(a,contributionTotals(a.id));
-      if(!due.label)return;
-      let key=a.id+':'+due.label;
-      if(seenSet.has(key))return;
-      seenSet.add(key);changed=true;
-      if(due.label==='Paid')return;
-      pushNotification({type:'reminder',title:a.title+' — '+due.label,body:a.dueDate?('Due '+a.dueDate):'',action:{tab:'contributions'}});
+      const due=contributionDueInfo(a,contributionTotals(a.id));
+      if(!due.label||due.label==='Paid')return;
+      const key=JSON.stringify([a.id,a.dueDate,due.label]);
+      if(previous.has(key) || pushNotification({type:'reminder',title:a.title+' — '+due.label,body:a.dueDate?('Due '+a.dueDate):'',action:{tab:'contributions'}}))active.push(key);
     });
-    if(changed){try{localStorage.setItem('ft_notified_due_keys',JSON.stringify([...seenSet].slice(-500)))}catch(e){}}
+    localStorage.setItem(dueKey,JSON.stringify(active));
   }catch(e){}
 }
 window.checkReminderNotifications=checkReminderNotifications;
@@ -6332,7 +6468,95 @@ function updateSetupChecklist(){let panel=document.getElementById('setupChecklis
 function dismissSetupChecklist(){try{localStorage.setItem('ft_setup_dismissed','1')}catch(e){}document.getElementById('setupChecklist').hidden=true}
 function openSetupOrganization(){openSettings();switchSettingsTab('about')}
 
+// Team review queue: derived from the current workspace, never stored separately.
+function dashboardActionAvailability(state) {
+  if (!state || !state.orgId || !['owner', 'disbursing'].includes(state.role)) return 'not-authorized';
+  if (state.recoveryLocked || state.syncError || state.listenerError) return 'sync-error';
+  if (!state.memberConfirmed || !state.online || !navigator.onLine || !state.baselineReady) return 'unconfirmed';
+  if (state.dirty || state.pushTimer || state.pushesInFlight) return 'saving';
+  return 'ready';
+}
+function dashboardPendingRequests(data) {
+  const requests = [];
+  for (const bill of data.payables) {
+    if (bill.kind !== 'advance' || !bill.pendingApproval) continue;
+    const project = data.projects.find(p => p.id === bill.projectId);
+    requests.push({type:'refund', record:bill, request:bill.pendingApproval, project:project ? project.name : (bill.projectId ? 'Unknown project' : 'No project assigned')});
+  }
+  for (const [type, records] of [['fund',data.funds],['project',data.projects],['contributionActivity',data.contributionActivities],['contributor',data.contributors]]) {
+    for (const record of records) if (record.pendingDeletion) requests.push({type,record,request:record.pendingDeletion});
+  }
+  return requests.sort((a,b)=>String(a.request.requestedAt||'').localeCompare(String(b.request.requestedAt||'')));
+}
+function renderDashboardActions() {
+  const card=document.getElementById('dashboardActionsCard');
+  if (!card) return;
+  const state=window.pondoTeamState, availability=dashboardActionAvailability(state);
+  card.hidden=availability==='not-authorized';
+  if(card.hidden) return;
+  const list=document.getElementById('dashboardActionsList'), count=document.getElementById('dashboardActionsCount'), empty=document.getElementById('dashboardActionsEmpty'), status=document.getElementById('dashboardActionsStatus');
+  // Do not expose records from the previous workspace while this one loads.
+  const requests=state.baselineReady ? dashboardPendingRequests({payables,projects,funds,contributionActivities,contributors}) : [];
+  count.hidden=!state.baselineReady;
+  count.textContent=String(requests.length);
+  count.setAttribute('aria-label',requests.length+' pending '+(requests.length===1?'request':'requests'));
+  list.replaceChildren();
+  empty.hidden=!!requests.length || availability!=='ready';
+  const messages={'sync-error':'Team sync needs attention. These requests may be out of date; resolve the sync issue before acting.','unconfirmed':'Waiting for a confirmed team connection. Requests may be out of date.','saving':'Waiting for team changes to sync before another review.'};
+  status.hidden=availability==='ready'; status.textContent=messages[availability]||'';
+  const labels={fund:'Fund',project:'Project',contributionActivity:'Contribution activity',contributor:'Contributor'};
+  requests.forEach(item=>{
+    const row=document.createElement('article'); row.className='dashboard-action-row';
+    const info=document.createElement('div'); info.className='dashboard-action-info';
+    const title=document.createElement('strong');
+    const detail=document.createElement('p');
+    const meta=document.createElement('p');
+    const rec=item.record, req=item.request;
+    if(item.type==='refund'){
+      title.textContent='Refund request · '+(rec.description||'Untitled');
+      detail.textContent=fmt(rec.amount)+' · Reimburse '+(rec.reimburseTo||'—')+' · '+item.project;
+    } else {
+      title.textContent='Delete '+labels[item.type]+' · '+(rec.name||rec.title||'Untitled');
+      let context=item.type==='contributor' ? dataActivityName(rec.activityId) : '';
+      detail.textContent=[context,req.reason?'Reason: '+req.reason:'', 'Approval permanently removes linked records.'].filter(Boolean).join(' · ');
+    }
+    const date=req.requestedAt && !Number.isNaN(Date.parse(req.requestedAt)) ? new Date(req.requestedAt).toLocaleDateString('en-PH') : '';
+    meta.textContent=['Requested by '+(req.requestedBy?.name||'a teammate'),date].filter(Boolean).join(' · ');
+    info.append(title,detail,meta);
+    const actions=document.createElement('div'); actions.className='dashboard-action-buttons';
+    const button=(label,handler,disabled)=>{const b=document.createElement('button');b.type='button';b.className='btn btn-light';b.textContent=label;b.disabled=!!disabled;b.addEventListener('click',handler);actions.appendChild(b)};
+    button('Review',()=>reviewDashboardRequest(item),false);
+    const act=approve=>{
+      if(dashboardActionAvailability(window.pondoTeamState)!=='ready'){appAlert('Team sync or access changed. Refresh the request before taking action.');return;}
+      const guard=()=>dashboardActionAvailability(window.pondoTeamState)==='ready';
+      if(item.type==='refund') (approve?approveRefundRequest:rejectRefundRequest)(rec.id,guard);
+      else (approve?approveDeletionRequest:rejectDeletionRequest)(item.type,rec.id,guard);
+    };
+    button('Approve',()=>act(true),availability!=='ready');
+    button('Reject',()=>act(false),availability!=='ready');
+    row.append(info,actions); list.appendChild(row);
+  });
+}
+function dataActivityName(id){const a=contributionActivities.find(x=>x.id===id);return a?'Activity: '+a.title:'Activity unavailable';}
+function reviewDashboardRequest(item){
+  const rec=item.record;
+  if(item.type==='refund'){switchTab('refunds');return;}
+  if(item.type==='fund'){switchTab('funds');openFundDetails(rec.id);return;}
+  if(item.type==='project'){switchTab('projects');openProjectDetails(rec.id);return;}
+  const activity=item.type==='contributor'?contributionActivities.find(a=>a.id===rec.activityId):rec;
+  if(!activity){appAlert('This contribution activity is no longer available.');return;}
+  if(item.type==='contributor' && rec.period) contributionSelectedPeriod[activity.id]=rec.period;
+  contributionSearch=''; contributionStatus='';
+  switchTab('contributions');openContributionDetails(activity.id);
+  if(item.type==='contributor'){
+    const details=[...document.querySelectorAll('#detailBody .contrib-person-details')].find(el=>el.dataset.personId===rec.id);
+    if(details){details.open=true;details.scrollIntoView({block:'nearest'});}
+  } else {const more=document.querySelector('#detailBody .contrib-more');if(more)more.open=true;}
+}
+window.renderDashboardActions=renderDashboardActions;
+
 function renderAll(){
+  renderDashboardActions();
   let totalRec = funds.reduce((s,f)=>s+f.initialAmount,0) + txs.filter(t=>t.type==='IN').reduce((s,t)=>s+t.amount,0);
   let totalSpent = txs.filter(t=>t.type==='OUT').reduce((s,t)=>s+t.amount,0);
   let remaining = totalRec-totalSpent;
@@ -6737,9 +6961,9 @@ function renderSlideOrder(){ let list=document.getElementById('slideOrderList');
 LUCIDE_PATHS['chevron-up']='<path d="m18 15-6-6-6 6"/>'; LUCIDE_PATHS['chevron-down']='<path d="m6 9 6 6 6-6"/>';
 function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+dir; if(j<0||j>=arr.length) return; [arr[i],arr[j]]=[arr[j],arr[i]]; saveAppSettings(); renderSlideOrder(); }
 function updateStorageInfo(){ let el=document.getElementById('storageInfo'); if(el) el.innerText='Funds: '+funds.length+' • Transactions: '+txs.length+' • Projects: '+projects.length+' • Signatories: '+sigs.length+' • Storage: '+(trackerDB?'Transactional':'Legacy'); }
-function syncAboutSettings(){ document.getElementById('settingsOrgName').value=org.name; document.getElementById('settingsOrgLoc').value=org.location; document.getElementById('settingsPeriodFrom').value=org.periodFrom; document.getElementById('settingsPeriodTo').value=org.periodTo; let s=document.getElementById('settingsSigs'); s.innerHTML=''; sigs.forEach(sig=>{ s.innerHTML+='<div style="display:flex; justify-content:space-between; padding:8px 10px; border-radius:10px; background:white"><span style="font-size:13px">'+escapeText(sig.name)+' — '+escapeText(sig.title)+'</span></div>'; }); document.getElementById('lastBackup').innerText=localStorage.getItem('ft_last_backup')||'Never'; }
+function syncAboutSettings(){ document.getElementById('settingsOrgName').value=org.name; document.getElementById('settingsOrgLoc').value=org.location; document.getElementById('settingsPeriodFrom').value=org.periodFrom; document.getElementById('settingsPeriodTo').value=org.periodTo; let s=document.getElementById('settingsSigs'); s.innerHTML=''; sigs.forEach(sig=>{ s.innerHTML+='<div style="display:flex; justify-content:space-between; padding:8px 10px; border-radius:10px; background:white"><span style="font-size:13px">'+escapeText(sig.name)+' — '+escapeText(sig.title)+'</span></div>'; }); document.getElementById('lastBackup').innerText=localStorage.getItem(reminderStorageKey('ft_last_backup'))||'Never'; }
 async function saveOrgFromSettings(){ org.name=document.getElementById('settingsOrgName').value; org.location=document.getElementById('settingsOrgLoc').value; org.periodFrom=document.getElementById('settingsPeriodFrom').value; org.periodTo=document.getElementById('settingsPeriodTo').value; saveAll(); renderAll(); if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Organization saved'); }
-function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem('ft_last_backup', new Date().toLocaleString());localStorage.setItem('ft_last_backup_ts',String(Date.now()));localStorage.removeItem('ft_backup_reminder_until');localStorage.removeItem('ft_backup_overdue_notified')}catch(e){} updateBackupReminder();appAlert('Backup export started. Keep the downloaded file in a safe place.'); }
+function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem(reminderStorageKey('ft_last_backup'), new Date().toLocaleString());localStorage.setItem(reminderStorageKey('ft_last_backup_ts'),String(Date.now()));localStorage.removeItem(reminderStorageKey('ft_backup_reminder_until'));localStorage.removeItem(reminderStorageKey('ft_backup_overdue_notified'))}catch(e){} updateBackupReminder();appAlert('Backup export started. Keep the downloaded file in a safe place.'); }
 // Validate the staged core records before replacing any live state.
 function validateCoreBackup(fundsIn,txsIn,projectsIn,sigsIn,allocsIn,billsIn,orgIn){
  const idList=(label,arr)=>{if(arr.some(x=>!x||typeof x!=='object'||Array.isArray(x)||typeof x.id!=='string'||!x.id.trim())||new Set(arr.map(x=>x.id)).size!==arr.length)throw Error('Invalid or duplicate '+label+' ID.');};
@@ -7504,6 +7728,7 @@ const pondoTeamState = {
   orgId: null,
   orgName: '',
   role: null,
+  memberConfirmed: false,
   members: [],
   orgMemberships: [], // every orgId this user belongs to (not just the active one)
   memberships: [], // resolved {orgId, name, role} for each entry above, for the workspace switcher
@@ -7568,6 +7793,9 @@ function canWriteOrgData() {
 }
 
 function applyRoleUI() {
+  if (window.renderDashboardActions) window.renderDashboardActions();
+  if (window.updateNotifBadge) window.updateNotifBadge();
+  if (window.refreshNotifCenterIfOpen) window.refreshNotifCenterIfOpen();
   const isReviewer = pondoTeamState.orgId && pondoTeamState.role === 'reviewer';
   const recoveryLocked = pondoTeamState.orgId && pondoTeamState.recoveryLocked;
   document.body.classList.toggle('role-reviewer', !!(isReviewer || recoveryLocked));
@@ -7579,6 +7807,7 @@ function applyRoleUI() {
 }
 
 function setSyncBadge(mode) {
+  if (window.renderDashboardActions) window.renderDashboardActions();
   // Do not let a connectivity event or panel rerender hide a failed write.
   if (mode === 'live' && (pondoTeamState.syncError || pondoTeamState.listenerError)) mode = 'error';
   const badge = document.getElementById('teamSyncBadge');
@@ -7688,6 +7917,7 @@ function schedulePush(snapshotArg) {
   if (!pondoTeamState.dirty && pondoTeamState.baselineReady && json === pondoTeamState.lastSyncedJSON) return;
   pondoTeamState.dirty = true;
   pondoTeamState.pendingSnapshot = local;
+  if (window.renderDashboardActions) window.renderDashboardActions();
   try {
     const key = teamDraftKey(pondoTeamState.uid, pondoTeamState.orgId);
     const raw = JSON.stringify({ ...local, exportedAt: new Date().toISOString() });
@@ -7736,6 +7966,9 @@ async function doPush() {
         } catch (e) { flagTeamSaveError('The saved draft could not be cleared after sync.'); }
       }
       setSyncBadge(navigator.onLine ? 'live' : 'offline');
+      if (!pondoTeamState.syncError && !pondoTeamState.dirty && window.processReviewNotifications) {
+        try { window.processReviewNotifications(stripped, pondoTeamState); } catch (e) { console.warn('Review notifications unavailable:', e); }
+      }
     }
   } catch (err) {
     if (pondoTeamState.orgId === orgId && pondoTeamState.uid === uid) {
@@ -7746,6 +7979,7 @@ async function doPush() {
     console.warn('Cloud sync push failed:', err);
   } finally {
     pondoTeamState.pushesInFlight--;
+    if (window.renderDashboardActions) window.renderDashboardActions();
     if (pondoTeamState.orgId === orgId && pondoTeamState.uid === uid && pondoTeamState.pendingSnapshot && !pondoTeamState.syncError) doPush();
   }
 }
@@ -7773,6 +8007,7 @@ function subscribeToOrg(orgId) {
   pondoTeamState.lastSyncedJSON = null;
   pondoTeamState.lastSyncedRevision = 0;
   pondoTeamState.baselineReady = false;
+  pondoTeamState.memberConfirmed = false;
   pondoTeamState.recoveryLocked = false;
   pondoTeamState.dirty = false;
   pondoTeamState.pendingSnapshot = null;
@@ -7798,14 +8033,16 @@ function subscribeToOrg(orgId) {
     renderTeamPanel();
   }, (err) => handleTeamListenerError(orgId, 'Organization', err));
 
-  pondoTeamState.unsubMembers = onSnapshot(collection(firestoreDb, 'organizations', orgId, 'members'), (snap) => {
+  pondoTeamState.unsubMembers = onSnapshot(collection(firestoreDb, 'organizations', orgId, 'members'), { includeMetadataChanges: true }, (snap) => {
     const members = [];
+    const memberConfirmed = !snap.metadata.fromCache && !snap.metadata.hasPendingWrites;
+    pondoTeamState.memberConfirmed = memberConfirmed;
     snap.forEach((d) => members.push(d.data()));
     // Notify about teammates joining/leaving/changing role -- but only once
     // we've already seen a members list for this org in this session, so the
     // very first snapshot after subscribing doesn't look like a mass-join.
     const prevMembers = teamActivityMemory.membersByOrg[orgId];
-    if (prevMembers && window.pushNotification) {
+    if (memberConfirmed && prevMembers && window.pushNotification) {
       const prevByUid = new Map(prevMembers.map((m) => [m.uid, m]));
       const nextByUid = new Map(members.map((m) => [m.uid, m]));
       const orgLabel = pondoTeamState.orgName || 'your workspace';
@@ -7828,12 +8065,16 @@ function subscribeToOrg(orgId) {
         }
       });
     }
-    teamActivityMemory.membersByOrg[orgId] = members;
+    if (memberConfirmed) teamActivityMemory.membersByOrg[orgId] = members;
     pondoTeamState.members = members;
     const mine = members.find((m) => m.uid === pondoTeamState.uid);
     if (!mine) { handleRemovedFromOrg(); return; }
     pondoTeamState.role = mine.role;
+    if (memberConfirmed && window.processMemberRoleNotification) window.processMemberRoleNotification(pondoTeamState);
     applyRoleUI();
+    if (pondoTeamState.baselineReady && !pondoTeamState.dirty && pondoTeamState.lastSyncedJSON && window.processReviewNotifications) {
+      try { window.processReviewNotifications(JSON.parse(pondoTeamState.lastSyncedJSON), pondoTeamState); } catch (e) { console.warn('Review notifications unavailable:', e); }
+    }
     renderTeamPanel();
     // Members load from Firestore asynchronously and can arrive after the
     // header badge/dropdown have already rendered (e.g. right after sign-in,
@@ -7892,6 +8133,9 @@ function subscribeToOrg(orgId) {
       } finally {
         window.__pondoApplyingRemote = false;
         setTimeout(() => { window.__pondoSuppressFeedback = false; }, 50);
+      }
+      if (window.processReviewNotifications) {
+        try { window.processReviewNotifications(rest, pondoTeamState); } catch (e) { console.warn('Review notifications unavailable:', e); }
       }
       if (prevJSON && window.pushNotification) {
         try {
@@ -7961,6 +8205,7 @@ async function switchActiveWorkspace(key) {
 
   teardownOrgSubscriptions();
   pondoTeamState.role = null;
+  pondoTeamState.memberConfirmed = false;
   pondoTeamState.members = [];
   // Set this before applySnapshot()/renderAll() below (which internally calls
   // saveAll()) so its workspace-cache write lands under the right key instead
@@ -8460,9 +8705,11 @@ async function initCollaboration(user) {
 
 function teardownCollaboration() {
   teardownOrgSubscriptions();
+  teamActivityMemory.membersByOrg = {};
   pondoTeamState.uid = null;
   pondoTeamState.orgId = null;
   pondoTeamState.role = null;
+  pondoTeamState.memberConfirmed = false;
   pondoTeamState.members = [];
   pondoTeamState.orgMemberships = [];
   pondoTeamState.memberships = [];
