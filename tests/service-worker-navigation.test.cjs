@@ -1,0 +1,5 @@
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const code=fs.readFileSync('sw.js','utf8');
+function setup(){let handlers={},puts=[],matches=[];let self={location:{href:'https://example.test/PondoApp/sw.js',origin:'https://example.test'},addEventListener:(k,f)=>handlers[k]=f};let caches={open:async()=>({put:async(k)=>puts.push(k)}),match:async k=>{matches.push(k);return undefined}};vm.runInNewContext(code,{self,caches,URL,fetch:async()=>({clone:()=>({})}),Promise});return {handlers,puts,matches}}
+async function navigate(t,url){let result;t.handlers.fetch({request:{method:'GET',mode:'navigate',url},respondWith:p=>{result=p}});await result;await new Promise(r=>setImmediate(r))}
+test('only the main app navigation writes the app-shell cache key',async()=>{let t=setup();await navigate(t,'https://example.test/PondoApp/index.html');assert.deepEqual(t.puts,['./index.html']);await navigate(t,'https://example.test/PondoApp/public-report/index.html?id=test');assert.deepEqual(t.puts,['./index.html'])});
