@@ -6,7 +6,7 @@ async function runGuard(saved){
  const document={body:{children:Object.values(nodes),appendChild(){}},createElement:()=>element()};
  const ctx=vm.createContext({window:{pondoGuestMode:true,addEventListener(){}},document,navigator:{locks:{request:(_name,_options,fn)=>fn({})}},
   TransactionalFundStore:{open:async name=>{names.push(name);return {load:async()=>({revision:saved?2:0,snapshot:saved}),save:async()=>{throw Error('unexpected initialization write')}}}},
-  applySnapshot:x=>snapshots.push(x),blankWorkspaceSnapshot:()=>({guestBlank:true}),renderAll(){},syncSettingsUI(){},applyAppearance(){},
+  applySnapshot:x=>snapshots.push(x),blankWorkspaceSnapshot:()=>({guestBlank:true}),renderAll(){},syncSettingsUI(){},applyAppearance(){},applyAppShortcut(){},
   funds:[],txs:[],projects:[],contributionActivities:[],setTimeout,location:{reload(){}}});
  const start=html.indexOf('window.trackerReady=false;'),end=html.indexOf('// Kept outside the Firebase module',start);
  vm.runInContext(html.slice(start,end),ctx);ctx.window.startTabGuard();await new Promise(r=>setImmediate(r));
