@@ -3097,6 +3097,15 @@ body{
   }
 }
 
+/* App-update controls use the native overlay area only when the installed
+   window actually exposes it. Otherwise they remain in Pondo's own header. */
+.pondo-update-button{border:0;border-radius:999px;padding:7px 12px;background:#087f5b;color:#fff;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;cursor:pointer}
+.pondo-update-button:hover{background:#066548}.pondo-update-button:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.pondo-update-button[hidden]{display:none!important}
+#titlebarUpdateArea{position:fixed;z-index:9997;left:env(titlebar-area-x,0px);top:env(titlebar-area-y,0px);width:env(titlebar-area-width,0px);height:env(titlebar-area-height,0px);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;box-sizing:border-box;pointer-events:none}
+@media(max-width:480px){body.app-update-available .app-tagline{display:none}body.app-update-available .pondo-header-actions{gap:4px}body.app-update-available #headerUpdateBtn{font-size:11px;padding:7px 8px}}
+#titlebarUpdateArea button{pointer-events:auto;max-height:100%;-webkit-app-region:no-drag;app-region:no-drag}
+@media print{#titlebarUpdateArea,.pondo-update-button{display:none!important}}
 </style>
 <style>
 :root{
@@ -4725,6 +4734,8 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
 </head>
 <body>
 <div id="ptrIndicator" class="ptr-indicator" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.1-6.8"/><path d="M21 3v6h-6"/></svg></div>
+<span id="appUpdateAnnouncement" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></span>
+<div id="titlebarUpdateArea" class="no-print"><button id="titlebarUpdateBtn" class="pondo-update-button" type="button" hidden>App update</button></div>
 <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authGateTitle" style="display:flex">
   <div class="auth-layout">
   <div class="auth-gate-card">
@@ -4738,6 +4749,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
     <button id="authOfflineBtn" type="button" class="btn btn-light auth-offline-btn">Continue offline</button>
     <p class="auth-offline-note">Offline mode opens a separate device-only tracker, not your signed-in personal or team workspaces. It will not sync automatically. Export a backup to transfer its data.</p>
     <p id="authStatusText" class="auth-status-text" aria-live="polite"></p>
+    <button id="authUpdateBtn" class="pondo-update-button" type="button" hidden>App update</button>
     <p id="authError" class="auth-error" role="alert" hidden></p>
     <p id="authManualFallback" class="auth-manual-fallback" hidden>Still nothing after a few seconds? <button type="button" id="authManualFallbackBtn" class="auth-manual-fallback-btn">Open Pondo in your browser</button> and sign in there. You can then try reopening this app in the same browser profile; sessions may not be shared on every device.</p>
   </div>
@@ -4759,6 +4771,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
       </div>
     </div>
     <div class="pondo-header-actions">
+      <button id="headerUpdateBtn" class="pondo-update-button" type="button" hidden>App update</button>
       <div class="team-switcher-wrap">
         <button id="teamHeaderBadge" type="button" class="team-header-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="teamSwitcherMenu" onclick="toggleTeamSwitcher()" title="Switch workspace or manage your team"><span id="teamHeaderBadgeDot" class="team-header-dot"></span><span id="teamHeaderBadgeText">Solo</span></button>
         <div id="teamSwitcherMenu" class="header-more-menu team-switcher-menu" hidden></div>
@@ -7106,14 +7119,102 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
 });
 </script>
 <script>
-// PWA: register service worker for offline app-shell caching.
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((err) => {
-      console.warn('Service worker registration failed:', err);
-    });
+// PWA updates are offered explicitly: never reload an editing window merely
+// because a new service worker activated in another window.
+(function setupAppUpdates() {
+  if (!('serviceWorker' in navigator)) return;
+  const sw = navigator.serviceWorker;
+  const overlay = navigator.windowControlsOverlay;
+  const titlebarButton = document.getElementById('titlebarUpdateBtn');
+  const headerButton = document.getElementById('headerUpdateBtn');
+  const authButton = document.getElementById('authUpdateBtn');
+  const announcement = document.getElementById('appUpdateAnnouncement');
+  let registration = null, available = false, activating = false;
+  let hadController = !!sw.controller, reloadOnChange = false, lastCheck = 0;
+  const buttons = [titlebarButton, headerButton, authButton].filter(Boolean);
+  function render() {
+    const rect = overlay && overlay.visible && overlay.getTitlebarAreaRect ? overlay.getTitlebarAreaRect() : null;
+    const hasOverlay = !!(rect && rect.width >= 120 && rect.height >= 24);
+    if (titlebarButton) titlebarButton.hidden = !available || !hasOverlay;
+    if (headerButton) headerButton.hidden = !available || hasOverlay;
+    // The login gate sits above the overlay control; retain its own fallback.
+    if (authButton) authButton.hidden = !available;
+    if (document.body) document.body.classList.toggle('app-update-available', available && !hasOverlay);
+    buttons.forEach(button => { button.disabled = activating; button.textContent = activating ? 'Updating…' : 'App update'; });
+  }
+  function announce() { if (!available && announcement) announcement.textContent = 'A Pondo app update is ready.'; available = true; render(); }
+  function canUseAppDialog() { return !!(window.trackerReady && (window.pondoCurrentUser || window.pondoGuestMode)); }
+  function unsafeReason() {
+    const team = window.pondoTeamState;
+    if (trackerFatal || storageWarningOpen) return 'Local saving is incomplete or has failed. Resolve it and export a backup before updating.';
+    if (trackerPending) return 'A local save is still in progress. Please wait before updating.';
+    if (team && team.orgId && (team.pushTimer || team.pushesInFlight || team.dirty || team.syncError || team.recoveryLocked))
+      return 'Team changes are not confirmed. Resolve sync or export a backup before updating.';
+    return '';
+  }
+  async function updateNow() {
+    if (!available || activating) return;
+    let reason = unsafeReason();
+    if (reason) { if (window.appAlert && canUseAppDialog()) window.appAlert(reason); else alert(reason); return; }
+    // Unsubmitted form contents are not part of the persisted snapshot.
+    const message = 'Update Pondo and reload this window? Finish or save any open forms first.';
+    const confirmed = window.appConfirm && canUseAppDialog() ? await window.appConfirm(message) : confirm(message);
+    if (!confirmed) return;
+    reason = unsafeReason();
+    if (reason) { if (window.appAlert && canUseAppDialog()) window.appAlert(reason); else alert(reason); return; }
+    if (registration && registration.waiting) {
+      activating = true; reloadOnChange = true; render();
+      try { registration.waiting.postMessage({ type: 'PONDO_ACTIVATE_UPDATE' }); }
+      catch (err) {
+        activating = false; reloadOnChange = false; render();
+        if (window.appAlert && canUseAppDialog()) window.appAlert('The update could not be started. Please try again.');
+        else alert('The update could not be started. Please try again.');
+        return;
+      }
+      // If activation fails, keep the button usable rather than trapping the UI.
+      setTimeout(() => { if (activating) { activating = false; reloadOnChange = false; render(); } }, 10000);
+    } else {
+      location.reload();
+    }
+  }
+  buttons.forEach(button => button.addEventListener('click', updateNow));
+  if (overlay && overlay.addEventListener) overlay.addEventListener('geometrychange', render);
+  sw.addEventListener('controllerchange', () => {
+    if (!hadController && !reloadOnChange) { hadController = true; return; } // first install, not an update
+    hadController = true;
+    activating = false;
+    if (reloadOnChange) {
+      reloadOnChange = false;
+      const reason = unsafeReason();
+      if (!reason) { location.reload(); return; }
+      if (window.appAlert && canUseAppDialog()) window.appAlert(reason); else alert(reason);
+    }
+    announce(); // another window activated an update: let this user choose when to reload
   });
-}
+  function watch(worker) {
+    if (!worker) return;
+    worker.addEventListener('statechange', () => {
+      if (worker.state === 'installed' && (sw.controller || (registration && registration.active))) announce();
+    });
+  }
+  function check() {
+    if (!registration || !navigator.onLine || Date.now() - lastCheck < 60000) return;
+    lastCheck = Date.now();
+    registration.update().catch(err => console.warn('Update check failed:', err));
+  }
+  window.addEventListener('load', () => {
+    sw.register('./sw.js').then(reg => {
+      registration = reg;
+      if (reg.waiting && (sw.controller || reg.active)) announce();
+      watch(reg.installing);
+      reg.addEventListener('updatefound', () => watch(reg.installing));
+      check();
+    }).catch(err => console.warn('Service worker registration failed:', err));
+  });
+  window.addEventListener('online', check);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+  setInterval(check, 60 * 60 * 1000);
+})();
 </script>
 <script>
 // PWA: app-wide "you're offline" indicator, shown as a small icon badge on

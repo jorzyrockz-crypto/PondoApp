@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v60';
+const CACHE_VERSION = 'pondo-v61';
 const APP_SHELL = [
   './',
   './index.html',
@@ -79,8 +79,13 @@ self.addEventListener('install', (event) => {
           }).catch(() => {})
         )
       ))
-      .then(() => self.skipWaiting())
   );
+});
+
+// A waiting update is activated only when a client requests it. Other open
+// windows must choose when to reload; do not force-refresh unsaved forms.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'PONDO_ACTIVATE_UPDATE') event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', (event) => {
