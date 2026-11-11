@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v50';
+const CACHE_VERSION = 'pondo-v51';
 const APP_SHELL = [
   './',
   './index.html',
@@ -30,6 +30,8 @@ const APP_SHELL = [
   './icons/icon-512-maskable.png',
   './assets/branding/login-bg.jpg',
   './assets/branding/login-bg-dark.jpg',
+  './assets/branding/login-portrait.jpg',
+  './assets/branding/login-landscape.jpg',
   './assets/branding/share-banner.jpg',
   './functions/projection.js',
 ];

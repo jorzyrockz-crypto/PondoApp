@@ -4460,8 +4460,16 @@ body.dark-mode #appHeaderLogo,body.dark-mode #authGateLogo{background:#1c1c1c!im
 }
 
 /* Firebase auth gate */
-.auth-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,rgba(236,253,245,.55),rgba(247,247,245,.75)),url('assets/branding/login-bg.jpg') center/cover no-repeat;}
-body.dark-mode .auth-gate{background:linear-gradient(180deg,rgba(15,23,42,.35),rgba(17,24,39,.55)),url('assets/branding/login-bg-dark.jpg') center/cover no-repeat;}
+.auth-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px;background:#0c0b26 url('assets/branding/login-landscape.jpg') center/cover no-repeat;}
+@media (orientation:portrait){.auth-gate{background-image:url('assets/branding/login-portrait.jpg');}}
+.auth-layout{width:min(100%,360px);margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:32px;}
+.auth-landscape-brand{display:none;}
+@media (orientation:landscape) and (min-width:700px) and (min-height:560px){
+ .auth-gate{justify-content:flex-start;padding-left:clamp(32px,5.5vw,100px);}
+ .auth-layout{width:min(44vw,440px);}
+ .auth-landscape-brand{display:flex;align-items:center;align-self:flex-start;gap:16px;color:#fff;font:italic 800 clamp(36px,5vw,64px)/1 system-ui,sans-serif;letter-spacing:-.04em;text-shadow:0 3px 8px #0009;}
+ .auth-landscape-brand img{display:block;width:clamp(52px,6.5vw,72px);height:auto;border-radius:22%;box-shadow:0 6px 22px #0006;}
+}
 .auth-gate-card{width:100%;max-width:360px;background:var(--surface,#fff);border-radius:24px;padding:36px 28px;text-align:center;box-shadow:0 20px 60px #0003;backdrop-filter:blur(2px);}
 .auth-gate-title{font-family:'Fraunces',serif;font-size:28px;font-weight:800;margin:0 0 8px;color:var(--ink,#141414);}
 .auth-gate-sub{font-size:14px;color:var(--ink2,#6b7280);margin:0 0 24px;line-height:1.5;}
@@ -4635,6 +4643,8 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
 <body>
 <div id="ptrIndicator" class="ptr-indicator" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.1-6.8"/><path d="M21 3v6h-6"/></svg></div>
 <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authGateTitle" style="display:flex">
+  <div class="auth-layout">
+  <div class="auth-landscape-brand" aria-hidden="true"><img src="icons/icon-96.png" alt=""><span>PondoApp</span></div>
   <div class="auth-gate-card">
     <div class="logo" id="authGateLogo" style="width:56px;height:56px;border-radius:18px;font-size:22px;margin:0 auto 18px"><img src="icons/icon-96.png" alt="" class="org-logo-image"></div>
     <h1 id="authGateTitle" class="auth-gate-title">Pondo</h1>
@@ -4648,6 +4658,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
     <p id="authStatusText" class="auth-status-text" aria-live="polite"></p>
     <p id="authError" class="auth-error" role="alert" hidden></p>
     <p id="authManualFallback" class="auth-manual-fallback" hidden>Still nothing after a few seconds? <button type="button" id="authManualFallbackBtn" class="auth-manual-fallback-btn">Open Pondo in your browser</button> and sign in there. You can then try reopening this app in the same browser profile; sessions may not be shared on every device.</p>
+  </div>
   </div>
 </div>
 <div id="pondoApp" inert>
