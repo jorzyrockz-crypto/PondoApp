@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v61';
+const CACHE_VERSION = 'pondo-v64';
 const APP_SHELL = [
   './',
   './index.html',
