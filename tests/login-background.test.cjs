@@ -11,7 +11,7 @@ test('login background uses supplied landscape and portrait images in both theme
 
 test('wide landscape centers the card vertically in the left area without the extra branding',()=>{
  assert.match(html,/@media \(orientation:landscape\) and \(min-width:700px\) and \(min-height:560px\)/);
- assert.match(html,/\.auth-gate\{justify-content:flex-start;padding-left:clamp\(41\.6px,7\.15vw,130px\)/);
+ assert.match(html,/\.auth-gate\{justify-content:flex-start;padding-left:clamp\(54\.08px,9\.295vw,169px\)/);
  assert.doesNotMatch(html,/auth-landscape-brand/);
  assert.match(html,/\.auth-layout\{[^}]*margin:auto 0/);
  assert.match(html,/id="authGateLogo"/);
