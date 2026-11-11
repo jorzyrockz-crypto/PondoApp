@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v48';
+const CACHE_VERSION = 'pondo-v50';
 const APP_SHELL = [
   './',
   './index.html',
@@ -30,10 +30,13 @@ const APP_SHELL = [
   './icons/icon-512-maskable.png',
   './assets/branding/login-bg.jpg',
   './assets/branding/login-bg-dark.jpg',
+  './assets/branding/share-banner.jpg',
+  './functions/projection.js',
 ];
 
 // Firebase Auth SDK (loaded from the CDN) is cached at runtime too, see the
-// fetch handler below, so sign-in still works offline after a first visit.
+// fetch handler below, so a previously cached SDK can initialize offline.
+// Google sign-in itself requires an internet connection.
 const RUNTIME_CACHEABLE_ORIGINS = ['https://www.gstatic.com'];
 
 // Best-effort precache of the pinned Firebase SDK modules the app imports on
@@ -89,6 +92,13 @@ self.addEventListener('fetch', (event) => {
   const isRuntimeCacheable = RUNTIME_CACHEABLE_ORIGINS.includes(url.origin);
 
   if (request.mode === 'navigate') {
+    // Never cache an embedded report (or any other page) as the main app.
+    const appRoot = new URL('./', self.location.href).pathname;
+    const appIndex = new URL('./index.html', self.location.href).pathname;
+    if (!isSameOrigin || (url.pathname !== appRoot && url.pathname !== appIndex)) {
+      event.respondWith(fetch(request).catch(() => caches.match(request)));
+      return;
+    }
     event.respondWith(
       fetch(request)
         .then((response) => {

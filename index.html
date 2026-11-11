@@ -4,7 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pondo — Fund Tracker</title>
+<meta name="application-name" content="Pondo">
 <meta name="description" content="Track and manage your funds with Pondo.">
+<link rel="canonical" href="https://jorzyrockz-crypto.github.io/PondoApp/">
+
+<!-- Link previews use an absolute URL; installed app icons remain separate. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pondo">
+<meta property="og:title" content="Pondo — Fund Tracker">
+<meta property="og:description" content="Track and manage your funds with Pondo.">
+<meta property="og:url" content="https://jorzyrockz-crypto.github.io/PondoApp/">
+<meta property="og:image" content="https://jorzyrockz-crypto.github.io/PondoApp/assets/branding/share-banner.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PondoApp banner: track your expenses and budget in your browser">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pondo — Fund Tracker">
+<meta name="twitter:description" content="Track and manage your funds with Pondo.">
+<meta name="twitter:image" content="https://jorzyrockz-crypto.github.io/PondoApp/assets/branding/share-banner.jpg">
+<meta name="twitter:image:alt" content="PondoApp banner: track your expenses and budget in your browser">
 
 <!-- PWA: manifest -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -4418,6 +4437,18 @@ body.dark-mode .dashboard-contribution-open,body.dark-mode .dashboard-view-all,b
 .pondo-identity{display:flex;align-items:center;gap:12px;min-width:0}.pondo-identity-text{min-width:0}.pondo-brand{font-weight:800!important;letter-spacing:-.03em!important}.pondo-header-actions{display:flex;align-items:center;gap:8px}.header-more-wrap{position:relative}.header-more-menu[hidden]{display:none!important}.header-more-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:60;min-width:160px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 12px 32px #0003}.header-menu-item[hidden]{display:none!important}.header-menu-item{display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:9px;background:transparent;color:var(--ink);padding:12px;font-size:13px;font-weight:700;text-align:left;cursor:pointer}.header-menu-item:hover,.header-menu-item:focus-visible{background:var(--surface2);outline:2px solid var(--accent);outline-offset:-2px}#headerMoreBtn{color:var(--ink)}#headerMoreBtn svg{fill:currentColor}#orgNameHeader{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-tagline{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}@media (max-width:480px){.app-tagline{max-width:140px}}#orgIdentityMeta[hidden]{display:none!important}#appHeaderLogo,#authGateLogo{border:1px solid var(--line);box-sizing:border-box;background:#fff!important;box-shadow:none!important}
 body.dark-mode #appHeaderLogo,body.dark-mode #authGateLogo{background:#1c1c1c!important}
 
+/* Keep the overflow menu labels and icons aligned without affecting the
+   separate team, account and notification menus. Account for body zoom when
+   limiting the menu to the viewport; on very narrow screens labels may wrap. */
+#headerMoreMenu{width:220px;min-width:0;max-width:calc(100vw / var(--interface-scale, 1) - 24px)}
+#headerMoreMenu .header-menu-item{min-height:44px;line-height:1.3}
+#headerMoreMenu .header-menu-item > svg{flex:0 0 18px;width:18px;height:18px}
+#headerMoreMenu .header-menu-item > span{min-width:0;overflow-wrap:anywhere}
+
+/* Promotional artwork in our own install banner, not the native install UI. */
+.install-app-banner .install-app-image{display:block;width:220px;max-width:100%;height:auto;flex:0 1 220px;border-radius:10px}
+@media(max-width:600px){.install-app-banner .install-app-image{order:-1;width:100%;flex:1 1 100%}}
+
 /* Keep navigation balanced on phones and use a compact centered dock on tablets. */
 @media screen{
  .bottomnav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch}
@@ -4436,6 +4467,7 @@ body.dark-mode .auth-gate{background:linear-gradient(180deg,rgba(15,23,42,.35),r
 .auth-gate-sub{font-size:14px;color:var(--ink2,#6b7280);margin:0 0 24px;line-height:1.5;}
 .auth-google-btn{width:100%;height:50px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;border-radius:14px;cursor:pointer;}
 .auth-google-btn:disabled{opacity:.6;cursor:not-allowed;}
+.auth-offline-btn{width:100%;margin-top:10px;height:46px;border-radius:14px;font-weight:700;cursor:pointer}.auth-offline-note{font-size:12px;line-height:1.45;color:var(--ink2,#6b7280);margin:10px 0 0}.guest-banner{padding:10px 16px;text-align:center;background:#fff4d4;color:#503b00;font:13px/1.45 system-ui,sans-serif}.guest-banner button{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
 .auth-status-text{min-height:18px;font-size:12px;color:var(--ink2,#6b7280);margin:14px 0 0;}
 .auth-error{font-size:12px;color:#dc2626;background:#fef2f2;border-radius:10px;padding:10px 12px;margin:14px 0 0;line-height:1.4;}
 .auth-manual-fallback{font-size:12px;color:var(--ink2,#6b7280);background:var(--surface2,#f3f4f6);border-radius:10px;padding:10px 12px;margin:14px 0 0;line-height:1.5;text-align:left;}
@@ -4606,17 +4638,20 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
   <div class="auth-gate-card">
     <div class="logo" id="authGateLogo" style="width:56px;height:56px;border-radius:18px;font-size:22px;margin:0 auto 18px"><img src="icons/icon-96.png" alt="" class="org-logo-image"></div>
     <h1 id="authGateTitle" class="auth-gate-title">Pondo</h1>
-    <p class="auth-gate-sub">Sign in to access your fund tracker.</p>
+    <p class="auth-gate-sub">Sign in for your workspaces, or use a separate tracker on this device.</p>
     <button id="authSignInBtn" type="button" class="btn btn-dark auth-google-btn">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
       <span>Continue with Google</span>
     </button>
+    <button id="authOfflineBtn" type="button" class="btn btn-light auth-offline-btn">Continue offline</button>
+    <p class="auth-offline-note">Offline mode opens a separate device-only tracker, not your signed-in personal or team workspaces. It will not sync automatically. Export a backup to transfer its data.</p>
     <p id="authStatusText" class="auth-status-text" aria-live="polite"></p>
     <p id="authError" class="auth-error" role="alert" hidden></p>
     <p id="authManualFallback" class="auth-manual-fallback" hidden>Still nothing after a few seconds? <button type="button" id="authManualFallbackBtn" class="auth-manual-fallback-btn">Open Pondo in your browser</button> and sign in there. You can then try reopening this app in the same browser profile; sessions may not be shared on every device.</p>
   </div>
 </div>
 <div id="pondoApp" inert>
+<div id="guestBanner" class="guest-banner no-print" role="status" hidden>Offline tracker · Saved only on this device, separate from signed-in workspaces. <button type="button" id="guestSignInBtn">Return to sign in</button></div>
 <div id="reviewerBanner" hidden role="status">Reviewer access — you can view this organization's data but cannot make changes.</div>
 <div id="saveStatus" hidden role="status" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;background:#153c2c;color:#fff;padding:8px 14px;border-radius:10px;font:12px system-ui;box-shadow:0 3px 12px #0003">Saving changes…</div>
 <header class="topbar no-print">
@@ -4657,7 +4692,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
   </div>
 </header>
 
-<main class="wrap"><div id="rolePreviewBanner" class="data-safety-banner no-print" hidden><div><strong id="rolePreviewTitle"></strong><p>Preview only. No one is assigned, and everyone using this browser can still view and edit all records.</p></div></div><div id="starterDataWarning" class="data-safety-banner no-print" hidden><div><strong>Review possible older starter data</strong><p>Some records match examples bundled with an older version. They have not been removed or changed. Review fund sources, transactions, organization details and report signatories before sharing; keep anything that is yours.</p></div><div class="data-safety-actions"><button class="btn btn-light" type="button" onclick="switchTab('funds')">Review funds</button><button class="btn btn-light" type="button" onclick="dismissStarterWarning()">Dismiss</button></div></div><div id="futureDataWarning" class="data-safety-banner future-data-banner no-print" hidden><div><strong>Future-dated records are included in current totals</strong><p id="futureDataWarningText"></p></div></div><div id="installAppBanner" class="data-safety-banner install-app-banner no-print" hidden><div><strong>Install Pondo as an app</strong><p>Signing in from the browser like this works great. Install it now for quicker, full-screen access — your signed-in session carries over automatically.</p><p id="installAppInstructions" class="install-app-instructions" hidden></p></div><div class="data-safety-actions"><button class="btn btn-emerald" type="button" id="installAppBannerBtn">Install app</button><button class="btn btn-light" type="button" id="installAppBannerDismiss">Not now</button></div></div>
+<main class="wrap"><div id="rolePreviewBanner" class="data-safety-banner no-print" hidden><div><strong id="rolePreviewTitle"></strong><p>Preview only. No one is assigned, and everyone using this browser can still view and edit all records.</p></div></div><div id="starterDataWarning" class="data-safety-banner no-print" hidden><div><strong>Review possible older starter data</strong><p>Some records match examples bundled with an older version. They have not been removed or changed. Review fund sources, transactions, organization details and report signatories before sharing; keep anything that is yours.</p></div><div class="data-safety-actions"><button class="btn btn-light" type="button" onclick="switchTab('funds')">Review funds</button><button class="btn btn-light" type="button" onclick="dismissStarterWarning()">Dismiss</button></div></div><div id="futureDataWarning" class="data-safety-banner future-data-banner no-print" hidden><div><strong>Future-dated records are included in current totals</strong><p id="futureDataWarningText"></p></div></div><div id="installAppBanner" class="data-safety-banner install-app-banner no-print" hidden><div><strong>Install Pondo as an app</strong><p>Install Pondo for quicker access in its own window. Your signed-in session may carry over when using the same browser profile.</p><p id="installAppInstructions" class="install-app-instructions" hidden></p></div><img class="install-app-image" src="assets/branding/share-banner.jpg" alt="" width="1200" height="630" loading="lazy"><div class="data-safety-actions"><button class="btn btn-emerald" type="button" id="installAppBannerBtn">Install app</button><button class="btn btn-light" type="button" id="installAppBannerDismiss">Not now</button></div></div>
   <!-- DASHBOARD -->
   <section id="tab-dashboard" class="tab-section">
     <div class="dashboard-intro"><div><p class="eyebrow">Financial workspace</p><h1>Overview</h1><p>Your funds, all in one place.</p></div></div>
@@ -5132,7 +5167,7 @@ window.pondoWorkspace={
 })();
 function downloadCurrentSnapshot(){let x={...currentSnapshot(),appSettings,exportedAt:new Date().toISOString()},url=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='Pondo_Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function showFatalSave(error){if(trackerFatal)return;trackerFatal=true;storageWarningOpen=true;let veil=document.createElement('section');veil.setAttribute('role','alertdialog');veil.setAttribute('aria-modal','true');veil.style.cssText='position:fixed;inset:0;z-index:10000;background:#f5f7f5;color:#17231d;display:flex;align-items:center;justify-content:center;padding:20px';let box=document.createElement('div');box.style.cssText='width:min(100%,520px);background:white;padding:24px;border-radius:18px;font:15px/1.5 system-ui';let title=document.createElement('h1');title.textContent='Changes could not be saved';let msg=document.createElement('p');msg.textContent=(error?.name==='StorageConflict'?'Another copy changed the stored records. ':'Storage is unavailable or full. ')+'Current changes may only exist in memory. Export a backup before reloading; do not continue editing.';let b=document.createElement('button');b.textContent='Export current data, including unsaved changes';b.style.cssText='padding:12px;background:#087f5b;color:white;border:0;border-radius:10px';b.onclick=downloadCurrentSnapshot;box.append(title,msg,b);veil.append(box);[...document.body.children].filter(el=>el.tagName!=='SCRIPT').forEach(el=>el.inert=true);document.body.append(veil);veil.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();b.focus()}});b.focus()}
-function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(snap))}catch(e){/* non-fatal */}trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
+function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);try{const wsKey=window.pondoGuestMode?'offline-guest':(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(snap))}catch(e){/* non-fatal */}trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
 window.addEventListener('beforeunload',e=>{if(trackerPending){e.preventDefault();e.returnValue=''}});
 function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(currentSnapshot()))}catch(cacheErr){/* non-fatal */}return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
 // appSettings (defined further down, in the APP SETTINGS section) is read
@@ -6645,7 +6680,7 @@ function handleImport(input,verifyOnly=false){
  }catch(err){appAlert((verifyOnly?'Backup check failed: ':'Import failed: ')+(err.message||'Invalid backup'));}finally{input.value='';}};reader.onerror=()=>{input.value='';appAlert(verifyOnly?'Backup check failed: the file could not be read.':'Import failed: the file could not be read.')};reader.readAsText(file);
 }
 async function clearTransactionsOnly(){ if(funds.some(f=>allocations.filter(a=>a.fundId===f.id).reduce((n,a)=>n+cents(a.amount),0)>cents(f.initialAmount))){appAlert('Cannot clear transactions: some project allocations would exceed the funds’ original balances. Reduce those allocations first or use a full reset after backing up.');return;} if(await appConfirm('Clear all transactions? Fund-funded contribution payments will also be voided and their contributors’ balances reopened. Payables will become unpaid again, and allocated funds will become unspent.')){const stamp=new Date().toISOString();const clearActor=currentActorStamp();txs.forEach(t=>auditLog.push({id:makeId('audit'),action:'bulk clear transaction',timestamp:stamp,reason:'Bulk clear confirmed',linkedContribution:contributionPayments.find(m=>m.txId===t.id)||null,record:JSON.parse(JSON.stringify(t)),...(clearActor?{by:clearActor}:{})}));let cleared=new Set(txs.map(t=>t.id));contributionPayments=contributionPayments.filter(m=>!m.txId||!cleared.has(m.txId));txs=[]; saveAll(); renderAll(); } }
-async function clearAllData(){ if(await appPrompt('This will delete all tracker data and settings. Type DELETE to continue:')==='DELETE'){if(trackerDB){const previous=currentSnapshot(),year=localDate().slice(0,4);org={name:'Your organization',location:'Set location in settings',periodFrom:year+'-01-01',periodTo:year+'-12-31',initials:'ORG'};funds=[];txs=[];sigs=[];projects=[];allocations=[];payables=[];auditLog=[];contributionActivities=[];contributors=[];contributionPayments=[];if(!await saveAll()){applySnapshot(previous);return}} Object.keys(localStorage).filter(k=>k.startsWith('ft_')).forEach(k=>localStorage.removeItem(k)); location.reload(); } }
+async function clearAllData(){ if(window.pondoGuestMode){appAlert('Clear All Data is unavailable in offline mode to protect your signed-in workspaces. You can remove individual records instead.');return} if(await appPrompt('This will delete this tracker’s data and settings. The separate offline tracker is not deleted. Type DELETE to continue:')==='DELETE'){if(trackerDB){const previous=currentSnapshot(),year=localDate().slice(0,4);org={name:'Your organization',location:'Set location in settings',periodFrom:year+'-01-01',periodTo:year+'-12-31',initials:'ORG'};funds=[];txs=[];sigs=[];projects=[];allocations=[];payables=[];auditLog=[];contributionActivities=[];contributors=[];contributionPayments=[];if(!await saveAll()){applySnapshot(previous);return}} Object.keys(localStorage).filter(k=>k.startsWith('ft_')).forEach(k=>localStorage.removeItem(k)); location.reload(); } }
 function resetSettingsSection(){
   const active=document.querySelector('.settings-tab-btn.active')?.dataset.stab||'appearance';
   const sections={appearance:['appearance'],sound:['sound'],motion:['motion','animation'],present:['presentation']};
@@ -6906,7 +6941,16 @@ window.startTabGuard=(function(){
    if(usedAlready && typeof window.maybeShowInstallPrompt==='function') window.maybeShowInstallPrompt();
   }catch(e){}
  };
- const open=async()=>{try{let db=await TransactionalFundStore.open('fund-tracker-transactional-v1'),loaded=await db.load();if(loaded.snapshot){trackerDB=db;trackerRevision=loaded.revision;applySnapshot(loaded.snapshot);openUI();return}
+ const open=async()=>{try{
+ // Guest records have their own database. Never open, migrate or overwrite the
+ // currently signed-in workspace when authentication is unavailable.
+ if(window.pondoGuestMode){
+  const db=await TransactionalFundStore.open('fund-tracker-offline-guest-v1'),loaded=await db.load();
+  trackerDB=db;trackerRevision=loaded.revision;
+  applySnapshot(loaded.snapshot||blankWorkspaceSnapshot());
+  openUI();return;
+ }
+ let db=await TransactionalFundStore.open('fund-tracker-transactional-v1'),loaded=await db.load();if(loaded.snapshot){trackerDB=db;trackerRevision=loaded.revision;applySnapshot(loaded.snapshot);openUI();return}
  const data=currentSnapshot(),hasData=[funds,txs,sigs,projects,allocations,payables,auditLog,contributionActivities,contributors,contributionPayments].some(x=>x.length)||org.name!=='Your organization'||org.location!=='Set location in settings';
  if(!hasData){trackerRevision=await db.save(data,0);trackerDB=db;openUI();return}
  box.querySelector('h1').textContent='Back up before upgrading storage';box.querySelector('p').textContent='Save and verify a separate JSON backup before upgrading. Existing browser records will be retained, but older versions will not see later changes. Close all older tracker copies and use only this version after upgrading.';const actions=box.querySelector('.tab-guard-actions');actions.innerHTML='';const button=(label,fn)=>{let b=document.createElement('button');b.type='button';b.textContent=label;b.style.cssText='display:block;margin-top:8px;width:100%;padding:12px;background:#087f5b;color:white;border:0;border-radius:10px';b.onclick=fn;actions.append(b);return b};button('Download backup',downloadCurrentSnapshot);button('I saved and verified a backup — upgrade',async()=>{actions.querySelectorAll('button').forEach(b=>b.disabled=true);try{trackerRevision=await db.migrateLegacy(currentSnapshot(),true);trackerDB=db;openUI()}catch(e){db.close();box.querySelector('p').textContent='Upgrade failed. Original records have not been removed. '+e.message;actions.querySelectorAll('button').forEach(b=>b.disabled=false)}});button('Not now — continue with old storage',()=>{db.close();openUI()});actions.querySelector('button').focus();
@@ -6917,6 +6961,26 @@ window.startTabGuard=(function(){
  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
  };
 })();
+// Kept outside the Firebase module so this works even when the SDK could not
+// load from the network. This is deliberately a separate local workspace.
+window.pondoGuestMode=false;
+document.getElementById('authOfflineBtn').addEventListener('click',()=>{
+ if(window.pondoCurrentUser || window.pondoGuestMode)return;
+ window.pondoGuestMode=true;
+ document.getElementById('authGate').style.display='none';
+ document.getElementById('pondoApp').inert=false;
+ document.getElementById('guestBanner').hidden=false;
+ document.getElementById('signOutMenuItem').hidden=true;
+ document.getElementById('teamLoading').hidden=true;
+ document.getElementById('teamSignedOutNotice').hidden=false;
+ window.startTabGuard();
+});
+document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
+ // Wait for local writes before returning to the normal sign-in flow.
+ if(trackerPending)await trackerQueue;
+ if(trackerFatal)return;
+ location.reload();
+});
 </script>
 <script>
 // PWA: register service worker for offline app-shell caching.
@@ -8147,6 +8211,9 @@ getRedirectResult(auth).then(async result=>{
 });
 
 onAuthStateChanged(auth, (user) => {
+  // An in-flight auth response must never attach cloud listeners to guest data.
+  // Switching modes is explicit and reloads after local writes complete.
+  if(window.pondoGuestMode)return;
   if(user){ signInPending=false; setRedirectPending(false); disarmSignInWatchdog(); }
   else if(!signInPending) disarmSignInWatchdog();
   const headerAvatarBtn = document.getElementById('headerAvatarBtn');
