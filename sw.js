@@ -7,12 +7,25 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v57';
+const CACHE_VERSION = 'pondo-v58';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './favicon.ico',
+  './icons/rounded/favicon.ico',
+  './icons/rounded/favicon-16x16.png',
+  './icons/rounded/favicon-32x32.png',
+  './icons/rounded/favicon-48x48.png',
+  './icons/rounded/icon-72.png',
+  './icons/rounded/icon-96.png',
+  './icons/rounded/icon-128.png',
+  './icons/rounded/icon-144.png',
+  './icons/rounded/icon-152.png',
+  './icons/rounded/icon-192.png',
+  './icons/rounded/icon-256.png',
+  './icons/rounded/icon-384.png',
+  './icons/rounded/icon-512.png',
   './icons/favicon-16x16.png',
   './icons/favicon-32x32.png',
   './icons/favicon-48x48.png',
