@@ -9,11 +9,12 @@ test('login background uses supplied landscape and portrait images in both theme
  }
 });
 
-test('wide landscape shows a left-aligned branded layout while portrait keeps its centered card',()=>{
+test('wide landscape centers the card vertically in the left area without the extra branding',()=>{
  assert.match(html,/@media \(orientation:landscape\) and \(min-width:700px\) and \(min-height:560px\)/);
  assert.match(html,/\.auth-gate\{justify-content:flex-start;padding-left:/);
- assert.match(html,/class="auth-landscape-brand" aria-hidden="true"/);
- assert.match(html,/\.auth-landscape-brand\{display:none/);
+ assert.doesNotMatch(html,/auth-landscape-brand/);
+ assert.match(html,/\.auth-layout\{[^}]*margin:auto 0/);
+ assert.match(html,/id="authGateLogo"/);
  assert.match(html,/id="authOfflineBtn"/);
  assert.match(html,/overflow-y:auto;padding:24px;background:#0c0b26/);
 });
