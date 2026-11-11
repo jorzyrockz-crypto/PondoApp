@@ -3790,6 +3790,23 @@ html, body{ overflow-x:hidden !important; max-width:100vw !important; }
 .nav-icon svg{ width:22px !important; height:22px !important; }
 .nav-btn .nav-icon svg{ stroke:var(--nav-color,#6b7280) !important; }
 .nav-btn.active .nav-icon svg{ stroke:#fff !important; }
+/* Animate the newly selected icon without moving the button or changing its hit area. */
+@keyframes nav-icon-select{
+  0%{transform:translateY(2px) scale(.86);opacity:.7}
+  65%{transform:translateY(-2px) scale(1.08);opacity:1}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+@keyframes nav-label-select{
+  from{opacity:.65;transform:translateY(2px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion: no-preference){
+  body:not(.reduce-motion) .bottomnav .nav-btn.active .nav-icon{animation:nav-icon-select 300ms cubic-bezier(.2,.8,.2,1) both}
+  body:not(.reduce-motion) .bottomnav .nav-btn.active .nav-label{animation:nav-label-select 220ms ease-out both}
+}
+@media (prefers-reduced-motion: reduce){
+  .bottomnav button{transition:none !important}
+}
 .icon-btn svg{ stroke:#475569 !important; } .present-btn svg{ stroke:#fff !important; } .fab svg{ stroke:#fff !important; } .close-btn svg{ stroke:#475569 !important; }
 .tx-icon{ display:grid !important; place-items:center !important; } .tx-icon svg{ width:20px !important; height:20px !important; }
 .fund-icon{ display:inline-grid !important; place-items:center !important; width:44px !important; height:44px !important; border-radius:14px !important; flex-shrink:0 !important; }
