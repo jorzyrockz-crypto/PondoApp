@@ -4479,6 +4479,24 @@ body.dark-mode #appHeaderLogo,body.dark-mode #authGateLogo{background:#1c1c1c!im
  @media(min-width:768px) and (max-width:900px){.fab{bottom:106px!important;right:24px!important}}
 }
 
+/* Keep the final content reachable above the dock and quick-add button. */
+@media screen{
+ main.wrap{padding-bottom:calc(180px + env(safe-area-inset-bottom, 0px))!important}
+ .fab{bottom:calc(104px + env(safe-area-inset-bottom, 0px))!important}
+ @media(min-width:600px){
+  .bottomnav{width:min(580px,calc(100% - 24px))!important}
+ }
+ /* Blur only where supported, with the existing opaque surface as fallback. */
+ @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body:not(.dark-mode) .bottomnav{background:rgba(255,255,255,.82)!important;background:color-mix(in srgb,var(--accent-strong) 6%,rgba(255,255,255,.82))!important}
+  body.dark-mode .bottomnav{background:rgba(16,21,24,.82)!important;background:color-mix(in srgb,var(--accent-strong) 8%,rgba(16,21,24,.82))!important}
+ }
+}
+@media screen and (prefers-reduced-transparency:reduce), screen and (prefers-contrast:more){
+ body:not(.dark-mode) .bottomnav{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ body.dark-mode .bottomnav{background:#101518!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
+
 /* Firebase auth gate */
 .auth-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px;background:#0c0b26 url('assets/branding/login-landscape.jpg') center/cover no-repeat;}
 @media (orientation:portrait){.auth-gate{background-image:url('assets/branding/login-portrait.jpg');}}
@@ -6947,6 +6965,20 @@ if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)')
 setInterval(()=>{if(appSettings.appearance.mode==='auto') applyAppearance();if(document.getElementById('tab-dashboard').style.display!=='none'&&!document.getElementById('dashboardContributionCards').contains(document.activeElement))renderContributionDashboard();updateBackupReminder();updateDataSafetyWarnings();if(window.checkReminderNotifications)window.checkReminderNotifications();},60000);
 
 document.addEventListener('keydown', e=>{ if(document.getElementById('presentation').style.display!=='none'){ if(e.key==='ArrowRight') nextSlide(); if(e.key==='ArrowLeft') prevSlide(); if(e.key==='Escape') closePresentation(); } });
+// Installed-app shortcuts only navigate to existing sections; they never create records. They are
+// applied after the local tracker is ready, so authentication, workspace loading
+// and the single-tab guard cannot be bypassed. Unknown values do nothing.
+function applyAppShortcut(){
+ let url;try{url=new URL(location.href)}catch(e){return}
+ const value=url.searchParams.get('shortcut');
+ const allowed=['funds','projects','contributions','refunds','report'];
+ if(!allowed.includes(value))return;
+ switchTab(value);
+ const heading=document.querySelector('#tab-'+value+' h1,#tab-'+value+' h2');
+ if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true})}
+ url.searchParams.delete('shortcut');
+ try{history.replaceState(history.state,'',url.toString())}catch(e){/* navigation still succeeded */}
+}
 // Only one upgraded tracker tab may edit this browser origin at a time when Web Locks is available.
 // This guard (and the "another tab is open" lock contention it can report) only matters once
 // there is actual local tracker data to protect, i.e. once the user is signed in - started from
@@ -6963,7 +6995,7 @@ window.startTabGuard=(function(){
  const box=document.createElement('div');box.style.cssText='width:min(100%,480px);background:white;border:1px solid #ccd9d0;border-radius:18px;padding:24px;font:15px/1.5 system-ui,sans-serif';box.innerHTML='<h1 id="tabGuardTitle" style="font-size:20px;margin:0 0 12px">Opening tracker…</h1><p class="tab-guard-message">Checking whether another tab is editing these records.</p><div class="tab-guard-actions"></div>';gate.appendChild(box);
  const blocked=[...document.body.children].filter(el=>el!==gate&&el.id!=='authGate'&&el.tagName!=='SCRIPT').map(el=>[el,el.inert]);blocked.forEach(([el])=>el.inert=true);document.body.appendChild(gate);
  const show=(title,message,action,label)=>{box.querySelector('h1').textContent=title;box.querySelector('p').textContent=message;let button=document.createElement('button');button.type='button';button.textContent=label;button.style.cssText='padding:12px 16px;border:0;border-radius:10px;background:#087f5b;color:white;font-weight:700;cursor:pointer';button.onclick=action;box.querySelector('.tab-guard-actions').appendChild(button);button.focus()};
- const openUI=()=>{blocked.forEach(([el,was])=>el.inert=was);gate.remove();renderAll();syncSettingsUI();applyAppearance();window.trackerReady=true;
+ const openUI=()=>{blocked.forEach(([el,was])=>el.inert=was);gate.remove();renderAll();syncSettingsUI();applyAppearance();window.trackerReady=true;applyAppShortcut();
   try{
    // "Used the app a bit" = has at least one real record - skip the install
    // nudge for a brand-new, still-empty account.
