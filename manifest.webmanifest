@@ -2,7 +2,7 @@
   "name": "Pondo — Fund Tracker",
   "short_name": "Pondo",
   "description": "Track and manage your funds with Pondo.",
-  "id": "/",
+  "id": "/PondoApp/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -7,7 +7,9 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v64';
+const CACHE_VERSION = 'pondo-v65';
+// Cache Storage is shared by every app on this origin. Only prune our own versions.
+const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
   './',
   './index.html',
@@ -93,7 +95,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_VERSION)
+          .filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION)
           .map((key) => caches.delete(key))
       )
     ).then(() => self.clients.claim())
@@ -116,7 +118,7 @@ self.addEventListener('fetch', (event) => {
     const appRoot = new URL('./', self.location.href).pathname;
     const appIndex = new URL('./index.html', self.location.href).pathname;
     if (!isSameOrigin || (url.pathname !== appRoot && url.pathname !== appIndex)) {
-      event.respondWith(fetch(request).catch(() => caches.match(request)));
+      event.respondWith(fetch(request).catch(() => caches.open(CACHE_VERSION).then(cache => cache.match(request))));
       return;
     }
     event.respondWith(
@@ -126,14 +128,14 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_VERSION).then((cache) => cache.put('./index.html', copy));
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.open(CACHE_VERSION).then(cache => cache.match('./index.html')))
     );
     return;
   }
 
   if (isSameOrigin || isRuntimeCacheable) {
     event.respondWith(
-      caches.match(request).then((cached) => {
+      caches.open(CACHE_VERSION).then(cache => cache.match(request)).then((cached) => {
         if (cached) return cached;
         return fetch(request, isRuntimeCacheable ? { mode: 'cors' } : undefined).then((response) => {
           if (response && response.status === 200) {
