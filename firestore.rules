@@ -63,7 +63,9 @@ service cloud.firestore {
     // ---- organizations ----
     match /organizations/{orgId} {
       allow read: if isMember(orgId);
-      allow create: if signedIn() && request.resource.data.createdBy == uid();
+      allow create: if signedIn() && request.resource.data.createdBy == uid()
+                    && !exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()))
+                    && getAfter(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid())).data.role == 'owner';
       allow update, delete: if isOwner(orgId);
 
       match /members/{memberId} {
@@ -71,20 +73,29 @@ service cloud.firestore {
         // membership doc (even if it doesn't exist, e.g. after being removed).
         allow read: if isMember(orgId) || (signedIn() && memberId == uid());
 
-        // Case 1: becoming the owner of a brand-new org you just created.
+        // Bootstrap the creator only in the same atomic write as a new org.
         allow create: if signedIn() && memberId == uid()
+                       && request.resource.data.uid == uid()
                        && request.resource.data.role == 'owner'
-                       && get(/databases/$(database)/documents/organizations/$(orgId)).data.createdBy == uid();
+                       && !exists(/databases/$(database)/documents/organizations/$(orgId))
+                       && getAfter(/databases/$(database)/documents/organizations/$(orgId)).data.createdBy == uid();
 
-        // Case 2: joining via a valid, unexpired, unused-up invite whose
-        // role matches exactly what the invite grants.
+        // Redeeming an invite must atomically consume one use. getAfter ties
+        // membership creation to the counter update in the same transaction.
         allow create: if signedIn() && memberId == uid()
+                       && request.resource.data.uid == uid()
+                       && request.resource.data.inviteCode is string
+                       && request.resource.data.role in ['reviewer', 'disbursing', 'project-manager']
                        && request.resource.data.role == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.role
                        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.orgId == orgId
-                       && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.revoked != true
+                       && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.revoked == false
+                       && (get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt == null
+                           || request.time < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt)
                        && (get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses == null
                            || get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
-                              < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses);
+                              < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses)
+                       && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
+                          == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount + 1;
 
         allow update: if isOwner(orgId);
         allow delete: if isOwner(orgId) || (signedIn() && memberId == uid());
@@ -92,7 +103,20 @@ service cloud.firestore {
 
       match /data/{docId} {
         allow read: if isMember(orgId);
-        allow write: if canEditData(orgId);
+        // Old clients performed unconditional snapshot writes. Reject them and
+        // require a monotonic revision, including on the first legacy upgrade.
+        // Clients must still use a transaction: rules cannot prove they did.
+        allow create: if docId == 'snapshot' && canEditData(orgId)
+                      && request.resource.data._syncRevision is int
+                      && request.resource.data._syncRevision == 1
+                      && request.resource.data.updatedBy == uid();
+        allow update: if docId == 'snapshot' && canEditData(orgId)
+                      && resource.data.get('_syncRevision', 0) is int
+                      && resource.data.get('_syncRevision', 0) >= 0
+                      && request.resource.data._syncRevision is int
+                      && request.resource.data._syncRevision == resource.data.get('_syncRevision', 0) + 1
+                      && request.resource.data.updatedBy == uid();
+        allow delete: if false;
       }
     }
 
@@ -102,13 +126,21 @@ service cloud.firestore {
       // they are a member of the target org).
       allow get: if signedIn();
       allow list: if false;
-      allow create: if signedIn() && request.resource.data.createdBy == uid() && isOwner(request.resource.data.orgId);
-      // A joining member may only increment usedCount by exactly 1 and may
-      // not change anything else about the invite.
+      allow create: if signedIn() && request.resource.data.createdBy == uid() && isOwner(request.resource.data.orgId)
+                    && request.resource.data.role in ['reviewer', 'disbursing', 'project-manager']
+                    && request.resource.data.usedCount == 0 && request.resource.data.revoked == false
+                    && (request.resource.data.maxUses == null || (request.resource.data.maxUses is int && request.resource.data.maxUses > 0))
+                    && (request.resource.data.expiresAt == null || request.resource.data.expiresAt is timestamp);
+      // The same transaction must create the caller's matching membership.
       allow update: if signedIn()
                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount'])
                      && request.resource.data.usedCount == resource.data.usedCount + 1
-                     && (resource.data.maxUses == null || resource.data.usedCount < resource.data.maxUses);
+                     && resource.data.revoked == false
+                     && (resource.data.expiresAt == null || request.time < resource.data.expiresAt)
+                     && (resource.data.maxUses == null || resource.data.usedCount < resource.data.maxUses)
+                     && !exists(/databases/$(database)/documents/organizations/$(resource.data.orgId)/members/$(uid()))
+                     && getAfter(/databases/$(database)/documents/organizations/$(resource.data.orgId)/members/$(uid())).data.inviteCode == code
+                     && getAfter(/databases/$(database)/documents/organizations/$(resource.data.orgId)/members/$(uid())).data.role == resource.data.role;
       allow delete: if signedIn() && isOwner(resource.data.orgId);
     }
 

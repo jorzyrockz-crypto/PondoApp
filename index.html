@@ -5052,6 +5052,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
               </div>
               <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
               <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
+              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>An unconfirmed team draft was found on this device. Download and verify it before discarding it. It has not been merged with the team copy.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button></div>
             </div>
             <div class="team-card" id="teamInviteCard" hidden>
               <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
@@ -5248,8 +5249,16 @@ function blankWorkspaceSnapshot(){return {org:{name:'Your organization',location
 // Per-workspace local cache, so switching between "Personal (this device)" and
 // any organization you belong to doesn't lose or mix up each one's data.
 window.pondoWorkspace={
-  save(key){try{localStorage.setItem('ft_ws_cache:'+key,JSON.stringify(currentSnapshot()))}catch(e){/* non-fatal: best-effort cache */}},
-  load(key){try{const raw=localStorage.getItem('ft_ws_cache:'+key);return raw?JSON.parse(raw):null}catch(e){return null}},
+  save(key){try{const serialized=JSON.stringify(currentSnapshot());localStorage.setItem('ft_ws_cache:'+key,serialized);return localStorage.getItem('ft_ws_cache:'+key)===serialized}catch(e){return false}},
+  async flush(){await trackerQueue;return !trackerFatal && !trackerPending},
+  load(key){
+    const raw=localStorage.getItem('ft_ws_cache:'+key);
+    if(raw===null)return null;
+    const value=JSON.parse(raw);
+    const arrays=['funds','txs','sigs','projects','allocations','payables','auditLog','contributionActivities','contributors','contributionPayments'];
+    if(!value||typeof value!=='object'||Array.isArray(value)||!value.org||typeof value.org!=='object'||Array.isArray(value.org)||arrays.some(k=>!Array.isArray(value[k])))throw new Error('Invalid workspace cache');
+    return value;
+  },
   blank:blankWorkspaceSnapshot,
 };
 (function seedPersonalWorkspaceCache(){
@@ -5262,7 +5271,7 @@ window.pondoWorkspace={
 function downloadCurrentSnapshot(){let x={...currentSnapshot(),appSettings,exportedAt:new Date().toISOString()},url=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='Pondo_Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function showFatalSave(error){if(trackerFatal)return;trackerFatal=true;storageWarningOpen=true;let veil=document.createElement('section');veil.setAttribute('role','alertdialog');veil.setAttribute('aria-modal','true');veil.style.cssText='position:fixed;inset:0;z-index:10000;background:#f5f7f5;color:#17231d;display:flex;align-items:center;justify-content:center;padding:20px';let box=document.createElement('div');box.style.cssText='width:min(100%,520px);background:white;padding:24px;border-radius:18px;font:15px/1.5 system-ui';let title=document.createElement('h1');title.textContent='Changes could not be saved';let msg=document.createElement('p');msg.textContent=(error?.name==='StorageConflict'?'Another copy changed the stored records. ':'Storage is unavailable or full. ')+'Current changes may only exist in memory. Export a backup before reloading; do not continue editing.';let b=document.createElement('button');b.textContent='Export current data, including unsaved changes';b.style.cssText='padding:12px;background:#087f5b;color:white;border:0;border-radius:10px';b.onclick=downloadCurrentSnapshot;box.append(title,msg,b);veil.append(box);[...document.body.children].filter(el=>el.tagName!=='SCRIPT').forEach(el=>el.inert=true);document.body.append(veil);veil.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();b.focus()}});b.focus()}
 function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);try{const wsKey=window.pondoGuestMode?'offline-guest':(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(snap))}catch(e){/* non-fatal */}trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
-window.addEventListener('beforeunload',e=>{if(trackerPending){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{const team=window.pondoTeamState;if(trackerPending||(team&&team.orgId&&(team.pushTimer||team.pushesInFlight||team.syncError))){e.preventDefault();e.returnValue=''}});
 function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(currentSnapshot()))}catch(cacheErr){/* non-fatal */}return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
 // appSettings (defined further down, in the APP SETTINGS section) is read
 // here by reference at call time, not at parse time -- fmt() itself is
@@ -7248,7 +7257,8 @@ import {
   deleteDoc,
   onSnapshot,
   serverTimestamp,
-  increment
+  writeBatch,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -7400,7 +7410,15 @@ const pondoTeamState = {
   unsubOrgDoc: null,
   unsubData: null,
   lastSyncedJSON: null,
+  lastSyncedRevision: 0,
   pushTimer: null,
+  pushesInFlight: 0,
+  dirty: false,
+  pendingSnapshot: null,
+  baselineReady: false,
+  recoveryLocked: false,
+  syncError: false,
+  listenerError: false,
   online: navigator.onLine,
 };
 window.pondoTeamState = pondoTeamState;
@@ -7450,23 +7468,31 @@ function canWriteOrgData() {
 
 function applyRoleUI() {
   const isReviewer = pondoTeamState.orgId && pondoTeamState.role === 'reviewer';
-  document.body.classList.toggle('role-reviewer', !!isReviewer);
+  const recoveryLocked = pondoTeamState.orgId && pondoTeamState.recoveryLocked;
+  document.body.classList.toggle('role-reviewer', !!(isReviewer || recoveryLocked));
   const banner = document.getElementById('reviewerBanner');
-  if (banner) banner.hidden = !isReviewer;
+  if (banner) {
+    banner.hidden = !(isReviewer || recoveryLocked);
+    banner.textContent = recoveryLocked ? 'Unconfirmed team draft found. Open Settings → Team to download it before discarding or reloading.' : "Reviewer access — you can view this organization's data but cannot make changes.";
+  }
 }
 
 function setSyncBadge(mode) {
-  // mode: 'live' | 'offline' | 'none'
+  // Do not let a connectivity event or panel rerender hide a failed write.
+  if (mode === 'live' && (pondoTeamState.syncError || pondoTeamState.listenerError)) mode = 'error';
   const badge = document.getElementById('teamSyncBadge');
   const text = document.getElementById('teamSyncStatusText');
   if (!badge || !text) return;
   badge.classList.remove('live', 'offline');
   if (mode === 'live') {
     badge.classList.add('live');
-    text.textContent = 'Connected — syncing in real time';
+    text.textContent = 'Online — cloud sync is not guaranteed';
+  } else if (mode === 'error') {
+    badge.classList.add('offline');
+    text.textContent = 'Sync error — records may be outdated or unshared. Back up your data.';
   } else if (mode === 'offline') {
     badge.classList.add('offline');
-    text.textContent = 'Offline — changes will sync when reconnected';
+    text.textContent = 'Offline — cloud sync is not confirmed';
   } else {
     text.textContent = 'Not connected';
   }
@@ -7503,7 +7529,7 @@ function updateHeaderTeamBadge() {
     text.textContent = hasOtherOrgs ? 'Personal · Switch' : 'Solo · Add team';
   } else {
     const roleLabel = ROLE_LABELS[pondoTeamState.role] || '';
-    badge.title = 'Shared with your team. Tap to switch workspace or manage members.';
+    badge.title = 'Network status only, not proof of sync. Tap to switch workspace or manage members.';
     text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
     if (avatarBtn) avatarBtn.classList.add(navigator.onLine ? 'live' : 'offline');
@@ -7529,35 +7555,97 @@ function buildTeamFacepileHtml(members) {
   }).join('') + (members.length > max ? '<span class="team-collab-more" title="' + (members.length - max) + ' more member' + (members.length - max === 1 ? '' : 's') + '">+' + (members.length - max) + '</span>' : '');
 }
 
-function schedulePush(snapshotArg) {
-  if (!canWriteOrgData()) return;
-  // This save was triggered by us applying an incoming remote update, not by
-  // a genuine local edit — don't echo it straight back to Firestore.
-  if (window.__pondoSuppressFeedback) return;
-  clearTimeout(pondoTeamState.pushTimer);
-  pondoTeamState.pushTimer = setTimeout(() => doPush(snapshotArg), 500);
+// Compare document contents, not property insertion order. Metadata is not
+// part of the financial snapshot and server timestamps are not comparable.
+function stableSnapshotJSON(value) {
+  const sort = v => Array.isArray(v) ? v.map(sort) : v && typeof v === 'object'
+    ? Object.keys(v).sort().reduce((out, key) => { out[key] = sort(v[key]); return out; }, {}) : v;
+  return JSON.stringify(sort(value));
+}
+function sharedSnapshotData(data) {
+  const { updatedAt, updatedBy, writerClientId, _syncRevision, ...rest } = data;
+  return rest;
+}
+function sharedSnapshotRevision(data) {
+  const revision = data && data._syncRevision !== undefined ? data._syncRevision : 0;
+  if (!Number.isSafeInteger(revision) || revision < 0 || revision >= Number.MAX_SAFE_INTEGER) throw new Error('Invalid team snapshot revision');
+  return revision;
+}
+function teamDraftKey(uid, orgId) { return 'ft_team_draft:' + uid + ':' + orgId; }
+function flagTeamSaveError(message) {
+  const firstFailure = !pondoTeamState.syncError;
+  pondoTeamState.syncError = true;
+  setSyncBadge('error');
+  if (firstFailure) notify(message + ' Export a backup before reloading or switching.');
 }
 
-async function doPush(snapshotArg) {
-  if (!canWriteOrgData()) return;
-  let local;
-  try {
-    local = snapshotArg || (window.currentSnapshot ? window.currentSnapshot() : null);
-  } catch (e) { local = null; }
+function schedulePush(snapshotArg) {
+  if (!canWriteOrgData() || window.__pondoApplyingRemote || pondoTeamState.recoveryLocked) return;
+  const local = snapshotArg || (window.currentSnapshot && window.currentSnapshot());
   if (!local) return;
-  const stripped = stripHeavyFields(local);
-  const json = JSON.stringify(stripped);
-  if (json === pondoTeamState.lastSyncedJSON) return;
+  const json = stableSnapshotJSON(stripHeavyFields(local));
+  if (!pondoTeamState.dirty && pondoTeamState.baselineReady && json === pondoTeamState.lastSyncedJSON) return;
+  pondoTeamState.dirty = true;
+  pondoTeamState.pendingSnapshot = local;
   try {
-    await setDoc(doc(firestoreDb, 'organizations', pondoTeamState.orgId, 'data', 'snapshot'), {
-      ...stripped,
-      updatedAt: serverTimestamp(),
-      updatedBy: pondoTeamState.uid,
-      writerClientId: CLIENT_ID,
+    const key = teamDraftKey(pondoTeamState.uid, pondoTeamState.orgId);
+    const raw = JSON.stringify({ ...local, exportedAt: new Date().toISOString() });
+    localStorage.setItem(key, raw);
+    if (localStorage.getItem(key) !== raw) throw new Error('Draft verification failed');
+  } catch (e) {
+    flagTeamSaveError('The local team draft could not be stored safely; changes were not sent.');
+    return;
+  }
+  if (!pondoTeamState.baselineReady) {
+    flagTeamSaveError('The team copy was not confirmed before editing; changes were not sent.');
+    return;
+  }
+  if (pondoTeamState.syncError) return;
+  clearTimeout(pondoTeamState.pushTimer);
+  const orgId = pondoTeamState.orgId;
+  pondoTeamState.pushTimer = setTimeout(() => {
+    pondoTeamState.pushTimer = null;
+    if (pondoTeamState.orgId === orgId) doPush();
+  }, 500);
+}
+
+async function doPush() {
+  if (!canWriteOrgData() || pondoTeamState.syncError || pondoTeamState.pushesInFlight || !pondoTeamState.pendingSnapshot) return;
+  const orgId = pondoTeamState.orgId, uid = pondoTeamState.uid;
+  const stripped = stripHeavyFields(pondoTeamState.pendingSnapshot);
+  const json = stableSnapshotJSON(stripped), baseline = pondoTeamState.lastSyncedJSON, baselineRevision = pondoTeamState.lastSyncedRevision;
+  pondoTeamState.pendingSnapshot = null;
+  pondoTeamState.pushesInFlight++;
+  try {
+    const ref = doc(firestoreDb, 'organizations', orgId, 'data', 'snapshot');
+    await runTransaction(firestoreDb, async transaction => {
+      const server = await transaction.get(ref);
+      const data = server.exists() ? server.data() : null;
+      const serverJSON = data ? stableSnapshotJSON(sharedSnapshotData(data)) : null;
+      if (serverJSON !== baseline || sharedSnapshotRevision(data) !== baselineRevision) throw new Error('Team snapshot changed since it was loaded');
+      transaction.set(ref, { ...stripped, _syncRevision: baselineRevision + 1, updatedAt: serverTimestamp(), updatedBy: uid, writerClientId: CLIENT_ID });
     });
-    pondoTeamState.lastSyncedJSON = json;
+    if (pondoTeamState.orgId === orgId && pondoTeamState.uid === uid) {
+      pondoTeamState.lastSyncedJSON = json;
+      pondoTeamState.lastSyncedRevision = baselineRevision + 1;
+      if (!pondoTeamState.syncError && !pondoTeamState.pendingSnapshot) {
+        try {
+          localStorage.removeItem(teamDraftKey(uid, orgId));
+          pondoTeamState.dirty = false;
+        } catch (e) { flagTeamSaveError('The saved draft could not be cleared after sync.'); }
+      }
+      setSyncBadge(navigator.onLine ? 'live' : 'offline');
+    }
   } catch (err) {
+    if (pondoTeamState.orgId === orgId && pondoTeamState.uid === uid) {
+      flagTeamSaveError('Team sync stopped because the server copy changed or could not be reached. Local changes have not been confirmed.');
+    } else {
+      notify('A team save failed after leaving the workspace. Return to it and back up your data.');
+    }
     console.warn('Cloud sync push failed:', err);
+  } finally {
+    pondoTeamState.pushesInFlight--;
+    if (pondoTeamState.orgId === orgId && pondoTeamState.uid === uid && pondoTeamState.pendingSnapshot && !pondoTeamState.syncError) doPush();
   }
 }
 
@@ -7569,17 +7657,45 @@ function teardownOrgSubscriptions() {
   if (pondoTeamState.unsubData) { pondoTeamState.unsubData(); pondoTeamState.unsubData = null; }
 }
 
+function handleTeamListenerError(orgId, label, err) {
+  console.warn(label + ' listener error:', err);
+  if (pondoTeamState.orgId !== orgId) return;
+  const firstFailure = !pondoTeamState.listenerError;
+  pondoTeamState.listenerError = true;
+  setSyncBadge('error');
+  if (firstFailure) notify('Team updates are unavailable. Your data may be out of date. Export a backup and check your connection and access.');
+}
+
 function subscribeToOrg(orgId) {
   teardownOrgSubscriptions();
   pondoTeamState.orgId = orgId;
   pondoTeamState.lastSyncedJSON = null;
+  pondoTeamState.lastSyncedRevision = 0;
+  pondoTeamState.baselineReady = false;
+  pondoTeamState.recoveryLocked = false;
+  pondoTeamState.dirty = false;
+  pondoTeamState.pendingSnapshot = null;
+  pondoTeamState.syncError = false;
+  pondoTeamState.listenerError = false;
+  try {
+    if (localStorage.getItem(teamDraftKey(pondoTeamState.uid, orgId)) !== null) {
+      pondoTeamState.recoveryLocked = true;
+      pondoTeamState.dirty = true;
+      flagTeamSaveError('An unconfirmed team draft was found. Download it from Settings → Team.');
+    }
+  } catch (e) {
+    pondoTeamState.recoveryLocked = true;
+    pondoTeamState.dirty = true;
+    flagTeamSaveError('Local draft storage cannot be read.');
+  }
+  applyRoleUI();
   setSyncBadge(navigator.onLine ? 'live' : 'offline');
 
   pondoTeamState.unsubOrgDoc = onSnapshot(doc(firestoreDb, 'organizations', orgId), (snap) => {
     if (!snap.exists()) { handleRemovedFromOrg(); return; }
     pondoTeamState.orgName = snap.data().name || 'Organization';
     renderTeamPanel();
-  }, (err) => console.warn('Org doc listener error:', err));
+  }, (err) => handleTeamListenerError(orgId, 'Organization', err));
 
   pondoTeamState.unsubMembers = onSnapshot(collection(firestoreDb, 'organizations', orgId, 'members'), (snap) => {
     const members = [];
@@ -7623,21 +7739,43 @@ function subscribeToOrg(orgId) {
     // or while the dropdown happens to be open) -- keep the open dropdown's
     // teammate facepile in sync instead of leaving it stuck empty/stale.
     if (window.refreshTeamSwitcherMenuIfOpen) window.refreshTeamSwitcherMenuIfOpen();
-  }, (err) => console.warn('Members listener error:', err));
+  }, (err) => handleTeamListenerError(orgId, 'Members', err));
 
-  pondoTeamState.unsubData = onSnapshot(doc(firestoreDb, 'organizations', orgId, 'data', 'snapshot'), (snap) => {
+  pondoTeamState.unsubData = onSnapshot(doc(firestoreDb, 'organizations', orgId, 'data', 'snapshot'), { includeMetadataChanges: true }, (snap) => {
+    // A cached snapshot is not a safe base for a transaction. Do not replace
+    // a local draft until a server-confirmed snapshot has been received.
+    if (snap.metadata.fromCache || snap.metadata.hasPendingWrites) return;
+    const data = snap.exists() ? snap.data() : null;
+    if (data && data.writerClientId === CLIENT_ID && pondoTeamState.pushesInFlight) return;
+    let incomingRevision;
+    try { incomingRevision = sharedSnapshotRevision(data); }
+    catch (e) {
+      pondoTeamState.dirty = true;
+      flagTeamSaveError('The team snapshot has an invalid revision and cannot be opened safely.');
+      return;
+    }
+    const rest = data ? sharedSnapshotData(data) : null;
+    const incomingJSON = rest ? stableSnapshotJSON(rest) : null;
+    if (pondoTeamState.dirty) {
+      if (!pondoTeamState.baselineReady || incomingJSON !== pondoTeamState.lastSyncedJSON || incomingRevision !== pondoTeamState.lastSyncedRevision) {
+        clearTimeout(pondoTeamState.pushTimer);
+        pondoTeamState.pushTimer = null;
+        flagTeamSaveError('The team copy changed while local edits were pending. Local changes were kept on this device and not automatically merged.');
+      }
+      return;
+    }
+    pondoTeamState.baselineReady = true;
+    pondoTeamState.lastSyncedRevision = incomingRevision;
     setSyncBadge(navigator.onLine ? 'live' : 'offline');
-    if (!snap.exists()) return;
-    const data = snap.data();
-    if (data.writerClientId === CLIENT_ID) return; // our own echo
-    const { updatedAt, updatedBy, writerClientId, ...rest } = data;
+    if (!data) { pondoTeamState.lastSyncedJSON = null; return; }
+    const updatedBy = data.updatedBy;
     // Captured before being overwritten below -- lets us diff record counts
     // against what we last applied, to describe what a teammate changed.
     // Will be falsy on the first snapshot after subscribing (reset to null
     // in subscribeToOrg()), which correctly skips the notification for the
     // initial sync instead of describing the whole workspace as "new".
     const prevJSON = pondoTeamState.lastSyncedJSON;
-    pondoTeamState.lastSyncedJSON = JSON.stringify(rest);
+    pondoTeamState.lastSyncedJSON = incomingJSON;
     const merged = reattachLocalImages(rest);
     if (window.applySnapshot && window.renderAll) {
       // Applying this remote update runs through the same renderAll()/saveAll()
@@ -7646,10 +7784,12 @@ function subscribeToOrg(orgId) {
       // try to echo this exact data straight back to Firestore. Suppress all
       // of that for updates that originated elsewhere.
       window.__pondoSuppressFeedback = true;
+      window.__pondoApplyingRemote = true;
       try {
         window.applySnapshot(merged);
         window.renderAll();
       } finally {
+        window.__pondoApplyingRemote = false;
         setTimeout(() => { window.__pondoSuppressFeedback = false; }, 50);
       }
       if (prevJSON && window.pushNotification) {
@@ -7679,7 +7819,7 @@ function subscribeToOrg(orgId) {
         } catch (e) { /* non-fatal: skip the notification if diffing failed */ }
       }
     }
-  }, (err) => console.warn('Org data listener error:', err));
+  }, (err) => handleTeamListenerError(orgId, 'Organization data', err));
 }
 
 // Switches which workspace's data is loaded: 'personal' for this device's
@@ -7691,8 +7831,32 @@ async function switchActiveWorkspace(key) {
   const current = pondoTeamState.orgId || 'personal';
   if (key === current) { if (window.closeTeamSwitcher) window.closeTeamSwitcher(); if (window.closeHeaderAvatarMenu) window.closeHeaderAvatarMenu(); return; }
   if (!window.pondoWorkspace || !window.applySnapshot || !window.renderAll) return;
-
-  window.pondoWorkspace.save(current); // keep a local copy of the workspace we're leaving
+  if (pondoTeamState.pushTimer || pondoTeamState.pushesInFlight || pondoTeamState.dirty) {
+    notify('A team save is awaiting confirmation. Wait before switching workspaces. If it remains pending, export a backup before leaving or reloading.');
+    return;
+  }
+  // The transactional store contains only the active workspace. Never replace
+  // it until its pending writes are complete and the outgoing workspace cache
+  // has actually been stored; otherwise a quota error can silently lose data.
+  if (!await window.pondoWorkspace.flush()) {
+    notify('Local saving failed. Export a backup before switching workspaces.');
+    return;
+  }
+  // State may have changed while the local save queue was draining.
+  if ((pondoTeamState.orgId || 'personal') !== current || pondoTeamState.pushTimer || pondoTeamState.pushesInFlight || pondoTeamState.dirty) {
+    notify('A save or workspace switch is in progress. Please try again.');
+    return;
+  }
+  let cached;
+  try { cached = window.pondoWorkspace.load(key); }
+  catch (err) {
+    notify('The destination workspace cache could not be read. No workspace was switched. Do not clear browser data; export a backup and seek help.');
+    return;
+  }
+  if (!window.pondoWorkspace.save(current)) {
+    notify('Could not save this workspace on this device. Export a backup and free browser storage before switching.');
+    return;
+  }
 
   teardownOrgSubscriptions();
   pondoTeamState.role = null;
@@ -7704,11 +7868,12 @@ async function switchActiveWorkspace(key) {
   applyRoleUI();
 
   window.__pondoSuppressFeedback = true;
+  window.__pondoApplyingRemote = true;
   try {
-    const cached = window.pondoWorkspace.load(key);
     window.applySnapshot(cached || window.pondoWorkspace.blank());
     window.renderAll();
   } finally {
+    window.__pondoApplyingRemote = false;
     setTimeout(() => { window.__pondoSuppressFeedback = false; }, 50);
   }
 
@@ -7822,12 +7987,14 @@ async function createOrganization() {
   if (!user) return;
   try {
     const orgRef = doc(collection(firestoreDb, 'organizations'));
-    await setDoc(orgRef, { name, createdBy: user.uid, createdAt: serverTimestamp() });
-    await setDoc(doc(firestoreDb, 'organizations', orgRef.id, 'members', user.uid), {
+    const batch = writeBatch(firestoreDb);
+    batch.set(orgRef, { name, createdBy: user.uid, createdAt: serverTimestamp() });
+    batch.set(doc(firestoreDb, 'organizations', orgRef.id, 'members', user.uid), {
       uid: user.uid, role: 'owner', email: user.email || null,
       displayName: user.displayName || null, photoURL: user.photoURL || null,
       joinedAt: serverTimestamp(),
     });
+    await batch.commit();
     pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, orgRef.id]));
     await setDoc(doc(firestoreDb, 'users', user.uid), {
       orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgRef.id,
@@ -7844,27 +8011,30 @@ async function joinWithInviteCode(code) {
   const user = window.pondoCurrentUser;
   if (!user) throw new Error('Not signed in.');
   const inviteRef = doc(firestoreDb, 'invites', code);
-  const inviteSnap = await getDoc(inviteRef);
-  if (!inviteSnap.exists()) throw new Error('Invite code not found.');
-  const invite = inviteSnap.data();
-  if (invite.revoked) throw new Error('This invite has been revoked.');
-  if (invite.expiresAt && invite.expiresAt.toMillis && invite.expiresAt.toMillis() < Date.now()) throw new Error('This invite has expired.');
-  if (invite.maxUses != null && (invite.usedCount || 0) >= invite.maxUses) throw new Error('This invite has already been used.');
-
-  const alreadyMember = pondoTeamState.orgMemberships.includes(invite.orgId);
-  if (!alreadyMember) {
-    await setDoc(doc(firestoreDb, 'organizations', invite.orgId, 'members', user.uid), {
-      uid: user.uid, role: invite.role, email: user.email || null,
-      displayName: user.displayName || null, photoURL: user.photoURL || null,
-      joinedAt: serverTimestamp(), inviteCode: code,
-    });
-    try { await updateDoc(inviteRef, { usedCount: increment(1) }); } catch (e) { /* non-fatal */ }
-    pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, invite.orgId]));
-  }
+  const orgId = await runTransaction(firestoreDb, async (transaction) => {
+    const inviteSnap = await transaction.get(inviteRef);
+    if (!inviteSnap.exists()) throw new Error('Invite code not found.');
+    const invite = inviteSnap.data();
+    if (invite.revoked) throw new Error('This invite has been revoked.');
+    if (invite.expiresAt && invite.expiresAt.toMillis && invite.expiresAt.toMillis() <= Date.now()) throw new Error('This invite has expired.');
+    const memberRef = doc(firestoreDb, 'organizations', invite.orgId, 'members', user.uid);
+    const memberSnap = await transaction.get(memberRef);
+    if (!memberSnap.exists()) {
+      if (invite.maxUses != null && (invite.usedCount || 0) >= invite.maxUses) throw new Error('This invite has already been used.');
+      transaction.set(memberRef, {
+        uid: user.uid, role: invite.role, email: user.email || null,
+        displayName: user.displayName || null, photoURL: user.photoURL || null,
+        joinedAt: serverTimestamp(), inviteCode: code,
+      });
+      transaction.update(inviteRef, { usedCount: invite.usedCount + 1 });
+    }
+    return invite.orgId;
+  });
+  pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, orgId]));
   await setDoc(doc(firestoreDb, 'users', user.uid), {
-    orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: invite.orgId,
+    orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgId,
   }, { merge: true });
-  await switchActiveWorkspace(invite.orgId);
+  await switchActiveWorkspace(orgId);
   await refreshMemberships();
 }
 
@@ -8009,6 +8179,8 @@ function renderTeamPanel() {
   document.getElementById('teamOrgName').textContent = pondoTeamState.orgName || 'Organization';
   const roleLabels = { owner: 'Owner', disbursing: 'Disbursing Officer', reviewer: 'Reviewer (read-only)', 'project-manager': 'Project Manager' };
   document.getElementById('teamMyRole').textContent = roleLabels[pondoTeamState.role] || pondoTeamState.role || '—';
+  const draftRecovery = document.getElementById('teamDraftRecovery');
+  if (draftRecovery) draftRecovery.hidden = !pondoTeamState.recoveryLocked;
   setSyncBadge(navigator.onLine ? 'live' : 'offline');
 
   const inviteCard = document.getElementById('teamInviteCard');
@@ -8075,7 +8247,28 @@ function renderTeamPanel() {
   }
 }
 
+function downloadTeamDraft() {
+  try {
+    const raw = localStorage.getItem(teamDraftKey(pondoTeamState.uid, pondoTeamState.orgId));
+    if (raw === null) throw new Error('Draft not found');
+    const url = URL.createObjectURL(new Blob([raw], { type: 'application/json' }));
+    const a = document.createElement('a'); a.href = url; a.download = 'Pondo_Unsynced_Team_Draft.json'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    notify('Draft download started. Verify and store the file securely before discarding the draft.');
+  } catch (e) { notify('Could not read the saved draft. Do not clear browser data; seek help.'); }
+}
+async function discardTeamDraft() {
+  if (!pondoTeamState.recoveryLocked || !pondoTeamState.orgId) return;
+  if (!await confirmAction('Discard this device’s unconfirmed team draft and reload the team copy? Changes not present in the team copy will be lost. Only continue after downloading and verifying your draft backup.')) return;
+  try {
+    localStorage.removeItem(teamDraftKey(pondoTeamState.uid, pondoTeamState.orgId));
+    location.reload();
+  } catch (e) { notify('Could not remove the draft. Do not clear browser data; seek help.'); }
+}
+
 window.pondoTeam = {
+  downloadDraft: downloadTeamDraft,
+  discardDraft: discardTeamDraft,
   createOrganization,
   joinWithPastedInput,
   generateInvite,
@@ -8286,6 +8479,11 @@ authSignInBtn.addEventListener('click', handleSignIn);
 // renderHeaderAvatarMenu above), so there's one place that actually calls
 // Firebase's signOut().
 async function handlePondoSignOut() {
+  if (pondoTeamState.orgId && (pondoTeamState.pushTimer || pondoTeamState.pushesInFlight)) {
+    notify('A team save is awaiting confirmation. Wait before signing out. If it remains pending, export a backup before leaving or reloading.');
+    return;
+  }
+  if (pondoTeamState.orgId && pondoTeamState.syncError && !await confirmAction('A team save failed and may not be shared. Export a backup before signing out. Sign out anyway?')) return;
   try {
     await signOut(auth);
   } catch (err) {
