@@ -4613,7 +4613,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
     </button>
     <p id="authStatusText" class="auth-status-text" aria-live="polite"></p>
     <p id="authError" class="auth-error" role="alert" hidden></p>
-    <p id="authManualFallback" class="auth-manual-fallback" hidden>Still nothing after a few seconds? <button type="button" id="authManualFallbackBtn" class="auth-manual-fallback-btn">Open sign-in in your browser</button> instead, then come back and reopen this app — it will pick up the signed-in session.</p>
+    <p id="authManualFallback" class="auth-manual-fallback" hidden>Still nothing after a few seconds? <button type="button" id="authManualFallbackBtn" class="auth-manual-fallback-btn">Open Pondo in your browser</button> and sign in there. You can then try reopening this app in the same browser profile; sessions may not be shared on every device.</p>
   </div>
 </div>
 <div id="pondoApp" inert>
@@ -8020,76 +8020,84 @@ function showAuthError(message) {
   authError.textContent = message;
 }
 
-// An installed/standalone PWA window cannot host the Google sign-in popup:
-// there is no window.opener for it to report back to, so signInWithPopup()
-// either hangs forever (notably on iOS home-screen apps) or rejects with an
-// error code this app wasn't already watching for (e.g. on Android WebAPKs).
-// Detect that case up front and go straight to the redirect flow instead of
-// waiting for a popup attempt that was never going to resolve.
+// Desktop installed Chrome apps can open an OAuth popup. Redirects through
+// firebaseapp.com may lose their state when cross-site storage is restricted,
+// so prefer the popup there as we do in a regular browser. Mobile standalone
+// apps retain the existing redirect flow, where popups may not be supported.
 function isStandalonePwa() {
   try {
-    if (window.navigator.standalone) return true; // iOS "Add to Home Screen"
-    if (document.referrer && document.referrer.startsWith('android-app://')) return true; // Android TWA
+    if (window.navigator.standalone) return true;
+    if (document.referrer && document.referrer.startsWith('android-app://')) return true;
     if (window.matchMedia && ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay']
       .some(mode => window.matchMedia('(display-mode: ' + mode + ')').matches)) return true;
-  } catch (e) { /* matchMedia/navigator quirks: fall through to popup */ }
+  } catch (e) { /* fall through */ }
   return false;
 }
-
-// Safety net: whichever path handleSignIn takes (popup or redirect) is
-// expected to either hand off to Google within a couple of seconds or
-// report an error. If neither happens - some installed-app/browser
-// combinations silently stall instead of rejecting - surface a manual
-// escape hatch rather than leaving the sign-in button looking inert.
-let signInWatchdog = null;
+function isMobileStandalonePwa() {
+  const nav=window.navigator;
+  return isStandalonePwa() && (/Android|iPhone|iPad|iPod/i.test(nav.userAgent || '') ||
+    (nav.platform==='MacIntel' && nav.maxTouchPoints>1) || !!nav.standalone);
+}
+const REDIRECT_PENDING_KEY='ft_auth_redirect_pending';
+function setRedirectPending(pending){
+  try { if(pending) sessionStorage.setItem(REDIRECT_PENDING_KEY,'1'); else sessionStorage.removeItem(REDIRECT_PENDING_KEY); } catch(e) { /* storage may be unavailable */ }
+}
+function hasPendingRedirect(){ try { return sessionStorage.getItem(REDIRECT_PENDING_KEY)==='1'; } catch(e) { return false; } }
+let signInWatchdog = null, signInPending = false;
 function armSignInWatchdog() {
   clearTimeout(signInWatchdog);
   authManualFallback.hidden = true;
   signInWatchdog = setTimeout(() => { authManualFallback.hidden = false; }, 3500);
 }
-function disarmSignInWatchdog() {
-  clearTimeout(signInWatchdog);
-}
+function disarmSignInWatchdog() { clearTimeout(signInWatchdog); }
 authManualFallbackBtn?.addEventListener('click', () => {
   window.open(location.href, '_blank', 'noopener');
 });
-
+function failSignIn(message){
+  signInPending=false;
+  disarmSignInWatchdog();
+  setGateBusy(false, '');
+  showAuthError(message);
+  authManualFallback.hidden=false;
+}
+async function startSignInRedirect(){
+  setRedirectPending(true);
+  setGateBusy(true, 'Redirecting to Google sign-in…');
+  try { await signInWithRedirect(auth, googleProvider); }
+  catch(err){ setRedirectPending(false); throw err; }
+}
 async function handleSignIn() {
-  authError.hidden = true;
+  if(signInPending)return;
+  authError.hidden=true;
+  signInPending=true;
   armSignInWatchdog();
-  if (isStandalonePwa()) {
-    try {
-      setGateBusy(true, 'Redirecting to Google sign-in…');
-      await signInWithRedirect(auth, googleProvider);
-    } catch (err) {
-      disarmSignInWatchdog();
-      setGateBusy(false, '');
-      showAuthError('Sign-in failed: ' + (err && err.message ? err.message : 'Please try again.'));
-      authManualFallback.hidden = false;
-    }
+  if(isMobileStandalonePwa()){
+    try { await startSignInRedirect(); }
+    catch(err) { failSignIn('Sign-in failed: '+(err?.message || 'Please try again.')); }
     return;
   }
   setGateBusy(true, 'Opening Google sign-in…');
   try {
     await signInWithPopup(auth, googleProvider);
-    disarmSignInWatchdog();
-  } catch (err) {
-    const code = err && err.code;
-    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
-      try {
-        setGateBusy(true, 'Redirecting to Google sign-in…');
-        await signInWithRedirect(auth, googleProvider);
-        return;
-      } catch (redirectErr) {
-        err = redirectErr;
-      }
-    }
+    signInPending=false;
     disarmSignInWatchdog();
     setGateBusy(false, '');
-    if (code !== 'auth/cancelled-popup-request' && code !== 'auth/popup-closed-by-user') {
-      showAuthError('Sign-in failed: ' + (err && err.message ? err.message : 'Please try again.'));
-      authManualFallback.hidden = false;
+  } catch(err) {
+    const code=err?.code;
+    if(code==='auth/cancelled-popup-request'||code==='auth/popup-closed-by-user'){
+      signInPending=false; disarmSignInWatchdog(); setGateBusy(false, ''); return;
     }
+    if(code==='auth/popup-blocked'||code==='auth/operation-not-supported-in-this-environment'){
+      // Do not silently switch desktop installed apps to the redirect flow
+      // that may return to the gate without a session.
+      if(isStandalonePwa()){
+        failSignIn('Google sign-in could not open. Allow pop-ups for Pondo in Chrome, then try again, or use the browser link below.');
+        return;
+      }
+      try { await startSignInRedirect(); return; }
+      catch(redirectErr) { err=redirectErr; }
+    }
+    failSignIn('Sign-in failed: '+(err?.message || 'Please try again.'));
   }
 }
 
@@ -8113,10 +8121,34 @@ signOutMenuItem?.addEventListener('click', () => {
   handlePondoSignOut();
 });
 
-getRedirectResult(auth).catch((err) => console.warn('Redirect sign-in error:', err));
+// Firebase can resolve a failed cross-origin redirect with no result rather
+// than throwing. Report that only when this tab actually initiated a redirect.
+const redirectWasPending=hasPendingRedirect();
+if(redirectWasPending){
+  signInPending=true;
+  setGateBusy(true, 'Finishing Google sign-in…');
+  armSignInWatchdog();
+}
+getRedirectResult(auth).then(async result=>{
+  if(!redirectWasPending)return;
+  if(typeof auth.authStateReady==='function') await auth.authStateReady();
+  setRedirectPending(false);
+  if(!result && !auth.currentUser){
+    failSignIn('Google sign-in returned without a session. Try again, or open Pondo in your browser. Your browser may be blocking cross-site sign-in storage.');
+  } else {
+    signInPending=false;
+    disarmSignInWatchdog();
+    setGateBusy(false, '');
+  }
+}).catch(err=>{
+  setRedirectPending(false);
+  console.warn('Redirect sign-in error:', err);
+  failSignIn('Google sign-in could not finish: '+(err?.message || 'Please try again.'));
+});
 
 onAuthStateChanged(auth, (user) => {
-  disarmSignInWatchdog();
+  if(user){ signInPending=false; setRedirectPending(false); disarmSignInWatchdog(); }
+  else if(!signInPending) disarmSignInWatchdog();
   const headerAvatarBtn = document.getElementById('headerAvatarBtn');
   const headerAvatarImg = document.getElementById('headerAvatarImg');
   const headerAvatarInitial = document.getElementById('headerAvatarInitial');
@@ -8155,7 +8187,7 @@ onAuthStateChanged(auth, (user) => {
     const notifBellBtn = document.getElementById('notifBellBtn');
     if (notifBellBtn) notifBellBtn.hidden = true;
     if (window.closeNotifCenter) window.closeNotifCenter();
-    setGateBusy(false, '');
+    if(!signInPending) setGateBusy(false, '');
     window.pondoCurrentUser = null;
     clearTimeout(settingsPushTimer);
     teardownCollaboration();
