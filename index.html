@@ -3772,6 +3772,11 @@ tr:last-child td{border-bottom:none !important}
   text-overflow:ellipsis !important;
 }
 html, body{ overflow-x:hidden !important; max-width:100vw !important; }
+/* A viewport-unit max-width is itself scaled by body zoom and can clip the
+   layout. Let the zoomed body fill its containing block instead. */
+@media screen{
+  body[data-interface-scaled]{width:100% !important;max-width:none !important;min-height:calc(100dvh / var(--interface-scale)) !important}
+}
 @media(max-width:640px){
   .topbar .wrap,
   .topbar-inner{ padding:10px 16px !important; gap:10px !important; }
@@ -6637,34 +6642,17 @@ function applyAppearance(){
   document.body.classList.toggle('match-chart', !!a.matchChart);
   document.body.classList.toggle('reduce-motion', !!appSettings.motion.reduceMotion);
   (function applyScaleZoom(){
-    // CSS zoom scales body's own rendered box, not just its content: at
-    // e.g. 85%, body's box becomes 85% as wide/tall as before, and since
-    // body still only occupies its own (now smaller) box within <html>,
-    // the remaining 15% of the viewport on the right/bottom is left
-    // uncovered -- revealing <html>'s background (a flat tint meant only
-    // as a fallback for the mobile overscroll bounce, see
-    // syncSystemThemeColor below) instead of the app. Compensate by
-    // inflating body's own width/min-height by 1/scale *before* zoom
-    // shrinks it back down, so the rendered box still exactly fills the
-    // viewport at every scale -- the same technique real browser zoom
-    // uses internally. Skipped entirely at 100% so default behavior is
-    // byte-for-byte unchanged.
     const pct=effectiveFontScale(), scale=pct/100;
     document.body.style.zoom=pct+'%';
-    if(scale===1){ document.body.style.removeProperty('width'); document.body.style.removeProperty('min-height'); document.body.style.removeProperty('margin-left'); }
-    else {
-      document.body.style.setProperty('width','calc(100% / '+scale+')','important');
-      document.body.style.setProperty('min-height','calc(100dvh / '+scale+')','important');
-      // Inflating width makes body's own (pre-zoom) box WIDER than <html>
-      // whenever scale<1 -- and a block element wider than its container
-      // can't actually be centered by its own "margin:auto" (the spec
-      // resolves auto margins to 0 when there's no room, so it would just
-      // overflow off the right edge, exactly the "dragged into the left
-      // corner" look). Centering it explicitly with a calculated negative
-      // margin keeps it centered under zoom at any scale, independent of
-      // that overflow/auto-margin edge case, regardless of how inner
-      // elements like .wrap size or center themselves.
-      document.body.style.setProperty('margin-left','calc((100% - (100% / '+scale+')) / 2)','important');
+    // Clear the old compensations, including when upgrading an already-open
+    // page. A negative margin shifts the whole layout away from the viewport.
+    ['width','max-width','min-height','margin-left'].forEach(p=>document.body.style.removeProperty(p));
+    if(scale===1){
+      delete document.body.dataset.interfaceScaled;
+      document.body.style.removeProperty('--interface-scale');
+    } else {
+      document.body.dataset.interfaceScaled='';
+      document.body.style.setProperty('--interface-scale',String(scale));
     }
   })();
   (function scaleDebugOverlay(){
@@ -6688,6 +6676,8 @@ function applyAppearance(){
         +'body.style.zoom: '+document.body.style.zoom+'\n'
         +'body.style.width: '+document.body.style.width+'\n'
         +'body.style.marginLeft: '+document.body.style.marginLeft+'\n'
+        +'body computed width: '+getComputedStyle(document.body).width+'\n'
+        +'body computed maxWidth: '+getComputedStyle(document.body).maxWidth+'\n'
         +'window.innerWidth: '+window.innerWidth+'\n'
         +'devicePixelRatio: '+window.devicePixelRatio+'\n'
         +'visualViewport.scale: '+(window.visualViewport?window.visualViewport.scale:'n/a')+'\n'
