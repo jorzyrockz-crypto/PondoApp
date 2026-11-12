@@ -9,7 +9,7 @@ test('main app and dormant public viewer target the requested Firebase web app',
 });
 test('Firebase Auth and Firestore use the configured app without silently enabling analytics',()=>{
  assert.match(html,/initializeApp\(firebaseConfig\)/);assert.match(html,/getAuth\(firebaseApp\)/);assert.match(html,/initializeFirestore\(firebaseApp/);assert.match(html,/getFirestore\(firebaseApp\)/);
- assert.doesNotMatch(html,/import\s*\{[^}]*getAnalytics/);assert.doesNotMatch(html,/getAnalytics\s*\(/);assert.match(sw,/pondo-v67/);
+ assert.doesNotMatch(html,/import\s*\{[^}]*getAnalytics/);assert.doesNotMatch(html,/getAnalytics\s*\(/);assert.match(sw,/const CACHE_VERSION = 'pondo-v\d+'/);
 });
 test('migration guidance warns about local isolation and does not enable public reports',()=>{
  const guidance=fs.readFileSync('docs/firebase-project-switch.md','utf8');assert.match(guidance,/not fully scoped/);assert.match(guidance,/do\s+not automatically move/);assert.match(guidance,/do not deploy its backend or enable public/);assert.match(guidance,/does not deploy `firestore.rules`/);

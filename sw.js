@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v67';
+const CACHE_VERSION = 'pondo-v68';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
