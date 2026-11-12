@@ -4739,6 +4739,29 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
 #reviewerBanner[hidden]{display:none!important;}
 </style>
 
+
+<style id="mobile-scroll-performance">
+/* Keep touch scrolling on a cheap compositing path. Fixed artwork and
+   backdrop blur force large repaints on Android tablets as the page moves. */
+@media (pointer: coarse), (max-width: 900px) {
+  body[data-background="pondoArtwork"],
+  body[data-background="softWave"] { background-attachment: scroll !important; }
+  .topbar,
+  .bottomnav {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255,255,255,.96) !important;
+  }
+  body.dark-mode .topbar,
+  body.dark-mode .bottomnav { background: rgba(16,21,24,.96) !important; }
+  .hero-stat,
+  .hero.hero--vibrant::after,
+  .hero--vibrant .hero-stat {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="ptrIndicator" class="ptr-indicator" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.1-6.8"/><path d="M21 3v6h-6"/></svg></div>
@@ -7172,7 +7195,7 @@ function applyAppearance(){
   document.body.classList.toggle('density-compact', effectiveDensity()==='compact');
   document.body.classList.toggle('density-extra-compact', effectiveDensity()==='extra-compact');
   document.body.classList.toggle('match-chart', !!a.matchChart);
-  document.body.classList.toggle('reduce-motion', !!appSettings.motion.reduceMotion);
+  document.body.classList.toggle('reduce-motion', !!appSettings.motion.reduceMotion); updateHeroParallax();
   (function applyScaleZoom(){
     const pct=effectiveFontScale(), scale=pct/100;
     document.body.style.zoom=pct+'%';
@@ -7249,7 +7272,23 @@ function animateTotals(){
   function frame(now){if(run!==countRun)return; const t=Math.min(1,(now-started)/duration), eased=1-Math.pow(1-t,3); els.forEach((el,i)=>el.textContent=fmt(Math.round(targets[i]*eased))); if(t<1) requestAnimationFrame(frame); else soundEvent('countFinish');}
   requestAnimationFrame(frame);
 }
-window.addEventListener('scroll',()=>{const hero=document.querySelector('.hero'); if(hero) {hero.style.backgroundSize=appSettings.motion.parallax?'100% 140%':''; hero.style.backgroundPosition=appSettings.motion.parallax && !appSettings.motion.reduceMotion?'center '+Math.min(window.scrollY*.15,80)+'px':'';}},{passive:true});
+let heroParallaxFrame=0;
+function updateHeroParallax(){
+  heroParallaxFrame=0;
+  const hero=document.querySelector('.hero');
+  if(!hero)return;
+  if(!appSettings.motion.parallax || appSettings.motion.reduceMotion){
+    hero.style.backgroundSize='';
+    hero.style.backgroundPosition='';
+    return;
+  }
+  hero.style.backgroundSize='100% 140%';
+  hero.style.backgroundPosition='center '+Math.min(window.scrollY*.15,80)+'px';
+}
+window.addEventListener('scroll',()=>{
+  if(!appSettings.motion.parallax || appSettings.motion.reduceMotion)return;
+  if(!heroParallaxFrame)heroParallaxFrame=requestAnimationFrame(updateHeroParallax);
+},{passive:true});
 function soundEvent(name){ if(appSettings.sound.events[name]) playSound(); }
 function configureSlides(){
   const pref=appSettings.presentation;
