@@ -3,7 +3,7 @@ import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasej
 
 // Only a separate public report document is read here. Private workspace
 // snapshots, members, and user profiles are never accessed by this view.
-const config={apiKey:'AIzaSyCnBYuNlOYUoLKKcaua5nMqnTSlFi4Di80',authDomain:'class-scheduler-63968.firebaseapp.com',projectId:'class-scheduler-63968',storageBucket:'class-scheduler-63968.firebasestorage.app',messagingSenderId:'747294517653',appId:'1:747294517653:web:795a578b113913ee1dae9c'};
+const config={apiKey:'AIzaSyAUh0YYKDexZySfDqgUFS2E_UxMGFw7480',authDomain:'russapps-pondo.firebaseapp.com',projectId:'russapps-pondo',storageBucket:'russapps-pondo.firebasestorage.app',messagingSenderId:'676136086001',appId:'1:676136086001:web:ad131dcf119887da573c50',measurementId:'G-LS0LVDHVMY'};
 const status=document.getElementById('status'),target=document.getElementById('report');
 const params=new URLSearchParams(location.search),id=params.get('id'),requested=params.get('view');
 const views=['funds','projects','contributions'];
