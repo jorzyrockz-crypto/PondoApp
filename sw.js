@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v69';
+const CACHE_VERSION = 'pondo-v70';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -113,9 +113,8 @@ self.addEventListener('fetch', (event) => {
   const isSameOrigin = url.origin === self.location.origin;
   const isRuntimeCacheable = RUNTIME_CACHEABLE_ORIGINS.includes(url.origin);
 
-  // Firebase sign-in helpers are served via a same-origin reverse proxy on
-  // Vercel. They are dynamic auth endpoints, not offline app assets. Let the
-  // browser fetch them directly, including navigations and query strings.
+  // Auth helper endpoints are dynamic, not offline app assets. If a future
+  // host serves them same-origin, let the browser fetch them directly.
   if (isSameOrigin && (url.pathname === '/__/auth' || url.pathname.startsWith('/__/auth/'))) return;
 
   if (request.mode === 'navigate') {
