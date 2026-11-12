@@ -7286,7 +7286,7 @@ function updateHeroParallax(){
   hero.style.backgroundPosition='center '+Math.min(window.scrollY*.15,80)+'px';
 }
 window.addEventListener('scroll',()=>{
-  if(!appSettings.motion.parallax || appSettings.motion.motion.reduceMotion)return;
+  if(!appSettings.motion.parallax || appSettings.motion.reduceMotion)return;
   if(!heroParallaxFrame)heroParallaxFrame=requestAnimationFrame(updateHeroParallax);
 },{passive:true});
 function soundEvent(name){ if(appSettings.sound.events[name]) playSound(); }
