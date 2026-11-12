@@ -8805,9 +8805,10 @@ function showAuthError(message) {
   authError.textContent = message;
 }
 
-// Desktop installed apps use a popup. Mobile standalone apps retain redirects,
-// since popups may not be supported. Cross-site storage restrictions can still
-// prevent a redirect from completing on mobile. See docs/android-pwa-sign-in.md.
+// Use popup sign-in for browsers and installed PWAs. Firebase documents popup
+// sign-in as the alternative when redirect sign-in is affected by blocked
+// cross-site storage. Keep standalone detection only for the clearer fallback
+// message when Android blocks the popup itself.
 function isStandalonePwa() {
   try {
     if (window.navigator.standalone) return true;
@@ -8816,11 +8817,6 @@ function isStandalonePwa() {
       .some(mode => window.matchMedia('(display-mode: ' + mode + ')').matches)) return true;
   } catch (e) { /* fall through */ }
   return false;
-}
-function isMobileStandalonePwa() {
-  const nav=window.navigator;
-  return isStandalonePwa() && (/Android|iPhone|iPad|iPod/i.test(nav.userAgent || '') ||
-    (nav.platform==='MacIntel' && nav.maxTouchPoints>1) || !!nav.standalone);
 }
 const REDIRECT_PENDING_KEY='ft_auth_redirect_pending';
 function setRedirectPending(pending){
@@ -8855,11 +8851,8 @@ async function handleSignIn() {
   authError.hidden=true;
   signInPending=true;
   armSignInWatchdog();
-  if(isMobileStandalonePwa()){
-    try { await startSignInRedirect(); }
-    catch(err) { failSignIn('Sign-in failed: '+(err?.message || 'Please try again.')); }
-    return;
-  }
+  // Popup sign-in avoids the cross-origin redirect-storage dependency
+  // that breaks on some Android installed PWAs.
   setGateBusy(true, 'Opening Google sign-in…');
   try {
     await signInWithPopup(auth, googleProvider);
