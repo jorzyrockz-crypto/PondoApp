@@ -1,46 +1,39 @@
-# Android installed-app Google sign-in on Vercel
+# Google sign-in rollback and Android limitation
 
-The installed mobile app uses Firebase's redirect flow. When Pondo is served
-from `pondoapp.vercel.app` but Firebase's auth helpers are on
-`russapps-pondo.firebaseapp.com`, the browser may block cross-site storage and
-return from sign-in without a session. The message does not prove this is the
-cause: an interrupted redirect, provider setup, or other errors can also fail.
+The same-origin Vercel Firebase Auth change introduced a Google
+`redirect_uri_mismatch` error during desktop sign-in. The redirect in the
+reported error was `https://pondoapp.vercel.app/__/auth/handler`. Because the
+active Google OAuth web client could not be independently verified, this change
+rolls back the Vercel auth-domain override and reverse proxy. Pondo again uses
+`russapps-pondo.firebaseapp.com` as its Firebase auth domain on all hosts.
+This does not modify Firebase project data, local data, or Google Cloud settings.
 
-For this exact HTTPS production host, Pondo uses `pondoapp.vercel.app` as its
-Firebase `authDomain`, and `vercel.json` transparently rewrites `/__/auth/*` to
-the same Firebase project's helpers. The service worker does not intercept or
-cache those paths, and Vercel is configured to return `Cache-Control: no-store`
-for the helper responses. This implements Firebase's reverse proxy approach:
-https://firebase.google.com/docs/auth/web/redirect-best-practices#proxy-requests
+## After deployment
 
-## Required before deploying
+1. Use the installed app's Update action if offered, then close and reopen the
+   app so the updated service worker takes control. Test desktop popup sign-in
+   and sign-out with the same account. This rollback restores the previous
+   configuration, but actual sign-in still depends on Firebase/Google settings
+   and must be tested; success is not guaranteed.
+2. Do not clear site data or uninstall the app to troubleshoot: local-only
+   records, logos and receipts may be lost. Back up anything worth keeping.
+3. Android installed-app sign-in still uses a cross-origin redirect. It can
+   return without a session when third-party storage is restricted. This rollback
+   does not solve that problem. The ordinary browser popup may work, but an
+   installed app and browser may not share a session on every device.
 
-1. In Firebase Authentication for **russapps-pondo**, enable Google sign-in and
-   add `pondoapp.vercel.app` to Authentication → Settings → Authorized domains.
-2. In Google Cloud Console for the same project, APIs & Services → Credentials,
-   find the OAuth 2.0 Web client used by the Firebase Google sign-in provider.
-   Add the exact **authorized redirect URI**
-   `https://pondoapp.vercel.app/__/auth/handler` without removing existing URIs.
-   This is separate from Firebase's authorized domain setting. Confirm the
-   correct OAuth client in the Firebase provider settings; don't change another
-   project's client. No secrets need to be placed in Pondo's source code.
-3. Deploy the app and Vercel rewrite together. Older installed service workers
-   may cache auth helpers; use the app's Update action when offered, then close
-   and reopen Pondo so the new service worker controls it before testing.
-   Don't clear site data or uninstall: local-only records, logos and receipts
-   may be lost. Back up any data worth keeping before testing.
-4. Test on an actual Android phone and tablet: sign in, sign out, then sign in
-   again from the installed app, including account chooser, cancellation and
-   offline/retry cases. Also test Chrome browser and desktop sign-in. Confirm
-   the helper `/__/auth/iframe` is served at the Pondo origin by a transparent
-   rewrite, not an HTTP redirect or cached copy; test with real Firebase/Google
-   credentials. Mock tests do not establish that Vercel or OAuth is configured.
+## Before attempting the Android fix again
 
-The proxy and `authDomain` override apply only to `https://pondoapp.vercel.app`.
-Preview URLs, custom domains and GitHub Pages continue to use the original
-Firebase auth domain; redirect sign-in there can still hit the same storage
-problem and requires separate domain/proxy/OAuth setup. The static Vercel
-rewrite is present on preview deployments, but preview clients don't use it.
-Do not enable incomplete public-report backend or change Firestore rules as
-part of this fix. App account isolation and backup precautions still apply; see
-`firebase-project-switch.md` and `team-sync-rollout.md`.
+- Identify the exact Google OAuth web client used by Firebase Authentication in
+  `russapps-pondo`; do not change another project's client or share secrets.
+  The Firebase Authentication authorized domains list and the Google OAuth
+  client's authorized redirect URIs are separate settings. Confirm the exact
+  URI in Google error details is saved on the correct OAuth client; retain
+  existing authorized URIs. Resolve any Google Cloud validation error first.
+- If returning to a same-origin approach, consult Firebase's documented reverse
+  proxy setup: https://firebase.google.com/docs/auth/web/redirect-best-practices#proxy-requests
+  Test the transparent proxy, OAuth callback, service worker, browser popup and
+  installed Android sign-in/sign-out/sign-in flow on real devices *before*
+  production rollout. A mock unit test or Vercel deployment status is not proof
+  that Google authentication works. Do not enable the incomplete public-report
+  backend or change Firestore rules as part of sign-in troubleshooting.
