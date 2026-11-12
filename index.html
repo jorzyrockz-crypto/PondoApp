@@ -7656,6 +7656,12 @@ const firebaseConfig = {
   measurementId: "G-LS0LVDHVMY"
 };
 
+// Only the production Vercel host has a same-origin /__/auth proxy. Configure
+// its OAuth redirect URI in Google Cloud before deploying this change. Other
+// hosts keep using the Firebase auth domain and need their own setup.
+if (location.protocol === 'https:' && location.hostname === 'pondoapp.vercel.app' && !location.port) {
+  firebaseConfig.authDomain = 'pondoapp.vercel.app';
+}
 // Analytics is intentionally not initialized; a measurement ID alone does not enable it.
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
@@ -8805,10 +8811,9 @@ function showAuthError(message) {
   authError.textContent = message;
 }
 
-// Desktop installed Chrome apps can open an OAuth popup. Redirects through
-// firebaseapp.com may lose their state when cross-site storage is restricted,
-// so prefer the popup there as we do in a regular browser. Mobile standalone
-// apps retain the existing redirect flow, where popups may not be supported.
+// Desktop installed Chrome apps can open an OAuth popup. Mobile standalone
+// apps retain redirects, since popups may not be supported. On the production
+// Vercel host, same-origin auth helpers avoid cross-site redirect storage.
 function isStandalonePwa() {
   try {
     if (window.navigator.standalone) return true;
