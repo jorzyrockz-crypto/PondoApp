@@ -3,11 +3,11 @@ const html=fs.readFileSync('index.html','utf8');
 const source=html.slice(html.indexOf('const defaultAppSettings = {'),html.indexOf('let storedSettings;'));
 const ctx=vm.createContext({CURRENCIES:{PHP:{},USD:{}}});vm.runInContext(source,ctx);
 const normalize=value=>ctx.normalizeSettings(value);
-test('new and partial settings use dark mode, lavender and Pondo Artwork while existing choices remain',()=>{
- const fresh=normalize(null),partial=normalize({appearance:{mode:'light'},version:4}),saved=normalize({appearance:{mode:'light',accent:'teal',background:'softWave'},version:4});
- assert.equal(fresh.appearance.mode,'dark');assert.equal(fresh.appearance.accent,'lavender');assert.equal(fresh.appearance.background,'pondoArtwork');
- assert.equal(partial.appearance.mode,'light');assert.equal(partial.appearance.accent,'lavender');assert.equal(partial.appearance.background,'pondoArtwork');
- assert.equal(saved.appearance.mode,'light');assert.equal(saved.appearance.accent,'teal');assert.equal(saved.appearance.background,'softWave');
+test('new and partial settings use light mode, lavender and Pondo Artwork while existing choices remain',()=>{
+ const fresh=normalize(null),partial=normalize({appearance:{mode:'dark'},version:4}),saved=normalize({appearance:{mode:'dark',accent:'teal',background:'softWave'},version:4});
+ assert.equal(fresh.appearance.mode,'light');assert.equal(fresh.appearance.accent,'lavender');assert.equal(fresh.appearance.background,'pondoArtwork');
+ assert.equal(partial.appearance.mode,'dark');assert.equal(partial.appearance.accent,'lavender');assert.equal(partial.appearance.background,'pondoArtwork');
+ assert.equal(saved.appearance.mode,'dark');assert.equal(saved.appearance.accent,'teal');assert.equal(saved.appearance.background,'softWave');
  assert.doesNotMatch(html,/if\(appSettings\.version<4\)[^\n]*appearance\.(accent|background)/);
 });
 test('optional artwork background uses muted overlays and switches with orientation',()=>{
