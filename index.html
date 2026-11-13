@@ -4772,6 +4772,7 @@ body.role-reviewer .pending-deletion-actions{display:none!important;}
   --school-page: #f1f5f9;
   --school-line: #e2e8f0;
   --school-muted: #64748b;
+  --school-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
   --school-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.05);
   --school-side-w: 15rem;
 }
@@ -5055,7 +5056,10 @@ button,
 input,
 select,
 textarea {
-  font-family: 'Inter', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  font-family: var(--school-font) !important;
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  letter-spacing: -0.01em;
 }
 .font-serif,
 .hero-amount,
@@ -5063,14 +5067,40 @@ textarea {
 .sheet-title,
 .report-title,
 .slide-title {
-  font-family: 'Inter', 'Instrument Sans', system-ui, sans-serif !important;
+  font-family: var(--school-font) !important;
   letter-spacing: -0.025em !important;
+}
+.dashboard-intro h1,
+.tab-section > div:first-child > h2,
+.tab-section > h2,
+#tab-report .report-page-heading h2,
+.app-dialog h2,
+.fab-sheet-card h3 {
+  font-family: var(--school-font) !important;
+  font-synthesis: none;
 }
 .font-mono,
 .hero-stat-value,
 .fund-amount b,
 .tx-amount {
-  font-family: 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace !important;
+  font-family: var(--school-font) !important;
+  font-variant-numeric: tabular-nums;
+}
+.auth-gate-title,
+.auth-offline-note,
+.guest-banner,
+.team-header-badge,
+.header-avatar-initial,
+.avatar-menu-initial,
+.notif-badge,
+.save-status,
+.nav-label {
+  font-family: var(--school-font) !important;
+}
+.nav-label {
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  font-weight: 600 !important;
 }
 .nav-icon {
   width: 1.5rem;
@@ -5409,7 +5439,7 @@ textarea {
     padding: 0 0.875rem !important;
     border-radius: 0.75rem !important;
     color: #64748b !important;
-    font: 650 0.9rem/1.2 'Inter', 'Instrument Sans', system-ui, sans-serif !important;
+    font: 600 0.9rem/1.2 var(--school-font) !important;
     text-align: left !important;
   }
   body .bottomnav .nav-btn.active {
