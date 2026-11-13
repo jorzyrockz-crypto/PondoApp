@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v71';
+const CACHE_VERSION = 'pondo-v72';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -92,13 +92,14 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION)
-          .map((key) => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
+    caches.keys().then(async (keys) => {
+      const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
+      if (obsolete.length) {
+        // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v72', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+      }
+      await Promise.all(obsolete.map((key) => caches.delete(key)));
+    }).then(() => self.clients.claim())
   );
 });
 

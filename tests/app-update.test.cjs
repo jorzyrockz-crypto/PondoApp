@@ -53,3 +53,12 @@ test('a new unsaved edit during confirmation prevents activation',async()=>{
 test('activation while another save starts does not force a reload',async()=>{
   const t=setup();await t.load();await t.buttons.headerUpdateBtn.click();t.ctx.trackerPending=1;t.listeners.controllerchange();assert.equal(t.reloads,0);assert.equal(t.buttons.headerUpdateBtn.hidden,false);
 });
+test('About check uses the existing registration without bypassing confirmation',async()=>{
+ const t=setup();await t.load();let checks=0;t.reg.update=async()=>{checks++};
+ assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'checked');assert.equal(checks,1);assert.equal(t.ctx.window.pondoAppUpdates.available(),true);assert.equal(t.messages.length,0);
+ await t.ctx.window.pondoAppUpdates.apply();assert.equal(t.messages[0].type,'PONDO_ACTIVATE_UPDATE');
+});
+test('About check reports offline and failures without claiming an update is current',async()=>{
+ const t=setup({waiting:false});await t.load();t.ctx.navigator.onLine=false;assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'offline');
+ t.ctx.navigator.onLine=true;t.reg.update=async()=>{throw Error('network')};assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'failed');
+});
