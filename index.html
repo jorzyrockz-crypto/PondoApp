@@ -5495,6 +5495,28 @@ textarea {
     stroke-linecap: round !important;
     stroke-linejoin: round !important;
   }
+  body .bottomnav .nav-more-menu button.active {
+    background: #eef2ff !important;
+    color: #7890b6 !important;
+    font-weight: 700 !important;
+  }
+  body .bottomnav .nav-more-menu button.active .nav-more-icon {
+    color: #6254e8 !important;
+  }
+  body:not(.reduce-motion) .bottomnav .nav-more-menu button.active .nav-more-icon {
+    animation: nav-icon-select 300ms cubic-bezier(.2,.8,.2,1) both;
+  }
+  body:not(.reduce-motion) .bottomnav .nav-more-menu button.active .nav-more-icon svg > * {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: nav-shape-select 300ms cubic-bezier(.2,.8,.2,1) both;
+  }
+  body:not(.reduce-motion) .bottomnav .nav-more-menu button.active .nav-more-icon svg > :nth-child(2) {
+    animation-delay: 35ms;
+  }
+  body:not(.reduce-motion) .bottomnav .nav-more-menu button.active .nav-more-icon svg > :nth-child(3) {
+    animation-delay: 70ms;
+  }
   body .nav-more-menu button:nth-child(1) .nav-more-icon { color: #4f46e5; }
   body .nav-more-menu button:nth-child(2) .nav-more-icon { color: #c95b08; }
   body .nav-more-menu button:nth-child(3) .nav-more-icon { color: #0f766e; }
@@ -5662,6 +5684,40 @@ body.dark-mode .bottomnav .nav-btn.active .nav-icon {
 }
 body.dark-mode .bottomnav .nav-btn.active::before {
   background: #6c5cff !important;
+}
+body.dark-mode .bottomnav .nav-more-menu button.active {
+  background: #f1f4f8 !important;
+  color: #91a5c8 !important;
+}
+body.dark-mode .bottomnav .nav-more-menu button.active .nav-more-icon {
+  filter: none !important;
+}
+body .nav-more-menu button.active {
+  background: #eef2ff !important;
+  color: #7890b6 !important;
+  font-weight: 700 !important;
+  border-radius: 0.75rem !important;
+}
+body .nav-more-menu button.active .nav-more-icon {
+  color: #6254e8 !important;
+}
+body.dark-mode .nav-more-menu button.active {
+  background: #f1f4f8 !important;
+  color: #91a5c8 !important;
+}
+body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon {
+  animation: nav-icon-select 300ms cubic-bezier(.2,.8,.2,1) both;
+}
+body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon svg > * {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nav-shape-select 300ms cubic-bezier(.2,.8,.2,1) both;
+}
+body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon svg > :nth-child(2) {
+  animation-delay: 35ms;
+}
+body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon svg > :nth-child(3) {
+  animation-delay: 70ms;
 }
 body.dark-mode .btn.btn-emerald,
 body.dark-mode .btn:not(.btn-light):not(.btn-secondary) {
@@ -6286,6 +6342,12 @@ function switchTab(tab){
   else section.classList.add('app-'+appSettings.motion.appTransition);
   window.scrollTo(0,0); if(tab==='dashboard'){renderContributionDashboard();requestAnimationFrame(updateFundRailHint);}
 }
+function syncMoreNavSelection(tab){
+  const tabs=['transactions','refunds','report'];
+  document.querySelectorAll('#navMoreMenu button').forEach((button,index)=>button.classList.toggle('active',tabs[index]===tab));
+}
+const pondoSwitchTab=switchTab;
+switchTab=function(tab){pondoSwitchTab(tab);syncMoreNavSelection(tab);};
 // Touch-only section navigation. Horizontal rails, inputs and modal content keep their own gestures.
 (function installSectionSwipe(){
  const order=['dashboard','funds','projects','contributions','transactions','refunds','report'];
