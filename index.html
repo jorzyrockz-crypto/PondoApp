@@ -5402,6 +5402,9 @@ textarea {
     border-right: 1px solid #dbe4ef !important;
     box-shadow: none !important;
   }
+  body:has(#guestBanner:not([hidden])) .bottomnav {
+    top: calc(4.625rem + 2.5rem) !important;
+  }
   body .bottomnav .nav-btn,
   body .bottomnav .nav-btn.active {
     min-height: 3rem !important;
@@ -5538,7 +5541,7 @@ body.dark-mode[data-background="pondoArtwork"] {
 }
 body.dark-mode .topbar,
 body.dark-mode .bottomnav {
-  background: #12284a !important;
+  background: #0f1a30 !important;
   border-color: var(--school-dark-line) !important;
   box-shadow: 0 2px 10px rgb(4 13 29 / 0.24) !important;
 }
@@ -5578,14 +5581,13 @@ body.dark-mode .dashboard-actions-card {
 }
 body.dark-mode .hero,
 body.dark-mode .hero.hero--vibrant {
-  background:
-    radial-gradient(520px 240px at 86% -12%, rgb(255 255 255 / 0.12), transparent 66%),
-    linear-gradient(135deg, #173b8f 0%, #214b9b 58%, #2a5bb2 100%) !important;
-  box-shadow: 0 16px 34px rgb(3 13 33 / 0.34) !important;
+  background: #121f35 !important;
+  border: 1px solid #263b5b !important;
+  box-shadow: 0 12px 28px rgb(3 13 33 / 0.24) !important;
 }
 body.dark-mode .hero-stat {
-  background: rgb(255 255 255 / 0.09) !important;
-  border-color: rgb(194 216 255 / 0.23) !important;
+  background: #182840 !important;
+  border-color: #2a4164 !important;
 }
 body.dark-mode .hero,
 body.dark-mode .hero-label,
@@ -5594,9 +5596,13 @@ body.dark-mode .hero-stat-label,
 body.dark-mode .hero-stat-value {
   color: #f4f7ff !important;
 }
+body.dark-mode .hero-amount {
+  color: #8eb5ff !important;
+}
 body.dark-mode .hero-label,
 body.dark-mode .hero-stat-label {
-  opacity: 0.88 !important;
+  color: #9db0cf !important;
+  opacity: 1 !important;
 }
 body.dark-mode .tx-row,
 body.dark-mode .dashboard-action-row {
@@ -5646,7 +5652,7 @@ body.dark-mode .bottomnav .nav-more-menu button {
   color: #aebed5 !important;
 }
 body.dark-mode .bottomnav .nav-btn.active {
-  background: #28457f !important;
+  background: #272b61 !important;
   color: #f4f7ff !important;
   box-shadow: none !important;
 }
@@ -5655,7 +5661,19 @@ body.dark-mode .bottomnav .nav-btn.active .nav-icon {
   color: #f4f7ff !important;
 }
 body.dark-mode .bottomnav .nav-btn.active::before {
-  background: #9bbcff !important;
+  background: #6c5cff !important;
+}
+body.dark-mode .btn.btn-emerald,
+body.dark-mode .btn:not(.btn-light):not(.btn-secondary) {
+  background: #5b4ae8 !important;
+  border-color: #5b4ae8 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+body.dark-mode .btn.btn-emerald:hover,
+body.dark-mode .btn:not(.btn-light):not(.btn-secondary):hover {
+  background: #6d5cf2 !important;
+  border-color: #6d5cf2 !important;
 }
 body.dark-mode .progress,
 body.dark-mode .bar-track,
