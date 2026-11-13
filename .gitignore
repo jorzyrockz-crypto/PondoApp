@@ -6,3 +6,4 @@ organization-functions/*.log
 
 emulator-tests/node_modules/
 emulator-tests/*-debug.log
+emulator-tests/firestore.generated.rules

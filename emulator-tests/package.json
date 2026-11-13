@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test:firestore": "firebase emulators:exec --project demo-pondo-security --only firestore 'node --test firestore.test.cjs'"
+    "test:firestore": "node prepare.cjs && firebase emulators:exec --project demo-pondo-security --only firestore 'node --test firestore.test.cjs'"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "4.0.1",
