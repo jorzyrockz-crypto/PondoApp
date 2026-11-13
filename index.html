@@ -5686,24 +5686,35 @@ body.dark-mode .bottomnav .nav-btn.active::before {
   background: #6c5cff !important;
 }
 body.dark-mode .bottomnav .nav-more-menu button.active {
-  background: #f1f4f8 !important;
-  color: #91a5c8 !important;
+  background: #272b61 !important;
+  color: #f4f7ff !important;
 }
 body.dark-mode .bottomnav .nav-more-menu button.active .nav-more-icon {
   filter: none !important;
 }
 body .nav-more-menu button.active {
   background: #eef2ff !important;
-  color: #7890b6 !important;
+  color: #4f46e5 !important;
   font-weight: 700 !important;
   border-radius: 0.75rem !important;
+  position: relative !important;
 }
 body .nav-more-menu button.active .nav-more-icon {
   color: #6254e8 !important;
 }
+body .nav-more-menu button.active::before {
+  content: "";
+  position: absolute;
+  top: 0.625rem;
+  bottom: 0.625rem;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #4f46e5;
+}
 body.dark-mode .nav-more-menu button.active {
-  background: #f1f4f8 !important;
-  color: #91a5c8 !important;
+  background: #272b61 !important;
+  color: #f4f7ff !important;
 }
 body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon {
   animation: nav-icon-select 300ms cubic-bezier(.2,.8,.2,1) both;
@@ -5718,6 +5729,13 @@ body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon svg > :nth-
 }
 body:not(.reduce-motion) .nav-more-menu button.active .nav-more-icon svg > :nth-child(3) {
   animation-delay: 70ms;
+}
+body.dark-mode .nav-more-menu button.active .nav-more-icon {
+  color: #6c5cff !important;
+  filter: none !important;
+}
+body.dark-mode .nav-more-menu button.active::before {
+  background: #6c5cff !important;
 }
 body.dark-mode .btn.btn-emerald,
 body.dark-mode .btn:not(.btn-light):not(.btn-secondary) {
