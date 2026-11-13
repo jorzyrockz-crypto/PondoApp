@@ -5308,8 +5308,17 @@ body .hero.hero--vibrant::after {
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.08) !important;
 }
 .btn-emerald {
-  background: #c95b08 !important;
-  box-shadow: 0 4px 10px rgb(201 91 8 / 0.18) !important;
+  background: #4f46e5 !important;
+  box-shadow: 0 4px 10px rgb(79 70 229 / 0.18) !important;
+}
+body .btn.btn-emerald,
+body .btn[class*="emerald"] {
+  background: #4f46e5 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgb(79 70 229 / 0.18) !important;
+}
+body #dashboardRequestRefundBtn {
+  color: #c95b08 !important;
 }
 .input,
 .search-input,
@@ -5358,6 +5367,9 @@ textarea {
   body .bottomnav .nav-btn.active .nav-label,
   body .bottomnav .nav-btn.active .nav-icon {
     color: #4f46e5 !important;
+  }
+  body .bottomnav .nav-btn.active .nav-icon svg {
+    stroke: #4f46e5 !important;
   }
   .bottomnav .nav-label {
     font-size: 0.9rem !important;
