@@ -5378,6 +5378,44 @@ textarea {
     text-transform: none !important;
   }
   .bottomnav .nav-icon { font-size: 1.25rem !important; }
+  /* Landscape has enough room to expose the secondary destinations directly. */
+  .bottomnav .nav-more-wrap {
+    display: block !important;
+  }
+  .bottomnav #navMore {
+    display: none !important;
+  }
+  body .bottomnav .nav-more-menu,
+  body .bottomnav .nav-more-menu[hidden] {
+    position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  body .bottomnav .nav-more-menu button {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 3rem !important;
+    padding: 0 0.875rem !important;
+    border-radius: 0.75rem !important;
+    color: #64748b !important;
+    font: 650 0.9rem/1.2 'Inter', 'Instrument Sans', system-ui, sans-serif !important;
+    text-align: left !important;
+  }
+  body .bottomnav .nav-more-menu button:hover,
+  body .bottomnav .nav-more-menu button:focus-visible {
+    background: #f1f5f9 !important;
+    color: #4f46e5 !important;
+  }
 }
 @media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
   .wrap { max-width: 52rem !important; padding-left: 2rem !important; padding-right: 2rem !important; }
