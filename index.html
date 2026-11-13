@@ -5762,6 +5762,233 @@ body.dark-mode .dashboard-contribution-track span {
 body.dark-mode .nav-more-icon {
   filter: saturate(0.75) brightness(1.15);
 }
+/* Settings workspace: structured navigation and calmer grouped controls. */
+#settingsModal .sheet-backdrop {
+  background: rgb(7 15 31 / 0.58) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+#settingsModal .sheet {
+  background: #fff !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 24px 24px 0 0 !important;
+  box-shadow: 0 -16px 48px rgb(15 23 42 / 0.18) !important;
+}
+#settingsModal .sheet-header {
+  padding: 16px 22px !important;
+  border-color: #dbe4ef !important;
+}
+#settingsModal .sheet-title {
+  font-family: var(--school-font) !important;
+  font-size: 21px !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.025em !important;
+  color: #122e76 !important;
+}
+#settingsModal .sheet-header .close-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #dbe4ef !important;
+}
+#settingsModal [style*="padding:12px 20px 0"] {
+  padding: 14px 20px 0 !important;
+}
+#settingsModal #settingsSearch {
+  height: 44px;
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+  background: #f8fafc !important;
+  border-color: #dbe4ef !important;
+}
+#settingsModal .tabs-pill {
+  background: #f1f5f9 !important;
+  border-radius: 14px !important;
+  padding: 5px !important;
+  gap: 4px !important;
+}
+#settingsModal .tab-pill {
+  min-height: 42px;
+  height: 42px;
+  border-radius: 10px !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  padding: 0 12px !important;
+  color: #64748b !important;
+  font-family: var(--school-font) !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.01em !important;
+}
+#settingsModal .tab-pill svg {
+  stroke: currentColor !important;
+}
+#settingsModal .tab-pill.active {
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+  box-shadow: none !important;
+}
+#settingsModal .sheet-content {
+  padding: 18px 22px 22px !important;
+  background: #f8fafc !important;
+}
+#settingsModal .settings-panel {
+  gap: 14px !important;
+}
+#settingsModal .settings-panel > div:not(.preview-card) {
+  padding: 16px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+}
+#settingsModal .settings-panel > label {
+  padding: 14px 16px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  color: #1e293b !important;
+}
+#settingsModal .preview-card {
+  padding: 18px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #173b8f, #3157b7) !important;
+  box-shadow: 0 10px 24px rgb(18 46 118 / 0.18) !important;
+}
+#settingsModal .settings-panel .opt,
+#settingsModal .settings-panel .bg-option,
+#settingsModal .settings-panel .card-option {
+  min-height: 42px;
+  border-radius: 10px !important;
+  border-color: #dbe4ef !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
+}
+#settingsModal .settings-panel .opt.selected,
+#settingsModal .settings-panel button.selected {
+  background: #eef2ff !important;
+  border-color: #6366f1 !important;
+  color: #4338ca !important;
+  outline: none !important;
+}
+#settingsModal .sheet-footer {
+  padding: 14px 22px calc(14px + env(safe-area-inset-bottom)) !important;
+  background: #fff !important;
+  border-color: #dbe4ef !important;
+}
+#settingsModal .sheet-footer .btn-emerald {
+  background: #5b4ae8 !important;
+  border-color: #5b4ae8 !important;
+  color: #fff !important;
+}
+body.dark-mode #settingsModal .sheet {
+  background: #101b30 !important;
+  border-color: #2b456b !important;
+  box-shadow: 0 -16px 48px rgb(3 13 33 / 0.46) !important;
+}
+body.dark-mode #settingsModal .sheet-header,
+body.dark-mode #settingsModal .sheet-footer {
+  background: #0f1a30 !important;
+  border-color: #2b456b !important;
+}
+body.dark-mode #settingsModal .sheet-title {
+  color: #f3f7ff !important;
+}
+body.dark-mode #settingsModal .sheet-header .close-btn {
+  background: #1d3452 !important;
+  border-color: #2b456b !important;
+}
+body.dark-mode #settingsModal [style*="padding:12px 20px 0"] {
+  background: #0f1a30 !important;
+}
+body.dark-mode #settingsModal #settingsSearch {
+  background: #172942 !important;
+  border-color: #385579 !important;
+  color: #f1f6ff !important;
+}
+body.dark-mode #settingsModal .tabs-pill {
+  background: #172942 !important;
+}
+body.dark-mode #settingsModal .tab-pill {
+  color: #aebed5 !important;
+}
+body.dark-mode #settingsModal .tab-pill.active {
+  background: #272b61 !important;
+  color: #f4f7ff !important;
+}
+body.dark-mode #settingsModal .sheet-content {
+  background: #101b30 !important;
+}
+body.dark-mode #settingsModal .settings-panel > div:not(.preview-card),
+body.dark-mode #settingsModal .settings-panel > label {
+  background: #172942 !important;
+  border-color: #2b456b !important;
+  color: #edf4ff !important;
+}
+body.dark-mode #settingsModal .preview-card {
+  background: linear-gradient(135deg, #272b61, #214b9b) !important;
+  box-shadow: none !important;
+}
+body.dark-mode #settingsModal .settings-panel .opt,
+body.dark-mode #settingsModal .settings-panel .bg-option,
+body.dark-mode #settingsModal .settings-panel .card-option {
+  background: #1d3452 !important;
+  border-color: #385579 !important;
+  color: #c6d4e9 !important;
+}
+body.dark-mode #settingsModal .settings-panel .opt.selected,
+body.dark-mode #settingsModal .settings-panel button.selected {
+  background: #272b61 !important;
+  border-color: #6c5cff !important;
+  color: #f4f7ff !important;
+}
+@media screen and (min-width: 700px) and (orientation: landscape) {
+  #settingsModal .sheet {
+    top: 50% !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    width: min(1000px, calc(100vw - 4rem)) !important;
+    height: min(760px, calc(100dvh - 3rem)) !important;
+    max-height: none !important;
+    transform: translate(-50%, -50%) !important;
+    display: grid !important;
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    border-radius: 24px !important;
+  }
+  #settingsModal #settingsSheetDrag {
+    display: none !important;
+  }
+  #settingsModal .sheet-header {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  #settingsModal [style*="padding:12px 20px 0"] {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 18px 12px !important;
+    border-right: 1px solid #dbe4ef;
+    overflow: auto;
+  }
+  #settingsModal .tabs-pill {
+    flex-direction: column !important;
+    overflow: visible !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  #settingsModal .sheet-content {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 0;
+  }
+  #settingsModal .sheet-footer {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+  body.dark-mode #settingsModal [style*="padding:12px 20px 0"] {
+    border-color: #2b456b;
+  }
+}
 @media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
   .wrap { max-width: 52rem !important; padding-left: 2rem !important; padding-right: 2rem !important; }
   .bottomnav { background: rgb(255 255 255 / 0.98) !important; }
