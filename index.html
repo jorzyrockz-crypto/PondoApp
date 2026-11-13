@@ -5015,6 +5015,39 @@ body:not(.dark-mode) {
 .dark-mode .bottomnav .nav-btn.active .nav-label {
   color: #c7d2fe !important;
 }
+/* Make the refresh win over PONDO's saved vibrant/artwork theme on fresh views. */
+body:not(.dark-mode)[data-background="pondoArtwork"] {
+  background-color: var(--school-page) !important;
+  background-image:
+    radial-gradient(900px 280px at 50% -120px, rgb(67 56 202 / 0.08), transparent 72%),
+    linear-gradient(180deg, #f8fafc 0%, var(--school-page) 34rem) !important;
+  background-attachment: scroll !important;
+}
+body .hero.hero--vibrant {
+  background:
+    radial-gradient(520px 240px at 86% -12%, rgb(255 255 255 / 0.22), transparent 66%),
+    linear-gradient(135deg, var(--school-navy) 0%, #294da8 58%, #3157b7 100%) !important;
+}
+body .hero.hero--vibrant::before {
+  background:
+    radial-gradient(520px 240px at 86% -12%, rgb(255 255 255 / 0.22), transparent 66%),
+    radial-gradient(460px 240px at 8% 112%, rgb(99 102 241 / 0.28), transparent 64%) !important;
+}
+body:not(.dark-mode) .topbar,
+body:not(.dark-mode) .bottomnav {
+  background: rgb(255 255 255 / 0.96) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: var(--school-line) !important;
+}
+body .bottomnav .nav-btn.active {
+  background: var(--school-navy) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 12px rgb(18 46 118 / 0.2) !important;
+}
+body .bottomnav .nav-btn.active .nav-label {
+  color: #fff !important;
+}
 </style>
 
 </head>
@@ -7121,7 +7154,7 @@ const CURRENCIES = {
   ZAR: {symbol:'R', locale:'en-ZA', name:'South African Rand'},
 };
 const defaultAppSettings = {
-  appearance: {mode:'dark', accent:'lavender', background:'pondoArtwork', heroSkin:'classic', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true, currency:'PHP', customCurrencySymbol:''},
+  appearance: {mode:'light', accent:'lavender', background:'pondoArtwork', heroSkin:'classic', cardStyle:'softShadow', density:'comfortable', fontScale:100, dynamicAccent:false, matchChart:true, currency:'PHP', customCurrencySymbol:''},
   sound: {enabled:true, pack:'softPop', volume:70, haptics:false, events:{tabSwitch:true, add:true, delete:true, slideChange:true, countFinish:true, celebrate:true, tap:false}},
   motion: {reduceMotion:false, appTransition:'cinematic', appDuration:'normal', presTransition:'slide', presDuration:'normal', direction:'h', parallax:false, autoAdvance:'off'},
   animation: {countUp:true, countDuration:1.5, easing:'easeOut', chartStagger:100, cardEntrance:'fadeRise', textReveal:'none', confetti:true, confettiIntensity:'med'},
