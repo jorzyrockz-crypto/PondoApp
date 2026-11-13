@@ -7039,6 +7039,24 @@ body.dark-mode #settings-data .sample-data-actions .btn-light { border-color: #3
 @media (prefers-reduced-motion: reduce), body.reduce-motion {
   .nav-more-menu { animation: none !important; }
 }
+/* Let the portrait artwork support the page instead of appearing as a narrow
+   centered strip behind the workspaces. */
+body:not(.dark-mode)[data-background="pondoArtwork"] {
+  background-image:
+    linear-gradient(to bottom, rgb(238 243 249 / .82) 0, rgb(238 243 249 / .92) 18rem, rgb(238 243 249 / .985) 30rem, var(--school-canvas) 40rem),
+    var(--pondo-artwork) !important;
+  background-position: center top, center top !important;
+  background-size: 100% 100%, 100% auto !important;
+  background-repeat: no-repeat !important;
+}
+body.dark-mode[data-background="pondoArtwork"] {
+  background-image:
+    linear-gradient(to bottom, rgb(16 27 47 / .82) 0, rgb(16 27 47 / .92) 18rem, rgb(16 27 47 / .985) 30rem, var(--school-dark-canvas) 40rem),
+    var(--pondo-artwork) !important;
+  background-position: center top, center top !important;
+  background-size: 100% 100%, 100% auto !important;
+  background-repeat: no-repeat !important;
+}
 </style>
 
 </head>
