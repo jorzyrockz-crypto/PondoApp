@@ -5350,9 +5350,6 @@ textarea {
     border-right: 1px solid #dbe4ef !important;
     box-shadow: none !important;
   }
-  body:has(#guestBanner:not([hidden])) .bottomnav {
-    top: calc(4.625rem + 2.5rem) !important;
-  }
   body .bottomnav .nav-btn,
   body .bottomnav .nav-btn.active {
     min-height: 3rem !important;
@@ -5406,6 +5403,7 @@ textarea {
   body .bottomnav .nav-more-menu button {
     display: flex !important;
     align-items: center !important;
+    gap: 0.75rem !important;
     width: 100% !important;
     min-height: 3rem !important;
     padding: 0 0.875rem !important;
@@ -5414,6 +5412,37 @@ textarea {
     font: 650 0.9rem/1.2 'Inter', 'Instrument Sans', system-ui, sans-serif !important;
     text-align: left !important;
   }
+  body .bottomnav .nav-btn.active {
+    position: relative !important;
+  }
+  body .bottomnav .nav-btn.active::before {
+    content: "";
+    position: absolute;
+    top: 0.625rem;
+    bottom: 0.625rem;
+    left: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: #4f46e5;
+  }
+  .nav-more-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+  }
+  .nav-more-icon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    stroke: currentColor !important;
+    stroke-width: 2.25 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+  body .nav-more-menu button:nth-child(1) .nav-more-icon { color: #4f46e5; }
+  body .nav-more-menu button:nth-child(2) .nav-more-icon { color: #c95b08; }
+  body .nav-more-menu button:nth-child(3) .nav-more-icon { color: #0f766e; }
   body .bottomnav .nav-more-menu button:hover,
   body .bottomnav .nav-more-menu button:focus-visible {
     background: #f1f5f9 !important;
@@ -5642,7 +5671,7 @@ textarea {
   <button class="nav-btn" data-tab="funds" onclick="switchTab('funds')"><span class="nav-icon" style="--nav-color:#059669"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></span><span class="nav-label">Funds</span></button>
   <button class="nav-btn" data-tab="projects" onclick="switchTab('projects')"><span class="nav-icon" style="--nav-color:#f59e0b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="nav-label">Projects</span></button>
   <button class="nav-btn" data-tab="contributions" onclick="switchTab('contributions')"><span class="nav-icon" style="--nav-color:#0284c7"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/><path d="M19 4v6M16 7h6"/></svg></span><span class="nav-label">Contributions</span></button>
-  <div class="nav-more-wrap"><button class="nav-btn nav-more" id="navMore" type="button" aria-expanded="false" aria-controls="navMoreMenu" onclick="toggleNavMore()"><span class="nav-icon" style="--nav-color:#64748b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span><span class="nav-label">More</span></button><div id="navMoreMenu" class="nav-more-menu" hidden><button type="button" onclick="switchTab('transactions')">Transactions</button><button type="button" onclick="switchTab('refunds')">Refund History</button><button type="button" onclick="switchTab('report')">Reports</button></div></div>
+  <div class="nav-more-wrap"><button class="nav-btn nav-more" id="navMore" type="button" aria-expanded="false" aria-controls="navMoreMenu" onclick="toggleNavMore()"><span class="nav-icon" style="--nav-color:#64748b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span><span class="nav-label">More</span></button><div id="navMoreMenu" class="nav-more-menu" hidden><button type="button" onclick="switchTab('transactions')"><span class="nav-more-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16v18l-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1V3Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>Transactions</span></button><button type="button" onclick="switchTab('refunds')"><span class="nav-more-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16v18l-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1V3Z"/><path d="M8 8h8M8 12h4"/><path d="M15 16a3 3 0 1 0-2.1-5.1"/></svg></span><span>Refund History</span></button><button type="button" onclick="switchTab('report')"><span class="nav-more-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><rect x="8" y="12" width="3" height="4" rx="1"/><rect x="13" y="9" width="3" height="7" rx="1"/><rect x="18" y="6" width="3" height="10" rx="1"/></svg></span><span>Reports</span></button></div></div>
 </nav>
 <div id="fabSheet" class="fab-sheet no-print" role="dialog" aria-modal="true" aria-label="Add transaction, fund, or project"><div class="fab-sheet-backdrop" onclick="closeFabSheet()"></div><div class="fab-sheet-card" id="fabSheetPanel"><div class="drag" id="fabSheetDrag" style="margin:8px auto"></div><h3 style="font-family:Fraunces,serif; font-size:18px; margin:4px 0 12px">Add</h3><div class="fab-tabs-row" style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap"><button class="btn btn-light" id="fabTab-tx" style="flex:1" onclick="fabShowForm('tx')">Transaction</button><button class="btn btn-light" id="fabTab-fund" style="flex:1" onclick="fabShowForm('fund')">Fund</button><button class="btn btn-light" id="fabTab-project" style="flex:1" onclick="fabShowForm('project')">Project</button><button type="button" class="btn btn-light fab-tab-refund" style="flex:1" onclick="closeFabSheet();openRefundRequest()">Refund</button></div><div class="fab-sheet-body"><div id="fabForm-tx" class="fab-form"><input id="fabTxDesc" class="input" placeholder="Description" aria-label="Transaction description" list="txDescriptionSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" style="margin-bottom:8px"><p class="funding-note">Descriptions are suggested from this workspace; you can type your own.</p><input id="fabTxAmt" type="number" class="input" placeholder="Amount (PHP)" style="margin-bottom:8px"><input id="fabTxDate" type="date" class="input" aria-label="Transaction date" style="margin-bottom:8px"><input id="fabTxCategory" class="input" placeholder="Category (optional)" aria-label="Transaction category" style="margin-bottom:8px"><input id="fabTxPayee" class="input" placeholder="Paid to / received from" aria-label="Payee or payer" style="margin-bottom:8px"><input id="fabTxReceipt" class="input" placeholder="Receipt or reference number" aria-label="Receipt number" style="margin-bottom:8px"><input id="fabTxMethod" class="input" placeholder="Payment method (optional)" aria-label="Payment method" style="margin-bottom:8px"><input id="fabTxNotes" class="input" placeholder="Notes (optional)" aria-label="Transaction notes" style="margin-bottom:8px"><label class="receipt-label">Receipt image (optional, max 5 MB)<input id="fabTxImage" type="file" accept="image/png,image/jpeg,image/webp"></label><select id="fabTxType" class="input" onchange="syncTxProjectChoices()" aria-label="Transaction type" style="margin-bottom:8px"><option value="OUT">Expense</option><option value="IN">Income</option></select><select id="fabTxFund" class="input" aria-label="Fund source" style="margin-bottom:8px" onchange="syncTxProjectChoices()"></select><select id="fabTxProject" class="input" aria-label="Project (optional)" style="margin-bottom:6px" onchange="updateTxFundingNote()"></select><p id="txFundingNote" class="funding-note"></p><button class="btn btn-emerald" style="width:100%; height:48px" onclick="fabSaveTx()">Save Transaction</button></div><div id="fabForm-fund" class="fab-form" style="display:none"><input id="fabFundName" class="input" placeholder="Fund Name" style="margin-bottom:8px"><input id="fabFundAmt" type="number" class="input" placeholder="Initial Amount (PHP)" style="margin-bottom:8px"><input id="fabFundDate" type="date" class="input" aria-label="Date received" style="margin-bottom:8px"><input id="fabFundPurpose" class="input" placeholder="Purpose (optional)" style="margin-bottom:8px"><select id="fabFundColor" class="input" aria-label="Card color" style="margin-bottom:12px"><option value="">Automatic color</option><option value="emerald">Emerald</option><option value="blue">Blue</option><option value="violet">Violet</option><option value="amber">Amber</option><option value="teal">Teal</option><option value="rose">Rose</option></select><button class="btn btn-emerald" style="width:100%; height:48px" onclick="fabSaveFund()">Save Fund</button></div><div id="fabForm-project" class="fab-form" style="display:none"><input id="fabProjectName" class="input" placeholder="Project Name" aria-label="Project name" list="projectNameSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" style="margin-bottom:8px"><input id="fabProjectSeries" class="input" placeholder="Recurring program / series (optional)" style="margin-bottom:8px"><input id="fabProjectCycle" class="input" placeholder="Edition or year (optional)" style="margin-bottom:8px"><input id="fabProjectDescription" class="input" placeholder="Description (optional)" aria-label="Project description" list="projectDescriptionSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" style="margin-bottom:8px"><p class="funding-note">Project names and descriptions are suggested from this workspace.</p><input id="fabProjectBudget" class="input" type="number" min="0" step="0.01" placeholder="Target budget (optional)" style="margin-bottom:8px"><select id="fabProjectStatus" class="input" aria-label="Project status" style="margin-bottom:12px"><option>Planning</option><option>Active</option><option>Completed</option><option>On hold</option></select><button class="btn btn-emerald" style="width:100%; height:48px" onclick="fabSaveProject()">Save Project</button></div></div><button class="btn btn-light" style="width:100%; height:48px; margin-top:8px" onclick="closeFabSheet()">Cancel</button></div></div><button class="fab no-print" id="fab" onclick="handleFab()"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
 
