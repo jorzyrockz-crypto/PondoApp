@@ -5329,12 +5329,17 @@ textarea {
   body { padding-left: var(--school-side-w) !important; }
   .topbar {
     margin-left: calc(-1 * var(--school-side-w)) !important;
-    padding-left: var(--school-side-w) !important;
+    padding-left: 0 !important;
+    width: calc(100% + var(--school-side-w)) !important;
   }
   .bottomnav {
+    top: 4.625rem !important;
     width: var(--school-side-w) !important;
     background: #fff !important;
     border-right: 1px solid #dbe4ef !important;
+  }
+  body:has(#guestBanner:not([hidden])) .bottomnav {
+    top: calc(4.625rem + 2.5rem) !important;
   }
   body .bottomnav .nav-btn,
   body .bottomnav .nav-btn.active {
