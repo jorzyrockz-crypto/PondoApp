@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Receipt files are separate from the Firestore snapshot. These rules are a
+// deployment candidate, not a substitute for emulator and production checks.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function memberPath(orgId) {
+      return /databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid);
+    }
+    function member(orgId) {
+      return request.auth != null && firestore.exists(memberPath(orgId))
+        && firestore.get(memberPath(orgId)).data.role in ['owner', 'disbursing', 'project-manager', 'reviewer'];
+    }
+    function editor(orgId) {
+      return member(orgId)
+        && firestore.get(memberPath(orgId)).data.role in ['owner', 'disbursing', 'project-manager'];
+    }
+    function validId(id) {
+      return id.matches('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+    }
+    match /organizations/{orgId}/receipts/{receiptId} {
+      // No list: users retrieve a specific object only after the record points
+      // to it. Membership is checked on every request, not via bearer URLs.
+      allow get: if member(orgId) && validId(receiptId);
+      allow list: if false;
+      // Immutable objects: only editors may create, with limited size/types
+      // and no custom metadata other than the content digest. Rules cannot
+      // inspect file bytes; clients must verify the digest and content.
+      allow create: if editor(orgId) && validId(receiptId)
+        && request.resource.size > 0 && request.resource.size <= 1048576
+        && request.resource.contentType in ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
+        && request.resource.metadata.keys().hasOnly(['sha256'])
+        && request.resource.metadata.sha256.matches('^[0-9a-f]{64}$');
+      allow update, delete: if false;
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

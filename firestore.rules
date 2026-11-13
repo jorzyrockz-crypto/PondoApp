@@ -63,22 +63,15 @@ service cloud.firestore {
     // ---- organizations ----
     match /organizations/{orgId} {
       allow read: if isMember(orgId);
-      allow create: if signedIn() && request.resource.data.createdBy == uid()
-                    && !exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()))
-                    && getAfter(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid())).data.role == 'owner';
-      allow update, delete: if isOwner(orgId);
+      // Organization creation, naming and discovery are managed exclusively
+      // by the trusted organization functions after the registry migration.
+      // Old clients must update before these rules are deployed.
+      allow create, update, delete: if false;
 
       match /members/{memberId} {
         // Members can list each other; a user can always check their own
         // membership doc (even if it doesn't exist, e.g. after being removed).
         allow read: if isMember(orgId) || (signedIn() && memberId == uid());
-
-        // Bootstrap the creator only in the same atomic write as a new org.
-        allow create: if signedIn() && memberId == uid()
-                       && request.resource.data.uid == uid()
-                       && request.resource.data.role == 'owner'
-                       && !exists(/databases/$(database)/documents/organizations/$(orgId))
-                       && getAfter(/databases/$(database)/documents/organizations/$(orgId)).data.createdBy == uid();
 
         // Redeeming an invite must atomically consume one use. getAfter ties
         // membership creation to the counter update in the same transaction.

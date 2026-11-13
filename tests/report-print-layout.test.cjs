@@ -19,6 +19,7 @@ test('printed tables wrap, paginate and repeat headers without affecting contrib
 });
 test('print options and filtered sections remain able to hide the report sections',()=>{
  assert.match(css,/body\.print-hide-summary:not\(\.contribution-printing\) #tab-report #printable-report \.print-summary \{ display:none!important; \}/);
- for(const type of ['projects','payables','tx','sigs'])assert.match(html,new RegExp('body\\.print-hide-'+type+' #printable-report'));
+ for(const type of ['projects','payables','tx'])assert.match(html,new RegExp('body\\.print-hide-'+type+' #printable-report'));
+ assert.doesNotMatch(html,/print-hide-sigs/);assert.doesNotMatch(html,/id="printSigs"/);
  assert.match(html,/\.report-filter-hidden\{display:none!important\}/);
 });
