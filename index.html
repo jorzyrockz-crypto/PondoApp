@@ -5124,7 +5124,53 @@ textarea {
     min-width: 0 !important;
     flex: none !important;
   }
-</style>
+}
+/* Portrait phones/tablets keep the reference app's full-width bottom tab bar. */
+@media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
+  body { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important; }
+  .bottomnav {
+    display: flex !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    transform: none !important;
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom)) !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+  }
+  .bottomnav > .nav-btn,
+  .bottomnav > .nav-more-wrap {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    max-width: 12rem;
+  }
+  .bottomnav .nav-btn,
+  .bottomnav .nav-btn.active {
+    min-height: 3.5rem !important;
+    height: 3.5rem !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.2rem !important;
+    padding: 0.35rem 0.5rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: none !important;
+  }
+  body .bottomnav .nav-btn.active {
+    background: var(--school-indigo-soft) !important;
+    color: var(--school-navy) !important;
+  }
+  body .bottomnav .nav-btn.active .nav-label,
+  body .bottomnav .nav-btn.active .nav-icon {
+    color: var(--school-navy) !important;
+  }
+}
 </style>
 
 </head>
