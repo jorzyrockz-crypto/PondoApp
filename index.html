@@ -5510,6 +5510,166 @@ textarea {
     padding-top: 1.75rem !important;
   }
 }
+/* Dark school-inventory treatment: navy chrome, slate canvas, and quiet artwork. */
+body.dark-mode {
+  --school-dark-canvas: #101b2f;
+  --school-dark-surface: #172942;
+  --school-dark-surface-2: #1d3452;
+  --school-dark-line: #2b456b;
+  background-color: var(--school-dark-canvas) !important;
+  background-image:
+    linear-gradient(to bottom, rgb(16 27 47 / 0.78) 0, rgb(16 27 47 / 0.90) 22rem, rgb(16 27 47 / 0.98) 34rem, var(--school-dark-canvas) 40rem),
+    var(--pondo-artwork) !important;
+  background-position: center top, center top !important;
+  background-size: 100% 40rem, auto 40rem !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll !important;
+  color: #edf4ff !important;
+}
+body.dark-mode[data-background="pondoArtwork"] {
+  background-color: var(--school-dark-canvas) !important;
+  background-image:
+    linear-gradient(to bottom, rgb(16 27 47 / 0.78) 0, rgb(16 27 47 / 0.90) 22rem, rgb(16 27 47 / 0.98) 34rem, var(--school-dark-canvas) 40rem),
+    var(--pondo-artwork) !important;
+  background-position: center top, center top !important;
+  background-size: 100% 40rem, auto 40rem !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll !important;
+}
+body.dark-mode .topbar,
+body.dark-mode .bottomnav {
+  background: #12284a !important;
+  border-color: var(--school-dark-line) !important;
+  box-shadow: 0 2px 10px rgb(4 13 29 / 0.24) !important;
+}
+body.dark-mode .bottomnav {
+  box-shadow: none !important;
+}
+body.dark-mode .logo {
+  box-shadow: 0 6px 16px rgb(3 13 33 / 0.42) !important;
+}
+body.dark-mode .org-name,
+body.dark-mode .sheet-title,
+body.dark-mode .report-title,
+body.dark-mode .dashboard-intro h1,
+body.dark-mode .tab-section h2,
+body.dark-mode .tab-section h3,
+body.dark-mode .tab-section h4 {
+  color: #f3f7ff !important;
+}
+body.dark-mode .org-meta,
+body.dark-mode .dashboard-intro p:last-child,
+body.dark-mode .fund-purpose,
+body.dark-mode .tx-meta,
+body.dark-mode .hero-sub,
+body.dark-mode .hero-stat-sub {
+  color: #aebed5 !important;
+}
+body.dark-mode .card,
+body.dark-mode .report-paper,
+body.dark-mode .sheet,
+body.dark-mode .fab-sheet-card,
+body.dark-mode .dashboard-contribution-card,
+body.dark-mode .dashboard-actions-card {
+  background: var(--school-dark-surface) !important;
+  border-color: var(--school-dark-line) !important;
+  color: #edf4ff !important;
+  box-shadow: 0 8px 24px rgb(3 13 33 / 0.24) !important;
+}
+body.dark-mode .hero,
+body.dark-mode .hero.hero--vibrant {
+  background:
+    radial-gradient(520px 240px at 86% -12%, rgb(255 255 255 / 0.12), transparent 66%),
+    linear-gradient(135deg, #173b8f 0%, #214b9b 58%, #2a5bb2 100%) !important;
+  box-shadow: 0 16px 34px rgb(3 13 33 / 0.34) !important;
+}
+body.dark-mode .hero-stat {
+  background: rgb(255 255 255 / 0.09) !important;
+  border-color: rgb(194 216 255 / 0.23) !important;
+}
+body.dark-mode .hero,
+body.dark-mode .hero-label,
+body.dark-mode .hero-amount,
+body.dark-mode .hero-stat-label,
+body.dark-mode .hero-stat-value {
+  color: #f4f7ff !important;
+}
+body.dark-mode .hero-label,
+body.dark-mode .hero-stat-label {
+  opacity: 0.88 !important;
+}
+body.dark-mode .tx-row,
+body.dark-mode .dashboard-action-row {
+  background: var(--school-dark-surface-2) !important;
+  border-color: var(--school-dark-line) !important;
+}
+body.dark-mode .section-title,
+body.dark-mode .section-title span:last-child,
+body.dark-mode .report-kpi span,
+body.dark-mode .report-preview-label,
+body.dark-mode .fund-page-summary span,
+body.dark-mode .source-card-stats span {
+  color: #aebed5 !important;
+}
+body.dark-mode .section-title span:last-child,
+body.dark-mode .fund-page-summary > div,
+body.dark-mode .report-kpi,
+body.dark-mode .empty-state {
+  background: var(--school-dark-surface-2) !important;
+  border-color: var(--school-dark-line) !important;
+}
+body.dark-mode .input,
+body.dark-mode .search-input,
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode input[type="date"],
+body.dark-mode select,
+body.dark-mode textarea {
+  background: #10213a !important;
+  border-color: #385579 !important;
+  color: #f1f6ff !important;
+}
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #8ea2bf !important;
+}
+body.dark-mode .btn-light,
+body.dark-mode .btn-secondary,
+body.dark-mode .icon-btn,
+body.dark-mode .close-btn {
+  background: var(--school-dark-surface-2) !important;
+  border-color: var(--school-dark-line) !important;
+  color: #eaf2ff !important;
+}
+body.dark-mode .bottomnav .nav-btn:not(.active),
+body.dark-mode .bottomnav .nav-more-menu button {
+  color: #aebed5 !important;
+}
+body.dark-mode .bottomnav .nav-btn.active {
+  background: #28457f !important;
+  color: #f4f7ff !important;
+  box-shadow: none !important;
+}
+body.dark-mode .bottomnav .nav-btn.active .nav-label,
+body.dark-mode .bottomnav .nav-btn.active .nav-icon {
+  color: #f4f7ff !important;
+}
+body.dark-mode .bottomnav .nav-btn.active::before {
+  background: #9bbcff !important;
+}
+body.dark-mode .progress,
+body.dark-mode .bar-track,
+body.dark-mode .dashboard-contribution-track {
+  background: #2c466a !important;
+}
+body.dark-mode .progress > div,
+body.dark-mode .bar-fill,
+body.dark-mode .dashboard-contribution-track span {
+  background: #83aaff !important;
+}
+body.dark-mode .nav-more-icon {
+  filter: saturate(0.75) brightness(1.15);
+}
 @media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
   .wrap { max-width: 52rem !important; padding-left: 2rem !important; padding-right: 2rem !important; }
   .bottomnav { background: rgb(255 255 255 / 0.98) !important; }
