@@ -22,4 +22,12 @@ jobs:
       - name: Install isolated emulator test dependencies
         run: npm ci --prefix emulator-tests --ignore-scripts --no-audit --no-fund
       - name: Run demo-project Firestore rules and migration tests
-        run: npm --prefix emulator-tests run test:firestore
+        run: |
+          set +e
+          npm --prefix emulator-tests run test:firestore > "$RUNNER_TEMP/emulator-test.log" 2>&1
+          result=$?
+          cat "$RUNNER_TEMP/emulator-test.log"
+          if [ "$result" -ne 0 ]; then
+            python -c 'import os,pathlib; s=pathlib.Path(os.environ["RUNNER_TEMP"],"emulator-test.log").read_text(errors="replace")[-12000:]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+          fi
+          exit "$result"
