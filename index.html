@@ -5231,10 +5231,11 @@ textarea {
 body:not(.dark-mode)[data-background="pondoArtwork"] {
   background-color: var(--school-canvas) !important;
   background-image:
-    linear-gradient(to bottom, rgb(238 243 249 / 0.70) 0, rgb(238 243 249 / 0.90) 25rem, var(--school-canvas) 40rem),
+    linear-gradient(to bottom, rgb(238 243 249 / 0.62) 0, rgb(238 243 249 / 0.88) 22rem, rgb(238 243 249 / 0.98) 34rem, var(--school-canvas) 40rem),
     var(--pondo-artwork) !important;
-  background-position: center top !important;
-  background-size: cover !important;
+  background-position: center top, center top !important;
+  background-size: 100% 40rem, auto 40rem !important;
+  background-repeat: no-repeat !important;
   background-attachment: scroll !important;
 }
 .topbar {
@@ -5498,6 +5499,15 @@ textarea {
   body .bottomnav .nav-more-menu button:focus-visible {
     background: #f1f5f9 !important;
     color: #4f46e5 !important;
+  }
+}
+/* School-inventory composition: keep the artwork airy behind a focused work column. */
+@media screen and (min-width: 1024px) and (not (pointer: coarse)),
+       screen and (pointer: coarse) and (orientation: landscape) and (min-width: 1000px) and (min-height: 600px) {
+  main.wrap {
+    width: calc(100% - 3rem) !important;
+    max-width: 44rem !important;
+    padding-top: 1.75rem !important;
   }
 }
 @media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
