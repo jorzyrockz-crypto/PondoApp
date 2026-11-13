@@ -15,7 +15,7 @@ test.beforeEach(async()=>env.clearFirestore());
 test.after(async()=>{if(admin)await deleteApp(admin);if(env)await env.cleanup()});
 const client=uid=>uid?env.authenticatedContext(uid).firestore():env.unauthenticatedContext().firestore();
 const ref=(c,p)=>doc(c,p);
-async function seed(rows){await env.withSecurityRulesDisabled(async context=>{for(const [p,value] of Object.entries(rows))await setDoc(ref(context.firestore(),p),value)})}
+async function seed(rows){await env.withSecurityRulesDisabled(async context=>{const store=context.firestore();for(const [p,value] of Object.entries(rows))await setDoc(ref(store,p),value)})}
 const actor=(uid,data={})=>({auth:{uid,token:{name:uid,email:uid+'@example.test'}},data});
 
 test('only actual members can read team data; reviewers cannot write; removed members lose access',async()=>{
@@ -64,7 +64,7 @@ test('service transactions preserve uniqueness and approval-gated membership und
 
 test('migration audits duplicates without writes, then reserves names and marks existing organizations private',async()=>{
  const {execFileSync}=require('node:child_process');
- const execute=args=>{let envVars={...process.env,GCLOUD_PROJECT:PROJECT};delete envVars.GOOGLE_APPLICATION_CREDENTIALS;return execFileSync(process.execPath,[path.join(__dirname,'../organization-functions/migrate.cjs'),...args],{encoding:'utf8',env:envVars,timeout:45000,stdio:['ignore','pipe','pipe']})};
+ const execute=args=>{let envVars={...process.env,GCLOUD_PROJECT:PROJECT,NODE_PATH:path.join(__dirname,'node_modules')};delete envVars.GOOGLE_APPLICATION_CREDENTIALS;return execFileSync(process.execPath,[path.join(__dirname,'../organization-functions/migrate.cjs'),...args],{encoding:'utf8',env:envVars,timeout:45000,stdio:['ignore','pipe','pipe']})};
  await db.doc('organizations/a').set({name:' School  Fund ',discoverable:true});await db.doc('organizations/b').set({name:'school fund'});
  assert.throws(()=>execute(['--apply']));assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).exists,false);assert.equal((await db.collection('organizationNames').get()).size,0);assert.equal((await db.doc('organizations/a').get()).data().discoverable,true);
  await db.doc('organizations/b').update({name:'Another organization'});assert.match(execute([]),/Audit only/);assert.equal((await db.collection('organizationNames').get()).size,0);
