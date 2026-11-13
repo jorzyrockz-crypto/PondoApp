@@ -6431,6 +6431,324 @@ body.dark-mode #tab-contributions .contribution-workspace .empty-state {
   #tab-contributions .contribution-search-wrap .input,
   #tab-contributions .contribution-filter-wrap .input { width: 100%; min-width: 0; }
 }
+/* Shared workspace treatment for Funds, Projects, and Dashboard. */
+#tab-funds .sr-only,
+#tab-projects .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+#tab-funds .funds-page-head,
+#tab-projects .project-page-head {
+  align-items: center !important;
+  margin-bottom: 18px !important;
+  padding: 20px 22px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 20px !important;
+  background: rgb(255 255 255 / .96) !important;
+  box-shadow: 0 10px 28px rgb(22 42 78 / .06) !important;
+}
+#tab-funds .funds-page-head h2,
+#tab-projects .project-page-head h2 {
+  color: #122e76 !important;
+  font-size: clamp(26px, 3vw, 34px) !important;
+  line-height: 1.05 !important;
+}
+#tab-funds .funds-page-head p:last-child,
+#tab-projects .project-page-head p:last-child {
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+#tab-funds .funds-page-head .btn,
+#tab-projects .project-page-head .btn {
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 0 17px !important;
+  border-radius: 12px !important;
+  background: #5b4ae8 !important;
+  border-color: #5b4ae8 !important;
+  box-shadow: 0 8px 16px rgb(91 74 232 / .18) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+#tab-funds .funds-page-head .btn > span,
+#tab-projects .project-page-head .btn > span {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 18px;
+  line-height: 0;
+  transform: translateY(1px);
+}
+#tab-funds .fund-page-summary,
+#tab-projects .projects-page-summary {
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+#tab-funds .fund-page-summary > div,
+#tab-projects .projects-page-summary > div {
+  min-height: 104px;
+  padding: 16px 17px 14px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 16px rgb(22 42 78 / .04) !important;
+}
+#tab-funds .fund-page-summary > div:nth-child(1),
+#tab-projects .projects-page-summary > div:nth-child(1) { border-top: 3px solid #5b4ae8 !important; }
+#tab-funds .fund-page-summary > div:nth-child(2),
+#tab-projects .projects-page-summary > div:nth-child(2) { border-top: 3px solid #1988d6 !important; }
+#tab-funds .fund-page-summary > div:nth-child(3),
+#tab-projects .projects-page-summary > div:nth-child(3) { border-top: 3px solid #0f9f73 !important; }
+#tab-projects .projects-page-summary > div:nth-child(4) { border-top-color: #e98a22 !important; }
+#tab-funds .fund-page-summary span,
+#tab-projects .projects-page-summary span {
+  color: #58709a !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+#tab-funds .fund-page-summary strong,
+#tab-projects .projects-page-summary strong {
+  margin-top: 9px !important;
+  color: #132f76 !important;
+  font-size: clamp(20px, 2.4vw, 27px) !important;
+  letter-spacing: -.04em !important;
+}
+#tab-funds .fund-page-summary small,
+#tab-projects .projects-page-summary small {
+  display: block;
+  margin-top: 6px;
+  color: #8392a8;
+  font-size: 10px;
+  line-height: 1.35;
+}
+#tab-funds .funds-terms {
+  margin: 0 0 16px !important;
+  padding: 11px 14px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 12px !important;
+  background: rgb(248 250 252 / .82) !important;
+  color: #71829b !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+#tab-funds .funds-list-heading,
+#tab-projects .projects-list-heading {
+  align-items: center !important;
+  margin-bottom: 16px !important;
+  padding: 18px 20px !important;
+  border: 1px solid #dbe4ef !important;
+  border-bottom: 0 !important;
+  border-radius: 18px 18px 0 0 !important;
+  background: rgb(255 255 255 / .78) !important;
+}
+#tab-funds .funds-list-heading .report-eyebrow,
+#tab-projects .projects-list-heading .report-eyebrow {
+  margin-bottom: 7px !important;
+  color: #58709a !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+}
+#tab-funds .funds-list-heading h3,
+#tab-projects .projects-list-heading h3 {
+  color: #1d355f !important;
+  font-size: 18px !important;
+  letter-spacing: -.03em !important;
+}
+#tab-funds .funds-list-heading p:last-child,
+#tab-projects .projects-list-heading p:last-child {
+  margin-top: 5px !important;
+  color: #71829b !important;
+  font-size: 11px !important;
+}
+#tab-funds .fund-search-wrap,
+#tab-projects .project-search-wrap {
+  position: relative;
+  display: block;
+}
+#tab-funds .fund-search-wrap svg,
+#tab-projects .project-search-wrap svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  color: #8292a8;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+#tab-funds .fund-search-wrap .input,
+#tab-projects .project-search-wrap .input {
+  width: 230px;
+  padding-left: 38px !important;
+}
+#tab-projects .project-filter-controls select { width: 148px; }
+#tab-funds #fundsList,
+#tab-projects #projectsList {
+  margin-top: -16px;
+  padding: 0 20px 20px;
+  border: 1px solid #dbe4ef;
+  border-top: 0;
+  border-radius: 0 0 18px 18px;
+  background: rgb(255 255 255 / .78);
+}
+#tab-funds #fundsList .source-card,
+#tab-projects #projectsList .compact-project-card {
+  padding: 17px !important;
+  border: 1px solid #dbe4ef !important;
+  border-top: 3px solid var(--card-color, #5b4ae8) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 16px rgb(22 42 78 / .04) !important;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+#tab-funds #fundsList .source-card:hover,
+#tab-projects #projectsList .compact-project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgb(22 42 78 / .09) !important;
+}
+#tab-projects #projectsList .compact-project-card .project-metrics > div,
+#tab-funds #fundsList .source-card-stats > div {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #f6f8fb;
+}
+#tab-dashboard .dashboard-page-head {
+  margin-bottom: 18px;
+  padding: 2px 2px 0;
+}
+#tab-dashboard .dashboard-page-head .eyebrow {
+  color: #58709a !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .11em !important;
+  text-transform: uppercase;
+}
+#tab-dashboard .dashboard-page-head h1 {
+  color: #122e76 !important;
+  font-size: clamp(30px, 4vw, 40px) !important;
+  letter-spacing: -.05em !important;
+}
+#tab-dashboard .dashboard-page-head > div > p:last-child {
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+#tab-dashboard .hero {
+  margin-bottom: 16px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 28px rgb(22 42 78 / .07) !important;
+  color: #132f76 !important;
+}
+#tab-dashboard .hero .hero-label { color: #58709a !important; font-weight: 800 !important; letter-spacing: .1em !important; }
+#tab-dashboard .hero .hero-amount { color: #173b8f !important; text-shadow: none !important; }
+#tab-dashboard .hero .hero-sub { color: #64748b !important; }
+#tab-dashboard .hero .hero-stat {
+  border-color: #dbe4ef !important;
+  background: #f8fafc !important;
+  color: #1d355f !important;
+}
+#tab-dashboard .hero .hero-stat-label,
+#tab-dashboard .hero .hero-stat-sub { color: #71829b !important; }
+#tab-dashboard .hero .hero-stat-value { color: #1d355f !important; }
+#tab-dashboard .hero .hero-stat-art { opacity: .12 !important; }
+#tab-dashboard .dashboard-hero-actions { gap: 10px !important; margin: 0 0 18px !important; }
+#tab-dashboard .dashboard-hero-actions .btn { min-height: 44px !important; height: 44px !important; border-radius: 12px !important; font-weight: 750 !important; }
+#tab-dashboard .dashboard-hero-actions .btn-emerald { background: #5b4ae8 !important; border-color: #5b4ae8 !important; box-shadow: 0 8px 16px rgb(91 74 232 / .18) !important; }
+#tab-dashboard .setup-checklist,
+#tab-dashboard .backup-reminder,
+#tab-dashboard .dashboard-actions-card,
+#tab-dashboard .dashboard-contributions,
+#tab-dashboard .grid-2 > .card,
+#tab-dashboard > .card {
+  border: 1px solid #dbe4ef !important;
+  border-radius: 18px !important;
+  background: rgb(255 255 255 / .86) !important;
+  box-shadow: 0 6px 20px rgb(22 42 78 / .045) !important;
+}
+#tab-dashboard .setup-checklist { padding: 18px !important; }
+#tab-dashboard .section-title { margin-top: 24px !important; color: #1d355f !important; font-size: 18px !important; font-weight: 750 !important; }
+#tab-dashboard .section-title span:last-child { color: #71829b !important; font-size: 11px !important; }
+#tab-dashboard .dashboard-contributions { padding: 19px 20px !important; }
+#tab-dashboard .grid-2 > .card,
+#tab-dashboard > .card { padding: 18px !important; }
+body.dark-mode #tab-funds .funds-page-head,
+body.dark-mode #tab-projects .project-page-head,
+body.dark-mode #tab-funds .fund-page-summary > div,
+body.dark-mode #tab-projects .projects-page-summary > div,
+body.dark-mode #tab-funds .funds-list-heading,
+body.dark-mode #tab-projects .projects-list-heading,
+body.dark-mode #tab-funds #fundsList,
+body.dark-mode #tab-projects #projectsList,
+body.dark-mode #tab-funds #fundsList .source-card,
+body.dark-mode #tab-projects #projectsList .compact-project-card,
+body.dark-mode #tab-dashboard .hero,
+body.dark-mode #tab-dashboard .setup-checklist,
+body.dark-mode #tab-dashboard .backup-reminder,
+body.dark-mode #tab-dashboard .dashboard-actions-card,
+body.dark-mode #tab-dashboard .dashboard-contributions,
+body.dark-mode #tab-dashboard .grid-2 > .card,
+body.dark-mode #tab-dashboard > .card {
+  border-color: #2b456b !important;
+  background: #172942 !important;
+  box-shadow: none !important;
+}
+body.dark-mode #tab-funds .funds-page-head h2,
+body.dark-mode #tab-projects .project-page-head h2,
+body.dark-mode #tab-funds .funds-list-heading h3,
+body.dark-mode #tab-projects .projects-list-heading h3,
+body.dark-mode #tab-dashboard .dashboard-page-head h1,
+body.dark-mode #tab-dashboard .section-title,
+body.dark-mode #tab-dashboard .hero .hero-amount,
+body.dark-mode #tab-dashboard .hero .hero-stat-value { color: #f3f7ff !important; }
+body.dark-mode #tab-funds .funds-page-head p:last-child,
+body.dark-mode #tab-projects .project-page-head p:last-child,
+body.dark-mode #tab-funds .funds-terms,
+body.dark-mode #tab-funds .funds-list-heading p:last-child,
+body.dark-mode #tab-projects .projects-list-heading p:last-child,
+body.dark-mode #tab-dashboard .dashboard-page-head > div > p:last-child,
+body.dark-mode #tab-dashboard .hero .hero-sub,
+body.dark-mode #tab-dashboard .hero .hero-stat-label,
+body.dark-mode #tab-dashboard .hero .hero-stat-sub { color: #aebed5 !important; }
+body.dark-mode #tab-funds .fund-page-summary span,
+body.dark-mode #tab-projects .projects-page-summary span,
+body.dark-mode #tab-funds .fund-page-summary small,
+body.dark-mode #tab-projects .projects-page-summary small { color: #aebed5 !important; }
+body.dark-mode #tab-funds .funds-terms { border-color: #2b456b !important; background: #13243c !important; }
+body.dark-mode #tab-dashboard .hero .hero-stat { border-color: #2b456b !important; background: #1d3452 !important; }
+body.dark-mode #tab-projects #projectsList .compact-project-card .project-metrics > div,
+body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #13243c; }
+@media (max-width: 700px) {
+  #tab-funds .funds-page-head,
+  #tab-projects .project-page-head { align-items: flex-start !important; padding: 18px !important; }
+  #tab-funds .funds-page-head .btn,
+  #tab-projects .project-page-head .btn { align-self: flex-start; }
+  #tab-funds .funds-list-heading,
+  #tab-projects .projects-list-heading { align-items: stretch !important; flex-direction: column; }
+  #tab-funds .fund-search-wrap .input,
+  #tab-projects .project-search-wrap .input,
+  #tab-projects .project-filter-controls .input { width: 100%; min-width: 0; }
+  #tab-funds .funds-list-heading,
+  #tab-projects .projects-list-heading { padding: 17px 14px !important; }
+  #tab-funds #fundsList,
+  #tab-projects #projectsList { margin-top: -16px; padding: 0 14px 16px; }
+  #tab-dashboard .dashboard-page-head { padding-top: 0; }
+  #tab-dashboard .hero { padding: 18px !important; }
+  #tab-dashboard .dashboard-hero-actions .btn { flex: 1 1 145px; }
+  #tab-dashboard .dashboard-contributions { padding: 17px 14px !important; }
+}
 </style>
 
 </head>
@@ -6503,7 +6821,7 @@ body.dark-mode #tab-contributions .contribution-workspace .empty-state {
 <main class="wrap"><div id="rolePreviewBanner" class="data-safety-banner no-print" hidden><div><strong id="rolePreviewTitle"></strong><p>Preview only. No one is assigned, and everyone using this browser can still view and edit all records.</p></div></div><div id="starterDataWarning" class="data-safety-banner no-print" hidden><div><strong>Review possible older starter data</strong><p>Some records match examples bundled with an older version. They have not been removed or changed. Review fund sources, transactions, organization details and report signatories before sharing; keep anything that is yours.</p></div><div class="data-safety-actions"><button class="btn btn-light" type="button" onclick="switchTab('funds')">Review funds</button><button class="btn btn-light" type="button" onclick="dismissStarterWarning()">Dismiss</button></div></div><div id="futureDataWarning" class="data-safety-banner future-data-banner no-print" hidden><div><strong>Future-dated records are included in current totals</strong><p id="futureDataWarningText"></p></div></div><div id="installAppBanner" class="data-safety-banner install-app-banner no-print" hidden><div><strong>Install Pondo as an app</strong><p>Install Pondo for quicker access in its own window. Your signed-in session may carry over when using the same browser profile.</p><p id="installAppInstructions" class="install-app-instructions" hidden></p></div><img class="install-app-image" src="assets/branding/share-banner.jpg" alt="" width="1200" height="630" loading="lazy"><div class="data-safety-actions"><button class="btn btn-emerald" type="button" id="installAppBannerBtn">Install app</button><button class="btn btn-light" type="button" id="installAppBannerDismiss">Not now</button></div></div>
   <!-- DASHBOARD -->
   <section id="tab-dashboard" class="tab-section">
-    <div class="dashboard-intro"><div><p class="eyebrow">Financial workspace</p><h1>Overview</h1><p>Your funds, all in one place.</p></div></div>
+     <div class="dashboard-intro dashboard-page-head"><div><p class="eyebrow">Financial workspace</p><h1>Overview</h1><p>Your funds, all in one place.</p></div></div>
     <div class="hero">
       <div class="hero-label">Total Fund Balance</div>
       <div class="hero-amount" id="totalRemaining">₱68,300</div>
@@ -6557,9 +6875,9 @@ body.dark-mode #tab-contributions .contribution-workspace .empty-state {
 
   <!-- FUNDS -->
   <section id="tab-funds" class="tab-section" style="display:none">
-    <div class="fund-page-head"><div><p class="report-eyebrow">FUND MANAGEMENT</p><h2>Fund sources</h2><p>Track the balance and activity for each source.</p></div><button class="btn btn-emerald" onclick="openFundModal()">+ Add fund</button></div>
-    <div class="fund-page-summary"><div><span>Fund sources</span><strong id="fundSourceCount">0</strong></div><div><span>Total received</span><strong id="fundSourceReceived">—</strong></div><div><span>Cash balance</span><strong id="fundSourceBalance">—</strong></div></div>
-    <p class="plain-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading"><div><h3>All fund sources</h3><p>Balances include linked transactions.</p></div><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderAll()"></div>
+     <div class="fund-page-head funds-page-head"><div><p class="report-eyebrow">FUND MANAGEMENT</p><h2>Fund sources</h2><p>Track the balance and activity for each source.</p></div><button class="btn btn-emerald" onclick="openFundModal()"><span aria-hidden="true">+</span> Add fund</button></div>
+     <div class="fund-page-summary funds-page-summary"><div><span>Fund sources</span><strong id="fundSourceCount">0</strong><small>Active sources</small></div><div><span>Total received</span><strong id="fundSourceReceived">—</strong><small>Across all sources</small></div><div><span>Cash balance</span><strong id="fundSourceBalance">—</strong><small>Available to allocate</small></div></div>
+     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">SOURCE WORKSPACE</p><h3>All fund sources</h3><p>Balances include linked transactions.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderAll()"></label></div>
     <div id="fundsList" style="display:flex; flex-direction:column; gap:10px"></div>
   </section>
 
@@ -6580,9 +6898,9 @@ body.dark-mode #tab-contributions .contribution-workspace .empty-state {
 
   <!-- PROJECTS -->
   <section id="tab-projects" class="tab-section" style="display:none">
-    <div class="fund-page-head"><div><p class="report-eyebrow">PROJECT MANAGEMENT</p><h2>Projects</h2><p>Track funding, activity and obligations for each project.</p></div><button class="btn btn-emerald" onclick="openProjectModal()">+ Add project</button></div>
-    <div class="project-page-summary"><div><span>Projects</span><strong id="projectCount">0</strong></div><div><span>Allocated</span><strong id="projectAllocated">—</strong></div><div><span>Cash paid</span><strong id="projectPaid">—</strong></div><div><span>Outstanding</span><strong id="projectOutstanding">—</strong></div></div>
-    <div class="fund-list-heading project-list-heading"><div><h3>All projects</h3><p>Select a project to view and manage its details.</p></div><div class="project-filter-controls"><input id="projectSearch" class="input" type="search" aria-label="Search projects" placeholder="Search projects or program" oninput="renderProjectCards()"><select id="projectStatusFilter" class="input" aria-label="Filter projects by status" onchange="renderProjectCards()"><option value="">All statuses</option><option>Planning</option><option>Active</option><option>Completed</option><option>On hold</option></select></div></div>
+    <div class="fund-page-head project-page-head"><div><p class="report-eyebrow">PROJECT MANAGEMENT</p><h2>Projects</h2><p>Track funding, activity and obligations for each project.</p></div><button class="btn btn-emerald" onclick="openProjectModal()"><span aria-hidden="true">+</span> Add project</button></div>
+    <div class="project-page-summary projects-page-summary"><div><span>Projects</span><strong id="projectCount">0</strong><small>All programs</small></div><div><span>Allocated</span><strong id="projectAllocated">—</strong><small>Reserved for work</small></div><div><span>Cash paid</span><strong id="projectPaid">—</strong><small>Recorded spending</small></div><div><span>Outstanding</span><strong id="projectOutstanding">—</strong><small>Still to be settled</small></div></div>
+    <div class="fund-list-heading project-list-heading projects-list-heading"><div><p class="report-eyebrow">PROJECT WORKSPACE</p><h3>All projects</h3><p>Select a project to view and manage its details.</p></div><div class="project-filter-controls"><label class="project-search-wrap"><span class="sr-only">Search projects</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="projectSearch" class="input" type="search" aria-label="Search projects" placeholder="Search projects or program" oninput="renderProjectCards()"></label><select id="projectStatusFilter" class="input" aria-label="Filter projects by status" onchange="renderProjectCards()"><option value="">All statuses</option><option>Planning</option><option>Active</option><option>Completed</option><option>On hold</option></select></div></div>
     <div id="seriesComparison" class="series-comparison" hidden></div><div id="projectsList"></div>
   </section>
 
