@@ -5107,6 +5107,24 @@ textarea {
   display: inline-grid;
   place-items: center;
 }
+@media screen and (min-width: 1024px) and (not (pointer: coarse)),
+       screen and (pointer: coarse) and (orientation: landscape) and (min-width: 1000px) and (min-height: 600px) {
+  .bottomnav {
+    display: flex !important;
+    grid-template-columns: none !important;
+    width: var(--school-side-w) !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    transform: none !important;
+  }
+  .bottomnav > .nav-btn,
+  .bottomnav > .nav-more-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+</style>
 </style>
 
 </head>
