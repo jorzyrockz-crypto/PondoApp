@@ -1,0 +1,25 @@
+name: Firestore security emulator
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security-emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: emulator-tests/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install isolated emulator test dependencies
+        run: npm ci --prefix emulator-tests --ignore-scripts --no-audit --no-fund
+      - name: Run demo-project Firestore rules and migration tests
+        run: npm --prefix emulator-tests run test:firestore

@@ -3,3 +3,6 @@ functions/node_modules/
 functions/*.log
 organization-functions/node_modules/
 organization-functions/*.log
+
+emulator-tests/node_modules/
+emulator-tests/*-debug.log

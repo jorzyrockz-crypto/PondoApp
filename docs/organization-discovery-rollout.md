@@ -65,3 +65,17 @@ deploy the unrelated public-report codebase or enable public financial reads.
 
 No production migration, Firebase deployment, App Check setup, live-account
 security validation, or physical-device test is performed by these changes.
+
+## Automated emulator test suite
+
+`emulator-tests/firestore.test.cjs` exercises checked-in Firestore rules with
+real emulator clients and the organization service against the same emulator,
+including unauthorized writes, invitations, role revocation, concurrent name
+reservation and approval, and the migration audit/apply path. It is fixed to
+the `demo-pondo-security` project and refuses to run without a loopback emulator.
+Run `npm ci --prefix emulator-tests --ignore-scripts` followed by
+`npm --prefix emulator-tests run test:firestore`; Java 21 and network access
+to obtain the Firebase emulator are required. The pull-request workflow runs
+only these demo emulator checks, with no Firebase credentials or deployments.
+A passing emulator run does not replace tests with multiple actual accounts,
+real deployed rules, Firebase Functions, App Check, offline and devices.
