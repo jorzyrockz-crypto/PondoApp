@@ -6749,6 +6749,208 @@ body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #132
   #tab-dashboard .dashboard-hero-actions .btn { flex: 1 1 145px; }
   #tab-dashboard .dashboard-contributions { padding: 17px 14px !important; }
 }
+/* Remaining workspaces: Transactions, Refund History, Reports, and sample-data tools. */
+#tab-transactions .transactions-page-head,
+#tab-refunds .refunds-page-head,
+#tab-report .reports-page-head {
+  align-items: center !important;
+  margin-bottom: 18px !important;
+  padding: 20px 22px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 20px !important;
+  background: rgb(255 255 255 / .96) !important;
+  box-shadow: 0 10px 28px rgb(22 42 78 / .06) !important;
+}
+#tab-transactions .transactions-page-head h2,
+#tab-refunds .refunds-page-head h2,
+#tab-report .reports-page-head h2 {
+  color: #122e76 !important;
+  font-size: clamp(26px, 3vw, 34px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.045em !important;
+}
+#tab-transactions .transactions-page-head p:last-child,
+#tab-refunds .refunds-page-head p:last-child,
+#tab-report .reports-page-head p:last-child {
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+#tab-transactions .transactions-page-head .btn,
+#tab-refunds .refunds-page-head .btn {
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 0 17px !important;
+  border-radius: 12px !important;
+  background: #5b4ae8 !important;
+  border-color: #5b4ae8 !important;
+  box-shadow: 0 8px 16px rgb(91 74 232 / .18) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+#tab-transactions .transactions-page-head .btn > span,
+#tab-refunds .refunds-page-head .btn > span { display:inline-block; margin-right:6px; font-size:18px; line-height:0; transform:translateY(1px); }
+#tab-transactions .transactions-filter-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 16px !important;
+  padding: 15px 17px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 16px !important;
+  background: rgb(255 255 255 / .78) !important;
+}
+#tab-transactions .transactions-filter-row .search-wrap { flex: 1; min-width: 220px; margin: 0 !important; }
+#tab-transactions .transactions-filter-row .search-input,
+#tab-transactions .transactions-filter-row select {
+  width: 100% !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 12px !important;
+  background: #f8fafc !important;
+}
+#tab-transactions .transactions-filter-row select { width: 150px !important; flex: 0 0 150px; padding: 0 12px !important; color: #334155; }
+#tab-transactions #txList {
+  display: flex !important;
+  flex-direction: column;
+  gap: 9px !important;
+  padding: 17px;
+  border: 1px solid #dbe4ef;
+  border-radius: 18px;
+  background: rgb(255 255 255 / .78);
+}
+#tab-transactions #txList .tx-entry {
+  padding: 13px 14px;
+  border: 1px solid #dbe4ef;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(22 42 78 / .035);
+}
+#tab-transactions #txList .tx-row { min-height: 42px; }
+#tab-transactions #txList .tx-title { color: #1d355f; font-weight: 700; }
+#tab-transactions #txList .tx-meta { color: #71829b; }
+#tab-transactions #txList .tx-amount { font-size: 14px; font-weight: 800; }
+#tab-transactions .audit-panel {
+  margin-top: 16px;
+  padding: 0 17px;
+  border: 1px solid #dbe4ef;
+  border-radius: 16px;
+  background: rgb(255 255 255 / .78);
+}
+#tab-transactions .audit-panel summary { padding: 16px 0; color: #1d355f; font-weight: 750; cursor: pointer; }
+#tab-transactions .audit-list { padding-bottom: 14px; }
+#tab-refunds .refunds-page-summary { margin-bottom: 16px !important; }
+#tab-refunds .refunds-page-summary > div:nth-child(1) { border-top: 3px solid #e98a22 !important; }
+#tab-refunds .refunds-page-summary > div:nth-child(2) { border-top: 3px solid #1988d6 !important; }
+#tab-refunds .refunds-page-summary > div:nth-child(3) { border-top: 3px solid #0f9f73 !important; }
+#tab-refunds .refunds-page-summary > div:nth-child(4) { border-top: 3px solid #e05b62 !important; }
+#tab-refunds .refund-workspace {
+  padding: 18px 20px 20px;
+  border: 1px solid #dbe4ef;
+  border-radius: 18px;
+  background: rgb(255 255 255 / .78);
+}
+#tab-refunds .refund-workspace .project-detail-section { margin-top: 0; padding-top: 0; border-top: 0; }
+#tab-refunds .refund-workspace .refund-log-section { margin-top: 17px !important; padding-top: 17px; border-top: 1px solid #dbe4ef; }
+#tab-refunds .refund-workspace .project-detail-section > summary { color: #1d355f; }
+#tab-refunds .refund-workspace .detail-section-intro { color: #71829b; }
+#tab-refunds .refund-workspace .payable-row { border-color: #dbe4ef; background: #fff; }
+#tab-refunds .refund-workspace .funding-note { padding: 16px; border: 1px dashed #cbd7e6; border-radius: 13px; background: #f8fafc; color: #71829b; }
+#tab-report .reports-page-head { margin-bottom: 16px !important; }
+#tab-report .report-filters {
+  margin-bottom: 8px !important;
+  padding: 16px 18px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 16px !important;
+  background: rgb(255 255 255 / .78) !important;
+}
+#tab-report .report-filters .input { background: #f8fafc !important; border-color: #dbe4ef !important; }
+#tab-report .report-filter-help { margin: 0 0 16px !important; padding: 0 3px; color: #71829b !important; }
+#tab-report .report-actions { margin-bottom: 15px !important; }
+#tab-report .report-actions .btn { border-radius: 12px !important; }
+#tab-report .report-overview .report-kpi {
+  border: 1px solid #dbe4ef !important;
+  border-top: 3px solid #1988d6 !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 16px rgb(22 42 78 / .04) !important;
+}
+#tab-report .report-overview .report-kpi:nth-child(2) { border-top-color: #e05b62 !important; }
+#tab-report .report-overview .report-kpi:nth-child(3) { border-top-color: #0f9f73 !important; }
+#tab-report .report-overview .report-kpi:nth-child(4) { border-top-color: #5b4ae8 !important; }
+#tab-report .report-overview .report-kpi strong { color: #1d355f !important; }
+#tab-report .report-preview-label { margin-top: 12px; color: #58709a !important; }
+#tab-report .report-paper { border: 1px solid #dbe4ef !important; box-shadow: 0 8px 22px rgb(22 42 78 / .05) !important; }
+#settings-data .sample-data-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px;
+  border: 1px solid #cfd9f3;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f4f2ff, #eef6ff);
+}
+#settings-data .sample-data-title { margin: 0; color: #1d2f70; font-size: 14px; font-weight: 750; }
+#settings-data .sample-data-copy { max-width: 560px; margin: 5px 0 0; color: #64748b; font-size: 11px; line-height: 1.5; }
+#settings-data .sample-data-actions { display: flex; flex: 0 0 auto; gap: 8px; }
+#settings-data .sample-data-actions .btn { min-height: 40px; height: 40px; white-space: nowrap; }
+#settings-data .sample-data-actions .btn-light { border-color: #cfd9f3 !important; color: #58678c !important; }
+#settings-data .sample-data-status { flex-basis: 100%; margin: -4px 0 0; color: #61739a; font-size: 11px; }
+body.dark-mode #tab-transactions .transactions-page-head,
+body.dark-mode #tab-refunds .refunds-page-head,
+body.dark-mode #tab-report .reports-page-head,
+body.dark-mode #tab-transactions .transactions-filter-row,
+body.dark-mode #tab-transactions #txList,
+body.dark-mode #tab-transactions .audit-panel,
+body.dark-mode #tab-refunds .refund-workspace,
+body.dark-mode #tab-refunds .refund-workspace .payable-row,
+body.dark-mode #tab-report .report-filters,
+body.dark-mode #tab-report .report-overview .report-kpi,
+body.dark-mode #tab-report .report-paper {
+  border-color: #2b456b !important;
+  background: #172942 !important;
+  box-shadow: none !important;
+}
+body.dark-mode #tab-transactions .transactions-page-head h2,
+body.dark-mode #tab-refunds .refunds-page-head h2,
+body.dark-mode #tab-report .reports-page-head h2,
+body.dark-mode #tab-transactions #txList .tx-title,
+body.dark-mode #tab-transactions .audit-panel summary,
+body.dark-mode #tab-refunds .refund-workspace .project-detail-section > summary,
+body.dark-mode #tab-report .report-overview .report-kpi strong,
+body.dark-mode #settings-data .sample-data-title { color: #f3f7ff !important; }
+body.dark-mode #tab-transactions .transactions-page-head p:last-child,
+body.dark-mode #tab-refunds .refunds-page-head p:last-child,
+body.dark-mode #tab-report .reports-page-head p:last-child,
+body.dark-mode #tab-transactions #txList .tx-meta,
+body.dark-mode #tab-refunds .refund-workspace .detail-section-intro,
+body.dark-mode #tab-refunds .refund-workspace .funding-note,
+body.dark-mode #tab-report .report-filter-help,
+body.dark-mode #settings-data .sample-data-copy,
+body.dark-mode #settings-data .sample-data-status { color: #aebed5 !important; }
+body.dark-mode #tab-transactions .transactions-filter-row .search-input,
+body.dark-mode #tab-transactions .transactions-filter-row select,
+body.dark-mode #tab-report .report-filters .input { background: #13243c !important; border-color: #385579 !important; color: #f3f7ff !important; }
+body.dark-mode #tab-transactions #txList .tx-entry { border-color: #2b456b; background: #1d3452; }
+body.dark-mode #tab-refunds .refund-workspace .refund-log-section { border-color: #2b456b; }
+body.dark-mode #tab-refunds .refund-workspace .funding-note { border-color: #385579; background: #13243c; }
+body.dark-mode #settings-data .sample-data-card { border-color: #385579; background: linear-gradient(135deg, #272b61, #173456); }
+body.dark-mode #settings-data .sample-data-actions .btn-light { border-color: #385579 !important; background: #1d3452 !important; color: #d7e4f8 !important; }
+@media (max-width: 700px) {
+  #tab-transactions .transactions-page-head,
+  #tab-refunds .refunds-page-head,
+  #tab-report .reports-page-head { align-items: flex-start !important; padding: 18px !important; }
+  #tab-transactions .transactions-page-head .btn,
+  #tab-refunds .refunds-page-head .btn { align-self: flex-start; }
+  #tab-transactions .transactions-filter-row { align-items: stretch !important; flex-direction: column; }
+  #tab-transactions .transactions-filter-row .search-wrap,
+  #tab-transactions .transactions-filter-row select { min-width: 0; width: 100% !important; flex-basis: auto; }
+  #tab-transactions #txList { padding: 13px; }
+  #tab-refunds .refund-workspace { padding: 16px 14px; }
+  #settings-data .sample-data-card { align-items: stretch; flex-direction: column; }
+  #settings-data .sample-data-actions .btn { flex: 1; }
+}
 </style>
 
 </head>
@@ -6882,18 +7084,18 @@ body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #132
   </section>
 
   <!-- TRANSACTIONS -->
-  <section id="tab-transactions" class="tab-section" style="display:none">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px"><h2 class="font-serif" style="font-size:24px; font-weight:700; margin:0">Transactions</h2><button class="btn btn-emerald" onclick="openTxModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add Transaction</button></div>
-    <div class="filter-row"><div class="search-wrap" style="margin-bottom:14px;position:relative"><span class="search-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span><input id="txSearch" class="search-input" placeholder="Search transactions" aria-label="Search transactions" oninput="renderAll()"></div><select id="txTypeFilter" aria-label="Filter by transaction type" onchange="renderAll()"><option value="all">All types</option><option value="IN">Income</option><option value="OUT">Expenses</option></select></div>
+  <section id="tab-transactions" class="tab-section transactions-page" style="display:none">
+     <div class="fund-page-head transactions-page-head"><div><p class="report-eyebrow">CASH ACTIVITY</p><h2>Transactions</h2><p>Review every receipt, expense, and linked payment.</p></div><button class="btn btn-emerald" onclick="openTxModal()"><span aria-hidden="true">+</span> Add transaction</button></div>
+     <div class="filter-row transactions-filter-row"><div class="search-wrap" style="margin-bottom:14px;position:relative"><span class="search-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span><input id="txSearch" class="search-input" placeholder="Search transactions" aria-label="Search transactions" oninput="renderAll()"></div><select id="txTypeFilter" aria-label="Filter by transaction type" onchange="renderAll()"><option value="all">All types</option><option value="IN">Income</option><option value="OUT">Expenses</option></select></div>
     <div id="txList" style="display:flex; flex-direction:column; gap:8px"></div><details class="audit-panel"><summary>Audit and void history</summary><div id="auditList"></div></details>
   </section>
 
   <!-- REFUND HISTORY -->
-  <section id="tab-refunds" class="tab-section" style="display:none">
-    <div class="fund-page-head"><div><p class="report-eyebrow">REIMBURSEMENTS</p><h2>Refund History</h2><p>Refund requests, approvals, and payments, in one place.</p></div><button type="button" id="requestRefundBtn" class="btn btn-emerald" onclick="openRefundRequest()">+ Request a refund</button></div>
-    <div class="project-page-summary"><div><span>Pending approval</span><strong id="refundPendingCount">0</strong></div><div><span>Awaiting payment</span><strong id="refundAwaitingAmount">—</strong></div><div><span>Paid out</span><strong id="refundPaidAmount">—</strong></div><div><span>Rejected / voided</span><strong id="refundClosedCount">0</strong></div></div>
-    <details class="project-detail-section" open><summary>Active refund requests <span id="refundActiveCount">(0)</span></summary><p class="detail-section-intro">Refund requests that are pending approval, approved and awaiting payment, or partially paid.</p><div id="refundActiveList"></div></details>
-    <details class="project-detail-section" style="margin-top:14px"><summary>Refund log <span id="refundLogCount">(0)</span></summary><p class="detail-section-intro">Every refund request event — submitted, approved, rejected, paid, or cancelled — newest first.</p><div id="refundLogList" class="detail-list"></div></details>
+  <section id="tab-refunds" class="tab-section refunds-page" style="display:none">
+    <div class="fund-page-head refunds-page-head"><div><p class="report-eyebrow">REIMBURSEMENTS</p><h2>Refund History</h2><p>Refund requests, approvals, and payments, in one place.</p></div><button type="button" id="requestRefundBtn" class="btn btn-emerald" onclick="openRefundRequest()"><span aria-hidden="true">+</span> Request a refund</button></div>
+    <div class="project-page-summary refunds-page-summary"><div><span>Pending approval</span><strong id="refundPendingCount">0</strong><small>Needs review</small></div><div><span>Awaiting payment</span><strong id="refundAwaitingAmount">—</strong><small>Approved requests</small></div><div><span>Paid out</span><strong id="refundPaidAmount">—</strong><small>Completed refunds</small></div><div><span>Rejected / voided</span><strong id="refundClosedCount">0</strong><small>Closed requests</small></div></div>
+    <section class="refund-workspace"><details class="project-detail-section refund-active-section" open><summary>Active refund requests <span id="refundActiveCount">(0)</span></summary><p class="detail-section-intro">Refund requests that are pending approval, approved and awaiting payment, or partially paid.</p><div id="refundActiveList"></div></details>
+    <details class="project-detail-section refund-log-section" style="margin-top:14px"><summary>Refund log <span id="refundLogCount">(0)</span></summary><p class="detail-section-intro">Every refund request event — submitted, approved, rejected, paid, or cancelled — newest first.</p><div id="refundLogList" class="detail-list"></div></details></section>
   </section>
 
   <!-- PROJECTS -->
@@ -6908,7 +7110,7 @@ body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #132
 
   <!-- REPORT -->
   <section id="tab-report" class="tab-section" style="display:none">
-    <div class="report-page-heading"><div><p class="report-eyebrow">REPORTING</p><h2>Financial report</h2><p>Choose a fund source and date range to prepare a cash report.</p></div></div>
+    <div class="report-page-heading reports-page-head"><div><p class="report-eyebrow">REPORTING</p><h2>Financial report</h2><p>Choose a fund source and date range to prepare a cash report.</p></div></div>
     <div class="report-filters no-print"><label>Fund source<select id="reportFund" class="input"><option value="">All funds</option></select></label><label>From<input id="reportFrom" type="date" class="input"></label><label>To<input id="reportTo" type="date" class="input"></label><button class="btn btn-dark" type="button" onclick="applyReportFilters()">Apply filters</button><button class="btn btn-light" type="button" onclick="clearReportFilters()">Clear</button></div><p class="report-filter-help no-print">Opening and closing cash use recorded dates. Detailed project allocations and payables are hidden when a filter is active because their history is not dated.</p><div class="no-print report-actions">
       <button class="btn btn-light"  onclick="window.print()">Print report</button>
       <button class="btn btn-light"  onclick="downloadReportCSV()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download CSV</button>
@@ -7069,6 +7271,7 @@ body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #132
       </div>
       <div id="settings-data" class="settings-panel" style="display:none; flex-direction:column; gap:12px">
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0">Storage</p><p style="font-size:12px; color:var(--ink2); margin:6px 0 0" id="storageInfo">Funds: 3 • Transactions: 6 • Projects: 0</p><p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:8px 0 0">Records and images are stored in this browser. Capacity varies and may be cleared; export a backup regularly.</p></div>
+        <div class="sample-data-card"><div><p class="sample-data-title">Preview with sample data</p><p class="sample-data-copy">Load a complete, clearly marked school-fund workspace so you can preview every page. Sample records can be removed without touching your own records.</p></div><div class="sample-data-actions"><button id="loadSampleDataBtn" class="btn btn-emerald" type="button" onclick="loadSampleData()">Load sample data</button><button id="clearSampleDataBtn" class="btn btn-light" type="button" onclick="clearSampleData()">Clear sample data</button></div><p id="sampleDataStatus" class="sample-data-status" role="status"></p></div>
         <button class="btn btn-dark" style="width:100%; height:48px" onclick="exportJSONFull()">Export Full JSON Backup</button>
         <div style="padding:16px;border-radius:20px;border:1px solid var(--line)"><p style="font-size:14px;font-weight:600;margin:0 0 6px">Check a backup without restoring</p><p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 10px">Select a saved JSON backup to check its structure and supported financial links. This does not change your records or prove it is complete or recoverable in every situation.</p><input type="file" id="verifyBackupFile" accept=".json,application/json" aria-label="Choose a JSON backup to check" onchange="handleImport(this,true)"></div><button class="btn btn-light" style="width:100%; height:48px" onclick="downloadCSV()">Export Funds CSV</button>
         <div style="padding:16px; border-radius:20px; border:1px solid var(--line)"><p style="font-size:14px; font-weight:600; margin:0 0 10px">Import JSON</p><input type="file" id="importFile" accept=".json" style="width:100%; font-size:13px" onchange="handleImport(this)"><div style="display:flex; gap:8px; margin-top:10px"><button class="btn btn-light" style="flex:1" onclick="setImportMode('merge')">Merge</button><button class="btn btn-light" style="flex:1" onclick="setImportMode('overwrite')">Overwrite</button></div><p style="font-size:11px; color:var(--ink2); margin:8px 0 0">Current: <span id="importModeLabel">Merge</span></p></div>
@@ -9041,7 +9244,80 @@ function setImportMode(m){ importMode=m; document.getElementById('importModeLabe
 function renderSlideOrder(){ let list=document.getElementById('slideOrderList'); if(!list) return; list.innerHTML=''; appSettings.presentation.slideOrder.forEach((s,i)=>{ list.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:14px; background:#f7f7f5; font-size:13px"><span>${escapeText((i+1)+'. '+s)}</span><div style="display:flex; gap:6px"><button onclick="moveSlide(${i},-1)" style="width:28px; height:28px; border-radius:999px; background:white; border:1px solid var(--line); display:grid;place-items:center">${LICON("chevron-up","#059669",16)}</button><button onclick="moveSlide(${i},1)" style="width:28px; height:28px; border-radius:999px; background:white; border:1px solid var(--line); display:grid;place-items:center">${LICON("chevron-down","#059669",16)}</button></div></div>`; }); }
 LUCIDE_PATHS['chevron-up']='<path d="m18 15-6-6-6 6"/>'; LUCIDE_PATHS['chevron-down']='<path d="m6 9 6 6 6-6"/>';
 function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+dir; if(j<0||j>=arr.length) return; [arr[i],arr[j]]=[arr[j],arr[i]]; saveAppSettings(); renderSlideOrder(); }
-function updateStorageInfo(){ let el=document.getElementById('storageInfo'); if(el) el.innerText='Funds: '+funds.length+' • Transactions: '+txs.length+' • Projects: '+projects.length+' • Signatories: '+sigs.length+' • Storage: '+(trackerDB?'Transactional':'Legacy'); }
+ const SAMPLE_DATA_PREFIX='sample-';
+ function isSampleRecord(record){return !!record&&record.sampleData===true;}
+ function sampleDataPresent(){return [funds,txs,sigs,projects,allocations,payables,auditLog,contributionActivities,contributors,contributionPayments].some(list=>list.some(isSampleRecord));}
+ function updateSampleDataStatus(){let status=document.getElementById('sampleDataStatus'),clear=document.getElementById('clearSampleDataBtn'),load=document.getElementById('loadSampleDataBtn');if(!status)return;let count=[funds,txs,sigs,projects,allocations,payables,auditLog,contributionActivities,contributors,contributionPayments].reduce((n,list)=>n+list.filter(isSampleRecord).length,0);status.textContent=count?count+' sample records are loaded. Your own records are kept separate.':'No sample records loaded.';if(clear)clear.disabled=!count;if(load)load.disabled=!!count;}
+ function updateStorageInfo(){ let el=document.getElementById('storageInfo'); if(el) el.innerText='Funds: '+funds.length+' • Transactions: '+txs.length+' • Projects: '+projects.length+' • Signatories: '+sigs.length+' • Storage: '+(trackerDB?'Transactional':'Legacy'); updateSampleDataStatus(); }
+ async function loadSampleData(){
+   if(sampleDataPresent()){appAlert('Sample data is already loaded. Clear it first if you want to reload the preview.');return;}
+   const hasOwnData=[funds,txs,sigs,projects,allocations,payables,contributionActivities,contributors,contributionPayments].some(list=>list.some(x=>!isSampleRecord(x)));
+   if(hasOwnData&&!await appConfirm('Load sample records alongside the records already in this workspace? The sample records are marked and can be cleared separately.'))return;
+   const year=localDate().slice(0,4),d=(monthDay)=>year+'-'+monthDay;
+   const f1='sample-fund-operations',f2='sample-fund-projects',f3='sample-fund-community',p1='sample-project-supplies',p2='sample-project-ict',p3='sample-project-wellness',b1='sample-payable-supplies',b2='sample-payable-refund',a1='sample-activity-ambagan',a2='sample-activity-community';
+   funds.push(
+     {id:f1,name:'General Operations',purpose:'Daily school activities and supplies',initialAmount:52000,dateReceived:d('01-12'),color:'blue',sampleData:true},
+     {id:f2,name:'School Projects Fund',purpose:'Programs, equipment, and improvements',initialAmount:36000,dateReceived:d('02-05'),color:'violet',sampleData:true},
+     {id:f3,name:'Community Support',purpose:'Family and community-supported activities',initialAmount:18000,dateReceived:d('02-22'),color:'amber',sampleData:true}
+   );
+   projects.push(
+     {id:p1,name:'School Supplies Drive',description:'Classroom replenishment for the second semester.',status:'Active',budget:28000,series:'Annual Programs',cycle:year,sampleData:true},
+     {id:p2,name:'Community ICT Corner',description:'Shared devices and connectivity for learners.',status:'Planning',budget:42000,series:'Learning Access',cycle:year,sampleData:true},
+     {id:p3,name:'Faculty Wellness Week',description:'Staff wellbeing and community-building activities.',status:'Completed',budget:12000,series:'Annual Programs',cycle:year,sampleData:true}
+   );
+   allocations.push(
+     {id:'sample-allocation-1',fundId:f1,projectId:p1,amount:20000,sampleData:true},
+     {id:'sample-allocation-2',fundId:f2,projectId:p2,amount:24000,sampleData:true},
+     {id:'sample-allocation-3',fundId:f3,projectId:p3,amount:9000,sampleData:true}
+   );
+   payables.push(
+     {id:b1,projectId:p1,kind:'invoice',description:'Additional classroom materials',supplier:'School Supply Depot',category:'Supplies',amount:5200,invoiceDate:d('04-18'),dueDate:d('05-18'),sampleData:true},
+     {id:b2,projectId:p3,kind:'advance',description:'Transport reimbursement',reimburseTo:'Maria Santos',supplier:'Personal advance',category:'Refund',amount:2400,invoiceDate:d('03-28'),dueDate:d('04-10'),sampleData:true}
+   );
+   txs.push(
+     {id:'sample-tx-income',date:d('03-01'),fundId:f1,type:'IN',category:'Grant',description:'District operating release',amount:8000,payee:'District Office',method:'Bank transfer',sampleData:true},
+     {id:'sample-tx-supplies',date:d('04-20'),fundId:f1,projectId:p1,type:'OUT',category:'Supplies',description:'Classroom replenishment',amount:6500,payee:'School Supply Depot',method:'Purchase',sampleData:true},
+     {id:'sample-tx-ict',date:d('05-06'),fundId:f2,projectId:p2,type:'OUT',category:'Equipment',description:'Tablets and network equipment',amount:12800,payee:'Learning Tech Partners',method:'Purchase',sampleData:true},
+     {id:'sample-tx-supplies-payment',date:d('05-10'),fundId:f1,projectId:p1,payableId:b1,type:'OUT',category:'Supplies',description:'Payment: Additional classroom materials',amount:3500,payee:'School Supply Depot',method:'Fund payment',sampleData:true},
+     {id:'sample-tx-refund-payment',date:d('04-12'),fundId:f3,projectId:p3,payableId:b2,type:'OUT',category:'Refund',description:'Reimbursement: Transport reimbursement',amount:1500,payee:'Maria Santos',method:'Fund payment',sampleData:true}
+   );
+   sigs.push(
+     {id:'sample-sig-1',name:'Ana Reyes',title:'School Head',sampleData:true},
+     {id:'sample-sig-2',name:'Joel Cruz',title:'Disbursing Officer',sampleData:true},
+     {id:'sample-sig-3',name:'Liza Garcia',title:'Property Custodian',sampleData:true}
+   );
+   contributionActivities.push(
+     {id:a1,title:'Monthly community contribution',description:'Voluntary support for learner activities.',amount:750,dueDate:d('12-15'),color:'violet',projectId:p1,sampleData:true},
+     {id:a2,title:'Community reading corner',description:'One-time contribution for books and learning materials.',amount:1200,dueDate:d('11-30'),color:'teal',projectId:p2,sampleData:true}
+   );
+   contributors.push(
+     {id:'sample-person-1',activityId:a1,name:'Ramon Dela Cruz',expected:750,sampleData:true},
+     {id:'sample-person-2',activityId:a1,name:'Maria Santos',expected:750,sampleData:true},
+     {id:'sample-person-3',activityId:a1,name:'Joel Cruz',expected:750,sampleData:true},
+     {id:'sample-person-4',activityId:a1,name:'Liza Garcia',expected:750,sampleData:true},
+     {id:'sample-person-5',activityId:a1,name:'Carla Mendoza',expected:750,sampleData:true},
+     {id:'sample-person-6',activityId:a2,name:'Nora Reyes',expected:1200,sampleData:true},
+     {id:'sample-person-7',activityId:a2,name:'Paolo Lim',expected:1200,sampleData:true},
+     {id:'sample-person-8',activityId:a2,name:'Bea Navarro',expected:1200,sampleData:true}
+   );
+   contributionPayments.push(
+     {id:'sample-payment-1',contributorId:'sample-person-1',amount:750,date:d('04-05'),receivedBy:'Ana Reyes',method:'personal',reference:'RCPT-104',sampleData:true},
+     {id:'sample-payment-2',contributorId:'sample-person-2',amount:375,date:d('04-08'),receivedBy:'Ana Reyes',method:'personal',reference:'RCPT-105',sampleData:true},
+     {id:'sample-payment-3',contributorId:'sample-person-3',amount:750,date:d('04-12'),receivedBy:'Ana Reyes',method:'personal',reference:'RCPT-106',sampleData:true},
+     {id:'sample-payment-4',contributorId:'sample-person-4',amount:600,date:d('04-15'),receivedBy:'Ana Reyes',method:'fund',fundId:f1,txId:'sample-tx-contribution',reference:'FUND-021',sampleData:true},
+     {id:'sample-payment-5',contributorId:'sample-person-6',amount:1200,date:d('05-14'),receivedBy:'Joel Cruz',method:'personal',reference:'RCPT-204',sampleData:true},
+     {id:'sample-payment-6',contributorId:'sample-person-7',amount:600,date:d('05-16'),receivedBy:'Joel Cruz',method:'personal',reference:'RCPT-205',sampleData:true}
+   );
+   txs.push({id:'sample-tx-contribution',date:d('04-15'),fundId:f1,type:'OUT',category:'Contribution',description:'Contribution: Monthly community contribution — Liza Garcia',amount:600,payee:'Ana Reyes',method:'Fund payment',contributionPaymentId:'sample-payment-4',sampleData:true});
+   const saved=await saveAll();if(saved===false){appAlert('Sample data could not be saved. Export a backup before trying again.');return;}renderAll();updateStorageInfo();appAlert('Sample data loaded. Explore Dashboard, Transactions, Refund History, and Reports.');
+ }
+ async function clearSampleData(){
+   if(!sampleDataPresent()){appAlert('There are no sample records to clear.');return;}
+   if(!await appConfirm('Clear only the marked sample records? Your own records will stay in this workspace.'))return;
+   const sampleFunds=new Set(funds.filter(isSampleRecord).map(x=>x.id)),sampleProjects=new Set(projects.filter(isSampleRecord).map(x=>x.id)),sampleBills=new Set(payables.filter(isSampleRecord).map(x=>x.id)),sampleActivities=new Set(contributionActivities.filter(isSampleRecord).map(x=>x.id)),samplePeople=new Set(contributors.filter(isSampleRecord).map(x=>x.id));
+   funds=funds.filter(x=>!isSampleRecord(x));projects=projects.filter(x=>!isSampleRecord(x));sigs=sigs.filter(x=>!isSampleRecord(x));allocations=allocations.filter(x=>!isSampleRecord(x)&&!sampleFunds.has(x.fundId)&&!sampleProjects.has(x.projectId));payables=payables.filter(x=>!isSampleRecord(x));txs=txs.filter(x=>!isSampleRecord(x)&&!sampleFunds.has(x.fundId)&&!sampleProjects.has(x.projectId)&&!sampleBills.has(x.payableId));auditLog=auditLog.filter(x=>!isSampleRecord(x));contributionActivities=contributionActivities.filter(x=>!isSampleRecord(x));contributors=contributors.filter(x=>!isSampleRecord(x));contributionPayments=contributionPayments.filter(x=>!isSampleRecord(x)&&!samplePeople.has(x.contributorId)&&!sampleActivities.has(contributors.find(p=>p.id===x.contributorId)?.activityId));
+   const saved=await saveAll();if(saved===false){appAlert('Sample data could not be cleared from storage.');return;}renderAll();updateStorageInfo();appAlert('Sample data cleared. Your own records were kept.');
+ }
 function syncAboutSettings(){ document.getElementById('settingsOrgName').value=org.name; document.getElementById('settingsOrgLoc').value=org.location; document.getElementById('settingsPeriodFrom').value=org.periodFrom; document.getElementById('settingsPeriodTo').value=org.periodTo; let s=document.getElementById('settingsSigs'); s.innerHTML=''; sigs.forEach(sig=>{ s.innerHTML+='<div style="display:flex; justify-content:space-between; padding:8px 10px; border-radius:10px; background:white"><span style="font-size:13px">'+escapeText(sig.name)+' — '+escapeText(sig.title)+'</span></div>'; }); document.getElementById('lastBackup').innerText=localStorage.getItem(reminderStorageKey('ft_last_backup'))||'Never'; }
 async function saveOrgFromSettings(){ org.name=document.getElementById('settingsOrgName').value; org.location=document.getElementById('settingsOrgLoc').value; org.periodFrom=document.getElementById('settingsPeriodFrom').value; org.periodTo=document.getElementById('settingsPeriodTo').value; saveAll(); renderAll(); if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Organization saved'); }
 function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem(reminderStorageKey('ft_last_backup'), new Date().toLocaleString());localStorage.setItem(reminderStorageKey('ft_last_backup_ts'),String(Date.now()));localStorage.removeItem(reminderStorageKey('ft_backup_reminder_until'));localStorage.removeItem(reminderStorageKey('ft_backup_overdue_notified'))}catch(e){} updateBackupReminder();appAlert('Backup export started. Keep the downloaded file in a safe place.'); }
