@@ -47,10 +47,10 @@
 
 <!-- Windows / Microsoft Tiles -->
 <meta name="msapplication-config" content="browserconfig.xml">
-<meta name="msapplication-TileColor" content="#059669">
+<meta name="msapplication-TileColor" content="#122e76">
 <meta name="msapplication-TileImage" content="icons/mstile-150x150.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- Tailwind inlined below - no CDN needed for offline preview -->
 <style>
 /* === INLINED TAILWIND - self-contained, no CDN needed === */
@@ -5048,6 +5048,64 @@ body .bottomnav .nav-btn.active {
 }
 body .bottomnav .nav-btn.active .nav-label {
   color: #fff !important;
+}
+/* Typography and icon language aligned with Portable School Inventory. */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: 'Inter', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+.font-serif,
+.hero-amount,
+.org-name,
+.sheet-title,
+.report-title,
+.slide-title {
+  font-family: 'Inter', 'Instrument Sans', system-ui, sans-serif !important;
+  letter-spacing: -0.025em !important;
+}
+.font-mono,
+.hero-stat-value,
+.fund-amount b,
+.tx-amount {
+  font-family: 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace !important;
+}
+.nav-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-grid;
+  place-items: center;
+}
+.nav-icon svg,
+.icon-btn svg,
+.btn svg,
+.fab svg,
+.tx-icon svg,
+.hero-stat svg,
+.close-btn svg {
+  stroke: currentColor !important;
+  stroke-width: 2.25 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+.nav-btn:not(.active) .nav-icon,
+.nav-btn:not(.active) .nav-label {
+  color: #64748b !important;
+}
+.nav-btn.active .nav-icon {
+  color: #fff !important;
+}
+.tx-icon {
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+.icon-btn,
+.close-btn,
+.fab {
+  display: inline-grid;
+  place-items: center;
 }
 </style>
 
