@@ -12,7 +12,16 @@ function harness({standalone=true,ua='Mozilla/5.0 (Windows NT 10.0) Chrome/130',
 }
 test('desktop installed Chrome attempts popup directly',async()=>{let t=harness();await t.run('handleSignIn()');assert.deepEqual(t.calls,['popup']);assert.equal(t.button.disabled,false);});
 test('desktop installed popup block offers retry and does not redirect silently',async()=>{let t=harness({popupError:{code:'auth/popup-blocked'}});await t.run('handleSignIn()');assert.deepEqual(t.calls,['popup']);assert.equal(t.button.disabled,false);assert.match(t.error.textContent,/pop-ups/);assert.equal(t.fallback.hidden,false)});
-test('mobile installed app retains redirect and marks the attempt',async()=>{let t=harness({ua:'Mozilla/5.0 Android Chrome'});await t.run('handleSignIn()');assert.deepEqual(t.calls,['redirect']);assert.equal(t.storage.get('ft_auth_redirect_pending'),'1')});
+test('Android installed app uses a popup instead of redirect',async()=>{
+ let t=harness({ua:'Mozilla/5.0 Android Chrome'});await t.run('handleSignIn()');
+ assert.deepEqual(t.calls,['popup']);assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.equal(t.button.disabled,false);assert.equal(t.error.hidden,true);
+});
+test('Android installed popup errors offer browser fallback without redirecting',async()=>{
+ for(const code of ['auth/popup-blocked','auth/operation-not-supported-in-this-environment']){
+  let t=harness({ua:'Mozilla/5.0 Android Chrome',popupError:{code}});await t.run('handleSignIn()');
+  assert.deepEqual(t.calls,['popup']);assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.equal(t.button.disabled,false);assert.equal(t.fallback.hidden,false);assert.match(t.error.textContent,/pop-ups/);
+ }
+});
 test('browser popup block tries redirect and clears marker on failure',async()=>{let t=harness({standalone:false,popupError:{code:'auth/popup-blocked'},redirectError:{message:'network issue'}});await t.run('handleSignIn()');assert.deepEqual(t.calls,['popup','redirect']);assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.match(t.error.textContent,/network issue/);assert.equal(t.button.disabled,false)});
 test('closed popup enables retry without an error',async()=>{let t=harness({popupError:{code:'auth/popup-closed-by-user'}});await t.run('handleSignIn()');assert.equal(t.button.disabled,false);assert.equal(t.error.hidden,true)});
 test('unfinished redirect reports missing session and removes marker',async()=>{let t=harness({pending:true});t.run(redirect);await new Promise(r=>setImmediate(r));assert.match(t.error.textContent,/without a session/);assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.equal(t.button.disabled,false)});
@@ -23,6 +32,11 @@ test('redirect recovery blocks overlapping sign-in until it finishes',async()=>{
  assert.equal(t.button.disabled,true);await t.run('handleSignIn()');assert.deepEqual(t.calls,[]);
  finish(null);await new Promise(r=>setImmediate(r));assert.equal(t.button.disabled,false);assert.match(t.error.textContent,/without a session/);
 });
-test('a rejected mobile redirect clears the pending marker and allows retry',async()=>{
- let t=harness({ua:'Mozilla/5.0 Android Chrome',redirectError:{message:'offline'}});await t.run('handleSignIn()');assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.equal(t.button.disabled,false);assert.match(t.error.textContent,/offline/);
+test('Android browser popup failure may use redirect and clears the marker if redirect fails',async()=>{
+ let t=harness({standalone:false,ua:'Mozilla/5.0 Android Chrome',popupError:{code:'auth/popup-blocked'},redirectError:{message:'offline'}});
+ await t.run('handleSignIn()');assert.deepEqual(t.calls,['popup','redirect']);assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.equal(t.button.disabled,false);assert.match(t.error.textContent,/offline/);
+});
+test('Android installed popup failure is surfaced and retry remains available',async()=>{
+ let t=harness({ua:'Mozilla/5.0 Android Chrome',popupError:{code:'auth/network-request-failed',message:'offline'}});
+ await t.run('handleSignIn()');assert.deepEqual(t.calls,['popup']);assert.equal(t.storage.has('ft_auth_redirect_pending'),false);assert.equal(t.button.disabled,false);assert.equal(t.fallback.hidden,false);assert.match(t.error.textContent,/offline/);
 });

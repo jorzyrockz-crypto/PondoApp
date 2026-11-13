@@ -12,6 +12,6 @@ test('service worker leaves same-origin auth helpers to the network',()=>{
  for(const [path,mode] of [['/__/auth/iframe','no-cors'],['/__/auth/handler?state=abc','navigate'],['/__/auth/iframe.js','no-cors'],['/__/auth','navigate']])handler({request:{method:'GET',mode,url:'https://pondoapp.vercel.app'+path},respondWith(){responded++}});
  assert.equal(responded,0);assert.equal(opened,0);
 });
-test('rollback guidance acknowledges Android limitation and protects local data',()=>{
- const doc=fs.readFileSync('docs/android-pwa-sign-in.md','utf8');assert.match(doc,/redirect_uri_mismatch/);assert.match(doc,/does not solve that problem/);assert.match(doc,/Do not clear site data or uninstall/);assert.match(doc,/actual sign-in still depends/);
+test('Android popup guidance covers blocked popups, device testing, and local data safety',()=>{
+ const doc=fs.readFileSync('docs/android-pwa-sign-in.md','utf8');assert.match(doc,/popup flow/);assert.match(doc,/installed Android phone and tablet/);assert.match(doc,/blocks the popup/);assert.match(doc,/may not share/);assert.match(doc,/do not\s+clear site data or uninstall/i);assert.match(doc,/real-device testing/i);
 });
