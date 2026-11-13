@@ -5989,6 +5989,129 @@ body.dark-mode #settingsModal .settings-panel button.selected {
     border-color: #2b456b;
   }
 }
+/* Reference-style app header: clear identity, quiet chrome, and a labeled More action. */
+.topbar {
+  min-height: 4.75rem !important;
+  background: #fff !important;
+  border-bottom: 1px solid #dbe4ef !important;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.85) inset !important;
+}
+.topbar-inner {
+  min-height: 4.75rem !important;
+  padding: 0 1.5rem !important;
+  gap: 1rem !important;
+}
+.pondo-identity {
+  gap: 0.75rem !important;
+}
+.logo {
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  border-radius: 0.8rem !important;
+  box-shadow: 0 4px 10px rgb(18 46 118 / 0.14) !important;
+}
+.pondo-brand,
+.org-name {
+  color: #122e76 !important;
+  font-size: 1.1rem !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.025em !important;
+}
+.app-tagline {
+  color: #64748b !important;
+  font-size: 0.8rem !important;
+  line-height: 1.25 !important;
+}
+.pondo-header-actions {
+  gap: 0.625rem !important;
+}
+.team-header-badge,
+.header-avatar-btn,
+.header-bell-btn,
+#headerMoreBtn {
+  min-height: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+}
+.team-header-badge {
+  padding: 0 12px !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #dbe4ef !important;
+  color: #334155 !important;
+  font-family: var(--school-font) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+.team-header-badge:hover,
+.team-header-badge:focus-visible {
+  background: #eef2ff !important;
+  outline: 2px solid #6366f1 !important;
+  outline-offset: 1px;
+}
+#headerMoreBtn {
+  width: 46px !important;
+  padding: 0 !important;
+  color: #173b8f !important;
+  background: #eef3f9 !important;
+  border: 1px solid #dbe4ef !important;
+}
+#headerMoreBtn svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+#headerMoreBtn::after {
+  content: "";
+}
+.header-bell-btn {
+  background: #eef3f9 !important;
+  border-color: #dbe4ef !important;
+  color: #173b8f !important;
+}
+body.dark-mode .topbar {
+  background: #0f1a30 !important;
+  border-color: #2b456b !important;
+  box-shadow: none !important;
+}
+body.dark-mode .pondo-brand,
+body.dark-mode .org-name {
+  color: #f3f7ff !important;
+}
+body.dark-mode .app-tagline {
+  color: #aebed5 !important;
+}
+body.dark-mode .team-header-badge,
+body.dark-mode .header-avatar-btn,
+body.dark-mode .header-bell-btn,
+body.dark-mode #headerMoreBtn {
+  background: #1d3452 !important;
+  border-color: #2b456b !important;
+  color: #eaf2ff !important;
+}
+body.dark-mode .team-header-badge:hover,
+body.dark-mode .team-header-badge:focus-visible,
+body.dark-mode #headerMoreBtn:hover,
+body.dark-mode #headerMoreBtn:focus-visible {
+  background: #272b61 !important;
+  outline-color: #6c5cff !important;
+}
+@media screen and (min-width: 700px) {
+  #headerMoreBtn {
+    width: auto !important;
+    min-width: 92px !important;
+    padding: 0 14px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  #headerMoreBtn::after {
+    content: "More";
+    font-family: var(--school-font);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+}
 @media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
   .wrap { max-width: 52rem !important; padding-left: 2rem !important; padding-right: 2rem !important; }
   .bottomnav { background: rgb(255 255 255 / 0.98) !important; }
