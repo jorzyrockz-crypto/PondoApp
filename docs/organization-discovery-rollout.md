@@ -52,7 +52,10 @@ deploy the unrelated public-report codebase or enable public financial reads.
    each conflict with affected owners through a separately reviewed maintenance
    procedure, then repeat the audit. Do not print or publish private names.
 4. Only after reviewing the audit and project ID, run the same command with
-   `--apply`. It writes name reservations and marks existing orgs private;
+   `--apply --writers-stopped --confirm-project=PROJECT` (substitute the exact
+   `GCLOUD_PROJECT` value). The flags are explicit human attestations, not proof
+   that writers are stopped or backups exist. It writes name reservations and
+   marks existing orgs private;
    the ready marker is written last. It can be retried if interrupted before
    the marker, but **only** while all writers remain stopped. Check the registry
    and marker, rules, functions and updated app clients before resuming edits.

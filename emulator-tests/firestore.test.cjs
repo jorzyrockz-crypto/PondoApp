@@ -5,7 +5,8 @@ const {initializeTestEnvironment,assertFails,assertSucceeds}=require('@firebase/
 const {doc,getDoc,getDocs,collection,setDoc,updateDoc,deleteDoc,writeBatch}=require('firebase/firestore');
 const {initializeApp,deleteApp}=require('firebase-admin/app');
 const {getFirestore,FieldValue}=require('firebase-admin/firestore');
-const {createService}=require('../organization-functions/service.cjs');
+const {createService,canonicalName,nameId}=require('../organization-functions/service.cjs');
+const {execFileSync}=require('node:child_process');
 const PROJECT='demo-pondo-security';
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Refusing to run: start the local Firestore emulator first.');
 class HttpsError extends Error {constructor(code,message){super(message);this.code=code}}
@@ -17,6 +18,8 @@ const client=uid=>uid?env.authenticatedContext(uid).firestore():env.unauthentica
 const ref=(c,p)=>doc(c,p);
 async function seed(rows){await env.withSecurityRulesDisabled(async context=>{const store=context.firestore();for(const [p,value] of Object.entries(rows))await setDoc(ref(store,p),value)})}
 const actor=(uid,data={})=>({auth:{uid,token:{name:uid,email:uid+'@example.test'}},data});
+const executeMigration=args=>{let envVars={...process.env,GCLOUD_PROJECT:PROJECT,NODE_PATH:path.join(__dirname,'node_modules')};delete envVars.GOOGLE_APPLICATION_CREDENTIALS;return execFileSync(process.execPath,[path.join(__dirname,'../organization-functions/migrate.cjs'),...args],{encoding:'utf8',env:envVars,timeout:45000,stdio:['ignore','pipe','pipe']})};
+const applyMigration=['--apply','--writers-stopped',`--confirm-project=${PROJECT}`];
 
 test('only actual members can read team data; reviewers cannot write; removed members lose access',async()=>{
  await seed({'organizations/school':{name:'School'},'organizations/school/members/owner':{uid:'owner',role:'owner'},'organizations/school/members/reviewer':{uid:'reviewer',role:'reviewer'},'organizations/school/members/editor':{uid:'editor',role:'project-manager'},'organizations/school/data/snapshot':{_syncRevision:1,updatedBy:'owner',funds:[]}});
@@ -63,10 +66,29 @@ test('service transactions preserve uniqueness and approval-gated membership und
 });
 
 test('migration audits duplicates without writes, then reserves names and marks existing organizations private',async()=>{
- const {execFileSync}=require('node:child_process');
- const execute=args=>{let envVars={...process.env,GCLOUD_PROJECT:PROJECT,NODE_PATH:path.join(__dirname,'node_modules')};delete envVars.GOOGLE_APPLICATION_CREDENTIALS;return execFileSync(process.execPath,[path.join(__dirname,'../organization-functions/migrate.cjs'),...args],{encoding:'utf8',env:envVars,timeout:45000,stdio:['ignore','pipe','pipe']})};
+ const execute=executeMigration;
  await db.doc('organizations/a').set({name:' School  Fund ',discoverable:true});await db.doc('organizations/b').set({name:'school fund'});
- assert.throws(()=>execute(['--apply']));assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).exists,false);assert.equal((await db.collection('organizationNames').get()).size,0);assert.equal((await db.doc('organizations/a').get()).data().discoverable,true);
+ assert.throws(()=>execute(['--apply']));assert.throws(()=>execute(['--apply','--writers-stopped','--confirm-project=wrong-project']));
+ const apply=applyMigration;assert.throws(()=>execute(apply));assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).exists,false);assert.equal((await db.collection('organizationNames').get()).size,0);assert.equal((await db.doc('organizations/a').get()).data().discoverable,true);
  await db.doc('organizations/b').update({name:'Another organization'});assert.match(execute([]),/Audit only/);assert.equal((await db.collection('organizationNames').get()).size,0);
- assert.match(execute(['--apply']),/Registry ready/);assert.equal((await db.collection('organizationNames').get()).size,2);assert.equal((await db.doc('organizations/a').get()).data().discoverable,false);assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).data().ready,true);assert.throws(()=>execute(['--apply']));
+ assert.match(execute(apply),/Registry ready/);assert.equal((await db.collection('organizationNames').get()).size,2);assert.equal((await db.doc('organizations/a').get()).data().discoverable,false);assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).data().ready,true);assert.throws(()=>execute(apply));
+});
+
+test('migration rejects invalid names and conflicting reservations and resumes an interrupted batch',async()=>{
+ const key=canonicalName('School').key, reservation=db.doc(`organizationNames/${nameId(key)}`);
+ await db.doc('organizations/a').set({name:'School',discoverable:true});
+ await db.doc('organizations/b').set({name:''});
+ await assert.rejects(async()=>executeMigration(applyMigration),/Command failed/);
+ assert.equal((await reservation.get()).exists,false);
+ await db.doc('organizations/b').update({name:'Other'});
+ await reservation.set({key,orgId:'wrong'});
+ assert.throws(()=>executeMigration(applyMigration));
+ assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).exists,false);
+ assert.equal((await db.doc('organizations/a').get()).data().discoverable,true);
+ // Model a completed first batch after interruption, with the marker still absent.
+ await reservation.set({key,orgId:'a'});await db.doc('organizations/a').update({discoverable:false});
+ assert.match(executeMigration(applyMigration),/Registry ready/);
+ assert.equal((await db.collection('organizationNames').get()).size,2);
+ assert.equal((await db.doc('organizations/b').get()).data().discoverable,false);
+ assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).data().ready,true);
 });
