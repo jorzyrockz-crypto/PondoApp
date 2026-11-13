@@ -6116,6 +6116,321 @@ body.dark-mode #headerMoreBtn:focus-visible {
   .wrap { max-width: 52rem !important; padding-left: 2rem !important; padding-right: 2rem !important; }
   .bottomnav { background: rgb(255 255 255 / 0.98) !important; }
 }
+/* Contributions workspace: a calmer collection dashboard with clear progress hierarchy. */
+#tab-contributions {
+  --contrib-purple: #5b4ae8;
+  --contrib-purple-soft: #eef2ff;
+  --contrib-green: #0f9f73;
+  --contrib-canvas: #eef3f9;
+}
+#tab-contributions .contribution-page-head {
+  align-items: center !important;
+  margin-bottom: 18px !important;
+  padding: 20px 22px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 20px !important;
+  background: rgb(255 255 255 / 0.96) !important;
+  box-shadow: 0 10px 28px rgb(22 42 78 / 0.06) !important;
+}
+#tab-contributions .contribution-page-head .report-eyebrow,
+#tab-contributions .contribution-list-heading .report-eyebrow {
+  margin-bottom: 7px !important;
+  color: #58709a !important;
+  letter-spacing: .08em !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+#tab-contributions .contribution-page-head h2 {
+  color: #122e76 !important;
+  font-size: clamp(26px, 3vw, 34px) !important;
+  letter-spacing: -.045em !important;
+  line-height: 1.05 !important;
+}
+#tab-contributions .contribution-page-head p:not(.report-eyebrow) {
+  margin-top: 8px !important;
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+#tab-contributions .contribution-page-head .btn {
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 0 17px !important;
+  border-radius: 12px !important;
+  background: var(--contrib-purple) !important;
+  border-color: var(--contrib-purple) !important;
+  box-shadow: 0 8px 16px rgb(91 74 232 / .18) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+#tab-contributions .contribution-page-head .btn > span {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 18px;
+  line-height: 0;
+  transform: translateY(1px);
+}
+#tab-contributions .contribution-page-summary {
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+#tab-contributions .contribution-page-summary > div {
+  min-height: 108px;
+  padding: 16px 17px 14px !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 16px rgb(22 42 78 / .04) !important;
+}
+#tab-contributions .contribution-page-summary > div:nth-child(1) { border-top: 3px solid #5b4ae8 !important; }
+#tab-contributions .contribution-page-summary > div:nth-child(2) { border-top: 3px solid #1988d6 !important; }
+#tab-contributions .contribution-page-summary > div:nth-child(3) { border-top: 3px solid #0f9f73 !important; }
+#tab-contributions .contribution-page-summary > div:nth-child(4) { border-top: 3px solid #e98a22 !important; }
+#tab-contributions .contribution-page-summary span {
+  color: #58709a !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em;
+}
+#tab-contributions .contribution-page-summary strong {
+  margin-top: 9px !important;
+  color: #132f76 !important;
+  font-size: clamp(20px, 2.4vw, 27px) !important;
+  letter-spacing: -.04em !important;
+}
+#tab-contributions .contribution-page-summary small {
+  display: block;
+  margin-top: 6px;
+  color: #8392a8;
+  font-size: 10px;
+  line-height: 1.35;
+}
+#tab-contributions .contribution-health-card {
+  margin: 0 0 18px;
+  padding: 18px 20px 16px;
+  border: 1px solid #dbe4ef;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 7px 20px rgb(22 42 78 / .05);
+}
+#tab-contributions .contribution-health-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#tab-contributions .contribution-health-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  color: #0f9f73;
+  background: #e5f8f1;
+}
+#tab-contributions .contribution-health-icon svg { width: 21px; height: 21px; }
+#tab-contributions .contribution-health-head h3 {
+  margin: 0;
+  color: #1d355f;
+  font-size: 15px;
+  letter-spacing: -.02em;
+}
+#tab-contributions .contribution-health-head p {
+  margin: 4px 0 0;
+  color: #71829b;
+  font-size: 11px;
+}
+#tab-contributions .contribution-health-head > strong {
+  margin-left: auto;
+  color: #0f9f73;
+  font-size: 15px;
+  white-space: nowrap;
+}
+#tab-contributions .contribution-health-track {
+  height: 10px;
+  margin: 17px 0 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e3eaf3;
+}
+#tab-contributions .contribution-health-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0f9f73, #22c58b);
+  transition: width .45s cubic-bezier(.2,.8,.2,1);
+}
+#tab-contributions .contribution-health-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: #71829b;
+  font-size: 11px;
+}
+#tab-contributions .contribution-health-meta > span:not(.contribution-health-note) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#tab-contributions .contribution-health-meta strong { color: #273b5e; }
+#tab-contributions .health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0f9f73;
+}
+#tab-contributions .health-dot.outstanding { background: #e98a22; }
+#tab-contributions .contribution-health-note { margin-left: auto; color: #8997aa; }
+#tab-contributions .contribution-workspace {
+  padding: 19px 20px 20px;
+  border: 1px solid #dbe4ef;
+  border-radius: 20px;
+  background: rgb(255 255 255 / .72);
+}
+#tab-contributions .contribution-list-heading {
+  align-items: center !important;
+  margin-bottom: 17px !important;
+}
+#tab-contributions .contribution-list-heading h3 {
+  color: #1d355f !important;
+  font-size: 18px !important;
+  letter-spacing: -.03em !important;
+}
+#tab-contributions .contribution-list-heading > div:first-child > p:last-child {
+  margin-top: 5px !important;
+  color: #71829b !important;
+  font-size: 11px !important;
+}
+#tab-contributions .contrib-page-filter { align-items: center; }
+#tab-contributions .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+#tab-contributions .contribution-search-wrap,
+#tab-contributions .contribution-filter-wrap { position: relative; display: block; }
+#tab-contributions .contribution-search-wrap svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  color: #8292a8;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+#tab-contributions .contribution-search-wrap .input {
+  width: 230px;
+  padding-left: 38px !important;
+}
+#tab-contributions .contribution-filter-wrap .input { width: 148px; min-width: 138px; }
+#tab-contributions .contribution-workspace .contribution-cards { gap: 12px; }
+#tab-contributions .contribution-workspace .contribution-card {
+  padding: 17px !important;
+  border: 1px solid #dbe4ef !important;
+  border-top: 3px solid var(--card-color, #5b4ae8) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 16px rgb(22 42 78 / .04) !important;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+#tab-contributions .contribution-workspace .contribution-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgb(22 42 78 / .09) !important;
+}
+#tab-contributions .contribution-card .contribution-card-head h3 { color: #1d355f; }
+#tab-contributions .contribution-card > p { color: #71829b; }
+#tab-contributions .contribution-card .project-metrics { gap: 8px; }
+#tab-contributions .contribution-card .project-metrics > div {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #f6f8fb;
+}
+#tab-contributions .contribution-card .project-metrics strong { color: #1d355f; }
+#tab-contributions .contribution-workspace .empty-state {
+  min-height: 220px;
+  margin: 0;
+  padding: 28px 18px;
+  border: 1px dashed #cbd7e6;
+  border-radius: 15px;
+  background: #f8fafc;
+  color: #71829b;
+}
+#tab-contributions .contribution-workspace .empty-state strong {
+  display: block;
+  margin: 7px 0 5px;
+  color: #1d355f;
+  font-size: 15px;
+}
+#tab-contributions .contribution-disclaimer {
+  margin: 14px 2px 0 !important;
+  color: #8292a8 !important;
+  font-size: 11px !important;
+}
+body.dark-mode #tab-contributions .contribution-page-head,
+body.dark-mode #tab-contributions .contribution-page-summary > div,
+body.dark-mode #tab-contributions .contribution-health-card,
+body.dark-mode #tab-contributions .contribution-workspace {
+  border-color: #2b456b !important;
+  background: #172942 !important;
+  box-shadow: none !important;
+}
+body.dark-mode #tab-contributions .contribution-page-head h2,
+body.dark-mode #tab-contributions .contribution-page-head p:not(.report-eyebrow),
+body.dark-mode #tab-contributions .contribution-list-heading h3,
+body.dark-mode #tab-contributions .contribution-list-heading > div:first-child > p:last-child,
+body.dark-mode #tab-contributions .contribution-card .contribution-card-head h3,
+body.dark-mode #tab-contributions .contribution-card .project-metrics strong,
+body.dark-mode #tab-contributions .contribution-health-head h3,
+body.dark-mode #tab-contributions .contribution-health-meta strong,
+body.dark-mode #tab-contributions .contribution-workspace .empty-state strong {
+  color: #f3f7ff !important;
+}
+body.dark-mode #tab-contributions .contribution-page-head .report-eyebrow,
+body.dark-mode #tab-contributions .contribution-list-heading .report-eyebrow { color: #9fb8e2 !important; }
+body.dark-mode #tab-contributions .contribution-page-summary span,
+body.dark-mode #tab-contributions .contribution-page-summary small,
+body.dark-mode #tab-contributions .contribution-health-head p,
+body.dark-mode #tab-contributions .contribution-health-meta,
+body.dark-mode #tab-contributions .contribution-card > p,
+body.dark-mode #tab-contributions .contribution-disclaimer { color: #aebed5 !important; }
+body.dark-mode #tab-contributions .contribution-page-summary strong { color: #8eb5ff !important; }
+body.dark-mode #tab-contributions .contribution-health-icon { color: #6ee7b7; background: #173f3c; }
+body.dark-mode #tab-contributions .contribution-health-track { background: #2c466a; }
+body.dark-mode #tab-contributions .contribution-workspace .contribution-card {
+  border-color: #2b456b !important;
+  background: #1d3452 !important;
+}
+body.dark-mode #tab-contributions .contribution-card .project-metrics > div { background: #172942; }
+body.dark-mode #tab-contributions .contribution-workspace .empty-state {
+  border-color: #385579;
+  background: #13243c;
+  color: #aebed5;
+}
+@media (max-width: 700px) {
+  #tab-contributions .contribution-page-head { align-items: flex-start !important; padding: 18px !important; }
+  #tab-contributions .contribution-page-head .btn { align-self: flex-start; }
+  #tab-contributions .contribution-health-head { align-items: flex-start; }
+  #tab-contributions .contribution-health-head > strong { margin-top: 7px; }
+  #tab-contributions .contribution-health-note { margin-left: 0; flex-basis: 100%; }
+  #tab-contributions .contribution-workspace { padding: 17px 14px 16px; }
+  #tab-contributions .contribution-list-heading { align-items: stretch !important; }
+  #tab-contributions .contrib-page-filter { flex-direction: column; align-items: stretch; }
+  #tab-contributions .contribution-search-wrap .input,
+  #tab-contributions .contribution-filter-wrap .input { width: 100%; min-width: 0; }
+}
 </style>
 
 </head>
@@ -6271,7 +6586,7 @@ body.dark-mode #headerMoreBtn:focus-visible {
     <div id="seriesComparison" class="series-comparison" hidden></div><div id="projectsList"></div>
   </section>
 
-  <section id="tab-contributions" class="tab-section" style="display:none"><div class="fund-page-head"><div><p class="report-eyebrow">COLLECTION TRACKING</p><h2>Contributions</h2><p>Follow individual contributions and payment history.</p></div><button type="button" class="btn btn-emerald" onclick="openContributionForm('activity')">+ Add activity</button></div><div class="project-page-summary"><div><span id="contribActivityScope">Active activities</span><strong id="contribActivityCount">0</strong></div><div><span>Expected</span><strong id="contribExpected">₱0</strong></div><div><span>Total paid</span><strong id="contribPaid">₱0</strong></div><div><span>Outstanding</span><strong id="contribOutstanding">₱0</strong></div></div><p class="contribution-disclaimer">Personal payments are tracked separately from fund cash. Fund-funded payments create a linked fund expense.</p><div class="fund-list-heading"><div><h3>Contribution activities</h3><p>Open an activity to manage contributors and payments.</p></div><div class="contrib-page-filter"><input id="contribSearch" class="input" type="search" aria-label="Search contribution activities" placeholder="Search activities" oninput="renderContributionPage()"><select id="contribArchiveFilter" class="input" aria-label="Filter contribution activities" onchange="renderContributionPage()"><option value="active">Active</option><option value="archived">Archived</option><option value="all">All activities</option></select></div></div><div id="contributionCards" class="contribution-cards"></div></section>
+  <section id="tab-contributions" class="tab-section" style="display:none"><div class="fund-page-head contribution-page-head"><div><p class="report-eyebrow">COLLECTION TRACKING</p><h2>Contributions</h2><p>Follow individual contributions and payment history.</p></div><button type="button" class="btn btn-emerald" onclick="openContributionForm('activity')"><span aria-hidden="true">+</span> Add activity</button></div><div class="project-page-summary contribution-page-summary"><div><span id="contribActivityScope">Active activities</span><strong id="contribActivityCount">0</strong><small>Open collection plans</small></div><div><span>Expected</span><strong id="contribExpected">₱0</strong><small>Across contributors</small></div><div><span>Total paid</span><strong id="contribPaid">₱0</strong><small>Personal + fund-funded</small></div><div><span>Outstanding</span><strong id="contribOutstanding">₱0</strong><small>Still to be collected</small></div></div><section class="contribution-health-card" aria-labelledby="contributionHealthTitle"><div class="contribution-health-head"><span class="contribution-health-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-4 3 2 5-6"/><path d="M15 7h3v3"/></svg></span><div><h3 id="contributionHealthTitle">Collection health</h3><p>See how much has been paid and what remains outstanding.</p></div><strong id="contributionHealthRate">0% collected</strong></div><div class="contribution-health-track" role="progressbar" aria-label="Contribution payment progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="contributionHealthFill"></span></div><div class="contribution-health-meta"><span><i class="health-dot paid"></i>Paid <strong id="contributionHealthPaid">₱0</strong></span><span><i class="health-dot outstanding"></i>Outstanding <strong id="contributionHealthOutstanding">₱0</strong></span><span class="contribution-health-note">Personal payments stay separate from fund cash.</span></div></section><section class="contribution-workspace" aria-labelledby="contributionActivitiesTitle"><div class="fund-list-heading contribution-list-heading"><div><p class="report-eyebrow">ACTIVITY WORKSPACE</p><h3 id="contributionActivitiesTitle">Contribution activities</h3><p>Open an activity to manage contributors and payments.</p></div><div class="contrib-page-filter"><label class="contribution-search-wrap"><span class="sr-only">Search contribution activities</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="contribSearch" class="input" type="search" aria-label="Search contribution activities" placeholder="Search activities" oninput="renderContributionPage()"></label><label class="contribution-filter-wrap"><span class="sr-only">Filter contribution activities</span><select id="contribArchiveFilter" class="input" aria-label="Filter contribution activities" onchange="renderContributionPage()"><option value="active">Active</option><option value="archived">Archived</option><option value="all">All activities</option></select></label></div></div><div id="contributionCards" class="contribution-cards"></div></section><p class="contribution-disclaimer">Personal payments are tracked separately from fund cash. Fund-funded payments create a linked fund expense.</p></section>
 
   <!-- REPORT -->
   <section id="tab-report" class="tab-section" style="display:none">
@@ -7804,7 +8119,10 @@ function contributionExpectationDescription(a,month=null){let people=month?contr
 function contributionTotalsForActivities(activities){let sums={expected:0,paid:0,outstanding:0,fundPaid:0,personalPaid:0,count:0};activities.forEach(a=>{let t=contributionTotals(a.id);Object.keys(sums).forEach(k=>sums[k]+=t[k])});return sums}
 function renderContributionPage(){let mode=document.getElementById('contribArchiveFilter').value,scoped=contributionActivities.filter(a=>mode==='all'||(mode==='archived'?!!a.archived:!a.archived)),sum=contributionTotalsForActivities(scoped);document.getElementById('contribActivityScope').textContent=mode==='active'?'Active activities':mode==='archived'?'Archived activities':'All activities';document.getElementById('contribActivityCount').textContent=scoped.length;document.getElementById('contribExpected').textContent=fmt(sum.expected/100);document.getElementById('contribPaid').textContent=fmt(sum.paid/100);document.getElementById('contribOutstanding').textContent=fmt(sum.outstanding/100);let list=document.getElementById('contributionCards'),q=document.getElementById('contribSearch').value.trim().toLowerCase();list.innerHTML='';let visible=scoped.filter(a=>[a.title,a.description].some(x=>String(x||'').toLowerCase().includes(q)));if(!visible.length){list.innerHTML=contributionActivities.length?'<div class="empty-state"><strong>No matching activities</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('contribution')+'<strong>No contribution activities yet</strong>Add an activity to start tracking contributors.</div>';return}visible.forEach(a=>{let t=contributionTotals(a.id),card=document.createElement('article'),cc=cardColor(a),pct=t.expected>0?Math.min(100,Math.round(t.paid/t.expected*100)):0;card.className='card contribution-card';card.style.setProperty('--card-color',cc.hex);card.dataset.activityId=a.id;card.innerHTML=`<div class="contribution-card-head"><div class="contribution-identity"><span class="fund-icon" style="background:${cc.bg};color:${cc.hex}">${LICON('users',cc.hex,20)}</span><h3>${escapeText(a.title)}${a.archived?' · Archived':''}</h3></div>${a.pendingDeletion?'':'<button class="contrib-card-delete" type="button" aria-label="Delete activity">'+LICON('trash','#b83c3c',16)+'</button>'}</div><p>${escapeText(a.description||'No contribution details provided')}${a.dueDate&&!monthlyContribution(a)?' · Due '+escapeText(a.dueDate):monthlyContribution(a)?' · Monthly':''}</p><div class="project-metrics"><div><span>Expected</span><strong>${fmt(t.expected/100)}</strong></div><div><span>Total paid</span><strong>${fmt(t.paid/100)}</strong></div><div><span>Outstanding</span><strong>${fmt(t.outstanding/100)}</strong></div></div><div class="dashboard-contribution-track" role="progressbar" aria-label="Contribution payment progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div><p>${escapeText(contributionExpectationDescription(a))}</p>${createdByBadge(a)}${pendingDeletionBadge(a,'contributionActivity',a.id)}<button type="button" class="btn btn-light contrib-card-view">View details →</button>`;card.querySelector('.contrib-card-delete')?.addEventListener('click',e=>{e.stopPropagation();deleteContributionActivity(a.id)});card.querySelector('.pending-approve')?.addEventListener('click',e=>{e.stopPropagation();approveDeletionRequest('contributionActivity',a.id)});card.querySelector('.pending-reject')?.addEventListener('click',e=>{e.stopPropagation();rejectDeletionRequest('contributionActivity',a.id)});card.querySelector('.contrib-card-view').onclick=()=>openContributionDetails(a.id);card.onclick=e=>{if(!e.target.closest('button'))openContributionDetails(a.id)};list.appendChild(card)})}
 function openContributionDetails(id,refresh=false){if(id!==lastContributionViewId){contributionSearch='';contributionStatus='';lastContributionViewId=id}let a=contributionActivities.find(x=>x.id===id);if(!a)return;let month=selectedContributionMonth(a),totals=month?contributionMonthTotals(a,month):contributionTotals(id),people=month?contributionPeopleForMonth(a,month):contributors.filter(x=>x.activityId===id),oldOpen={};if(refresh)document.querySelectorAll('#detailBody .contrib-person-details').forEach(el=>oldOpen[el.dataset.personId]=el.open);let query=contributionSearch.trim().toLowerCase(),shown=people.filter(p=>(!query||p.name.toLowerCase().includes(query))&&(!contributionStatus||contributionStatusOf(p)===contributionStatus));let rows=shown.length?shown.map(p=>{let payments=contributionPayments.filter(x=>x.contributorId===p.id).slice().sort((x,y)=>String(y.date).localeCompare(String(x.date))),status=contributionStatusOf(p);let history=payments.length?payments.map(m=>`<div class="contrib-pay-row"><div><strong>${escapeText(m.date)} · ${fmt(m.amount)} · ${m.method==='fund'?'Fund-funded':'Personal payment'}</strong><small>Received by ${escapeText(m.receivedBy)}${m.method==='fund'?' · Fund: '+escapeText(funds.find(f=>f.id===m.fundId)?.name||'Missing fund'):''}${m.reference?' · Ref: '+escapeText(m.reference):''}${m.notes?' · '+escapeText(m.notes):''}</small>${receiptMarkup(m.receiptImage)}</div><button type="button" class="btn btn-light contrib-void" data-payment-id="${attr(m.id)}">Void</button></div>`).join(''):'<p class="detail-empty">No payments recorded.</p>';return `<div class="contrib-person"><div class="contrib-person-head"><div class="contrib-person-info"><strong>${escapeText(p.name)}</strong><small>Expected ${fmt(p.expected)} · Paid ${fmt(contributionPaid(p.id)/100)} · Balance ${fmt(contributionBalance(p)/100)}</small></div><div class="contrib-person-actions"><span class="contrib-status">${status}</span>${!a.archived&&contributionBalance(p)>0?`<button type="button" class="btn btn-emerald contrib-pay" data-person-id="${attr(p.id)}" aria-label="Record payment for ${attr(p.name)}">Pay</button>`:''}</div></div><details class="contrib-person-details" data-person-id="${attr(p.id)}" ${oldOpen[p.id]?'open':''}><summary>Payment history &amp; options</summary><div class="contrib-person-body"><div class="contrib-tools"><button type="button" class="btn btn-light contrib-edit-person" data-person-id="${attr(p.id)}">Edit contributor</button><button type="button" class="btn btn-light contrib-person-history" data-person-id="${attr(p.id)}">All activity history</button>${!a.archived&&!p.pendingDeletion?`<button type="button" class="btn btn-light contrib-remove-person" data-person-id="${attr(p.id)}">Remove</button>`:''}</div>${pendingDeletionBadge(p,'contributor',p.id)}${history}</div></details></div>`}).join(''):'<p class="detail-empty">'+(people.length?'No matching contributors.':'No contributors yet. Add a person to begin.')+'</p>';let project=projects.find(p=>p.id===a.projectId),counts={'Paid':0,'Partially paid':0,'Unpaid':0};people.forEach(p=>counts[contributionStatusOf(p)]++);let periodControl=monthlyContribution(a)?`<div class="contrib-tools"><label>Month <select class="input contrib-month-select" aria-label="Contribution month">${a.monthlyPeriods.map(m=>`<option value="${attr(m)}" ${m===month?'selected':''}>${escapeText(m)}</option>`).join('')}</select></label>${!a.archived?'<button type="button" class="btn btn-light contrib-add-month">+ Add month</button>':''}</div><p class="contrib-help">Totals and payments below are for the selected month. Each month keeps its own contributor list and history; activity cards and reports include all months. Monthly due dates and automatic reminders are not yet tracked.</p>`:(!a.archived?'<div class="contrib-tools"><button type="button" class="btn btn-light contrib-monthly-convert">Make monthly</button></div>':'');let body=`${periodControl}<div class="detail-stats">${detailStat('Expected',fmt(totals.expected/100))}${detailStat('Total paid',fmt(totals.paid/100))}${detailStat('Outstanding',fmt(totals.outstanding/100))}${detailStat('Contributors',String(totals.count))}</div><p class="contrib-link-notice" style="margin-top:12px">${counts.Paid} paid · ${counts['Partially paid']} partially paid · ${counts.Unpaid} unpaid</p><p class="contrib-link-notice">${escapeText(contributionExpectationDescription(a,month))}${contributionExpectationDescription(a,month).endsWith('.')?'':'.'} Outstanding is the amount still to be paid.</p><p class="contrib-link-notice">Personal payments ${fmt(totals.personalPaid/100)} · Paid by fund ${fmt(totals.fundPaid/100)}. Fund-funded payments reduce uncommitted fund cash. The linked project, if any, is for context only.</p><div class="contrib-tools">${!a.archived?'<button type="button" class="btn btn-emerald contrib-add-person">+ Add contributor</button><button type="button" class="btn btn-light contrib-bulk">Bulk-add names</button><button type="button" class="btn btn-light contrib-batch">Pay several people</button>':'<p class="contrib-archive-note">Archived: new contributors and payments are disabled. Existing records remain available.</p>'}</div><div class="contrib-secondary"><details class="contrib-more"><summary>More activity options</summary><div class="contrib-tools">${!a.archived?'<button type="button" class="btn btn-light contrib-edit-activity">Edit activity</button>':''}<button type="button" class="btn btn-light contrib-archive">${a.archived?'Restore activity':'Archive activity'}</button>${a.pendingDeletion?'':'<button type="button" class="btn contrib-delete-activity" style="background:#fef2f2;color:#dc2626">Delete activity</button>'}</div>${pendingDeletionBadge(a,'contributionActivity',a.id)}</details><details class="contrib-reports"><summary>Reports &amp; exports</summary><div class="contrib-report-actions"><button type="button" class="btn btn-light contrib-export">Named CSV</button><button type="button" class="btn btn-light contrib-print">Named PDF / print</button><button type="button" class="btn btn-light contrib-export-summary">Totals-only CSV</button><button type="button" class="btn btn-light contrib-print-summary">Totals-only PDF / print</button></div></details></div><section class="detail-section"><h3>Contributors · ${people.length}</h3><div class="contrib-filter"><input class="input contrib-person-search" type="search" placeholder="Search contributors" aria-label="Search contributors"><select class="input contrib-status-filter" aria-label="Filter contribution status"><option value="">All statuses</option><option>Unpaid</option><option>Partially paid</option><option>Paid</option></select></div><div class="contrib-person-list">${rows}</div></section>`;activeProjectDetail=null;activeFundDetail=null;activeContributionDetail=id;let sub=[a.description,'Expected per person: '+fmt(a.amount),monthlyContribution(a)?'Monthly · '+month:a.dueDate?'Due '+a.dueDate:'',project?'Linked project (context only): '+project.name:''].filter(Boolean).join(' · ');openDetails('Contribution activity',a.title,sub,body,refresh);setDetailCardColor(a);document.querySelector('.detail-footer').textContent='Personal payments do not affect fund balances. Fund-funded payments are linked to an outgoing fund transaction.';let root=document.getElementById('detailBody'),search=root.querySelector('.contrib-person-search'),filter=root.querySelector('.contrib-status-filter');search.value=contributionSearch;filter.value=contributionStatus;root.querySelector('.contrib-month-select')?.addEventListener('change',e=>{contributionSelectedPeriod[id]=e.target.value;contributionSearch='';contributionStatus='';openContributionDetails(id,true);});root.querySelector('.contrib-add-month')?.addEventListener('click',()=>addContributionMonth(id));root.querySelector('.contrib-monthly-convert')?.addEventListener('click',()=>convertContributionToMonthly(id));search.oninput=()=>{let val=search.value,pos=search.selectionStart;contributionSearch=val;openContributionDetails(id,true);let next=document.querySelector('.contrib-person-search');next.focus();next.setSelectionRange(pos,pos)};filter.onchange=()=>{contributionStatus=filter.value;openContributionDetails(id,true);document.querySelector('.contrib-status-filter').focus()};if(!a.archived){root.querySelector('.contrib-add-person').onclick=()=>openContributionForm('person',id);root.querySelector('.contrib-bulk').onclick=()=>openContributionBatch('bulk',id);root.querySelector('.contrib-batch').onclick=()=>openContributionBatch('batch',id);root.querySelector('.contrib-edit-activity').onclick=()=>openContributionForm('activity-edit',id)}root.querySelector('.contrib-archive').onclick=()=>toggleContributionArchive(id);root.querySelector('.contrib-delete-activity')?.addEventListener('click',()=>deleteContributionActivity(id));root.querySelector('.contrib-export').onclick=()=>exportContributionCSV(id);root.querySelector('.contrib-print').onclick=()=>printContribution(id);root.querySelector('.contrib-export-summary').onclick=()=>exportContributionSummaryCSV(id);root.querySelector('.contrib-print-summary').onclick=()=>printContributionSummary(id);root.querySelectorAll('.contrib-pay').forEach(b=>b.onclick=()=>openContributionForm('payment',id,b.dataset.personId));root.querySelectorAll('.contrib-edit-person').forEach(b=>b.onclick=()=>openContributionForm('person-edit',id,b.dataset.personId));root.querySelectorAll('.contrib-void').forEach(b=>b.onclick=()=>voidContributionPayment(b.dataset.paymentId));root.querySelectorAll('.contrib-person-history').forEach(b=>b.onclick=()=>openContributorHistory(id,b.dataset.personId));root.querySelectorAll('.contrib-remove-person').forEach(b=>b.onclick=()=>removeContributionPerson(b.dataset.personId));root.querySelectorAll('.pending-approve').forEach(b=>b.onclick=()=>approveDeletionRequest(b.dataset.type,b.dataset.id));root.querySelectorAll('.pending-reject').forEach(b=>b.onclick=()=>rejectDeletionRequest(b.dataset.type,b.dataset.id));}
-function openContributionForm(kind,activityId=null,personId=null){let activity=contributionActivities.find(x=>x.id===activityId),person=contributors.find(x=>x.id===personId);if(kind!=='activity'&&!activity)return;contributionPreviousFocus=document.activeElement;let back=activeContributionDetail===activityId?activityId:null;if(back)closeDetails();contributionReturnId=back;contributionFormContext={kind,activityId,personId,period:selectedContributionMonth(activity)};let fields=document.getElementById('contributionFormFields'),title=document.getElementById('contributionFormTitle');if(kind==='activity'||kind==='activity-edit'){title.textContent=kind==='activity'?'New contribution activity':'Edit contribution activity';fields.innerHTML=`<label>Activity title<input required id="cActivityTitle" class="input" maxlength="160" placeholder="e.g. Gulayan sa Paaralan" list="activityTitleSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()"></label><p class="contrib-help">Suggestions come from saved activities in this workspace.</p><label>Contribution details<textarea id="cActivityDescription" class="input" rows="3" placeholder="Purpose or description"></textarea></label><label id="activityDescriptionSuggestionLabel" hidden>Use a previous description (optional)<select id="activityDescriptionSuggestion" class="input" aria-label="Use a previous contribution description"><option value="">Choose a previous description</option></select></label><label>Expected amount per person (₱)<input required id="cActivityAmount" type="number" min="0.01" step="0.01" class="input"></label><label>Card color<select id="cActivityColor" class="input">${colorOptions(activity?cardColorKey(activity):null,true)}</select></label><label>Due date (optional)<input id="cActivityDue" type="date" class="input"></label><label>Related project (optional; context only)<select id="cActivityProject" class="input"><option value="">No project</option></select></label><p class="contrib-help">Changing the default affects new contributors and future months. Past monthly records stay unchanged.</p>`;document.getElementById('cActivityTitle').value=activity?.title||'';document.getElementById('cActivityDescription').value=activity?.description||'';document.getElementById('cActivityAmount').value=activity?.amount??'';document.getElementById('cActivityDue').value=activity?.dueDate||'';let sel=document.getElementById('cActivityProject');projects.forEach(p=>{let o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o)});sel.value=activity?.projectId||''}else if(kind==='person'||kind==='person-edit'){title.textContent=kind==='person'?'Add contributor':'Edit contributor';fields.innerHTML=`<label>Contributor name<input required id="cPersonName" class="input" maxlength="160" placeholder="Full name" list="contributorNameSuggestions" autocomplete="off"><datalist id="contributorNameSuggestions"></datalist></label><p class="contrib-help">Suggestions come from contributors already recorded in this browser. Each activity keeps its own payments.</p><label>Expected amount (₱)<input required id="cPersonExpected" type="number" min="0.01" step="0.01" class="input"></label><p class="contrib-help">Each person's expected amount can be adjusted. It cannot be lower than payments already recorded.</p>`;let suggestions=document.getElementById('contributorNameSuggestions'),seen=new Set();contributors.forEach(c=>{let name=String(c.name||'').trim(),key=name.toLocaleLowerCase();if(name&&!seen.has(key)){seen.add(key);let option=document.createElement('option');option.value=name;suggestions.appendChild(option)}});document.getElementById('cPersonName').value=person?.name||'';document.getElementById('cPersonExpected').value=person?.expected??activity.amount}else if(kind==='payment'){if(!person)return;title.textContent='Record contribution payment';fields.innerHTML=`<p class="contrib-help" id="cPaymentContext"></p><label>Amount paid (₱)<input required id="cPaymentAmount" type="number" min="0.01" step="0.01" class="input"></label><label>Payment date<input required id="cPaymentDate" type="date" class="input"></label><label>Received by<input required id="cReceivedBy" class="input" maxlength="160" placeholder="Person who received the payment" list="teammateNameSuggestions" autocomplete="off"></label><label>Paid by<select id="cPaymentMethod" class="input"><option value="personal">Contributor personally</option><option value="fund">Fund source (pays for contributor)</option></select></label><label id="cFundLabel" hidden>Fund source<select id="cPaymentFund" class="input"><option value="">Choose a fund source</option></select></label><label>Reference number (optional)<input id="cPaymentRef" class="input" maxlength="160"></label><label>Notes (optional)<textarea id="cPaymentNotes" class="input" rows="2"></textarea></label><label>Receipt image (optional, max 5 MB)<input id="cPaymentImage" type="file" accept="image/png,image/jpeg,image/webp" class="input"></label><p class="contrib-help" id="cPaymentHelp"></p>`;document.getElementById('cPaymentContext').textContent=person.name+(person.period?' · '+person.period:'')+' · Remaining '+fmt(contributionBalance(person)/100);document.getElementById('cPaymentDate').value=localDate();if(window.renderTeammateSuggestions)window.renderTeammateSuggestions();document.getElementById('cReceivedBy').value=currentUserDisplayName();let sel=document.getElementById('cPaymentFund');funds.forEach(f=>{let o=document.createElement('option');o.value=f.id;o.textContent=f.name+' · '+fmt(Math.max(0,fundAvailable(f.id))/100)+' uncommitted';sel.appendChild(o)});document.getElementById('cPaymentMethod').onchange=updateContributionPaymentHelp;sel.onchange=updateContributionPaymentHelp;updateContributionPaymentHelp()}refreshDescriptionSuggestions();let overlay=document.getElementById('contributionFormOverlay');overlay.hidden=false;document.body.classList.add('modal-open');fields.querySelector('input,textarea,select')?.focus()}
+ const pondoRenderContributionPage=renderContributionPage;
+ renderContributionPage=function(){pondoRenderContributionPage();let filter=document.getElementById('contribArchiveFilter'),mode=filter?.value||'active',scoped=contributionActivities.filter(a=>mode==='all'||(mode==='archived'?!!a.archived:!a.archived)),sum=contributionTotalsForActivities(scoped),paid=Math.max(0,sum.paid),expected=Math.max(0,sum.expected),pct=expected?Math.min(100,Math.max(0,Math.round(paid/expected*100))):0,fill=document.getElementById('contributionHealthFill'),track=fill?.closest('.contribution-health-track');if(fill)fill.style.width=pct+'%';if(track){track.setAttribute('aria-valuenow',String(pct));track.setAttribute('aria-valuetext',pct+'% collected')}let rate=document.getElementById('contributionHealthRate'),paidEl=document.getElementById('contributionHealthPaid'),outstandingEl=document.getElementById('contributionHealthOutstanding');if(rate)rate.textContent=pct+'% collected';if(paidEl)paidEl.textContent=fmt(paid/100);if(outstandingEl)outstandingEl.textContent=fmt(Math.max(0,sum.outstanding)/100)};
+
+ function openContributionForm(kind,activityId=null,personId=null){let activity=contributionActivities.find(x=>x.id===activityId),person=contributors.find(x=>x.id===personId);if(kind!=='activity'&&!activity)return;contributionPreviousFocus=document.activeElement;let back=activeContributionDetail===activityId?activityId:null;if(back)closeDetails();contributionReturnId=back;contributionFormContext={kind,activityId,personId,period:selectedContributionMonth(activity)};let fields=document.getElementById('contributionFormFields'),title=document.getElementById('contributionFormTitle');if(kind==='activity'||kind==='activity-edit'){title.textContent=kind==='activity'?'New contribution activity':'Edit contribution activity';fields.innerHTML=`<label>Activity title<input required id="cActivityTitle" class="input" maxlength="160" placeholder="e.g. Gulayan sa Paaralan" list="activityTitleSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()"></label><p class="contrib-help">Suggestions come from saved activities in this workspace.</p><label>Contribution details<textarea id="cActivityDescription" class="input" rows="3" placeholder="Purpose or description"></textarea></label><label id="activityDescriptionSuggestionLabel" hidden>Use a previous description (optional)<select id="activityDescriptionSuggestion" class="input" aria-label="Use a previous contribution description"><option value="">Choose a previous description</option></select></label><label>Expected amount per person (₱)<input required id="cActivityAmount" type="number" min="0.01" step="0.01" class="input"></label><label>Card color<select id="cActivityColor" class="input">${colorOptions(activity?cardColorKey(activity):null,true)}</select></label><label>Due date (optional)<input id="cActivityDue" type="date" class="input"></label><label>Related project (optional; context only)<select id="cActivityProject" class="input"><option value="">No project</option></select></label><p class="contrib-help">Changing the default affects new contributors and future months. Past monthly records stay unchanged.</p>`;document.getElementById('cActivityTitle').value=activity?.title||'';document.getElementById('cActivityDescription').value=activity?.description||'';document.getElementById('cActivityAmount').value=activity?.amount??'';document.getElementById('cActivityDue').value=activity?.dueDate||'';let sel=document.getElementById('cActivityProject');projects.forEach(p=>{let o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o)});sel.value=activity?.projectId||''}else if(kind==='person'||kind==='person-edit'){title.textContent=kind==='person'?'Add contributor':'Edit contributor';fields.innerHTML=`<label>Contributor name<input required id="cPersonName" class="input" maxlength="160" placeholder="Full name" list="contributorNameSuggestions" autocomplete="off"><datalist id="contributorNameSuggestions"></datalist></label><p class="contrib-help">Suggestions come from contributors already recorded in this browser. Each activity keeps its own payments.</p><label>Expected amount (₱)<input required id="cPersonExpected" type="number" min="0.01" step="0.01" class="input"></label><p class="contrib-help">Each person's expected amount can be adjusted. It cannot be lower than payments already recorded.</p>`;let suggestions=document.getElementById('contributorNameSuggestions'),seen=new Set();contributors.forEach(c=>{let name=String(c.name||'').trim(),key=name.toLocaleLowerCase();if(name&&!seen.has(key)){seen.add(key);let option=document.createElement('option');option.value=name;suggestions.appendChild(option)}});document.getElementById('cPersonName').value=person?.name||'';document.getElementById('cPersonExpected').value=person?.expected??activity.amount}else if(kind==='payment'){if(!person)return;title.textContent='Record contribution payment';fields.innerHTML=`<p class="contrib-help" id="cPaymentContext"></p><label>Amount paid (₱)<input required id="cPaymentAmount" type="number" min="0.01" step="0.01" class="input"></label><label>Payment date<input required id="cPaymentDate" type="date" class="input"></label><label>Received by<input required id="cReceivedBy" class="input" maxlength="160" placeholder="Person who received the payment" list="teammateNameSuggestions" autocomplete="off"></label><label>Paid by<select id="cPaymentMethod" class="input"><option value="personal">Contributor personally</option><option value="fund">Fund source (pays for contributor)</option></select></label><label id="cFundLabel" hidden>Fund source<select id="cPaymentFund" class="input"><option value="">Choose a fund source</option></select></label><label>Reference number (optional)<input id="cPaymentRef" class="input" maxlength="160"></label><label>Notes (optional)<textarea id="cPaymentNotes" class="input" rows="2"></textarea></label><label>Receipt image (optional, max 5 MB)<input id="cPaymentImage" type="file" accept="image/png,image/jpeg,image/webp" class="input"></label><p class="contrib-help" id="cPaymentHelp"></p>`;document.getElementById('cPaymentContext').textContent=person.name+(person.period?' · '+person.period:'')+' · Remaining '+fmt(contributionBalance(person)/100);document.getElementById('cPaymentDate').value=localDate();if(window.renderTeammateSuggestions)window.renderTeammateSuggestions();document.getElementById('cReceivedBy').value=currentUserDisplayName();let sel=document.getElementById('cPaymentFund');funds.forEach(f=>{let o=document.createElement('option');o.value=f.id;o.textContent=f.name+' · '+fmt(Math.max(0,fundAvailable(f.id))/100)+' uncommitted';sel.appendChild(o)});document.getElementById('cPaymentMethod').onchange=updateContributionPaymentHelp;sel.onchange=updateContributionPaymentHelp;updateContributionPaymentHelp()}refreshDescriptionSuggestions();let overlay=document.getElementById('contributionFormOverlay');overlay.hidden=false;document.body.classList.add('modal-open');fields.querySelector('input,textarea,select')?.focus()}
 function updateContributionPaymentHelp(){let fund=document.getElementById('cPaymentMethod').value==='fund',label=document.getElementById('cFundLabel'),sel=document.getElementById('cPaymentFund');label.hidden=!fund;label.style.display=fund?'flex':'none';sel.required=fund;let f=funds.find(x=>x.id===sel.value);document.getElementById('cPaymentHelp').textContent=fund?(f?'Fund payment uses uncommitted cash: '+fmt(Math.max(0,fundAvailable(f.id))/100)+' available. It does not use project allocations.':'Choose a fund. Fund payments use only uncommitted cash and create a linked expense.'):'Personal payments are recorded separately and do not change fund cash.'}
 function closeContributionForm(){document.getElementById('contributionFormOverlay').hidden=true;document.body.classList.remove('modal-open');let id=contributionReturnId;contributionReturnId=null;contributionFormContext=null;if(id&&contributionActivities.some(x=>x.id===id)){contributionSearch='';contributionStatus='';openContributionDetails(id);let trigger=findContributionTrigger(id);if(trigger)detailPreviousFocus=trigger}else if(contributionPreviousFocus?.isConnected&&typeof contributionPreviousFocus.focus==='function')contributionPreviousFocus.focus();contributionPreviousFocus=null}
 document.getElementById('contributionFormOverlay').addEventListener('click',e=>{if(e.target.id==='contributionFormOverlay')closeContributionForm()});
