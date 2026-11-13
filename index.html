@@ -5171,6 +5171,201 @@ textarea {
     color: var(--school-navy) !important;
   }
 }
+/* iPad workspace shell: airy canvas, compact white cards, and a calm app chrome. */
+:root {
+  --school-side-w: 18rem;
+  --school-canvas: #eef3f9;
+  --school-blue: #173b8f;
+}
+body:not(.dark-mode)[data-background="pondoArtwork"] {
+  background-color: var(--school-canvas) !important;
+  background-image:
+    linear-gradient(to bottom, rgb(238 243 249 / 0.70) 0, rgb(238 243 249 / 0.90) 25rem, var(--school-canvas) 40rem),
+    var(--pondo-artwork) !important;
+  background-position: center top !important;
+  background-size: cover !important;
+  background-attachment: scroll !important;
+}
+.topbar {
+  min-height: 4.625rem !important;
+}
+.topbar-inner {
+  max-width: none !important;
+  min-height: 4.625rem !important;
+  padding: 0 1.875rem !important;
+}
+.pondo-identity { gap: 0.875rem !important; }
+.logo {
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  border-radius: 0.75rem !important;
+}
+.org-name {
+  color: #0f172a !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+}
+.app-tagline {
+  color: #64748b !important;
+  font-size: 0.8rem !important;
+}
+.wrap {
+  max-width: 58rem !important;
+  padding: 2.25rem 2rem 8rem !important;
+}
+.dashboard-intro h1 {
+  color: #0f172a !important;
+  font-size: 1.8rem !important;
+  letter-spacing: -0.035em !important;
+}
+.dashboard-intro .eyebrow,
+.section-title {
+  color: #475569 !important;
+  letter-spacing: 0.02em !important;
+}
+.dashboard-intro > div > p:last-child {
+  color: #64748b !important;
+}
+body .hero,
+body .hero.hero--vibrant {
+  background: rgb(255 255 255 / 0.94) !important;
+  color: #0f172a !important;
+  border: 1px solid #dbe4ef !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 12px 28px rgb(15 23 42 / 0.06) !important;
+  padding: 1.5rem !important;
+}
+body .hero::before,
+body .hero::after,
+body .hero.hero--vibrant::before,
+body .hero.hero--vibrant::after {
+  display: none !important;
+}
+.hero-label {
+  color: #64748b !important;
+  opacity: 1 !important;
+  letter-spacing: 0.08em !important;
+}
+.hero-amount {
+  color: var(--school-blue) !important;
+  font-size: clamp(2.25rem, 5vw, 3.25rem) !important;
+  text-shadow: none !important;
+}
+.hero-sub {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+.hero-stats { margin-top: 1.25rem !important; }
+.hero-stat,
+.hero--vibrant .hero-stat,
+.hero--vibrant .hero-stat:nth-child(1),
+.hero--vibrant .hero-stat:nth-child(2),
+.hero--vibrant .hero-stat:nth-child(3) {
+  min-height: 0 !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: none !important;
+  padding: 0.875rem !important;
+}
+.hero-stat-label { color: #64748b !important; opacity: 1 !important; }
+.hero-stat-value { color: #0f172a !important; }
+.hero-stat-sub { color: #64748b !important; opacity: 1 !important; }
+.hero-stat-art { opacity: 0.12 !important; }
+.dashboard-hero-actions {
+  justify-content: flex-start !important;
+  margin: 1rem 0 1.5rem !important;
+}
+.section-title {
+  font-size: 1.05rem !important;
+  font-weight: 750 !important;
+  text-transform: none !important;
+  margin: 1.75rem 0 0.75rem !important;
+}
+.section-title span:last-child {
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #64748b !important;
+  font-size: 0.8rem !important;
+}
+.card,
+.dashboard-contribution-card,
+.dashboard-actions-card,
+.report-paper {
+  border-radius: 1rem !important;
+  border-color: #dbe4ef !important;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 20px rgb(15 23 42 / 0.04) !important;
+}
+.card { padding: 1.25rem !important; }
+.fund-card { padding-left: 1.25rem !important; }
+.fund-card::before { width: 3px !important; }
+.btn {
+  height: 2.75rem !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08) !important;
+}
+.btn-emerald {
+  background: #c95b08 !important;
+  box-shadow: 0 4px 10px rgb(201 91 8 / 0.18) !important;
+}
+.input,
+.search-input,
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  border-radius: 0.75rem !important;
+  min-height: 2.75rem !important;
+  background: #f8fafc !important;
+  border-color: #d6e1ed !important;
+}
+.tx-row { border-radius: 0.75rem !important; }
+@media screen and (min-width: 1024px) and (not (pointer: coarse)),
+       screen and (pointer: coarse) and (orientation: landscape) and (min-width: 1000px) and (min-height: 600px) {
+  body { padding-left: var(--school-side-w) !important; }
+  .topbar {
+    margin-left: calc(-1 * var(--school-side-w)) !important;
+    padding-left: var(--school-side-w) !important;
+  }
+  .bottomnav {
+    width: var(--school-side-w) !important;
+    background: #fff !important;
+    border-right: 1px solid #dbe4ef !important;
+  }
+  body .bottomnav .nav-btn,
+  body .bottomnav .nav-btn.active {
+    min-height: 3rem !important;
+    height: 3rem !important;
+    justify-content: flex-start !important;
+    border-radius: 0.75rem !important;
+    padding: 0 0.875rem !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+  body .bottomnav .nav-btn.active {
+    background: #eef2ff !important;
+    color: #4f46e5 !important;
+  }
+  body .bottomnav .nav-btn.active .nav-label,
+  body .bottomnav .nav-btn.active .nav-icon {
+    color: #4f46e5 !important;
+  }
+  .bottomnav .nav-label {
+    font-size: 0.9rem !important;
+    font-weight: 650 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+  .bottomnav .nav-icon { font-size: 1.25rem !important; }
+}
+@media screen and (pointer: coarse) and (orientation: portrait) and (min-width: 600px) {
+  .wrap { max-width: 52rem !important; padding-left: 2rem !important; padding-right: 2rem !important; }
+  .bottomnav { background: rgb(255 255 255 / 0.98) !important; }
+}
 </style>
 
 </head>
