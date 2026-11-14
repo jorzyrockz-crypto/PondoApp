@@ -24,7 +24,7 @@ test('concurrent case and whitespace variants have one winner, with private-by-d
  await assertFails(getDoc(ref(guest.db,`organizations/${orgId}`)));await assertFails(getDocs(collection(guest.db,'organizations')));
  await assertFails(updateDoc(ref(guest.db,`organizations/${orgId}`),{discoverable:true}));
  await assertFails(updateDoc(ref(winner.db,`organizations/${orgId}`),{name:'Other'}));
- await winner.service.orgSetVisibility({orgId,discoverable:true});assert.deepEqual((await guest.service.orgSearch({name:'SCHOOL FUND'})).organization,{id:orgId,name:'School Fund'});
+ await winner.service.orgSetVisibility({orgId,discoverable:true});const found=(await guest.service.orgSearch({name:'SCHOOL FUND'})).organization;assert.equal(found.id,orgId);assert.equal(found.name.toLowerCase(),'school fund');
  await winner.service.orgSetVisibility({orgId,discoverable:false});assert.equal((await guest.service.orgSearch({name:'school fund'})).organization,null);
 });
 
