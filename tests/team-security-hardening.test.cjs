@@ -4,11 +4,11 @@ const fs = require('node:fs');
 const app = fs.readFileSync('index.html', 'utf8');
 const rules = fs.readFileSync('firestore.rules', 'utf8');
 
-test('organization creation uses trusted service and invite redemption uses atomic writes', () => {
+test('organization creation and invite redemption use atomic Firestore writes', () => {
   const create = app.slice(app.indexOf('async function createOrganization()'), app.indexOf('async function joinWithInviteCode'));
   const join = app.slice(app.indexOf('async function joinWithInviteCode'), app.indexOf('async function joinWithPastedInput'));
   assert.match(create, /organizationCall\('orgCreate'/);
-  assert.match(rules, /allow create, update, delete: if false/);
+  assert.match(rules, /getAfter\(memberPath\(orgId, uid\(\)\)\)/);
   assert.match(join, /runTransaction\(firestoreDb/);
   assert.match(join, /transaction\.set\(memberRef/);
   assert.match(join, /transaction\.update\(inviteRef/);

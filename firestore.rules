@@ -55,18 +55,53 @@ service cloud.firestore {
       return isMember(orgId) && roleIn(orgId) != 'reviewer';
     }
 
+    function orgPath(orgId) { return /databases/$(database)/documents/organizations/$(orgId); }
+    function memberPath(orgId, userId) { return /databases/$(database)/documents/organizations/$(orgId)/members/$(userId); }
+    function joinPath(orgId, userId) { return /databases/$(database)/documents/organizations/$(orgId)/joinRequests/$(userId); }
+    function validOrgName(name, orgId) {
+      return name is string && name.size() > 0 && name.size() <= 120
+             && name.matches('^[^/\\s]+( [^/\\s]+)*$')
+             && orgId == 'org~' + name.lower();
+    }
+    function joinDetailsValid(data, userId) {
+      return data.keys().hasOnly(['uid','email','displayName','status','requestedAt'])
+             && data.keys().hasAll(['uid','email','displayName','status','requestedAt'])
+             && data.uid == userId && data.status == 'pending'
+             && (data.email == null || (data.email is string && data.email.size() <= 320))
+             && (data.displayName == null || (data.displayName is string && data.displayName.size() <= 160))
+             && data.requestedAt == request.time;
+    }
+
     // ---- user profiles: each user owns their own /users/{uid} subtree ----
     match /users/{userId} {
       allow read, write: if signedIn() && uid() == userId;
+      match /organizationRequests/{orgId} {
+        allow read, write: if signedIn() && uid() == userId;
+      }
     }
 
     // ---- organizations ----
     match /organizations/{orgId} {
-      allow read: if isMember(orgId);
-      // Organization creation, naming and discovery are managed exclusively
-      // by the trusted organization functions after the registry migration.
-      // Old clients must update before these rules are deployed.
-      allow create, update, delete: if false;
+      // A public exact-name lookup reveals only this small profile. A missing
+      // document is readable for lookup; private documents stay member-only.
+      allow get: if signedIn() && (resource == null || isMember(orgId) || resource.data.get('discoverable', false) == true);
+      allow list: if false;
+      // The document ID is a prefix plus the ASCII-lowercase name. Create-only means
+      // two concurrent registrations cannot claim the same name.
+      allow create: if signedIn()
+                    && request.resource.data.keys().hasOnly(['name','createdBy','createdAt','discoverable'])
+                    && request.resource.data.keys().hasAll(['name','createdBy','createdAt','discoverable'])
+                    && validOrgName(request.resource.data.name, orgId)
+                    && request.resource.data.createdBy == uid()
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.discoverable == false
+                    && !exists(memberPath(orgId, uid()))
+                    && getAfter(memberPath(orgId, uid())).data.uid == uid()
+                    && getAfter(memberPath(orgId, uid())).data.role == 'owner';
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['discoverable'])
+                    && request.resource.data.discoverable is bool;
+      allow delete: if false;
 
       match /members/{memberId} {
         // Members can list each other; a user can always check their own
@@ -75,7 +110,23 @@ service cloud.firestore {
 
         // Redeeming an invite must atomically consume one use. getAfter ties
         // membership creation to the counter update in the same transaction.
-        allow create: if signedIn() && memberId == uid()
+        // Initial owner is created atomically with a brand-new organization.
+        // An approved request and member creation must also be atomic.
+        allow create: if signedIn() && (
+          (memberId == uid() && !exists(orgPath(orgId))
+           && getAfter(orgPath(orgId)).data.createdBy == uid()
+           && request.resource.data.uid == uid() && request.resource.data.role == 'owner')
+          || (isOwner(orgId) && memberId != uid()
+              && exists(joinPath(orgId, memberId))
+              && get(joinPath(orgId, memberId)).data.status == 'pending'
+              && getAfter(joinPath(orgId, memberId)).data.status == 'approved'
+              && getAfter(joinPath(orgId, memberId)).data.decidedBy == uid()
+              && request.resource.data.uid == memberId
+              && request.resource.data.role in ['reviewer','disbursing','project-manager']
+              && request.resource.data.approvedBy == uid()
+              && request.resource.data.email == get(joinPath(orgId, memberId)).data.email
+              && request.resource.data.displayName == get(joinPath(orgId, memberId)).data.displayName)
+          || (memberId == uid()
                        && request.resource.data.uid == uid()
                        && request.resource.data.inviteCode is string
                        && request.resource.data.role in ['reviewer', 'disbursing', 'project-manager']
@@ -88,10 +139,30 @@ service cloud.firestore {
                            || get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
                               < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses)
                        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
-                          == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount + 1;
+                          == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount + 1));
 
         allow update: if isOwner(orgId);
         allow delete: if isOwner(orgId) || (signedIn() && memberId == uid());
+      }
+
+      match /joinRequests/{requester} {
+        allow get: if signedIn() && (uid() == requester || isOwner(orgId));
+        allow list: if isOwner(orgId);
+        allow create: if signedIn() && uid() == requester && joinDetailsValid(request.resource.data, requester)
+                      && get(orgPath(orgId)).data.discoverable == true && !exists(memberPath(orgId, requester));
+        allow update: if signedIn() && (
+          (uid() == requester && resource.data.status == 'rejected'
+           && joinDetailsValid(request.resource.data, requester)
+           && get(orgPath(orgId)).data.discoverable == true && !exists(memberPath(orgId, requester)))
+          || (isOwner(orgId) && resource.data.status == 'pending'
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedBy','decidedAt'])
+              && request.resource.data.decidedBy == uid() && request.resource.data.decidedAt == request.time
+              && ((request.resource.data.status == 'rejected' && !exists(memberPath(orgId, requester)))
+                  || (request.resource.data.status == 'approved' && !exists(memberPath(orgId, requester))
+                      && getAfter(memberPath(orgId, requester)).data.uid == requester
+                      && getAfter(memberPath(orgId, requester)).data.approvedBy == uid()
+                      && getAfter(memberPath(orgId, requester)).data.role in ['reviewer','disbursing','project-manager']))));
+        allow delete: if false;
       }
 
       match /data/{docId} {

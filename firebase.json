@@ -1,24 +1,4 @@
 {
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "public-reports",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "*.log"
-      ]
-    },
-    {
-      "source": "organization-functions",
-      "codebase": "organizations",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "*.log"
-      ]
-    }
-  ],
   "firestore": {
     "rules": "firestore.rules"
   }
