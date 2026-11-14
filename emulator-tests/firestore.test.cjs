@@ -70,3 +70,23 @@ test('reviewer and removed members cannot write; invite use is atomic',async()=>
  b=writeBatch(other);b.update(ref(other,'invites/code1'),{usedCount:2});b.set(ref(other,'organizations/school/members/other'),{uid:'other',role:'reviewer',inviteCode:'code1'});await assertFails(b.commit());
  await assertSucceeds(deleteDoc(ref(owner,'organizations/school/members/reviewer')));await assertFails(getDoc(ref(reviewer,p)));
 });
+
+test('competing owner decisions cannot create membership after rejection',async()=>{
+ const owner=directory('owner'),guest=directory('guest');const {orgId}=await owner.service.orgCreate({name:'Paaralan'});await owner.service.orgSetVisibility({orgId,discoverable:true});await guest.service.orgRequestJoin({orgId});
+ const results=await Promise.allSettled([owner.service.orgDecideRequest({orgId,uid:'guest',decision:'approve',role:'reviewer'}),owner.service.orgDecideRequest({orgId,uid:'guest',decision:'reject'})]);
+ assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+ const request=await getDoc(ref(guest.db,`organizations/${orgId}/joinRequests/guest`)),member=await getDoc(ref(guest.db,`organizations/${orgId}/members/guest`));
+ assert.equal(member.exists(),request.data().status==='approved');
+ if(member.exists())assert.equal(member.data().role,'reviewer');
+});
+
+test('forged requests and unrelated user profiles cannot grant access',async()=>{
+ const owner=directory('owner'),guest=directory('guest'),attacker=directory('attacker'),anonymous=client(null);const {orgId}=await owner.service.orgCreate({name:'Team'});await owner.service.orgSetVisibility({orgId,discoverable:true});const root=`organizations/${orgId}`;
+ assert.equal((await guest.service.orgSearch({name:'unknown'})).organization,null);
+ await assertFails(getDoc(ref(anonymous,root)));await assertFails(setDoc(ref(attacker.db,`${root}/joinRequests/guest`),{uid:'guest',email:null,displayName:null,status:'pending',requestedAt:serverTimestamp()}));
+ await assertFails(setDoc(ref(attacker.db,'users/guest/organizationRequests/team'),{orgId,name:'Team',created:false}));
+ await guest.service.orgRequestJoin({orgId});
+ await assertFails(setDoc(ref(attacker.db,`${root}/members/guest`),{uid:'guest',role:'reviewer',approvedBy:'attacker'}));
+ await assertFails(updateDoc(ref(attacker.db,`${root}/joinRequests/guest`),{status:'approved',decidedBy:'attacker',decidedAt:serverTimestamp()}));
+ await assertFails(deleteDoc(ref(owner.db,root)));
+});

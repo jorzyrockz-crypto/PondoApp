@@ -12,7 +12,7 @@ export function createOrganizationDirectory({db,api,getUser}) {
   const {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,limit}=api;
   const user=()=>{const u=getUser();if(!u)throw new Error('Sign in first.');return u};
   const org=o=>doc(db,'organizations',o), member=(o,u)=>doc(db,'organizations',o,'members',u), request=(o,u)=>doc(db,'organizations',o,'joinRequests',u), mine=(u,o)=>doc(db,'users',u,'organizationRequests',o);
-  const identity=u=>({uid:u.uid,email:u.email||null,displayName:u.displayName||null});
+  const identity=u=>({uid:u.uid,email:typeof u.email==='string'?u.email.slice(0,320):null,displayName:typeof u.displayName==='string'?u.displayName.slice(0,160):null});
   return {
     async orgCreate({name:raw}) {
       const u=user(),{name,id}=organizationName(raw),b=writeBatch(db);
