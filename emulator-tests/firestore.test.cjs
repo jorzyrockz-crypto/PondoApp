@@ -18,7 +18,7 @@ test('concurrent case and whitespace variants have one winner, with private-by-d
  const a=directory('alice'),b=directory('bob'),guest=directory('guest');
  const outcomes=await Promise.allSettled([a.service.orgCreate({name:' School  Fund '}),b.service.orgCreate({name:'school fund'})]);
  assert.equal(outcomes.filter(x=>x.status==='fulfilled').length,1);
- const winner=outcomes[0].status==='fulfilled'?a:b,orgId='school fund';
+ const winner=outcomes[0].status==='fulfilled'?a:b,orgId='org~school fund';
  assert.equal((await winner.service.orgMyRequests()).requests[0].status,'approved');
  assert.equal((await guest.service.orgSearch({name:'SCHOOL FUND'})).organization,null);
  await assertFails(getDoc(ref(guest.db,`organizations/${orgId}`)));await assertFails(getDocs(collection(guest.db,'organizations')));
@@ -32,7 +32,7 @@ test('Unicode names are supported, while unauthorized creation and forged canoni
  const owner=directory('owner'),attacker=directory('attacker');const id=organizationName('Paaralang Ñandú').id;
  assert.equal((await owner.service.orgCreate({name:'Paaralang Ñandú'})).orgId,id);
  await assert.rejects(attacker.service.orgCreate({name:'PAARALANG Ñandú'}));
- const b=writeBatch(attacker.db);b.set(ref(attacker.db,'organizations/other'),{name:'Paaralang Ñandú',createdBy:'attacker',createdAt:serverTimestamp(),discoverable:false});b.set(ref(attacker.db,'organizations/other/members/attacker'),{uid:'attacker',role:'owner'});await assertFails(b.commit());
+ const b=writeBatch(attacker.db);b.set(ref(attacker.db,'organizations/org~other'),{name:'Paaralang Ñandú',createdBy:'attacker',createdAt:serverTimestamp(),discoverable:false});b.set(ref(attacker.db,'organizations/org~other/members/attacker'),{uid:'attacker',role:'owner'});await assertFails(b.commit());
  await assertFails(setDoc(ref(attacker.db,'organizations/improper'),{name:'improper',createdBy:'attacker',createdAt:serverTimestamp(),discoverable:false}));
  await assertFails(setDoc(ref(attacker.db,`organizations/${id}/members/attacker`),{uid:'attacker',role:'owner'}));
 });

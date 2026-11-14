@@ -61,8 +61,7 @@ service cloud.firestore {
     function validOrgName(name, orgId) {
       return name is string && name.size() > 0 && name.size() <= 120
              && name.matches('^[^/\\s]+( [^/\\s]+)*$')
-             && orgId == name.lower() && orgId != '.' && orgId != '..'
-             && !orgId.matches('^__.*__$');
+             && orgId == 'org~' + name.lower();
     }
     function joinDetailsValid(data, userId) {
       return data.keys().hasOnly(['uid','email','displayName','status','requestedAt'])
@@ -87,7 +86,7 @@ service cloud.firestore {
       // document is readable for lookup; private documents stay member-only.
       allow get: if signedIn() && (resource == null || isMember(orgId) || resource.data.get('discoverable', false) == true);
       allow list: if false;
-      // The document ID is the canonical lower-case name. Create-only means
+      // The document ID is a prefix plus the ASCII-lowercase name. Create-only means
       // two concurrent registrations cannot claim the same name.
       allow create: if signedIn()
                     && request.resource.data.keys().hasOnly(['name','createdBy','createdAt','discoverable'])

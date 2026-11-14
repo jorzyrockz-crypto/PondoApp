@@ -6,7 +6,7 @@ export function organizationName(value) {
   if (!name || name.length>120 || /[\/\p{Cc}\p{Cf}]/u.test(name) || name==='.' || name==='..' || /^__.*__$/.test(name))
     throw new Error('Use 1 to 120 characters without slashes or control characters.');
   // Firestore Rules lower() folds ASCII A-Z only, so mirror that exactly.
-  return {name,id:name.replace(/[A-Z]/g,c=>c.toLowerCase())};
+  return {name,id:'org~'+name.replace(/[A-Z]/g,c=>c.toLowerCase())};
 }
 export function createOrganizationDirectory({db,api,getUser}) {
   const {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,limit}=api;
