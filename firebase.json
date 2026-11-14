@@ -8,15 +8,6 @@
         ".git",
         "*.log"
       ]
-    },
-    {
-      "source": "organization-functions",
-      "codebase": "organizations",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "*.log"
-      ]
     }
   ],
   "firestore": {

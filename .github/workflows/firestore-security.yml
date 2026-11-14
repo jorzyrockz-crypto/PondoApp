@@ -21,7 +21,7 @@ jobs:
           java-version: '21'
       - name: Install isolated emulator test dependencies
         run: npm ci --prefix emulator-tests --ignore-scripts --no-audit --no-fund
-      - name: Run demo-project Firestore rules and migration tests
+      - name: Run demo-project Firestore organization and security tests
         run: |
           set +e
           npm --prefix emulator-tests run test:firestore > "$RUNNER_TEMP/emulator-test.log" 2>&1

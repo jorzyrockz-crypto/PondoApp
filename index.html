@@ -8532,7 +8532,7 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
           </div>
           <div class="team-card">
             <p style="font-weight:700;font-size:14px;margin:0 0 6px">Create an organization</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Sync this fund tracker's data in real time with a team. The registered team name must be unique and starts private. It is separate from the editable name on financial reports. Everyone who joins sees the same live funds, transactions, projects and payables.</p>
+            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Sync this fund tracker's data in real time with a team. The registered team name must be unique and starts private. Names ignore case and extra spaces; Unicode lookalikes can differ. It is separate from the editable name on financial reports. Everyone who joins sees the same live funds, transactions, projects and payables.</p>
             <input id="teamNewOrgName" class="input" aria-label="Unique organization name" placeholder="Organization name" maxlength="120">
             <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">Create Organization</button>
           </div>
@@ -8625,7 +8625,7 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 74</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 75</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>More room to work on your phone</h4><ul><li>Workspace headings and actions fit smaller screens more comfortably.</li><li>Dashboard and fund totals, and transaction details, are easier to read on a phone.</li><li>Add forms have a clearer selected option and larger input text.</li><li>Print a totals-only summary across contribution activities, with refreshed office-style activity reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -8645,7 +8645,7 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='74', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='75', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -11453,6 +11453,7 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
 })();
 </script>
 <script type="module">
+import { createOrganizationDirectory } from "./organization-firestore.mjs";
 // Firebase Authentication — gates access to the Pondo fund tracker.
 // Loaded via the official CDN ES-module build (no bundler/build step required).
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -11473,6 +11474,10 @@ import {
   doc,
   collection,
   getDoc,
+  getDocs,
+  query,
+  where,
+  limit,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -12541,12 +12546,14 @@ async function discardTeamDraft() {
   } catch (e) { notify('Could not remove the draft. Do not clear browser data; seek help.'); }
 }
 
-// Loaded only for an explicit online team action, so the offline tracker does
-// not acquire a new startup dependency on the Functions SDK.
+// Organization operations use Firebase Auth and Firestore security rules only.
+const organizationDirectory = createOrganizationDirectory({
+  db: firestoreDb,
+  api: {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,limit},
+  getUser: () => window.pondoCurrentUser,
+});
 async function organizationCall(method, data = {}) {
-  const {getFunctions, httpsCallable} = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js');
-  const result = await httpsCallable(getFunctions(firebaseApp, 'us-central1'), method)(data);
-  return result.data;
+  return organizationDirectory[method](data);
 }
 async function setDiscovery(value) {
   const checkbox=document.getElementById('teamDiscoverable'), orgId=pondoTeamState.orgId;
@@ -12578,6 +12585,7 @@ async function loadJoinRequests() {
     const {requests}=await organizationCall('orgPendingRequests',{orgId});
     if(orgId!==pondoTeamState.orgId || uid!==pondoTeamState.uid || pondoTeamState.role!=='owner')return;
     output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
+    const verifyNote=document.createElement('p');verifyNote.textContent='Verify each requester through a trusted channel; displayed names and emails can be entered by the requester.';output.appendChild(verifyNote);
     if(requests.length===100){const note=document.createElement('p');note.textContent='Showing up to 100 pending requests. Review these, then refresh for more.';output.appendChild(note);}
     requests.forEach(request=>{
       const row=document.createElement('div');row.className='team-member-row';row.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
