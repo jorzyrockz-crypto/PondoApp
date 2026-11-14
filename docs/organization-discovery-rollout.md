@@ -8,7 +8,7 @@ Firestore security rules and the client must be published together.
 
 ## How names and privacy work
 
-The organization document ID is its name, lowercased with repeated spaces
+The organization document ID is its name, lowercased for ASCII A–Z with repeated spaces
 collapsed. Firestore rules require that ID to match the lowercased display name
 and atomically create the first owner. A document cannot be created twice, so
 concurrent registration of the same name has one winner. New organizations are

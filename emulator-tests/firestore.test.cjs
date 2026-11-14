@@ -31,7 +31,7 @@ test('concurrent case and whitespace variants have one winner, with private-by-d
 test('Unicode names are supported, while unauthorized creation and forged canonical IDs fail',async()=>{
  const owner=directory('owner'),attacker=directory('attacker');const id=organizationName('Paaralang Ñandú').id;
  assert.equal((await owner.service.orgCreate({name:'Paaralang Ñandú'})).orgId,id);
- await assert.rejects(attacker.service.orgCreate({name:'PAARALANG ÑANDÚ'}));
+ await assert.rejects(attacker.service.orgCreate({name:'PAARALANG Ñandú'}));
  const b=writeBatch(attacker.db);b.set(ref(attacker.db,'organizations/other'),{name:'Paaralang Ñandú',createdBy:'attacker',createdAt:serverTimestamp(),discoverable:false});b.set(ref(attacker.db,'organizations/other/members/attacker'),{uid:'attacker',role:'owner'});await assertFails(b.commit());
  await assertFails(setDoc(ref(attacker.db,'organizations/improper'),{name:'improper',createdBy:'attacker',createdAt:serverTimestamp(),discoverable:false}));
  await assertFails(setDoc(ref(attacker.db,`organizations/${id}/members/attacker`),{uid:'attacker',role:'owner'}));

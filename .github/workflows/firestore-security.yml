@@ -28,6 +28,6 @@ jobs:
           result=$?
           cat "$RUNNER_TEMP/emulator-test.log"
           if [ "$result" -ne 0 ]; then
-            python -c 'import os,pathlib; s="\n".join(x for x in pathlib.Path(os.environ["RUNNER_TEMP"],"emulator-test.log").read_text(errors="replace").splitlines() if not x.startswith("# ["))[-8000:]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+            python -c 'import os,pathlib; raw=pathlib.Path(os.environ["RUNNER_TEMP"],"emulator-test.log").read_text(errors="replace"); import re; s="\n".join(re.findall(r"not ok .*?(?=\n  \.\.\.|\Z)",raw,re.S))[-3500:] or raw[-3500:]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
           fi
           exit "$result"
