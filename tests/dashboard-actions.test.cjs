@@ -55,5 +55,5 @@ test('review handlers recheck request, role, workspace and dashboard sync guard 
  const pending2=ctx.approveDeletionRequest('fund','f',()=>true);state.orgId='two';resolve(true);await pending2;assert.equal(ctx.deleted,0);assert.match(alerts.pop(),/changed/);
 });
 test('queue refreshes with sync and role updates and refund review exposes local receipts',()=>{
- assert.match(html,/function renderAll\(\)\{\s*renderDashboardActions\(\)/);assert.match(html,/function applyRoleUI\(\) \{\s*if \(window\.renderDashboardActions\)/);assert.match(html,/function setSyncBadge\(mode\) \{\s*if \(window\.renderDashboardActions\)/);assert.match(html,/Receipt images are not synced between devices/);
+ assert.match(html,/function renderAll\(\)\{\s*renderDashboardActions\(\)/);assert.match(html,/function applyRoleUI\(\) \{\s*if \(window\.renderDashboardActions\)/);assert.match(html,/function setSyncBadge\(mode\) \{\s*if \(window\.renderDashboardActions\)/);assert.match(html,/Receipt attachments are not synced between devices/);
 });

@@ -1,0 +1,14 @@
+{
+  "name": "pondo-security-emulator-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:firestore": "node prepare.cjs && firebase emulators:exec --project demo-pondo-security --only firestore 'node --test firestore.test.cjs'"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "4.0.1",
+    "firebase": "11.1.0",
+    "firebase-admin": "13.0.2",
+    "firebase-tools": "13.35.1"
+  }
+}
