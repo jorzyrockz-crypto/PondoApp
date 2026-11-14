@@ -82,3 +82,75 @@ to obtain the Firebase emulator are required. The pull-request workflow runs
 only these demo emulator checks, with no Firebase credentials or deployments.
 A passing emulator run does not replace tests with multiple actual accounts,
 real deployed rules, Firebase Functions, App Check, offline and devices.
+
+## Release gate and evidence checklist
+
+The PR must remain a draft until the release owner has recorded the results
+below. A green preview or emulator check is not evidence that the live backend
+is ready. Do not put credentials, private organization names, user data or
+backup files in this repository, PR comments, or CI logs.
+
+### Isolated staging setup
+
+- [ ] Create a separate, non-production Firebase project and register its own
+  web app. Confirm its project ID, Auth domain, API key and app ID in the
+  Firebase console. Enable Firestore and Google sign-in there and configure
+  only the staging host as an authorized domain.
+- [ ] **The checked-in `index.html` targets `russapps-pondo`. Vercel and
+  GitHub preview deployments of this branch also target that project unless
+  their app configuration is replaced.** Do not sign in or test write flows
+  on an unmodified preview believing it is staging. Deployment previews are
+  separate hosts, not separate Firebase projects.
+- [ ] Produce a disposable staging-only copy of the app with the *entire*
+  `firebaseConfig` replaced by the staging web app's configuration. Host it
+  on a distinct origin, never the production Pages or production Vercel origin.
+  The public-report viewer has its own configuration; exclude that unfinished
+  feature from this test and do not deploy its backend. Never commit staging
+  credentials or config changes to the production app by mistake.
+- [ ] Use clean browser profiles and staging-only accounts and synthetic data.
+  Local workspace data, drafts, images, service workers and authentication
+  caches can persist by origin and are not fully account/project scoped. Do
+  not use, clear, or overwrite real users' browser data. Check the loaded
+  client source, Firebase console project and network requests before testing;
+  stop immediately if any client connects to production.
+- [ ] Explicitly select and verify the staging project before deploying only
+  the organization functions and Firestore rules. Verify the deployed rules
+  and function targets against the reviewed commit. The registry is not ready
+  until the audit and migration complete; the staging test must exercise those
+  steps, including an initially empty and a representative existing registry.
+
+### Real-account test evidence
+
+Record date, reviewed commit, environment/project ID, app origin and version,
+rule/function versions, tester, pass/fail and a private issue link. Use at
+least an owner, requester, reviewer and editor in separate clean profiles.
+
+- [ ] Confirm private and public exact-name searches, normalized-name collision,
+  owner-only visibility and absence of private data in directory results.
+- [ ] Confirm pending and rejected requesters cannot read snapshots, roles
+  cannot be escalated, approval grants only its chosen role, and removal or
+  role changes take effect. Test invite creation/redemption and exhaustion.
+- [ ] Test two owners deciding the same request and two users registering the
+  same normalized name at once; check stored records and access, not just UI.
+- [ ] Test legacy and current clients, offline/reconnect, stale tabs, concurrent
+  snapshot edits, draft export/recovery, account switching and mobile devices.
+  Verify backups restore in an isolated environment before any cutover.
+- [ ] Verify callable failures and rate limits are understandable to users;
+  review App Check, monitoring, abuse response and operational ownership.
+
+### Production go/no-go
+
+- [ ] Release owner approves the maintenance window, verified independent
+  backups (including device-local attachments), conflict-resolution plan,
+  communications, access controls and recovery plan.
+- [ ] Stop old clients and all organization/snapshot writers; independently
+  verify the intended production project and audit results. The migration's
+  confirmation flags are attestations, not enforcement of the maintenance.
+- [ ] Coordinate new rules, organization functions, migration and app release;
+  confirm the registry marker, deployed targets, app version and actual access
+  with designated accounts before resuming edits. Merging to `main` publishes
+  GitHub Pages, so merge timing is part of this release, not a harmless step.
+- [ ] On any failed check, keep maintenance in place and investigate. Reverting
+  rules alone can reopen legacy writes and invalidate uniqueness; do not resume
+  service or clear the ready marker as an improvised rollback. Reconcile data
+  with verified backups and re-audit under an explicitly reviewed recovery plan.

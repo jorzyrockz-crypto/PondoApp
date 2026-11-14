@@ -92,3 +92,31 @@ test('migration rejects invalid names and conflicting reservations and resumes a
  assert.equal((await db.doc('organizations/b').get()).data().discoverable,false);
  assert.equal((await db.doc('organizationDirectoryConfig/migration').get()).data().ready,true);
 });
+
+test('missing migration marker blocks discovery operations and creates no organization or membership',async()=>{
+ const service=createService({db,FieldValue,HttpsError});
+ for(const [method,data] of [['create',{name:'School'}],['search',{name:'School'}],['request',{orgId:'school'}],['mine',{}],['visibility',{orgId:'school',discoverable:true}],['pending',{orgId:'school'}],['decide',{orgId:'school',uid:'guest',decision:'reject'}]]){
+  await assert.rejects(service[method](actor('owner',data)),{code:'failed-precondition'});
+ }
+ assert.equal((await db.collection('organizations').get()).size,0);
+ assert.equal((await db.collection('organizationNames').get()).size,0);
+ // Rate-limit counters may still be written for create/search/request attempts.
+});
+
+test('owners only can review requests and revocation immediately removes service and client access',async()=>{
+ const service=createService({db,FieldValue,HttpsError});await db.doc('organizationDirectoryConfig/migration').set({ready:true});
+ const {orgId}=await service.create(actor('owner',{name:'Team'}));await service.visibility(actor('owner',{orgId,discoverable:true}));
+ await service.request(actor('guest',{orgId}));await service.request(actor('guest',{orgId}));
+ assert.equal((await service.pending(actor('owner',{orgId}))).requests.length,1);
+ await assert.rejects(service.pending(actor('guest',{orgId})),{code:'permission-denied'});
+ await assert.rejects(service.decide(actor('guest',{orgId,uid:'guest',decision:'approve',role:'reviewer'})),{code:'permission-denied'});
+ await service.decide(actor('owner',{orgId,uid:'guest',decision:'approve',role:'reviewer'}));
+ assert.equal((await service.mine(actor('guest'))).requests[0].status,'approved');
+ const guest=client('guest'),owner=client('owner'),org=`organizations/${orgId}`;
+ await assertSucceeds(getDoc(ref(guest,org)));await assertFails(updateDoc(ref(guest,`${org}/members/guest`),{role:'owner'}));
+ await assertSucceeds(deleteDoc(ref(owner,`${org}/members/guest`)));
+ assert.equal((await service.mine(actor('guest'))).requests[0].status,'not-a-member');await assertFails(getDoc(ref(guest,org)));
+ await assertSucceeds(deleteDoc(ref(owner,`${org}/members/owner`)));
+ await assert.rejects(service.pending(actor('owner',{orgId})),{code:'permission-denied'});
+ await assert.rejects(service.visibility(actor('owner',{orgId,discoverable:false})),{code:'permission-denied'});
+});
