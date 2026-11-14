@@ -49,7 +49,7 @@ test('review navigates to the relevant item and clears contributor filters',()=>
 test('review handlers recheck request, role, workspace and dashboard sync guard after dialogs',async()=>{
  const start=html.indexOf('function canApproveDeletions()'),end=html.indexOf('// Anyone who can edit data at all',start);
  const handlers=html.slice(start,end);let resolve;const record={id:'f',name:'Fund',pendingDeletion:request()},state={orgId:'one',role:'owner'};let deleted=0,alerts=[];
- const ctx=vm.createContext({pondoTeamState:state,funds:[record],projects:[],contributionActivities:[],contributors:[],payables:[],auditLog:[],appConfirm:()=>new Promise(r=>resolve=r),appAlert:m=>alerts.push(m),makeId:()=>1,currentUserDisplayName:()=>'',currentActorStamp:()=>null,renderAll:()=>{},fmt:String});
+ const ctx=vm.createContext({pondoTeamState:state,funds:[record],projects:[],contributionActivities:[],contributors:[],contributionPayments:[],payables:[],auditLog:[],appConfirm:()=>new Promise(r=>resolve=r),appAlert:m=>alerts.push(m),makeId:()=>1,currentUserDisplayName:()=>'',currentActorStamp:()=>null,renderAll:()=>{},fmt:String});
  vm.runInContext(handlers+'\nPENDING_DELETION_FORCE.fund=()=>deleted++;',ctx);ctx.deleted=0;
  let allowed=true;const pending=ctx.approveDeletionRequest('fund','f',()=>allowed);allowed=false;resolve(true);await pending;assert.equal(ctx.deleted,0);assert.match(alerts.pop(),/changed/);
  const pending2=ctx.approveDeletionRequest('fund','f',()=>true);state.orgId='two';resolve(true);await pending2;assert.equal(ctx.deleted,0);assert.match(alerts.pop(),/changed/);
