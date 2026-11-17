@@ -12,11 +12,11 @@ function createProofClient({db,api,orgId,uid}){
   id(personId);if(!/^\d{4}-\d{2}-\d{2}$/.test(absenceDate)||!/^\d{4}-\d{2}-\d{2}$/.test(paymentDate)||!Number.isSafeInteger(amountCents)||amountCents<=0)failure('Invalid payment');
   const paymentId=id(personId+'~'+absenceDate),p=ref('sparkPayments',paymentId);
   return runTransaction(db,async tx=>{
-   const snapshot=await tx.get(p);if(snapshot.exists()){
+   const [snapshot,person]=await Promise.all([tx.get(p),tx.get(ref('sparkPeople',personId))]);if(!person.exists())failure('Choose a registered member');if(snapshot.exists()){
     const old=snapshot.data();if(old.personId!==personId||old.absenceDate!==absenceDate||old.paymentDate!==paymentDate||old.amountCents!==amountCents||old.createdBy!==uid)failure('Payment ID already has different data');
     return {paymentId,replayed:true};
    }
-   tx.set(p,{personId,absenceDate,paymentDate,amountCents,createdAt:serverTimestamp(),createdBy:uid,remittanceId:null});return {paymentId,replayed:false};
+   tx.set(p,{personId,memberName:person.data().name,absenceDate,paymentDate,amountCents,createdAt:serverTimestamp(),createdBy:uid,remittanceId:null});return {paymentId,replayed:false};
   });
  }
  async function draft(remittanceId){const r=ref('sparkRemittances',id(remittanceId));return runTransaction(db,async tx=>{
@@ -37,13 +37,13 @@ function createProofClient({db,api,orgId,uid}){
  async function accept(remittanceId){const r=ref('sparkRemittances',id(remittanceId)),l=ref('sparkLedger','current');return runTransaction(db,async tx=>{
   const [rs,ls]=await Promise.all([tx.get(r),tx.get(l)]);if(!rs.exists()||!ls.exists())failure('Missing remittance or ledger');const old=rs.data(),balance=ls.data();
   if(old.status==='accepted'&&old.acceptedBy===uid)return {replayed:true};if(old.status!=='pending'||old.presidentUid!==uid)failure('Remittance not addressed to this President');
-  tx.update(r,{status:'accepted',acceptedBy:uid,acceptedAt:serverTimestamp()});tx.update(l,{balanceCents:balance.balanceCents+old.amountCents,revision:balance.revision+1,lastKind:'accept',lastId:remittanceId});return {replayed:false};
+  tx.update(r,{status:'accepted',acceptedBy:uid,acceptedAt:serverTimestamp()});tx.update(l,{balanceCents:balance.balanceCents+old.amountCents,revision:balance.revision+1,lastKind:'accept',lastId:remittanceId,lastAcceptedAt:serverTimestamp()});return {replayed:false};
  });}
- async function expense(expenseId,amountCents,description){const e=ref('sparkExpenses',id(expenseId)),l=ref('sparkLedger','current');if(!Number.isSafeInteger(amountCents)||amountCents<=0||typeof description!=='string'||!description.trim())failure('Invalid expense');
+ async function expense(expenseId,amountCents,description,occurredAt){const e=ref('sparkExpenses',id(expenseId)),l=ref('sparkLedger','current');if(!Number.isSafeInteger(amountCents)||amountCents<=0||typeof description!=='string'||!description.trim()||!(occurredAt instanceof Date)||!Number.isFinite(occurredAt.getTime()))failure('Invalid expense');
   return runTransaction(db,async tx=>{
-   const [es,ls]=await Promise.all([tx.get(e),tx.get(l)]);if(es.exists()){const old=es.data();if(old.createdBy!==uid||old.amountCents!==amountCents||old.description!==description)failure('Expense ID already has different data');return {replayed:true};}
+   const [es,ls]=await Promise.all([tx.get(e),tx.get(l)]);if(es.exists()){const old=es.data();if(old.createdBy!==uid||old.amountCents!==amountCents||old.description!==description||old.occurredAt.toMillis()!==occurredAt.getTime())failure('Expense ID already has different data');return {replayed:true};}
    if(!ls.exists()||ls.data().balanceCents<amountCents)failure('Not enough accepted cash');const bal=ls.data();
-   tx.set(e,{amountCents,description,createdAt:serverTimestamp(),createdBy:uid});tx.update(l,{balanceCents:bal.balanceCents-amountCents,revision:bal.revision+1,lastKind:'expense',lastId:expenseId});return {replayed:false};
+   tx.set(e,{amountCents,description,occurredAt,createdAt:serverTimestamp(),createdBy:uid});tx.update(l,{balanceCents:bal.balanceCents-amountCents,revision:bal.revision+1,lastKind:'expense',lastId:expenseId,lastExpenseAt:occurredAt});return {replayed:false};
   });
  }
  return {payment,draft,add,submit,accept,expense};
