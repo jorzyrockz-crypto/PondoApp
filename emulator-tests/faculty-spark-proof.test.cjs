@@ -79,3 +79,14 @@ test('expense records must be paired and immutable, and payment amounts cannot b
  await assertFails(setDoc(d(ao,'sparkExpenses/unpaired'),{amountCents:1,description:'Unpaired',createdAt:serverTimestamp(),createdBy:'ao'}));
  await assertSucceeds(spend(ao,'safe',10000));await assertFails(updateDoc(d(ao,'sparkExpenses/safe'),{amountCents:1}));await assertFails(deleteDoc(d(ao,'sparkExpenses/safe')));
 });
+
+test('prototype client retries remain idempotent after committed responses are lost',async()=>{
+ await setup();const api=require('firebase/firestore'),{createProofClient}=require('./fixtures/faculty-spark-proof-client.cjs');
+ const ao=createProofClient({db:client('ao'),api,orgId:'school',uid:'ao'}),president=createProofClient({db:client('president'),api,orgId:'school',uid:'president'});
+ const input={personId:'teacher',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000};
+ const p=await ao.payment(input);assert.equal((await ao.payment(input)).replayed,true);await assert.rejects(ao.payment({...input,amountCents:30000}));
+ await ao.draft('retrybatch');assert.equal((await ao.draft('retrybatch')).replayed,true);await ao.add('retrybatch',p.paymentId);assert.equal((await ao.add('retrybatch',p.paymentId)).replayed,true);
+ await ao.submit('retrybatch');assert.equal((await ao.submit('retrybatch')).replayed,true);await president.accept('retrybatch');assert.equal((await president.accept('retrybatch')).replayed,true);
+ await ao.expense('expense-token',10000,'Supplies');assert.equal((await ao.expense('expense-token',10000,'Supplies')).replayed,true);await assert.rejects(ao.expense('expense-token',9000,'Supplies'));
+ assert.equal((await getDoc(d(client('ao'),'sparkLedger/current'))).data().balanceCents,15000);
+});
