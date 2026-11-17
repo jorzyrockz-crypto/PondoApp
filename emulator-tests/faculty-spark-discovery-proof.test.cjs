@@ -35,3 +35,15 @@ test('bounded discovery finds each category without scanning completed records a
 test('acceptance racing cancellation never hides a cancelled linked payment',async()=>{
  const {aoDb,ao,pres}=await base();await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');const results=await Promise.allSettled([ao.cancelRemittance('r','Cancel'),pres.accept('r')]);assert.equal(results.filter(x=>x.status==='fulfilled').length,1);const r=await get(aoDb,'sparkDiscoveryRemittances/r');assert.ok(['cancelled','accepted'].includes(r.status));assert.equal(r.needsRelease,r.status==='cancelled');assert.equal(r.linkedCount,1);
 });
+
+test('independent collectors concurrently release different payments without hiding remaining work',async()=>{
+ const {owner,aoDb,ao}=await base(),other=client(owner,'owner');await ao.createRemittance('r',['p1','p2']);await ao.addPayment('r','p1');await ao.addPayment('r','p2');await ao.cancelRemittance('r','Wrong batch');const [a,b]=await Promise.all([ao.releasePayment('r','p1'),other.releasePayment('r','p2')]);assert.equal(a.replayed,false);assert.equal(b.replayed,false);const r=await get(aoDb,'sparkDiscoveryRemittances/r');assert.equal(r.linkedCount,0);assert.equal(r.needsRelease,false);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p1')).remittanceId,null);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p2')).remittanceId,null);
+});
+
+test('all recovery categories match the protected dataset across multiple pages',async()=>{
+ const {aoDb,ao,pres}=await base();await ao.createRemittance('draft',['p1']);await ao.createRemittance('release',['p1']);await ao.addPayment('release','p1');await ao.cancelRemittance('release','Mistake');await ao.createRemittance('done',['p2']);await ao.cancelRemittance('done','Nothing linked');assert.equal((await get(aoDb,'sparkDiscoveryRemittances/done')).needsRelease,false);
+ await ao.createRemittance('accepted',['p2']);await ao.addPayment('accepted','p2');await ao.submitRemittance('accepted');await pres.accept('accepted');const wallet=await get(aoDb,'sparkDiscoveryWallets/accepted');
+ for(const id of ['e1','e2','e3','e4'])await ao.createExpense(id,{amountCents:10000,description:'Supplies',payee:'Shop',occurredAt:wallet.acceptedAt});await ao.cancelExpense('e2','Cancel');await ao.cancelExpense('e4','Cancel');await ao.finishCancellation('e4');await ao.allocate('e3','accepted','allocation',10000);await ao.finalizeExpense('e3');await ao.beginVoid('e3','Correction');
+ const pager=createSparkDiscovery({db:aoDb,api,orgId:'school',isCurrent:()=>true,pageSize:1}),found={};for(const category of ['draftRemittances','releaseRemittances','expenses']){found[category]=[];let page;do{page=await pager.next(category);found[category].push(...page.items.map(x=>x.id));}while(page.hasMore);if(category==='expenses')assert.equal(page.complete,true);}
+ assert.deepEqual(found.draftRemittances,['draft']);assert.deepEqual(found.releaseRemittances,['release']);assert.deepEqual(found.expenses,['e1','e2','e3']);
+});
