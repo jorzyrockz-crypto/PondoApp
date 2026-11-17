@@ -78,7 +78,7 @@ test('a release cannot increase a wallet without matching cancellation and alloc
 });
 
 test('integrated client can retry lost responses without duplicate acceptance, expense or release',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),aoDb=client('ao'),pDb=client('president'),ao=createIntegratedClient({db:aoDb,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:pDb,api,orgId:'school',uid:'president'});
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),aoDb=client('ao'),pDb=client('president'),ao=createIntegratedClient({db:aoDb,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:pDb,api,orgId:'school',uid:'president'});
  await pending(aoDb,'r','person1');assert.equal((await pres.accept('r')).replayed,false);assert.equal((await pres.accept('r')).replayed,true);const occurredAt=(await getDoc(d(aoDb,'sparkWallets/r'))).data().acceptedAt;
  const values={amountCents:20000,description:'School supplies',payee:'Supplier',occurredAt};assert.equal((await ao.createExpense('expense1',values)).replayed,false);assert.equal((await ao.createExpense('expense1',values)).replayed,true);await assert.rejects(ao.createExpense('expense1',{...values,amountCents:10000}));
  assert.equal((await ao.allocate('expense1','r','alloc1',10000)).replayed,false);assert.equal((await ao.allocate('expense1','r','alloc1',10000)).replayed,true);await assert.rejects(ao.allocate('expense1','r','alloc1',9000));
@@ -86,7 +86,7 @@ test('integrated client can retry lost responses without duplicate acceptance, e
 });
 
 test('integrated client completes multi-wallet expense and retries each allocation safely',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:p,api,orgId:'school',uid:'president'});
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:p,api,orgId:'school',uid:'president'});
  await pending(db,'one','person1');await pres.accept('one');await pending(db,'two','person2');await pres.accept('two');const occurredAt=(await getDoc(d(db,'sparkWallets/two'))).data().acceptedAt;
  await ao.createExpense('expense',{amountCents:40000,description:'Materials',payee:'Supplier',occurredAt});await ao.allocate('expense','one','partone',25000);await assert.rejects(ao.finalizeExpense('expense'));await ao.allocate('expense','two','parttwo',15000);assert.equal((await ao.allocate('expense','two','parttwo',15000)).replayed,true);await ao.finalizeExpense('expense');assert.equal((await ao.finalizeExpense('expense')).replayed,true);
  assert.equal((await getDoc(d(db,'sparkWallets/one'))).data().unspentCents,0);assert.equal((await getDoc(d(db,'sparkWallets/two'))).data().unspentCents,10000);
@@ -112,7 +112,7 @@ test('a fully released draft can be corrected, but a recorded expense cannot be 
 });
 
 test('voiding a recorded expense requires a reason and releases each allocation exactly once',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),reviewer=createIntegratedClient({db:client('reviewer'),api,orgId:'school',uid:'reviewer'}),pres=createIntegratedClient({db:p,api,orgId:'school',uid:'president'});
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),reviewer=createIntegratedClient({db:client('reviewer'),api,orgId:'school',uid:'reviewer'}),pres=createIntegratedClient({db:p,api,orgId:'school',uid:'president'});
  await pending(db,'one','person1');await pres.accept('one');await pending(db,'two','person2');await pres.accept('two');const occurredAt=(await getDoc(d(db,'sparkWallets/two'))).data().acceptedAt;
  await ao.createExpense('e',{amountCents:40000,description:'Materials',payee:'Supplier',occurredAt});await ao.allocate('e','one','a',25000);await ao.allocate('e','two','b',15000);await ao.finalizeExpense('e');
  await assert.rejects(ao.beginVoid('e',''));await assert.rejects(reviewer.beginVoid('e','Wrong receipt'));await ao.beginVoid('e','Wrong receipt');assert.equal((await ao.beginVoid('e','Wrong receipt')).replayed,true);
@@ -128,7 +128,7 @@ test('no actor can forge a partial void or refund an allocation twice',async()=>
 });
 
 test('a second client can inspect and finish an interrupted expense reversal',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'}),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'}),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});
  await pending(db,'one','person1');await pres.accept('one');await pending(db,'two','person2');await pres.accept('two');const at=(await getDoc(d(db,'sparkWallets/two'))).data().acceptedAt;
  await ao.createExpense('resume',{amountCents:40000,description:'Supplies',payee:'Supplier',occurredAt:at});await ao.allocate('resume','one','line1',25000);await ao.allocate('resume','two','line2',15000);await ao.finalizeExpense('resume');await ao.beginVoid('resume','Incorrect');await ao.release('line1');
  const resumed=createIntegratedClient({db:client('ao'),api,orgId:'school',uid:'ao'}),view=await resumed.inspectExpense('resume');assert.equal(view.status,'voiding');assert.equal(view.allocatedCents,15000);assert.deepEqual(view.allocations.map(x=>[x.id,x.released]),[['line1',true],['line2',false]]);
@@ -136,12 +136,12 @@ test('a second client can inspect and finish an interrupted expense reversal',as
 });
 
 test('expense recovery refuses inconsistent allocation data instead of guessing',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),pres=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});await pending(db,'r','person1');await accept(pres,'r');const at=(await getDoc(d(db,'sparkWallets/r'))).data().acceptedAt;await ao.createExpense('e',{amountCents:10000,description:'Supplies',payee:'Supplier',occurredAt:at});await ao.allocate('e','r','a',10000);
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),pres=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});await pending(db,'r','person1');await accept(pres,'r');const at=(await getDoc(d(db,'sparkWallets/r'))).data().acceptedAt;await ao.createExpense('e',{amountCents:10000,description:'Supplies',payee:'Supplier',occurredAt:at});await ao.allocate('e','r','a',10000);
  await env.withSecurityRulesDisabled(async c=>updateDoc(d(c.firestore(),'sparkExpenseDrafts/e'),{allocatedCents:9999}));await assert.rejects(ao.inspectExpense('e'),/inconsistent/);
 });
 
 test('voiding and replacing a payment preserves history and permits only one active member/date entry',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),reviewer=createIntegratedClient({db:client('reviewer'),api,orgId:'school',uid:'reviewer'});
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),reviewer=createIntegratedClient({db:client('reviewer'),api,orgId:'school',uid:'reviewer'});
  const input={personId:'person1',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000};await assert.rejects(reviewer.createPayment('fake',input));await ao.createPayment('old',input);assert.equal((await ao.createPayment('old',input)).replayed,true);await assert.rejects(ao.createPayment('old',{...input,amountCents:10000}));await assert.rejects(ao.createPayment('other',input));
  await assertFails(updateDoc(d(db,'sparkPayments/old'),{voidedAt:serverTimestamp(),voidedBy:'ao',voidReason:'Wrong'}));await assertFails(updateDoc(d(db,'sparkPaymentSlots/person1~2026-01-01'),{activePaymentId:null,revision:2}));await assert.rejects(reviewer.voidPayment('old','Wrong'));await ao.voidPayment('old','Wrong');assert.equal((await ao.voidPayment('old','Wrong')).replayed,true);
  const outcomes=await Promise.allSettled([ao.createPayment('new1',input),ao.createPayment('new2',input)]);assert.equal(outcomes.filter(x=>x.status==='fulfilled').length,1);
@@ -149,7 +149,21 @@ test('voiding and replacing a payment preserves history and permits only one act
 });
 
 test('an accepted payment cannot be voided until its remittance is corrected and released',async()=>{
- await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});await pending(db,'r','person1');await assert.rejects(ao.voidPayment('pay_person1','Wrong'));await accept(p,'r');await assert.rejects(ao.voidPayment('pay_person1','Wrong'));
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});await pending(db,'r','person1');await assert.rejects(ao.voidPayment('pay_person1','Wrong'));await accept(p,'r');await assert.rejects(ao.voidPayment('pay_person1','Wrong'));
  await requestCorrection(db,'r','c');await approveCorrection(p,'r','c');await assertSucceeds(updateDoc(d(db,'sparkPayments/pay_person1'),{remittanceId:null}));await ao.voidPayment('pay_person1','Wrong');await ao.createPayment('replacement',{personId:'person1',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});
  const original=(await getDoc(d(db,'sparkPayments/pay_person1'))).data(),rem=(await getDoc(d(db,'sparkRemittances/r'))).data();assert.ok(original.voidedAt);assert.equal(rem.status,'voided');assert.ok(rem.acceptedAt);assert.equal((await getDoc(d(db,'sparkPaymentSlots/person1~2026-01-01'))).data().activePaymentId,'replacement');
+});
+
+test('Spark client submits and corrects a two-payment remittance with independent receipts',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'});
+ for(const [pid,person] of [['p1','person1'],['p2','person2']])await ao.createPayment(pid,{personId:person,absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});
+ await ao.createRemittance('batch');await ao.addPayment('batch','p1');assert.equal((await ao.addPayment('batch','p1')).replayed,true);await ao.addPayment('batch','p2');await ao.submitRemittance('batch');await assert.rejects(ao.accept('batch'));await pres.accept('batch');
+ await ao.confirmPrint('member','p1','batch');assert.equal((await ao.confirmPrint('member','p1','batch')).replayed,true);assert.equal((await getDoc(d(db,'sparkRemittanceReceipts/batch'))).exists(),false);await ao.confirmPrint('remittance','batch');
+ await ao.requestCorrection('fix','batch','Incorrect handover');await assert.rejects(ao.decideCorrection('fix','approved'));await pres.decideCorrection('fix','approved');assert.equal((await pres.decideCorrection('fix','approved')).replayed,true);await ao.releasePayment('batch','p1');assert.equal((await ao.releasePayment('batch','p1')).replayed,true);await ao.releasePayment('batch','p2');
+ assert.equal((await getDoc(d(db,'sparkWallets/batch'))).data().status,'voided');assert.equal((await getDoc(d(db,'sparkRemittances/batch'))).data().amountCents,50000);
+});
+
+test('Spark client supports declined batches and safe payment release',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'});
+ await ao.createPayment('p1',{personId:'person1',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r');await ao.addPayment('r','p1');await ao.submitRemittance('r');await pres.declineRemittance('r','Not received');assert.equal((await pres.declineRemittance('r','Not received')).replayed,true);await ao.releasePayment('r','p1');assert.equal((await getDoc(d(db,'sparkPayments/p1'))).data().remittanceId,null);assert.equal((await getDoc(d(db,'sparkRemittances/r'))).data().reason,'Not received');
 });
