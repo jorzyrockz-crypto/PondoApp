@@ -1,6 +1,7 @@
 name: Faculty Fund and app checks
 on:
   pull_request:
+  workflow_dispatch:
   push:
     branches: [main]
 jobs:
