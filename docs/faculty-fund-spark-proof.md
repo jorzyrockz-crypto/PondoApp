@@ -128,11 +128,26 @@ still arrive. It distinguishes an already accepted remittance or recorded
 expense from a cancellation, and must finish releasing reserved records before
 reporting cancellation. Acceptance or finalization can race with cancellation;
 a failed cancellation must be retried and reconciled against the server. The
-adapter is not loaded by the app. In particular, a device-only pending token
-cannot yet recover safely if the draft is absent, storage is lost, or the user
-changes devices. The proposed cancellation UI was withheld until these paths
-and matching browser/emulator tests are complete; connecting the read-only
-adapter now would hide unfinished records and can strand a user.
+adapter is not loaded by the app.
+
+The isolated `faculty-fund-spark-recovery.js` prototype discovers existing drafts,
+partial cancellations and voids, and cancelled/declined/voided remittances with
+payments still attached from the versioned server reader. It can resume a
+supported draft as its original collector, or let an authorized collector
+cancel a draft and finish releasing reserved amounts. It returns a fresh status
+and whether recovery remains; callers must distinguish `accepted` or `recorded`
+from `cancelled`. Emulator tests exercise a second device with no local token,
+other collectors finishing reversals, changed workspaces and lost responses.
+This listing is not a lock; writes and final reconciliation can still fail or
+race and need retry. Only records already visible on the server can be found:
+a missing draft does not prove an earlier request cannot still arrive. Nor can
+this discover a completed operation's original browser intent if its local token
+was lost. This remains dependent on the experimental rules, bounded full
+collection reads and shared revision, with quota and contention unmeasured.
+
+The proposed cancellation UI was withheld until these paths and matching
+browser/emulator tests are complete; connecting the read-only adapter now would
+hide unfinished records and can strand a user.
 
 This is still an isolated experiment, **not app integration or production
 rules**. A complete safe restore procedure, browser UI for recovering or

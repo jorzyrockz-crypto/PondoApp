@@ -84,3 +84,20 @@ test('recovery rechecks context after a committed action and reconciles on retry
  let once=true;const changed=recovery(h,c=>{const inner=h.factory(c),cancel=inner.cancelRemittance;return {...inner,cancelRemittance:async(...args)=>{const result=await cancel(...args);if(once){once=false;h.ctx.scopeToken++}return result}}});
  await assert.rejects(changed.resolve({orgId:'school',kind:'remittance',id,action:'cancel',reason:'Start over'}),/Workspace changed/);const retry=await recovery(h).resolve({orgId:'school',kind:'remittance',id,action:'finish'});assert.equal(retry.status,'cancelled');assert.equal(retry.remaining,false);assert.equal((await get(h.dbs.ao,'sparkPayments/'+p.paymentId)).data().remittanceId,null);
 });
+
+test('lost resume response is reconciled from the server without a duplicate remittance',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p=await addPersonAndPayment(h,a,2),id='rem_'+tok(4),client=h.factory(h.ctx);await client.createRemittance(id,[p.paymentId]);await client.addPayment(id,p.paymentId);
+ let once=true;const brokenWriter=createSparkWriteAdapter({getContext:()=>h.ctx,makeReader:h.reader,makeClient:c=>{const inner=h.factory(c),submit=inner.submitRemittance;return {...inner,submitRemittance:async(...args)=>{const result=await submit(...args);if(once){once=false;throw Error('Lost response')}return result}}}}),fresh=createSparkRecovery({getContext:()=>h.ctx,makeReader:h.reader,makeClient:h.factory,makeWriteAdapter:()=>brokenWriter});
+ await assert.rejects(fresh.resolve({orgId:'school',kind:'remittance',id,action:'resume'}),/Lost response/);const result=await fresh.resolve({orgId:'school',kind:'remittance',id,action:'resume'});assert.equal(result.status,'pending');assert.equal(result.remaining,false);assert.equal((await api.getDocs(api.collection(h.dbs.ao,`${root}/sparkRemittances`))).size,1);assert.equal((await get(h.dbs.ao,'sparkPayments/'+p.paymentId)).data().remittanceId,id);
+});
+
+test('recovery retries report acceptance rather than a cancellation when the President wins',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p=await addPersonAndPayment(h,a,2),rem=await a.transition(h.input(4,'submitRemittance',{paymentIds:[p.paymentId]}));let once=true;
+ const raced=recovery(h,c=>{const inner=h.factory(c),cancel=inner.cancelRemittance;return {...inner,cancelRemittance:async(...args)=>{if(once){once=false;await h.factory({orgId:'school',uid:'president'}).accept(rem.remittanceId)}return cancel(...args)}}});
+ await assert.rejects(raced.resolve({orgId:'school',kind:'remittance',id:rem.remittanceId,action:'cancel',reason:'Correction'}));const result=await recovery(h).resolve({orgId:'school',kind:'remittance',id:rem.remittanceId,action:'cancel',reason:'Correction'});assert.equal(result.status,'accepted');assert.equal(result.remaining,false);assert.equal((await get(h.dbs.ao,'sparkPayments/'+p.paymentId)).data().remittanceId,rem.remittanceId);assert.equal((await get(h.dbs.ao,'sparkWallets/'+rem.remittanceId)).data().unspentCents,25000);
+});
+
+test('rules deny a non-collector directly releasing a cancelled remittance',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p=await addPersonAndPayment(h,a,2),id='rem_'+tok(4),collector=h.factory(h.ctx);await collector.createRemittance(id,[p.paymentId]);await collector.addPayment(id,p.paymentId);await collector.cancelRemittance(id,'Cancelled');
+ h.use('president','reviewer');await assert.rejects(h.factory(h.ctx).releasePayment(id,p.paymentId));assert.equal((await get(h.dbs.president,'sparkPayments/'+p.paymentId)).data().remittanceId,id);h.use('ao','disbursing');assert.equal((await recovery(h).resolve({orgId:'school',kind:'remittance',id,action:'finish'})).remaining,false);
+});
