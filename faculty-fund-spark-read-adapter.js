@@ -42,5 +42,5 @@
   async function exportDiagnostic(input){const c=context(input?.orgId);if(c.role!=='owner')fail('Only a workspace owner can export');const snapshot=await load(c),result=await makeExport(snapshot,{orgId:c.orgId,actorUid:c.uid,role:c.role});if(!current(c))fail('Workspace changed while exporting');return result;}
   return {read,export:exportDiagnostic};
  }
- if(typeof module==='object'&&module.exports)module.exports={createSparkReadAdapter};else global.createFacultyFundSparkReadAdapter=createReadAdapter;
+ if(typeof module==='object'&&module.exports)module.exports={createSparkReadAdapter:createReadAdapter};else global.createFacultyFundSparkReadAdapter=createReadAdapter;
 })(typeof window!=='undefined'?window:globalThis);
