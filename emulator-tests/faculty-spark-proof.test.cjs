@@ -17,7 +17,7 @@ const d=(db,p)=>doc(db,`${root}/${p}`);
 async function setup(){const owner=client('owner');await assertSucceeds(setDoc(d(owner,'sparkConfig/current'),{presidentUid:'president',assignedAt:serverTimestamp(),assignedBy:'owner'}));await assertSucceeds(setDoc(d(owner,'sparkLedger/current'),{balanceCents:0,revision:0,lastKind:'init',lastId:''}));}
 async function makePayment(db,id='person1~2026-01-01',amount=25000){return setDoc(d(db,'sparkPayments/'+id),{personId:id.split('~')[0],absenceDate:id.split('~')[1],paymentDate:'2026-01-02',amountCents:amount,createdAt:serverTimestamp(),createdBy:'ao',remittanceId:null});}
 async function makeDraft(db,id='r'){return setDoc(d(db,'sparkRemittances/'+id),{status:'draft',amountCents:0,count:0,lastPaymentId:null,createdBy:'ao',createdAt:serverTimestamp()});}
-async function add(db,p,r='r',amount=25000,count=1,previous=0){let b=writeBatch(db);b.update(d(db,'sparkPayments/'+p),{remittanceId:r});b.update(d(db,'sparkRemittances/'+r),{count,amountCents:previous+amount,lastPaymentId:p});return b.commit();}
+async function add(db,p,r='r',amount=25000,count=1,previous=0){let b=writeBatch(db);b.update(d(db,'sparkPayments/'+p),{remittanceId:r});b.set(d(db,'sparkLines/'+r+'~'+p),{remittanceId:r,paymentId:p,amountCents:amount,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(db,'sparkRemittances/'+r),{count,amountCents:previous+amount,lastPaymentId:p});return b.commit();}
 async function submit(db,r='r'){return updateDoc(d(db,'sparkRemittances/'+r),{status:'pending',presidentUid:'president',submittedAt:serverTimestamp()});}
 async function accept(db,r='r',balance=25000,revision=1){let b=writeBatch(db);b.update(d(db,'sparkRemittances/'+r),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()});b.update(d(db,'sparkLedger/current'),{balanceCents:balance,revision,lastKind:'accept',lastId:r});return b.commit();}
 async function spend(db,e,amount){return runTransaction(db,async tx=>{const l=d(db,'sparkLedger/current'),s=await tx.get(l),v=s.data();tx.set(d(db,'sparkExpenses/'+e),{amountCents:amount,description:'Supplies',createdAt:serverTimestamp(),createdBy:'ao'});tx.update(l,{balanceCents:v.balanceCents-amount,revision:v.revision+1,lastKind:'expense',lastId:e});});}
@@ -61,7 +61,7 @@ test('assignment, decline, field integrity, and membership are checked by rules'
 
 test('two payments cannot share one forged draft increment',async()=>{
  await setup();const ao=client('ao');await assertSucceeds(makePayment(ao));await assertSucceeds(makePayment(ao,'person2~2026-01-01'));await assertSucceeds(makeDraft(ao));
- const b=writeBatch(ao);b.update(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:'r'});b.update(d(ao,'sparkPayments/person2~2026-01-01'),{remittanceId:'r'});b.update(d(ao,'sparkRemittances/r'),{count:1,amountCents:25000,lastPaymentId:'person1~2026-01-01'});await assertFails(b.commit());
+ const b=writeBatch(ao);b.update(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:'r'});b.update(d(ao,'sparkPayments/person2~2026-01-01'),{remittanceId:'r'});b.set(d(ao,'sparkLines/r~person1~2026-01-01'),{remittanceId:'r',paymentId:'person1~2026-01-01',amountCents:25000,linkedAt:serverTimestamp(),linkedBy:'ao'});b.set(d(ao,'sparkLines/r~person2~2026-01-01'),{remittanceId:'r',paymentId:'person2~2026-01-01',amountCents:25000,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(ao,'sparkRemittances/r'),{count:1,amountCents:25000,lastPaymentId:'person1~2026-01-01'});await assertFails(b.commit());
  assert.equal((await getDoc(d(ao,'sparkRemittances/r'))).data().amountCents,0);assert.equal((await getDoc(d(ao,'sparkPayments/person2~2026-01-01'))).data().remittanceId,null);
 });
 
@@ -89,4 +89,17 @@ test('prototype client retries remain idempotent after committed responses are l
  await ao.submit('retrybatch');assert.equal((await ao.submit('retrybatch')).replayed,true);await president.accept('retrybatch');assert.equal((await president.accept('retrybatch')).replayed,true);
  await ao.expense('expense-token',10000,'Supplies');assert.equal((await ao.expense('expense-token',10000,'Supplies')).replayed,true);await assert.rejects(ao.expense('expense-token',9000,'Supplies'));
  assert.equal((await getDoc(d(client('ao'),'sparkLedger/current'))).data().balanceCents,15000);
+});
+
+
+test('cancelled or declined payments can be reused without erasing the historical line',async()=>{
+ await setup();const ao=client('ao'),president=client('president');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));
+ await assertFails(updateDoc(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:null}));
+ await assertSucceeds(updateDoc(d(ao,'sparkRemittances/r'),{status:'cancelled',cancelledBy:'ao',cancelledAt:serverTimestamp(),reason:'Wrong batch'}));
+ await assertSucceeds(updateDoc(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:null}));await assertFails(deleteDoc(d(ao,'sparkLines/r~person1~2026-01-01')));
+ await assertSucceeds(makeDraft(ao,'retry'));await assertSucceeds(add(ao,'person1~2026-01-01','retry'));await assertSucceeds(submit(ao,'retry'));
+ await assertSucceeds(updateDoc(d(president,'sparkRemittances/retry'),{status:'declined',declinedBy:'president',declinedAt:serverTimestamp(),reason:'Not received'}));
+ await assertSucceeds(updateDoc(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:null}));assert.equal((await getDoc(d(ao,'sparkLines/r~person1~2026-01-01'))).data().amountCents,25000);
+ await assertSucceeds(makeDraft(ao,'accepted'));await assertSucceeds(add(ao,'person1~2026-01-01','accepted'));await assertSucceeds(submit(ao,'accepted'));await assertSucceeds(accept(president,'accepted'));
+ await assertFails(updateDoc(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:null}));
 });

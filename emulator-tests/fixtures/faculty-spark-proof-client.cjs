@@ -27,7 +27,7 @@ function createProofClient({db,api,orgId,uid}){
   const [rs,ps]=await Promise.all([tx.get(r),tx.get(p)]);if(!rs.exists()||!ps.exists())failure('Missing remittance or payment');const old=rs.data(),pay=ps.data();
   if(pay.remittanceId===remittanceId)return {replayed:true};
   if(old.status!=='draft'||pay.remittanceId!==null)failure('Payment unavailable');
-  tx.update(p,{remittanceId});tx.update(r,{lastPaymentId:paymentId,count:old.count+1,amountCents:old.amountCents+pay.amountCents});return {replayed:false};
+  tx.update(p,{remittanceId});tx.set(ref('sparkLines',remittanceId+'~'+paymentId),{remittanceId,paymentId,amountCents:pay.amountCents,linkedAt:serverTimestamp(),linkedBy:uid});tx.update(r,{lastPaymentId:paymentId,count:old.count+1,amountCents:old.amountCents+pay.amountCents});return {replayed:false};
  });}
  async function submit(remittanceId){const r=ref('sparkRemittances',id(remittanceId)),c=ref('sparkConfig','current');return runTransaction(db,async tx=>{
   const [rs,cs]=await Promise.all([tx.get(r),tx.get(c)]);if(!rs.exists()||!cs.exists())failure('Missing remittance or assignment');const old=rs.data();

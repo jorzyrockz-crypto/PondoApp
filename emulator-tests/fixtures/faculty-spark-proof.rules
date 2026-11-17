@@ -8,6 +8,7 @@ service cloud.firestore {
   function ledger(o) { return /databases/$(database)/documents/organizations/$(o)/sparkLedger/current; }
   function payment(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPayments/$(p); }
   function remit(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkRemittances/$(r); }
+  function line(o,r,p) { return /databases/$(database)/documents/organizations/$(o)/sparkLines/$(r + '~' + p); }
   function expense(o,e) { return /databases/$(database)/documents/organizations/$(o)/sparkExpenses/$(e); }
   function signed(o) { return request.auth != null && exists(member(o,request.auth.uid)); }
   function role(o) { return get(member(o,request.auth.uid)).data.role; }
@@ -35,18 +36,22 @@ service cloud.firestore {
      && request.resource.data.paymentDate is string && request.resource.data.paymentDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
      && validAmount(request.resource.data.amountCents) && request.resource.data.createdAt == request.time
      && request.resource.data.createdBy == request.auth.uid && request.resource.data.remittanceId == null;
-   allow update: if collector(o) && only(['remittanceId']) && resource.data.remittanceId == null
+   allow update: if (collector(o) && only(['remittanceId']) && resource.data.remittanceId == null
      && short(request.resource.data.remittanceId,128)
      && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
      && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
      && getAfter(remit(o,request.resource.data.remittanceId)).data.lastPaymentId == p
      && getAfter(remit(o,request.resource.data.remittanceId)).data.count == get(remit(o,request.resource.data.remittanceId)).data.count + 1
-     && getAfter(remit(o,request.resource.data.remittanceId)).data.amountCents == get(remit(o,request.resource.data.remittanceId)).data.amountCents + resource.data.amountCents;
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.amountCents == get(remit(o,request.resource.data.remittanceId)).data.amountCents + resource.data.amountCents
+     && !exists(line(o,request.resource.data.remittanceId,p))
+     && getAfter(line(o,request.resource.data.remittanceId,p)).data.paymentId == p)
+     || (collector(o) && only(['remittanceId']) && resource.data.remittanceId is string && request.resource.data.remittanceId == null
+       && get(remit(o,resource.data.remittanceId)).data.status in ['declined','cancelled']);
    allow delete: if false;
   }
   match /organizations/{o}/sparkRemittances/{r} {
    allow read: if signed(o);
-   allow create: if collector(o) && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt'])
+   allow create: if collector(o) && r.matches('^[A-Za-z0-9_-]{1,128}$') && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt'])
      && request.resource.data.status == 'draft' && request.resource.data.amountCents == 0 && request.resource.data.count == 0
      && request.resource.data.lastPaymentId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
    allow update: if (
@@ -55,6 +60,8 @@ service cloud.firestore {
      && short(request.resource.data.lastPaymentId,128)
      && get(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == null
      && getAfter(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == r
+     && !exists(line(o,r,request.resource.data.lastPaymentId))
+     && getAfter(line(o,r,request.resource.data.lastPaymentId)).data.paymentId == request.resource.data.lastPaymentId
      && request.resource.data.count == resource.data.count + 1
      && request.resource.data.amountCents == resource.data.amountCents + get(payment(o,request.resource.data.lastPaymentId)).data.amountCents
     ) || (
@@ -72,8 +79,25 @@ service cloud.firestore {
      president(o) && resource.data.status == 'pending' && resource.data.presidentUid == request.auth.uid
      && only(['status','declinedBy','declinedAt','reason']) && request.resource.data.status == 'declined'
      && request.resource.data.declinedBy == request.auth.uid && request.resource.data.declinedAt == request.time && short(request.resource.data.reason,500)
-    );
+    ) || (
+     collector(o) && resource.data.status in ['draft','pending'] && only(['status','cancelledBy','cancelledAt','reason'])
+     && request.resource.data.status == 'cancelled' && request.resource.data.cancelledBy == request.auth.uid
+     && request.resource.data.cancelledAt == request.time && short(request.resource.data.reason,500)
+   );
    allow delete: if false;
+  }
+  match /organizations/{o}/sparkLines/{lineId} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['remittanceId','paymentId','amountCents','linkedAt','linkedBy'])
+     && short(request.resource.data.remittanceId,128) && short(request.resource.data.paymentId,128)
+     && lineId == request.resource.data.remittanceId + '~' + request.resource.data.paymentId
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && get(payment(o,request.resource.data.paymentId)).data.remittanceId == null
+     && getAfter(payment(o,request.resource.data.paymentId)).data.remittanceId == request.resource.data.remittanceId
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.lastPaymentId == request.resource.data.paymentId
+     && request.resource.data.amountCents == get(payment(o,request.resource.data.paymentId)).data.amountCents
+     && request.resource.data.linkedAt == request.time && request.resource.data.linkedBy == request.auth.uid;
+   allow update, delete: if false;
   }
   match /organizations/{o}/sparkLedger/{id} {
    allow read: if signed(o) && id == 'current';
