@@ -77,10 +77,12 @@ The Faculty Fund backend is a **separate Firebase Functions codebase** from the
 incomplete public-report backend; never deploy the latter as part of this work.
 `firebase.json` now names the Faculty Fund codebase. The service uses a bounded
 single state document and refuses further changes before its capacity limit;
-archival and scaling remain future work. Security of the checked-in rules has
-not yet been established by a local Firestore emulator run. Unit/browser tests
-use an in-memory database and do not establish actual Firebase authorization,
-concurrency or offline behavior.
+archival and scaling remain future work. The Firestore security emulator workflow passed in GitHub Actions for PR #103
+(run 44088014997), including the protected-record rules and concurrent server
+transactions. The local sandbox could not run the emulator because Java and
+the official emulator download were unavailable. Unit/browser tests use an
+in-memory database; neither those tests nor the emulator establish behavior
+of the deployed Firebase project, real account sessions, or offline devices.
 
 All confirmed workspace members can read the Faculty Fund state, including
 names and absence dates; this is not a confidential attendance system. Backups
@@ -98,8 +100,8 @@ manual recovery. Recovery UI and deployment must be tested before use.
 1. Independently back up existing Pondo data and keep all clients on matching
    versions. Review how existing Faculty Fund cash and older payments will be
    migrated and reconciled; there is no opening-balance workflow yet.
-2. Run `node --test tests/*.test.cjs` and the Firestore emulator suite in
-   `emulator-tests/` with Java and Firebase CLI. The added rules tests must
+2. Keep `node --test tests/*.test.cjs` and the Firestore emulator suite in
+   `emulator-tests/` passing on the release commit. The added rules tests
    verify that owners, AOs, Presidents and outsiders cannot write protected
    state or forge acceptance. Test the callable service with a **real**
    emulator, including simultaneous spending, membership changes, retries,
