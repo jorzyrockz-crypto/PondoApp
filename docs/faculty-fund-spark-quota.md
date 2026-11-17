@@ -84,13 +84,17 @@ reader rely on matching revision-enforcing rules and immutable record/link
 invariants; administrator writes bypass those rules. Firestore emulator tests
 exercise isolated fixtures, not production rules or production index
 requirements. The isolated targeted resolver can resume remittance drafts and
-finish cancellations or reversals without that full reader. Its individual
-remittance release may still read up to 200 selected payments; its expense
-inspection fetches at most 201 allocation records and rejects more than 200.
-Resuming expense drafts remains unimplemented there. None of these modules is
-connected to the app. The full reader still serves the prototype's balances,
-reports and existing recovery adapter, so the 1,000-record limit and high read
-costs remain for those paths.
+finish cancellations or reversals without that full reader. Its optional
+expense resumer pages eligible wallets, rechecks individual records and uses
+retry-safe allocations. It scans at most 200 wallets by default and fails
+without claiming completion if the scan limit or available funds are exhausted;
+partial allocations remain reserved until resumed or cancelled. A release can
+still read up to 200 selected payments; expense inspection fetches at most 201
+allocation records and rejects more than 200. These are bounded requests, not
+proof of staying within the free quota. Query indexes and real-project cost are
+unverified. None of these modules is connected to the app. The full reader still
+serves the prototype's balances, reports and existing recovery adapter, so the
+1,000-record limit and high read costs remain for those paths.
 
 ## Release gate
 

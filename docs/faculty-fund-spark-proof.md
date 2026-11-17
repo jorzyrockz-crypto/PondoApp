@@ -163,11 +163,16 @@ experiment use a separate `sparkDiscovery*` namespace, a protected linked-paymen
 counter and a release-needed flag to page recovery work without scanning all
 historical records. `faculty-fund-spark-discovery-recovery.js` can resume a
 remittance draft, cancel a draft, and finish releasing a remittance or reversing
-an expense using targeted server reads. A response lost after a mutation remains
-unconfirmed until another server read; it distinguishes an already accepted or
-recorded transaction from a cancellation. The client caps its per-record line
-and allocation inspection at 201 documents, rejecting a result above 200.
-Resuming an expense draft is not supported by this targeted resolver.
+an expense using targeted server reads. The optional experimental
+`faculty-fund-spark-expense-resume.js` can resume a draft for its original
+collector, paging through eligible accepted wallets, using deterministic
+allocation IDs and enforcing the expense's claimed occurrence time. It checks
+protected wallet/remittance state again before each transaction; a rules race or
+lost response leaves a draft to reconcile, not a confirmed expense. A response
+lost after a mutation remains unconfirmed until another server read; the resolver
+distinguishes an already accepted or recorded transaction from a cancellation.
+The client caps its per-record line and allocation inspection at 201 documents,
+rejecting a result above 200.
 
 These modules cannot be mixed with the older namespace and have no migration or
 app integration. Emulator tests reject attempts to hide linked payments and test
