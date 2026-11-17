@@ -110,11 +110,18 @@ and the user experience of restarting must be evaluated before integration.
 The isolated targeted resolver can resume remittance drafts and
 finish cancellations or reversals without that full reader. Its optional
 expense resumer pages eligible wallets, rechecks individual records and uses
-retry-safe allocations. It scans at most 200 wallets by default and fails
-without claiming completion if the scan limit or available funds are exhausted;
-partial allocations remain reserved until resumed or cancelled. A release can
-still read up to 200 selected payments; expense inspection fetches at most 201
-allocation records and rejects more than 200. These are bounded requests, not
+retry-safe allocations. It scans at most 200 wallets per attempt by default.
+When it reaches that limit it returns a revision-checked continuation hint and
+an unfinished status; callers can continue the scan rather than repeatedly
+starting at the oldest wallets. A changed revision invalidates the hint and
+requires a restart. The cursor is not proof that all earlier wallets remain
+ineligible: review or restart the scan if later funds cannot complete the draft.
+The hint cannot authenticate history or guarantee progress under ongoing writes,
+and it is not yet connected to a user interface or durable pending workflow.
+If available funds are exhausted the operation remains unfinished; partial
+allocations stay reserved until resumed or cancelled. A release can still read
+up to 200 selected payments; expense inspection fetches at most 201 allocation
+records and rejects more than 200. These are bounded requests, not
 proof of staying within the free quota. Query indexes and real-project cost are
 unverified. None of these modules is connected to the app. The full reader still
 serves the prototype's balances, reports and existing recovery adapter, so the

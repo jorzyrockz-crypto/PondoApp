@@ -171,8 +171,13 @@ protected wallet/remittance state again before each transaction; a rules race or
 lost response leaves a draft to reconcile, not a confirmed expense. A response
 lost after a mutation remains unconfirmed until another server read; the resolver
 distinguishes an already accepted or recorded transaction from a cancellation.
-The client caps its per-record line and allocation inspection at 201 documents,
-rejecting a result above 200.
+A bounded wallet scan can return an unfinished status and a continuation hint
+for the same account, workspace, draft and server revision. Another write
+invalidates that hint. It is only a scan position, not evidence that all earlier
+wallets remain unavailable; a full restart may still be necessary. Cursor
+storage, user-facing continuation, and behavior under sustained contention are
+not implemented or proven. The client caps its per-record line and allocation
+inspection at 201 documents, rejecting a result above 200.
 
 The separate accepted-funds pager checks each open wallet against its accepted
 remittance and any pending correction, pins all pages to one protected

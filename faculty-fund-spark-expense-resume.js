@@ -61,12 +61,12 @@
      // completed status here; rules still authorize each subsequent mutation.
      return {...result(expenseId,e,snapshot.revision),reason:'scan-limit',continuation:{version:1,orgId:c.orgId,uid:c.uid,expenseId,revision:snapshot.revision,walletId:cursor.id}};
     }
-    const n=Math.min(pageSize,maxWallets-scanned),wallets=await page(c,db,e.occurredAt,cursor,n);if(!wallets.length)fail('Expense remains unfinished; retry when eligible funds are available or cancel the draft.');
+    const n=Math.min(pageSize,maxWallets-scanned),wallets=await page(c,db,e.occurredAt,cursor,n);if(!wallets.length)fail(input.continuation!==undefined?'Expense remains unfinished; no more wallets after this scan position. Restart the scan or cancel the draft.':'Expense remains unfinished; retry when eligible funds are available or cancel the draft.');
     for(const wallet of wallets){
      scanned++;cursor=wallet;const key=await allocationId(expenseId,wallet.id);guard(c);const checked=await candidate(c,db,expenseId,wallet.id,key,initial);e=checked.expense;if(e.status!=='draft')return result(expenseId,e,checked.revision);if(e.allocatedCents===e.amountCents)break;if(checked.skip)continue;if(e.count>=200)fail('This draft has too many allocations; cancel or review recovery.');
      const needed=e.amountCents-e.allocatedCents,value=Math.min(needed,checked.wallet.unspentCents);await step(c,()=>client.allocate(expenseId,wallet.id,key,value));
     }
-    if(wallets.length<n){snapshot=await state(c,db,expenseId);e=snapshot.item;if(e.status!=='draft')return result(expenseId,e,snapshot.revision);if(e.allocatedCents<e.amountCents)fail('Expense remains unfinished; retry when eligible funds are available or cancel the draft.');}
+    if(wallets.length<n){snapshot=await state(c,db,expenseId);e=snapshot.item;if(e.status!=='draft')return result(expenseId,e,snapshot.revision);if(e.allocatedCents<e.amountCents)fail(input.continuation!==undefined?'Expense remains unfinished; no more wallets after this scan position. Restart the scan or cancel the draft.':'Expense remains unfinished; retry when eligible funds are available or cancel the draft.');}
    }
   }
   return {resume};
