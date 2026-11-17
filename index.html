@@ -8125,6 +8125,39 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
  body.dark-mode #tab-dashboard .card-open-hint,
  body.dark-mode #tab-dashboard .dashboard-contribution-open {color:#93c5fd!important}
 }
+/* Dashboard polish: no changes to the desktop two-column layout. */
+@media screen {
+ #appHeaderLogo {background:#eef2ff!important;border-color:#c7d2fe!important;color:#4338ca!important;box-shadow:none!important}
+ #appHeaderLogo svg {width:24px;height:24px;display:block}
+ body.dark-mode #appHeaderLogo {background:#1e3151!important;border-color:#425b89!important;color:#c7d2fe!important}
+ #tab-dashboard .hero-stat[role="button"] {cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}
+ #tab-dashboard .hero-stat[role="button"]:hover {border-color:#a5b4fc!important;box-shadow:0 3px 12px rgb(79 70 229 / .12)!important}
+ #tab-dashboard .hero-stat[role="button"]:focus-visible {outline:3px solid #6366f1;outline-offset:2px}
+ body.dark-mode #tab-dashboard .hero-stat[role="button"]:hover {border-color:#a5b4fc!important}
+ #tab-dashboard .dashboard-page-head > div > p:last-child {color:#475569!important}
+ body.dark-mode #tab-dashboard .dashboard-page-head > div > p:last-child {color:#d2dcef!important}
+ body:not(.dark-mode)[data-background="midnight"] #tab-dashboard .dashboard-page-head > div > p:last-child {color:#eef5f6!important}
+ .transactions-opening-notice {margin:0 0 14px;padding:10px 12px;border-radius:10px;background:#eef2ff;color:#334155;font-size:12px;line-height:1.5}
+ .transactions-opening-notice[hidden] {display:none!important}
+ body.dark-mode .transactions-opening-notice {background:#1d3452;color:#d2dcef}
+}
+@media screen and (min-width:481px) {
+ .pondo-header-actions {min-width:0;max-width:calc(100% - 115px)}
+ .team-switcher-wrap {min-width:0;flex:0 1 auto}
+ .team-header-badge {max-width:100%}
+ #teamHeaderBadgeText {max-width:none;min-width:0}
+}
+@media screen and (min-width:1024px) {
+ #fab {display:none!important}
+ #tab-dashboard .hero {padding:22px 24px!important}
+ #tab-dashboard .hero-stats {margin-top:14px!important}
+ #tab-dashboard .hero-stat {padding:11px!important}
+ #tab-dashboard .dashboard-actions-card {padding:14px 16px!important;margin:14px 0!important}
+ #tab-dashboard .dashboard-actions-empty {margin-top:8px}
+ #tab-dashboard .dashboard-actions-list:empty {margin-top:0}
+}
+@media (prefers-reduced-motion:reduce) {#tab-dashboard .hero-stat[role="button"] {transition:none}}
+body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 </style>
 
 </head>
@@ -8158,7 +8191,7 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
 <header class="topbar no-print">
   <div class="topbar-inner">
     <div class="pondo-identity">
-      <div class="logo" id="appHeaderLogo"><img src="icons/icon-96.png" alt="" class="org-logo-image"></div>
+      <div class="logo" id="appHeaderLogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7V5a2 2 0 0 1 2-2h12"/><rect x="3" y="7" width="18" height="14" rx="3"/><path d="M16 12h5v5h-5a2.5 2.5 0 0 1 0-5Z"/><path d="M16.5 14.5h.01"/></svg></div>
       <div class="pondo-identity-text">
         <div class="org-name pondo-brand">Pondo</div>
         <div class="org-meta app-tagline">Track and manage your funds with Pondo.</div>
@@ -8205,9 +8238,9 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
       <div class="hero-amount" id="totalRemaining">₱68,300</div>
       <div class="hero-sub" id="heroSub">Across 3 funds • 6 transactions • Period 2025-01-01 to 2025-12-31</div>
       <div class="hero-stats">
-        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><div class="hero-stat-label">Received</div></div><div class="hero-stat-value" id="totalReceived">₱88,500</div><div class="hero-stat-sub">All sources</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 16 6-6 4 4 8-8M15 6h6v6"/></svg></div>
-        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg><div class="hero-stat-label">Spent</div></div><div class="hero-stat-value" id="totalSpent">₱20,200</div><div class="hero-stat-sub" id="spentPct">22.8% used</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 8 6 6 4-4 8 8M15 18h6v-6"/></svg></div>
-        <div class="hero-stat"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><div class="hero-stat-label">Transactions</div></div><div class="hero-stat-value" id="txCount">6</div><div class="hero-stat-sub">All recorded dates</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m7 3-4 4 4 4M3 7h17M17 21l4-4-4-4m4 4H4"/></svg></div>
+        <div class="hero-stat" role="button" tabindex="0" aria-label="View income transactions. Total received also includes initial fund receipts." onclick="openDashboardTransactions('IN')" onkeydown="dashboardKpiKey(event,'IN')"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><div class="hero-stat-label">Received</div></div><div class="hero-stat-value" id="totalReceived">₱88,500</div><div class="hero-stat-sub">All sources</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 16 6-6 4 4 8-8M15 6h6v6"/></svg></div>
+        <div class="hero-stat" role="button" tabindex="0" aria-label="View expense transactions" onclick="openDashboardTransactions('OUT')" onkeydown="dashboardKpiKey(event,'OUT')"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg><div class="hero-stat-label">Spent</div></div><div class="hero-stat-value" id="totalSpent">₱20,200</div><div class="hero-stat-sub" id="spentPct">22.8% used</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 8 6 6 4-4 8 8M15 18h6v-6"/></svg></div>
+        <div class="hero-stat" role="button" tabindex="0" aria-label="View all transactions" onclick="openDashboardTransactions('all')" onkeydown="dashboardKpiKey(event,'all')"><div style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><div class="hero-stat-label">Transactions</div></div><div class="hero-stat-value" id="txCount">6</div><div class="hero-stat-sub">All recorded dates</div><svg class="hero-stat-art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m7 3-4 4 4 4M3 7h17M17 21l4-4-4-4m4 4H4"/></svg></div>
       </div>
     </div>
 
@@ -8279,6 +8312,7 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
      <div class="fund-page-head transactions-page-head"><div><p class="report-eyebrow">CASH ACTIVITY</p><h2>Transactions</h2><p>Review every receipt, expense, and linked payment.</p></div><button class="btn btn-emerald" onclick="openTxModal()"><span aria-hidden="true">+</span> Add transaction</button></div>
      <div class="desktop-transactions-layout"><div class="desktop-transactions-main">
      <div class="filter-row transactions-filter-row"><div class="search-wrap" style="margin-bottom:14px;position:relative"><span class="search-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span><input id="txSearch" class="search-input" placeholder="Search transactions" aria-label="Search transactions" oninput="renderAll()"></div><select id="txTypeFilter" aria-label="Filter by transaction type" onchange="renderAll()"><option value="all">All types</option><option value="IN">Income</option><option value="OUT">Expenses</option></select></div>
+    <p id="incomeOpeningNotice" class="transactions-opening-notice" hidden>Income transactions exclude initial fund receipts, which are included in the dashboard’s Received total.</p>
     <div class="transactions-ledger-heading"><div><h3>Transaction ledger</h3><p>Newest first · Recorded income and expenses</p></div><span id="transactionResultCount" aria-live="polite"></span></div>
     <div class="transactions-column-head" aria-hidden="true"><span>Transaction</span><span>Details</span><span>Amount</span></div>
     <div id="txList" style="display:flex; flex-direction:column; gap:8px"></div></div><details class="audit-panel"><summary>Audit and void history</summary><p class="transactions-audit-intro">Review recorded changes and voided entries.</p><div id="auditList"></div></details></div>
@@ -8666,8 +8700,8 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 76</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>More room to work on your phone</h4><ul><li>Workspace headings and actions fit smaller screens more comfortably.</li><li>Dashboard and fund totals, and transaction details, are easier to read on a phone.</li><li>Add forms have a clearer selected option and larger input text.</li><li>Print a totals-only summary across contribution activities, with refreshed office-style activity reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 77</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>A clearer dashboard</h4><ul><li>Open income, expense, or all transactions directly from the balance summary.</li><li>Organization periods are easier to read and the workspace name has more room.</li><li>The desktop dashboard has tighter spacing and a cleaner header.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -8686,7 +8720,7 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='76', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='77', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -8884,6 +8918,21 @@ function fmt(n){
   const locale=isCustom?'en-US':cur.locale;
   return symbol+Number(n).toLocaleString(locale);
 }
+// Dates are labels only: the dashboard totals always include every recorded date.
+function formatOrganizationPeriod(from,to){
+ const parse=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;const date=new Date(value+'T00:00:00Z');return !Number.isNaN(date.valueOf())&&date.toISOString().slice(0,10)===value?date:null};
+ const a=parse(from),b=parse(to);if(!a||!b)return [from||'Not set',to||'Not set'].join(' – ');
+ const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ const part=d=>months[d.getUTCMonth()]+' '+d.getUTCDate();
+ return part(a)+(a.getUTCFullYear()!==b.getUTCFullYear()?', '+a.getUTCFullYear():'')+' – '+part(b)+', '+b.getUTCFullYear();
+}
+function openDashboardTransactions(type){
+ if(!['IN','OUT','all'].includes(type))return;
+ document.getElementById('txSearch').value='';
+ const filter=document.getElementById('txTypeFilter');filter.value=type;
+ switchTab('transactions');renderAll();filter.focus({preventScroll:true});
+}
+function dashboardKpiKey(event,type){if(event.key==='Enter'||event.key===' '){event.preventDefault();openDashboardTransactions(type)}}
 const CINEMA_TAB_ORDER=['dashboard','funds','projects','contributions','transactions','report'];
 function cinemaDirection(fromTab,toTab){ let i=CINEMA_TAB_ORDER.indexOf(fromTab),j=CINEMA_TAB_ORDER.indexOf(toTab); if(i<0||j<0||j===i) return 1; return j>i?1:-1; }
 function switchTab(tab){
@@ -10444,7 +10493,7 @@ function renderAll(){
   document.getElementById('fundSourceCount').textContent=funds.length; document.getElementById('fundSourceReceived').textContent=fmt(totalRec); document.getElementById('fundSourceBalance').textContent=fmt(remaining);
   document.getElementById('txCount').innerText=txs.length;
   document.getElementById('spentPct').innerText=pct+'% used';
-  document.getElementById('heroSub').innerText='Across '+funds.length+' funds • '+txs.length+' transactions • Organization period (label): '+org.periodFrom+' to '+org.periodTo;
+  document.getElementById('heroSub').innerText='Across '+funds.length+' funds • '+txs.length+' transactions • Organization period: '+formatOrganizationPeriod(org.periodFrom,org.periodTo);
   document.getElementById('fundsCount').innerText=funds.length+' funds';
 
   let fundCards=document.getElementById('fundCards'), fundScroll=fundCards.scrollLeft; let fundCardsHtml='';
@@ -10502,6 +10551,7 @@ function renderAll(){
   let q=(document.getElementById('txSearch')?.value||'').toLowerCase();
   let txList=document.getElementById('txList'); txList.innerHTML='';
   let filter=document.getElementById('txTypeFilter').value;
+  const openingNotice=document.getElementById('incomeOpeningNotice');if(openingNotice)openingNotice.hidden=filter!=='IN';
   const visibleTransactions=txs.slice().sort((a,b)=>b.date.localeCompare(a.date)).filter(t=>(filter==='all'||t.type===filter)&&(!q||[t.description,t.payee,t.receiptNo,t.category,funds.find(f=>f.id===t.fundId)?.name,projects.find(p=>p.id===t.projectId)?.name].some(v=>(v||'').toLowerCase().includes(q))));
   document.getElementById('transactionResultCount').textContent=visibleTransactions.length+' of '+txs.length+' transaction'+(txs.length===1?'':'s');
   visibleTransactions.forEach(t=>{
@@ -11866,7 +11916,7 @@ function updateHeaderTeamBadge() {
     text.textContent = hasOtherOrgs ? 'Personal · Switch' : 'Solo · Add team';
   } else {
     const roleLabel = ROLE_LABELS[pondoTeamState.role] || '';
-    badge.title = 'Network status only, not proof of sync. Tap to switch workspace or manage members.';
+    badge.title = (pondoTeamState.orgName || 'Team') + ' — Network status only, not proof of sync. Tap to switch workspace or manage members.';
     text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
     if (avatarBtn) avatarBtn.classList.add(navigator.onLine ? 'live' : 'offline');
