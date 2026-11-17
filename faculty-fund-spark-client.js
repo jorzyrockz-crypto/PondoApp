@@ -3,10 +3,14 @@
 // Only the isolated emulator fixture supports these paths; production rules
 // must not enable them until the complete workflow has been reviewed.
 // Rules are the authority: local checks provide readable errors and retries.
-function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
+function createIntegratedClient({db,api,orgId,uid,useRevision=false,trackRemittanceReleases=false}) {
+ if(trackRemittanceReleases&&!useRevision)throw Error('Recovery discovery requires versioned rules');
  const {doc,runTransaction,serverTimestamp}=api;
  if(!db||!orgId||!uid||orgId.includes('/'))throw Error('Missing workspace or actor');
- const ref=(name,key)=>doc(db,`organizations/${orgId}/${name}/${key}`);
+ // The discovery fixture uses a fresh namespace; it cannot safely mix with
+ // older records that lack a rule-enforced release counter.
+ const pathName=name=>trackRemittanceReleases?name.replace(/^spark/,'sparkDiscovery'):name;
+ const ref=(name,key)=>doc(db,`organizations/${orgId}/${pathName(name)}/${key}`);
  const fail=message=>{throw Error(message)};
  const identifier=v=>{if(typeof v!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(v))fail('Invalid operation ID');return v};
  const amount=v=>{if(!Number.isSafeInteger(v)||v<=0||v>100000000)fail('Invalid amount');return v};
@@ -38,26 +42,26 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
  }
  async function createRemittance(remittanceId,paymentIds){
   identifier(remittanceId);if(!Array.isArray(paymentIds)||!paymentIds.length||paymentIds.length>200||new Set(paymentIds).size!==paymentIds.length)fail('Select distinct payments');paymentIds.forEach(identifier);
-  const plan=[...paymentIds],r=ref('sparkRemittances',remittanceId);return atomic(async tx=>{const s=await tx.get(r);if(s.exists()){const old=s.data();if(old.createdBy!==uid||JSON.stringify(old.paymentIds)!==JSON.stringify(plan))fail('Remittance ID already has a different payment plan');return {replayed:true,status:old.status};}tx.set(r,{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,paymentIds:plan,createdBy:uid,createdAt:serverTimestamp()});return {replayed:false,status:'draft'};});
+  const plan=[...paymentIds],r=ref('sparkRemittances',remittanceId);return atomic(async tx=>{const s=await tx.get(r);if(s.exists()){const old=s.data();if(old.createdBy!==uid||JSON.stringify(old.paymentIds)!==JSON.stringify(plan))fail('Remittance ID already has a different payment plan');return {replayed:true,status:old.status};}tx.set(r,{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,paymentIds:plan,createdBy:uid,createdAt:serverTimestamp(),...(trackRemittanceReleases?{linkedCount:0,needsRelease:false,lastReleasedPaymentId:null}:{})});return {replayed:false,status:'draft'};});
  }
  async function addPayment(remittanceId,paymentId){
   identifier(remittanceId);identifier(paymentId);const r=ref('sparkRemittances',remittanceId),p=ref('sparkPayments',paymentId),line=ref('sparkLines',remittanceId+'~'+paymentId);
   return atomic(async tx=>{const [rs,ps,ls]=await Promise.all([tx.get(r),tx.get(p),tx.get(line)]);if(!rs.exists()||!ps.exists())fail('Remittance or payment unavailable');const rem=rs.data(),pay=ps.data();
    if(pay.remittanceId===remittanceId&&ls.exists())return {replayed:true};if(ls.exists()||rem.status!=='draft'||!rem.paymentIds.includes(paymentId)||pay.remittanceId!==null||pay.voidedAt)fail('Payment unavailable for remittance');
-   tx.update(p,{remittanceId});tx.set(line,{remittanceId,paymentId,amountCents:pay.amountCents,linkedAt:serverTimestamp(),linkedBy:uid});tx.update(r,{amountCents:rem.amountCents+pay.amountCents,count:rem.count+1,lastPaymentId:paymentId});return {replayed:false};});
+   tx.update(p,{remittanceId});tx.set(line,{remittanceId,paymentId,amountCents:pay.amountCents,linkedAt:serverTimestamp(),linkedBy:uid});tx.update(r,{amountCents:rem.amountCents+pay.amountCents,count:rem.count+1,lastPaymentId:paymentId,...(trackRemittanceReleases?{linkedCount:rem.linkedCount+1}:{})});return {replayed:false};});
  }
  async function submitRemittance(remittanceId){
   const r=ref('sparkRemittances',identifier(remittanceId)),c=ref('sparkConfig','current');return atomic(async tx=>{const [rs,cs]=await Promise.all([tx.get(r),tx.get(c)]);if(!rs.exists()||!cs.exists())fail('Remittance or President assignment unavailable');const rem=rs.data();if(rem.status!=='draft')return {replayed:true,status:rem.status};if(!rem.count||rem.count!==rem.paymentIds.length)fail('The remittance is incomplete; resume adding the selected payments');tx.update(r,{status:'pending',presidentUid:cs.data().presidentUid,submittedAt:serverTimestamp()});return {replayed:false,status:'pending'};});
  }
  async function declineRemittance(remittanceId,reason){
-  const r=ref('sparkRemittances',identifier(remittanceId));text(reason,500);return atomic(async tx=>{const s=await tx.get(r);if(!s.exists())fail('Remittance unavailable');const rem=s.data();if(rem.status==='declined'&&rem.declinedBy===uid&&rem.reason===reason)return {replayed:true};if(rem.status!=='pending'||rem.presidentUid!==uid)fail('Remittance cannot be declined');tx.update(r,{status:'declined',declinedBy:uid,declinedAt:serverTimestamp(),reason});return {replayed:false};});
+  const r=ref('sparkRemittances',identifier(remittanceId));text(reason,500);return atomic(async tx=>{const s=await tx.get(r);if(!s.exists())fail('Remittance unavailable');const rem=s.data();if(rem.status==='declined'&&rem.declinedBy===uid&&rem.reason===reason)return {replayed:true};if(rem.status!=='pending'||rem.presidentUid!==uid)fail('Remittance cannot be declined');tx.update(r,{status:'declined',declinedBy:uid,declinedAt:serverTimestamp(),reason,...(trackRemittanceReleases?{needsRelease:rem.linkedCount>0}:{})});return {replayed:false};});
  }
  async function cancelRemittance(remittanceId,reason){
-  const r=ref('sparkRemittances',identifier(remittanceId));text(reason,500);return atomic(async tx=>{const s=await tx.get(r);if(!s.exists())fail('Remittance unavailable');const rem=s.data();if(rem.status==='cancelled'&&rem.cancelledBy===uid&&rem.reason===reason)return {replayed:true};if(!['draft','pending'].includes(rem.status))fail('Remittance cannot be cancelled');tx.update(r,{status:'cancelled',cancelledBy:uid,cancelledAt:serverTimestamp(),reason});return {replayed:false};});
+  const r=ref('sparkRemittances',identifier(remittanceId));text(reason,500);return atomic(async tx=>{const s=await tx.get(r);if(!s.exists())fail('Remittance unavailable');const rem=s.data();if(rem.status==='cancelled'&&rem.cancelledBy===uid&&rem.reason===reason)return {replayed:true};if(!['draft','pending'].includes(rem.status))fail('Remittance cannot be cancelled');tx.update(r,{status:'cancelled',cancelledBy:uid,cancelledAt:serverTimestamp(),reason,...(trackRemittanceReleases?{needsRelease:rem.linkedCount>0}:{})});return {replayed:false};});
  }
  async function releasePayment(remittanceId,paymentId){
   identifier(remittanceId);identifier(paymentId);const r=ref('sparkRemittances',remittanceId),p=ref('sparkPayments',paymentId),line=ref('sparkLines',remittanceId+'~'+paymentId);
-  return atomic(async tx=>{const [rs,ps,ls]=await Promise.all([tx.get(r),tx.get(p),tx.get(line)]);if(!rs.exists()||!ps.exists()||!ls.exists()||!['declined','cancelled','voided'].includes(rs.data().status))fail('Payment cannot be released');const pay=ps.data();if(pay.remittanceId===null)return {replayed:true};if(pay.remittanceId!==remittanceId)fail('Payment belongs to another remittance');tx.update(p,{remittanceId:null});return {replayed:false};});
+  return atomic(async tx=>{const [rs,ps,ls]=await Promise.all([tx.get(r),tx.get(p),tx.get(line)]);if(!rs.exists()||!ps.exists()||!ls.exists()||!['declined','cancelled','voided'].includes(rs.data().status))fail('Payment cannot be released');const pay=ps.data();if(pay.remittanceId===null)return {replayed:true};if(pay.remittanceId!==remittanceId)fail('Payment belongs to another remittance');if(trackRemittanceReleases){const rem=rs.data();if(!Number.isSafeInteger(rem.linkedCount)||rem.linkedCount<1||rem.needsRelease!==true)fail('Remittance release count is inconsistent');tx.update(r,{linkedCount:rem.linkedCount-1,needsRelease:rem.linkedCount>1,lastReleasedPaymentId:paymentId});}tx.update(p,{remittanceId:null});return {replayed:false};});
  }
  async function requestCorrection(correctionId,remittanceId,reason){
   identifier(correctionId);identifier(remittanceId);text(reason,500);const c=ref('sparkCorrections',correctionId),r=ref('sparkRemittances',remittanceId);
@@ -67,7 +71,7 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
   identifier(correctionId);if(!['approved','declined'].includes(decision))fail('Invalid correction decision');if(decision==='declined')text(reason,500);const c=ref('sparkCorrections',correctionId);
   return atomic(async tx=>{const cs=await tx.get(c);if(!cs.exists())fail('Correction unavailable');const old=cs.data();if(old.status===decision&&old.decidedBy===uid&&(decision!=='declined'||old.decisionReason===reason))return {replayed:true};if(old.status!=='pending')fail('Correction already decided');const r=ref('sparkRemittances',identifier(old.remittanceId)),w=ref('sparkWallets',old.remittanceId),[rs,ws]=await Promise.all([tx.get(r),tx.get(w)]);if(!rs.exists()||!ws.exists()||rs.data().correctionId!==correctionId)fail('Correction no longer pending');
    if(decision==='declined'){tx.update(c,{status:decision,decidedBy:uid,decidedAt:serverTimestamp(),decisionReason:reason});tx.update(r,{correctionId:null});}
-   else{const wallet=ws.data();if(wallet.status!=='open'||wallet.unspentCents!==wallet.amountCents)fail('Reverse dependent expenses before approving this correction');tx.update(c,{status:decision,decidedBy:uid,decidedAt:serverTimestamp()});tx.update(r,{status:'voided',voidedBy:uid,voidedAt:serverTimestamp()});tx.update(w,{status:'voided'});}
+   else{const wallet=ws.data();if(wallet.status!=='open'||wallet.unspentCents!==wallet.amountCents)fail('Reverse dependent expenses before approving this correction');tx.update(c,{status:decision,decidedBy:uid,decidedAt:serverTimestamp()});tx.update(r,{status:'voided',voidedBy:uid,voidedAt:serverTimestamp(),...(trackRemittanceReleases?{needsRelease:rs.data().linkedCount>0}:{})});tx.update(w,{status:'voided'});}
    return {replayed:false};});
  }
  async function confirmPrint(kind,id,remittanceId){
@@ -122,7 +126,7 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
  async function inspectRemittance(remittanceId){
   identifier(remittanceId);const {collection,query,where,getDocFromServer,getDocsFromServer}=api;
   if(!collection||!query||!where||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
-  const parent=ref('sparkRemittances',remittanceId),lines=collection(db,`organizations/${orgId}/sparkLines`),clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
+  const parent=ref('sparkRemittances',remittanceId),lines=collection(db,`organizations/${orgId}/${pathName('sparkLines')}`),clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
   const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Remittance missing');const result=await getDocsFromServer(query(lines,where('remittanceId','==',remittanceId)));clean(result);const two=await getDocFromServer(parent);clean(two);if(!two.exists())fail('Remittance changed; reload');
   const before=one.data(),after=two.data(),fingerprint=x=>JSON.stringify([x.status,x.amountCents,x.count,x.lastPaymentId,x.paymentIds,x.correctionId,x.presidentUid]);
   if(fingerprint(before)!==fingerprint(after))fail('Remittance changed during recovery; reload');
@@ -137,7 +141,7 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
  async function inspectExpense(expenseId){
   identifier(expenseId);const {collection,query,where,getDocFromServer,getDocsFromServer}=api;
   if(!collection||!query||!where||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
-  const parent=ref('sparkExpenseDrafts',expenseId),lines=collection(db,`organizations/${orgId}/sparkAllocations`);
+  const parent=ref('sparkExpenseDrafts',expenseId),lines=collection(db,`organizations/${orgId}/${pathName('sparkAllocations')}`);
   const clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
   const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Expense missing');
   const result=await getDocsFromServer(query(lines,where('expenseId','==',expenseId)));clean(result);
