@@ -44,9 +44,33 @@ a document write; multi-payment remittances and multi-wallet expenses involve
 multiple transactions. This is not a guaranteed cost or a prediction of the
 user's usage. The project may also have data and traffic from other features.
 
-The reader refuses to load a collection once it exceeds 1,000 documents by
-default. No safe archival or pagination solution is implemented. Shared-revision
-contention and rule-dependent reads also require measurement.
+The full reader refuses to load a collection once it exceeds 1,000 documents by
+default. Shared-revision contention and rule-dependent reads also require
+measurement.
+
+## Bounded experiments
+
+Two isolated modules reduce reads for specific purposes, but do **not** replace
+all full-ledger reads:
+
+* `faculty-fund-spark-pending-reader.js` checks one known uncertain request. It
+  requests three server documents (revision, parent, revision) in the common
+  case. A cancelled, declined or voided remittance also checks each selected
+  payment, at most 200. Missing documents and changed revisions fail closed.
+* `faculty-fund-spark-history.js` reads one payment or expense history page at
+  a time. A page requests up to the page size plus one lookahead document and
+  reads the revision before and after. It refuses to combine pages after the
+  revision changes. This is an individual-record list, **not a reconciled
+  balance, complete audit, receipt or report**.
+
+These are request counts, not measured billable usage: rule-dependent reads,
+index entries, retries and other traffic are additional. The pages and focused
+reader rely on matching revision-enforcing rules and immutable record/link
+invariants; administrator writes bypass those rules. Firestore emulator tests
+exercise the experimental fixture, not production rules or production index
+requirements. Neither module is connected to the app. The full reader still
+serves the prototype's balances, reports and recovery discovery, so the 1,000
+record limit and high read costs remain for those paths.
 
 ## Release gate
 

@@ -143,8 +143,13 @@ race and need retry. The experimental `faculty-fund-spark-pending.js` inspector
 compares an original local remittance or expense request against a revision-checked
 server record. It does not permit treating a missing record or unfinished release
 as safe to clear, and reports the actual status of a matching completed record.
-It is not yet connected to the existing UI's pending-token lifecycle. Only records
-already visible on the server can be found:
+The optional bounded `faculty-fund-spark-pending-reader.js` fetches only that
+request's parent, revision and (when release must be checked) its selected
+payments; it still depends on matching rules and is not a full-ledger audit.
+The isolated `faculty-fund-spark-history.js` supports bounded payment or expense
+pages and rejects changes between pages, but does not establish a balance or a
+complete report. None of these modules is connected to the existing UI. Only
+records already visible on the server can be found:
 a missing draft does not prove an earlier request cannot still arrive. Nor can
 this discover a completed operation's original browser intent if its local token
 was lost. This remains dependent on the experimental rules, bounded full
