@@ -13,8 +13,8 @@ test('refund workspace has responsive, scoped request cards and a dark theme',()
 test('request presentation keeps calculation, escaping, receipts and the existing actions',()=>{
  for(const text of ['payableOutstanding(b)','payablePaid(bill.id)','payableStatus(bill)','escapeText(bill.reimburseTo', 'escapeText(bill.description', 'escapeText(projectLabel)', 'createdByBadge(bill)','pendingApprovalBadge(bill)','addReceiptLink(info,bill.receiptImage)','canAssignRefundProject()','assignRefundProject(bill.id,sel.value)','openPayablePayment(bill.id)','deleteUnpaidPayable(bill.id)','approveRefundRequest(bill.id)','rejectRefundRequest(bill.id)']) assert.ok(renderer.includes(text),text);
  assert.match(renderer,/remaining>0&&!bill\.pendingApproval/);
- assert.match(renderer,/if\(paid===0\)/);
- assert.match(renderer,/bill\.pendingApproval\?'pending':paid>0\?'partial':'unpaid'/);
+ assert.match(renderer,/if\(paid===0&&credit===0\)/);
+ assert.match(renderer,/bill\.pendingApproval\?'pending':paid\+credit>0\?'partial':'unpaid'/);
 });
 test('summary and newest-first log continue to aggregate existing refund records',()=>{
  for(const action of ['request refund approval','approve refund request','reject refund request','void payable','assign refund project'])assert.ok(renderer.includes(action),action);

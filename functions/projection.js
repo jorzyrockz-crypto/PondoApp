@@ -42,7 +42,7 @@ function buildPublicReport(snapshot, selection) {
     const spent=sum(rows.filter(t=>t.direction==='OUT').map(t=>t.amountCents));
     return {label:'Project '+(i+1),allocatedCents:allocated,spentCents:spent,remainingCents:allocated-spent,transactions:rows};
   });
-  if(enabled('contributions')) report.contributions=snapshot.contributionActivities.map((activity,i)=>{
+  if(enabled('contributions')) report.contributions=snapshot.contributionActivities.filter(activity=>!activity.deathAid).map((activity,i)=>{
     const people=snapshot.contributors.filter(p=>p.activityId===activity.id);
     const ids=new Set(people.map(p=>p.id));
     const rows=snapshot.contributionPayments.filter(p=>ids.has(p.contributorId)).map(p=>({date:date(p.date),label:'Contribution payment',amountCents:amount(p.amount)}));
