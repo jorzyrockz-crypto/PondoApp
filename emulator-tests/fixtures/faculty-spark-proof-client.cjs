@@ -46,6 +46,11 @@ function createProofClient({db,api,orgId,uid}){
    tx.set(e,{amountCents,description,occurredAt,createdAt:serverTimestamp(),createdBy:uid});tx.update(l,{balanceCents:bal.balanceCents-amountCents,revision:bal.revision+1,lastKind:'expense',lastId:expenseId,lastExpenseAt:occurredAt});return {replayed:false};
   });
  }
- return {payment,draft,add,submit,accept,expense};
+ async function confirmPrint(kind,recordId){
+  if(!['member','remittance'].includes(kind))failure('Invalid receipt kind');
+  const target=ref(kind==='member'?'sparkMemberReceipts':'sparkRemittanceReceipts',id(recordId));
+  return runTransaction(db,async tx=>{const s=await tx.get(target);if(s.exists())return {replayed:true};tx.set(target,{printedAt:serverTimestamp(),printedBy:uid});return {replayed:false};});
+ }
+ return {payment,draft,add,submit,accept,expense,confirmPrint};
 }
 module.exports={createProofClient};

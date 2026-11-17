@@ -124,3 +124,21 @@ test('expense time must not precede the latest accepted handover, go backwards, 
  await assertFails(at('before',new Date('2020-01-01'),2,24000));await assertFails(at('future',new Date('2099-01-01'),2,24000));
  await assertSucceeds(at('valid',accepted,2,24000));await assertFails(at('older',new Date('2020-01-01'),3,23000));
 });
+
+
+test('receipt confirmations are separate, accepted-only, collector-only and immutable',async()=>{
+ await setup();const ao=client('ao'),president=client('president'),reviewer=client('reviewer');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));
+ const member='sparkMemberReceipts/person1~2026-01-01',remit='sparkRemittanceReceipts/r';
+ await assertFails(setDoc(d(ao,member),{printedBy:'ao',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,remit),{printedBy:'ao',printedAt:serverTimestamp()}));
+ await assertSucceeds(accept(president));
+ await assertFails(setDoc(d(reviewer,member),{printedBy:'reviewer',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,member),{printedBy:'owner',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,member),{printedBy:'ao',printedAt:new Date('2020-01-01')}));
+ await assertSucceeds(setDoc(d(ao,member),{printedBy:'ao',printedAt:serverTimestamp()}));assert.equal((await getDoc(d(ao,remit))).exists(),false);
+ await assertSucceeds(setDoc(d(ao,remit),{printedBy:'ao',printedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,member),{printedBy:'owner'}));await assertFails(deleteDoc(d(ao,remit)));
+});
+
+test('receipt confirmation client retries do not update the original server timestamp',async()=>{
+ await setup();const api=require('firebase/firestore'),{createProofClient}=require('./fixtures/faculty-spark-proof-client.cjs');const db=client('ao'),pres=client('president'),ao=createProofClient({db,api,orgId:'school',uid:'ao'});
+ await assertSucceeds(makePayment(db));await assertSucceeds(makeDraft(db));await assertSucceeds(add(db,'person1~2026-01-01'));await assertSucceeds(submit(db));await assertSucceeds(accept(pres));
+ assert.equal((await ao.confirmPrint('member','person1~2026-01-01')).replayed,false);const before=(await getDoc(d(db,'sparkMemberReceipts/person1~2026-01-01'))).data().printedAt;
+ assert.equal((await ao.confirmPrint('member','person1~2026-01-01')).replayed,true);assert.ok(before.isEqual((await getDoc(d(db,'sparkMemberReceipts/person1~2026-01-01'))).data().printedAt));assert.equal((await ao.confirmPrint('remittance','r')).replayed,false);
+});

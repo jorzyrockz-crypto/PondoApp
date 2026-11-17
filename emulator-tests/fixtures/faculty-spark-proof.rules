@@ -109,6 +109,22 @@ service cloud.firestore {
      && request.resource.data.linkedAt == request.time && request.resource.data.linkedBy == request.auth.uid;
    allow update, delete: if false;
   }
+  // These are explicit human confirmations, not evidence of physical printing.
+  match /organizations/{o}/sparkMemberReceipts/{p} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['printedBy','printedAt'])
+     && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
+     && get(payment(o,p)).data.remittanceId is string
+     && get(remit(o,get(payment(o,p)).data.remittanceId)).data.status == 'accepted';
+   allow update, delete: if false;
+  }
+  match /organizations/{o}/sparkRemittanceReceipts/{r} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['printedBy','printedAt'])
+     && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
+     && get(remit(o,r)).data.status == 'accepted';
+   allow update, delete: if false;
+  }
   match /organizations/{o}/sparkLedger/{id} {
    allow read: if signed(o) && id == 'current';
    allow create: if owner(o) && id == 'current' && request.resource.data.keys().hasOnly(['balanceCents','revision','lastKind','lastId','lastAcceptedAt','lastExpenseAt'])
