@@ -104,13 +104,26 @@ and partial-draft releases.
 `faculty-fund-spark-projection.js` checks relationships and reconciles accepted,
 spent, reserved and unremitted cash from provided records, exposing unfinished
 actions rather than treating draft spending as completed. It is not a security
-boundary and multiple separate Firestore reads do not form an atomic snapshot;
-consistent, bounded and fully confirmed loading still needs design and tests.
+boundary. The newer isolated `faculty-spark-versioned-proof.rules` fixture
+requires each client financial write to atomically advance a shared revision.
+The experimental reader checks this revision before and after bounded,
+server-confirmed collection reads, rejects changed workspaces and inconsistent
+records, and validates the current President against immutable assignment
+history. Emulator tests exercise concurrent changes and valid calendar dates.
+Administrative SDK writes bypass these rules and this consistency guarantee;
+extra reads and the shared revision also have free-tier quota and contention
+costs that need measurement.
+
+Experimental receipt, CSV/printable report, diagnostic export and read-only UI
+adapter modules are tested against the versioned emulator fixture. The adapter
+has no write API and deliberately refuses incomplete multi-step operations that
+the existing UI cannot yet resume. The diagnostic export checksum detects
+accidental changes, not authenticity, and **cannot restore President
+acceptances**. The normal app backup does not include this separate data.
 
 This is still an isolated experiment, **not app integration or production
-rules**. A complete recovery/export story, server-enforced valid calendar dates,
-safe browser persistence of multi-step expense plans, reports, notifications,
-receipt rendering, and integration with existing team rules and UI remain
-unfinished. Do not publish the fixture or enter real
-fund data based on this experiment. Emulator tests do not replace actual
-multi-account tests in Firebase.
+rules**. A complete safe restore procedure, browser UI for recovering or
+cancelling multi-step expense operations, notifications, print pagination on
+real devices, and integration with existing team rules and UI remain
+unfinished. Do not publish the fixture or enter real fund data based on this
+experiment. Emulator tests do not replace actual multi-account tests in Firebase.
