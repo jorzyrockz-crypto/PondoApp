@@ -103,6 +103,17 @@ service cloud.firestore {
                     && request.resource.data.discoverable is bool;
       allow delete: if false;
 
+      // Approximate recent activity; a member may update only their own
+      // timestamp, never another member's or an arbitrary client-supplied time.
+      match /presence/{memberId} {
+        allow read: if isMember(orgId);
+        allow create, update: if isMember(orgId) && uid() == memberId
+                              && request.resource.data.keys().hasOnly(['lastSeen'])
+                              && request.resource.data.keys().hasAll(['lastSeen'])
+                              && request.resource.data.lastSeen == request.time;
+        allow delete: if signedIn() && (uid() == memberId || isOwner(orgId));
+      }
+
       match /members/{memberId} {
         // Members can list each other; a user can always check their own
         // membership doc (even if it doesn't exist, e.g. after being removed).

@@ -28,3 +28,25 @@ change Firestore rules or the public-report backend as part of this fix.
 
 Mock unit tests do not verify actual Google sign-in. Real-device testing on
 Android, including sign-out and sign-in again, is still needed.
+
+## Invitations opened inside Messenger
+
+Firebase's hosted auth page may report “missing initial state” if sign-in is
+started in an in-app browser and the temporary state is lost or partitioned.
+That error alone does not establish whether an invitation is valid or whether
+membership was created. Go back to the **original invitation in the chat**,
+copy it, paste it into Chrome or Safari, and sign in there with Google. The
+error page's own URL is a Firebase sign-in URL, not the invitation. Check the
+team workspace afterward; do not use offline mode to join.
+
+Pondo now recognizes common Facebook/Messenger and Instagram user-agent
+markers and shows a copyable Pondo link instead of starting Google sign-in in
+those browsers. The copied link preserves the invitation parameter and omits
+unrelated query parameters and fragments. When clipboard access fails, the
+field can be selected manually. This detection is best-effort: user agents and
+browser menus can change, and this does not fix every browser's Firebase auth
+storage behavior. Treat invitation links as credentials; send them privately.
+
+Test the full flow with real invitee accounts and devices in Messenger on
+Android and iOS, including copy/manual selection and browser sign-in, before
+relying on this guidance. Do not clear site data, as local records may be lost.

@@ -90,3 +90,18 @@ test('forged requests and unrelated user profiles cannot grant access',async()=>
  await assertFails(updateDoc(ref(attacker.db,`${root}/joinRequests/guest`),{status:'approved',decidedBy:'attacker',decidedAt:serverTimestamp()}));
  await assertFails(deleteDoc(ref(owner.db,root)));
 });
+
+test('presence is member-only and each user can write only their own server timestamp',async()=>{
+ await seed({'organizations/school':{name:'School'},'organizations/school/members/owner':{uid:'owner',role:'owner'},'organizations/school/members/reviewer':{uid:'reviewer',role:'reviewer'}});
+ const owner=client('owner'),reviewer=client('reviewer'),stranger=client('stranger');
+ const path='organizations/school/presence/';
+ await assertSucceeds(setDoc(ref(reviewer,path+'reviewer'),{lastSeen:serverTimestamp()}));
+ await assertSucceeds(getDocs(collection(owner,'organizations/school/presence')));
+ await assertFails(getDocs(collection(stranger,'organizations/school/presence')));
+ await assertFails(setDoc(ref(reviewer,path+'owner'),{lastSeen:serverTimestamp()}));
+ await assertFails(setDoc(ref(reviewer,path+'reviewer'),{lastSeen:new Date('2099-01-01')}));
+ await assertFails(setDoc(ref(reviewer,path+'reviewer'),{lastSeen:serverTimestamp(),extra:'private'}));
+ await assertSucceeds(deleteDoc(ref(owner,'organizations/school/members/reviewer')));
+ await assertFails(setDoc(ref(reviewer,path+'reviewer'),{lastSeen:serverTimestamp()}));
+ await assertFails(getDocs(collection(reviewer,'organizations/school/presence')));
+});
