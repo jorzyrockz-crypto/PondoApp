@@ -16,16 +16,16 @@ async function pending(db,r,p,amount=25000){
  await setDoc(d(db,'sparkRemittances/'+r),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:'ao',createdAt:serverTimestamp()});const id=p+'~2026-01-01',b=writeBatch(db);
  b.update(d(db,'sparkPayments/'+id),{remittanceId:r});b.set(d(db,'sparkLines/'+r+'~'+id),{remittanceId:r,paymentId:id,amountCents:amount,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(db,'sparkRemittances/'+r),{amountCents:amount,count:1,lastPaymentId:id});await b.commit();await updateDoc(d(db,'sparkRemittances/'+r),{status:'pending',presidentUid:'president',submittedAt:serverTimestamp()});
 }
-async function accept(db,r,amount=25000){const b=writeBatch(db);b.update(d(db,'sparkRemittances/'+r),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()});b.set(d(db,'sparkWallets/'+r),{status:'open',amountCents:amount,unspentCents:amount,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null});return b.commit();}
-async function expense(db,id,amount,occurredAt){return setDoc(d(db,'sparkExpenseDrafts/'+id),{status:'draft',amountCents:amount,allocatedCents:0,count:0,lastAllocation:null,description:'School supplies',payee:'Supplier',occurredAt,createdAt:serverTimestamp(),createdBy:'ao'});}
-async function allocate(db,expenseId,walletId,id,amount){return runTransaction(db,async tx=>{const w=d(db,'sparkWallets/'+walletId),e=d(db,'sparkExpenseDrafts/'+expenseId),[ws,es]=await Promise.all([tx.get(w),tx.get(e)]),wallet=ws.data(),draft=es.data();tx.set(d(db,'sparkAllocations/'+id),{expenseId,walletId,amountCents:amount,recordedAt:serverTimestamp(),recordedBy:'ao'});tx.update(w,{unspentCents:wallet.unspentCents-amount,revision:wallet.revision+1,lastAllocation:id});tx.update(e,{allocatedCents:draft.allocatedCents+amount,count:draft.count+1,lastAllocation:id});});}
+async function accept(db,r,amount=25000){const b=writeBatch(db);b.update(d(db,'sparkRemittances/'+r),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()});b.set(d(db,'sparkWallets/'+r),{status:'open',amountCents:amount,unspentCents:amount,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null,lastRelease:null});return b.commit();}
+async function expense(db,id,amount,occurredAt){return setDoc(d(db,'sparkExpenseDrafts/'+id),{status:'draft',amountCents:amount,allocatedCents:0,count:0,lastAllocation:null,lastRelease:null,description:'School supplies',payee:'Supplier',occurredAt,createdAt:serverTimestamp(),createdBy:'ao'});}
+async function allocate(db,expenseId,walletId,id,amount){return runTransaction(db,async tx=>{const w=d(db,'sparkWallets/'+walletId),e=d(db,'sparkExpenseDrafts/'+expenseId),[ws,es]=await Promise.all([tx.get(w),tx.get(e)]),wallet=ws.data(),draft=es.data();tx.set(d(db,'sparkAllocations/'+id),{expenseId,walletId,amountCents:amount,recordedAt:serverTimestamp(),recordedBy:'ao',releasedAt:null,releasedBy:null});tx.update(w,{unspentCents:wallet.unspentCents-amount,revision:wallet.revision+1,lastAllocation:id});tx.update(e,{allocatedCents:draft.allocatedCents+amount,count:draft.count+1,lastAllocation:id});});}
 async function finalize(db,id){return updateDoc(d(db,'sparkExpenseDrafts/'+id),{status:'recorded',recordedAt:serverTimestamp()});}
 async function requestCorrection(db,r,c){const b=writeBatch(db);b.set(d(db,'sparkCorrections/'+c),{remittanceId:r,status:'pending',requestedBy:'ao',requestedAt:serverTimestamp(),reason:'Incorrect handover'});b.update(d(db,'sparkRemittances/'+r),{correctionId:c});return b.commit();}
 async function approveCorrection(db,r,c){const b=writeBatch(db);b.update(d(db,'sparkCorrections/'+c),{status:'approved',decidedBy:'president',decidedAt:serverTimestamp()});b.update(d(db,'sparkRemittances/'+r),{status:'voided',voidedBy:'president',voidedAt:serverTimestamp()});b.update(d(db,'sparkWallets/'+r),{status:'voided'});return b.commit();}
 
 test('only the President can create a wallet tied to the exact accepted amount and server timestamp',async()=>{
  await setup();const ao=client('ao'),pres=client('president');await pending(ao,'r','person1');
- await assertFails(setDoc(d(ao,'sparkWallets/r'),{status:'open',amountCents:25000,unspentCents:25000,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null}));
+ await assertFails(setDoc(d(ao,'sparkWallets/r'),{status:'open',amountCents:25000,unspentCents:25000,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null,lastRelease:null}));
  await assertFails(updateDoc(d(pres,'sparkRemittances/r'),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()}));
  await assertFails(accept(pres,'r',25001));await assertFails(accept(ao,'r'));await assertSucceeds(accept(pres,'r'));const w=(await getDoc(d(ao,'sparkWallets/r'))).data();assert.equal(w.unspentCents,25000);assert.ok(w.acceptedAt.isEqual((await getDoc(d(ao,'sparkRemittances/r'))).data().acceptedAt));
 });
@@ -47,7 +47,7 @@ test('a grouped expense must be fully allocated, atomically and without overdraw
 test('competing expenses and forged multi-line allocations cannot consume the same wallet twice',async()=>{
  await setup();const ao=client('ao'),pres=client('president');await pending(ao,'r','person1');await accept(pres,'r');const at=(await getDoc(d(ao,'sparkWallets/r'))).data().acceptedAt;
  await expense(ao,'e1',20000,at);await expense(ao,'e2',20000,at);const results=await Promise.allSettled([allocate(ao,'e1','r','a1',20000),allocate(ao,'e2','r','a2',20000)]);assert.equal(results.filter(x=>x.status==='fulfilled').length,1);assert.equal((await getDoc(d(ao,'sparkWallets/r'))).data().unspentCents,5000);
- const b=writeBatch(ao);b.set(d(ao,'sparkAllocations/fake'),{expenseId:'e1',walletId:'r',amountCents:1000,recordedAt:serverTimestamp(),recordedBy:'ao'});await assertFails(b.commit());
+ const b=writeBatch(ao);b.set(d(ao,'sparkAllocations/fake'),{expenseId:'e1',walletId:'r',amountCents:1000,recordedAt:serverTimestamp(),recordedBy:'ao',releasedAt:null,releasedBy:null});await assertFails(b.commit());
 });
 
 test('corrections preserve historical funds and freeze allocations while pending',async()=>{
@@ -55,4 +55,24 @@ test('corrections preserve historical funds and freeze allocations while pending
  await expense(ao,'e',10000,at);await allocate(ao,'e','used','a',10000);await finalize(ao,'e');await requestCorrection(ao,'used','c1');await assertFails(approveCorrection(pres,'used','c1'));
  await requestCorrection(ao,'unused','c2');await expense(ao,'e2',1000,at);await assertFails(allocate(ao,'e2','unused','a2',1000));await assertFails(approveCorrection(ao,'unused','c2'));await assertSucceeds(approveCorrection(pres,'unused','c2'));
  assert.equal((await getDoc(d(ao,'sparkWallets/unused'))).data().status,'voided');assert.equal((await getDoc(d(ao,'sparkRemittances/unused'))).data().status,'voided');assert.equal((await getDoc(d(ao,'sparkWallets/used'))).data().unspentCents,15000);
+});
+
+async function beginCancel(db,e){return updateDoc(d(db,'sparkExpenseDrafts/'+e),{status:'cancelling',cancelReason:'Wrong amount',cancelRequestedBy:'ao',cancelRequestedAt:serverTimestamp()});}
+async function releaseAllocation(db,id){return runTransaction(db,async tx=>{
+ const a=d(db,'sparkAllocations/'+id),as=await tx.get(a),line=as.data(),e=d(db,'sparkExpenseDrafts/'+line.expenseId),w=d(db,'sparkWallets/'+line.walletId),[es,ws]=await Promise.all([tx.get(e),tx.get(w)]),draft=es.data(),wallet=ws.data();
+ tx.update(a,{releasedAt:serverTimestamp(),releasedBy:'ao'});tx.update(e,{allocatedCents:draft.allocatedCents-line.amountCents,count:draft.count-1,lastRelease:id});tx.update(w,{unspentCents:wallet.unspentCents+line.amountCents,revision:wallet.revision+1,lastRelease:id});
+});}
+async function finishCancel(db,e){return updateDoc(d(db,'sparkExpenseDrafts/'+e),{status:'cancelled',cancelledAt:serverTimestamp()});}
+
+test('cancelled partial expense releases each reservation once and preserves its history',async()=>{
+ await setup();const ao=client('ao'),pres=client('president');await pending(ao,'one','person1');await accept(pres,'one');await pending(ao,'two','person2');await accept(pres,'two');const at=(await getDoc(d(ao,'sparkWallets/two'))).data().acceptedAt;
+ await expense(ao,'e',45000,at);await allocate(ao,'e','one','a1',25000);await allocate(ao,'e','two','a2',10000);await assertFails(releaseAllocation(ao,'a1'));await assertSucceeds(beginCancel(ao,'e'));await assertFails(finalize(ao,'e'));await assertFails(finishCancel(ao,'e'));
+ await assertSucceeds(releaseAllocation(ao,'a1'));await assertFails(releaseAllocation(ao,'a1'));await assertSucceeds(releaseAllocation(ao,'a2'));await assertSucceeds(finishCancel(ao,'e'));
+ assert.equal((await getDoc(d(ao,'sparkWallets/one'))).data().unspentCents,25000);assert.equal((await getDoc(d(ao,'sparkWallets/two'))).data().unspentCents,25000);
+ const old=(await getDoc(d(ao,'sparkAllocations/a1'))).data();assert.equal(old.amountCents,25000);assert.equal(old.releasedBy,'ao');assert.ok(old.releasedAt);assert.equal((await getDoc(d(ao,'sparkExpenseDrafts/e'))).data().status,'cancelled');
+});
+
+test('a release cannot increase a wallet without matching cancellation and allocation updates',async()=>{
+ await setup();const ao=client('ao'),pres=client('president');await pending(ao,'r','person1');await accept(pres,'r');const at=(await getDoc(d(ao,'sparkWallets/r'))).data().acceptedAt;await expense(ao,'e',10000,at);await allocate(ao,'e','r','a',10000);await beginCancel(ao,'e');
+ await assertFails(updateDoc(d(ao,'sparkWallets/r'),{unspentCents:25000,revision:2,lastRelease:'a'}));await assertFails(updateDoc(d(ao,'sparkAllocations/a'),{releasedAt:serverTimestamp(),releasedBy:'ao'}));await assertSucceeds(releaseAllocation(ao,'a'));
 });
