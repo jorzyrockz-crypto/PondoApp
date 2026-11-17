@@ -21,17 +21,18 @@ function createIntegratedClient({db,api,orgId,uid}) {
   if(typeof presidentUid!=='string'||!presidentUid||presidentUid.length>128||presidentUid.includes('/'))fail('Invalid President');const c=ref('sparkConfig','current');
   return runTransaction(db,async tx=>{const s=await tx.get(c);if(s.exists()&&s.data().presidentUid===presidentUid)return {replayed:true};tx.set(c,{presidentUid,assignedBy:uid,assignedAt:serverTimestamp()});return {replayed:false};});
  }
- async function createRemittance(remittanceId){
-  const r=ref('sparkRemittances',identifier(remittanceId));return runTransaction(db,async tx=>{const s=await tx.get(r);if(s.exists()){if(s.data().createdBy!==uid)fail('Remittance ID belongs to another actor');return {replayed:true,status:s.data().status};}tx.set(r,{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:uid,createdAt:serverTimestamp()});return {replayed:false,status:'draft'};});
+ async function createRemittance(remittanceId,paymentIds){
+  identifier(remittanceId);if(!Array.isArray(paymentIds)||!paymentIds.length||paymentIds.length>200||new Set(paymentIds).size!==paymentIds.length)fail('Select distinct payments');paymentIds.forEach(identifier);
+  const plan=[...paymentIds],r=ref('sparkRemittances',remittanceId);return runTransaction(db,async tx=>{const s=await tx.get(r);if(s.exists()){const old=s.data();if(old.createdBy!==uid||JSON.stringify(old.paymentIds)!==JSON.stringify(plan))fail('Remittance ID already has a different payment plan');return {replayed:true,status:old.status};}tx.set(r,{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,paymentIds:plan,createdBy:uid,createdAt:serverTimestamp()});return {replayed:false,status:'draft'};});
  }
  async function addPayment(remittanceId,paymentId){
   identifier(remittanceId);identifier(paymentId);const r=ref('sparkRemittances',remittanceId),p=ref('sparkPayments',paymentId),line=ref('sparkLines',remittanceId+'~'+paymentId);
   return runTransaction(db,async tx=>{const [rs,ps,ls]=await Promise.all([tx.get(r),tx.get(p),tx.get(line)]);if(!rs.exists()||!ps.exists())fail('Remittance or payment unavailable');const rem=rs.data(),pay=ps.data();
-   if(pay.remittanceId===remittanceId&&ls.exists())return {replayed:true};if(ls.exists()||rem.status!=='draft'||pay.remittanceId!==null||pay.voidedAt)fail('Payment unavailable for remittance');
+   if(pay.remittanceId===remittanceId&&ls.exists())return {replayed:true};if(ls.exists()||rem.status!=='draft'||!rem.paymentIds.includes(paymentId)||pay.remittanceId!==null||pay.voidedAt)fail('Payment unavailable for remittance');
    tx.update(p,{remittanceId});tx.set(line,{remittanceId,paymentId,amountCents:pay.amountCents,linkedAt:serverTimestamp(),linkedBy:uid});tx.update(r,{amountCents:rem.amountCents+pay.amountCents,count:rem.count+1,lastPaymentId:paymentId});return {replayed:false};});
  }
  async function submitRemittance(remittanceId){
-  const r=ref('sparkRemittances',identifier(remittanceId)),c=ref('sparkConfig','current');return runTransaction(db,async tx=>{const [rs,cs]=await Promise.all([tx.get(r),tx.get(c)]);if(!rs.exists()||!cs.exists())fail('Remittance or President assignment unavailable');const rem=rs.data();if(rem.status!=='draft')return {replayed:true,status:rem.status};if(!rem.count)fail('Select at least one payment');tx.update(r,{status:'pending',presidentUid:cs.data().presidentUid,submittedAt:serverTimestamp()});return {replayed:false,status:'pending'};});
+  const r=ref('sparkRemittances',identifier(remittanceId)),c=ref('sparkConfig','current');return runTransaction(db,async tx=>{const [rs,cs]=await Promise.all([tx.get(r),tx.get(c)]);if(!rs.exists()||!cs.exists())fail('Remittance or President assignment unavailable');const rem=rs.data();if(rem.status!=='draft')return {replayed:true,status:rem.status};if(!rem.count||rem.count!==rem.paymentIds.length)fail('The remittance is incomplete; resume adding the selected payments');tx.update(r,{status:'pending',presidentUid:cs.data().presidentUid,submittedAt:serverTimestamp()});return {replayed:false,status:'pending'};});
  }
  async function declineRemittance(remittanceId,reason){
   const r=ref('sparkRemittances',identifier(remittanceId));text(reason,500);return runTransaction(db,async tx=>{const s=await tx.get(r);if(!s.exists())fail('Remittance unavailable');const rem=s.data();if(rem.status==='declined'&&rem.declinedBy===uid&&rem.reason===reason)return {replayed:true};if(rem.status!=='pending'||rem.presidentUid!==uid)fail('Remittance cannot be declined');tx.update(r,{status:'declined',declinedBy:uid,declinedAt:serverTimestamp(),reason});return {replayed:false};});
@@ -100,6 +101,21 @@ function createIntegratedClient({db,api,orgId,uid}) {
  async function finishCancellation(expenseId){const e=ref('sparkExpenseDrafts',identifier(expenseId));return runTransaction(db,async tx=>{const s=await tx.get(e);if(!s.exists())fail('Expense missing');const old=s.data();if(old.status==='cancelled')return {replayed:true};if(old.status!=='cancelling'||old.allocatedCents!==0||old.count!==0)fail('Release every allocation before finishing cancellation');tx.update(e,{status:'cancelled',cancelledAt:serverTimestamp()});return {replayed:false};});}
  async function beginVoid(expenseId,reason){const e=ref('sparkExpenseDrafts',identifier(expenseId));text(reason,500);return runTransaction(db,async tx=>{const s=await tx.get(e);if(!s.exists())fail('Expense missing');const old=s.data();if(['voiding','voided'].includes(old.status)){if(old.voidReason!==reason||old.voidRequestedBy!==uid)fail('Expense already voided for a different reason');return {replayed:true,status:old.status};}if(old.status!=='recorded')fail('Only a recorded expense can be voided');tx.update(e,{status:'voiding',voidReason:reason,voidRequestedBy:uid,voidRequestedAt:serverTimestamp()});return {replayed:false,status:'voiding'};});}
  async function finishVoid(expenseId){const e=ref('sparkExpenseDrafts',identifier(expenseId));return runTransaction(db,async tx=>{const s=await tx.get(e);if(!s.exists())fail('Expense missing');const old=s.data();if(old.status==='voided')return {replayed:true};if(old.status!=='voiding'||old.allocatedCents!==0||old.count!==0)fail('Release every allocation before finishing the void');tx.update(e,{status:'voided',voidedAt:serverTimestamp()});return {replayed:false};});}
+ // A confirmed parent, immutable selection and matching history lines let a
+ // caller resume a partially assembled remittance on another device. This is
+ // still a recovery view, not a lock: subsequent writes must use transactions.
+ async function inspectRemittance(remittanceId){
+  identifier(remittanceId);const {collection,query,where,getDocFromServer,getDocsFromServer}=api;
+  if(!collection||!query||!where||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
+  const parent=ref('sparkRemittances',remittanceId),lines=collection(db,`organizations/${orgId}/sparkLines`),clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
+  const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Remittance missing');const result=await getDocsFromServer(query(lines,where('remittanceId','==',remittanceId)));clean(result);const two=await getDocFromServer(parent);clean(two);if(!two.exists())fail('Remittance changed; reload');
+  const before=one.data(),after=two.data(),fingerprint=x=>JSON.stringify([x.status,x.amountCents,x.count,x.lastPaymentId,x.paymentIds,x.correctionId,x.presidentUid]);
+  if(fingerprint(before)!==fingerprint(after))fail('Remittance changed during recovery; reload');
+  if(!['draft','pending','accepted','declined','cancelled','voided'].includes(after.status)||!Array.isArray(after.paymentIds)||after.paymentIds.some(x=>typeof x!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(x))||after.paymentIds.length<1||after.paymentIds.length>200||new Set(after.paymentIds).size!==after.paymentIds.length||result.size>200||!Number.isSafeInteger(after.count)||!Number.isSafeInteger(after.amountCents))fail('Remittance recovery data is invalid');
+  const seen=new Set();let total=0;for(const snap of result.docs){clean(snap);const row=snap.data();if(row.remittanceId!==remittanceId||typeof row.paymentId!=='string'||!after.paymentIds.includes(row.paymentId)||seen.has(row.paymentId)||snap.id!==remittanceId+'~'+row.paymentId||!Number.isSafeInteger(row.amountCents)||row.amountCents<=0)fail('Remittance history is invalid');seen.add(row.paymentId);total+=row.amountCents;if(!Number.isSafeInteger(total))fail('Remittance total is invalid');}
+  if(total!==after.amountCents||seen.size!==after.count||(!['draft','cancelled'].includes(after.status)&&seen.size!==after.paymentIds.length))fail('Remittance history is inconsistent; reload');
+  return {status:after.status,amountCents:total,paymentIds:[...after.paymentIds],linkedPaymentIds:after.paymentIds.filter(x=>seen.has(x)),missingPaymentIds:after.paymentIds.filter(x=>!seen.has(x))};
+ }
  // Read only from Firestore's server, not an offline or locally pending view.
  // Double-read the monotonic parent around the allocation query. No client may
  // treat an inconsistent view as proof that a multi-step operation completed.
@@ -125,7 +141,7 @@ function createIntegratedClient({db,api,orgId,uid}) {
   if(['cancelled','voided'].includes(after.status)&&activeCount!==0)fail('Expense reversal is incomplete');
   return {status:after.status,amountCents:after.amountCents,allocatedCents:activeAmount,allocations:entries.sort((a,b)=>a.id.localeCompare(b.id))};
  }
- return {createPerson,assignPresident,createPayment,voidPayment,createRemittance,addPayment,submitRemittance,accept,declineRemittance,cancelRemittance,releasePayment,requestCorrection,decideCorrection,confirmPrint,createExpense,allocate,finalizeExpense,cancelExpense,release,finishCancellation,beginVoid,finishVoid,inspectExpense};
+ return {createPerson,assignPresident,createPayment,voidPayment,createRemittance,addPayment,submitRemittance,accept,declineRemittance,cancelRemittance,releasePayment,requestCorrection,decideCorrection,confirmPrint,createExpense,allocate,finalizeExpense,cancelExpense,release,finishCancellation,beginVoid,finishVoid,inspectExpense,inspectRemittance};
 }
 if(typeof module==='object'&&module.exports)module.exports={createIntegratedClient};
 else if(typeof window!=='undefined')window.createFacultyFundSparkClient=createIntegratedClient;

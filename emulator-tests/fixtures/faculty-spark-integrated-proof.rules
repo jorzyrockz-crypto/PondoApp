@@ -82,6 +82,7 @@ service cloud.firestore {
    allow update: if (collector(o) && only(['remittanceId']) && resource.data.voidedAt == null && resource.data.remittanceId == null
      && short(request.resource.data.remittanceId,128)
      && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && p in get(remit(o,request.resource.data.remittanceId)).data.paymentIds
      && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
      && getAfter(remit(o,request.resource.data.remittanceId)).data.lastPaymentId == p
      && getAfter(remit(o,request.resource.data.remittanceId)).data.count == get(remit(o,request.resource.data.remittanceId)).data.count + 1
@@ -99,13 +100,15 @@ service cloud.firestore {
   }
   match /organizations/{o}/sparkRemittances/{r} {
    allow read: if signed(o);
-   allow create: if collector(o) && r.matches('^[A-Za-z0-9_-]{1,128}$') && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt','correctionId'])
+   allow create: if collector(o) && r.matches('^[A-Za-z0-9_-]{1,128}$') && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt','correctionId','paymentIds'])
      && request.resource.data.status == 'draft' && request.resource.data.amountCents == 0 && request.resource.data.count == 0
+     && request.resource.data.paymentIds is list && request.resource.data.paymentIds.size() > 0 && request.resource.data.paymentIds.size() <= 200
+     && request.resource.data.paymentIds.toSet().size() == request.resource.data.paymentIds.size()
      && request.resource.data.lastPaymentId == null && request.resource.data.correctionId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
    allow update: if (
      collector(o) && resource.data.status == 'draft' && request.resource.data.status == 'draft'
      && only(['count','amountCents','lastPaymentId']) && resource.data.count < 200
-     && short(request.resource.data.lastPaymentId,128)
+     && short(request.resource.data.lastPaymentId,128) && request.resource.data.lastPaymentId in resource.data.paymentIds
      && get(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == null
      && getAfter(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == r
      && !exists(line(o,r,request.resource.data.lastPaymentId))
@@ -113,7 +116,7 @@ service cloud.firestore {
      && request.resource.data.count == resource.data.count + 1
      && request.resource.data.amountCents == resource.data.amountCents + get(payment(o,request.resource.data.lastPaymentId)).data.amountCents
     ) || (
-     collector(o) && resource.data.status == 'draft' && resource.data.count > 0
+     collector(o) && resource.data.status == 'draft' && resource.data.count > 0 && resource.data.count == resource.data.paymentIds.size()
      && only(['status','presidentUid','submittedAt']) && request.resource.data.status == 'pending'
      && request.resource.data.presidentUid == get(config(o)).data.presidentUid
      && exists(member(o,request.resource.data.presidentUid)) && request.resource.data.submittedAt == request.time

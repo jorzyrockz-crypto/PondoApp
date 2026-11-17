@@ -13,7 +13,7 @@ const client=uid=>env.authenticatedContext(uid).firestore();const d=(db,p)=>doc(
 async function setup(){await setDoc(d(client('owner'),'sparkConfig/current'),{presidentUid:'president',assignedAt:serverTimestamp(),assignedBy:'owner'});}
 async function pending(db,r,p,amount=25000){
  const id='pay_'+p,slotId=p+'~2026-01-01',create=writeBatch(db);create.set(d(db,'sparkPayments/'+id),{slotId,personId:p,memberName:p,absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:amount,createdAt:serverTimestamp(),createdBy:'ao',remittanceId:null,voidedAt:null,voidedBy:null,voidReason:null});create.set(d(db,'sparkPaymentSlots/'+slotId),{personId:p,absenceDate:'2026-01-01',activePaymentId:id,revision:1});await create.commit();
- await setDoc(d(db,'sparkRemittances/'+r),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:'ao',createdAt:serverTimestamp()});const b=writeBatch(db);
+ await setDoc(d(db,'sparkRemittances/'+r),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,paymentIds:[id],createdBy:'ao',createdAt:serverTimestamp()});const b=writeBatch(db);
  b.update(d(db,'sparkPayments/'+id),{remittanceId:r});b.set(d(db,'sparkLines/'+r+'~'+id),{remittanceId:r,paymentId:id,amountCents:amount,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(db,'sparkRemittances/'+r),{amountCents:amount,count:1,lastPaymentId:id});await b.commit();await updateDoc(d(db,'sparkRemittances/'+r),{status:'pending',presidentUid:'president',submittedAt:serverTimestamp()});
 }
 async function accept(db,r,amount=25000){const b=writeBatch(db);b.update(d(db,'sparkRemittances/'+r),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()});b.set(d(db,'sparkWallets/'+r),{status:'open',amountCents:amount,unspentCents:amount,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null,lastRelease:null});return b.commit();}
@@ -157,7 +157,7 @@ test('an accepted payment cannot be voided until its remittance is corrected and
 test('Spark client submits and corrects a two-payment remittance with independent receipts',async()=>{
  await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'});
  for(const [pid,person] of [['p1','person1'],['p2','person2']])await ao.createPayment(pid,{personId:person,absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});
- await ao.createRemittance('batch');await ao.addPayment('batch','p1');assert.equal((await ao.addPayment('batch','p1')).replayed,true);await ao.addPayment('batch','p2');await ao.submitRemittance('batch');await assert.rejects(ao.accept('batch'));await pres.accept('batch');
+ await ao.createRemittance('batch',['p1','p2']);await ao.addPayment('batch','p1');assert.equal((await ao.addPayment('batch','p1')).replayed,true);await ao.addPayment('batch','p2');await ao.submitRemittance('batch');await assert.rejects(ao.accept('batch'));await pres.accept('batch');
  await ao.confirmPrint('member','p1','batch');assert.equal((await ao.confirmPrint('member','p1','batch')).replayed,true);assert.equal((await getDoc(d(db,'sparkRemittanceReceipts/batch'))).exists(),false);await ao.confirmPrint('remittance','batch');
  await ao.requestCorrection('fix','batch','Incorrect handover');await assert.rejects(ao.decideCorrection('fix','approved'));await pres.decideCorrection('fix','approved');assert.equal((await pres.decideCorrection('fix','approved')).replayed,true);await ao.releasePayment('batch','p1');assert.equal((await ao.releasePayment('batch','p1')).replayed,true);await ao.releasePayment('batch','p2');
  assert.equal((await getDoc(d(db,'sparkWallets/batch'))).data().status,'voided');assert.equal((await getDoc(d(db,'sparkRemittances/batch'))).data().amountCents,50000);
@@ -165,5 +165,22 @@ test('Spark client submits and corrects a two-payment remittance with independen
 
 test('Spark client supports declined batches and safe payment release',async()=>{
  await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'});
- await ao.createPayment('p1',{personId:'person1',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r');await ao.addPayment('r','p1');await ao.submitRemittance('r');await pres.declineRemittance('r','Not received');assert.equal((await pres.declineRemittance('r','Not received')).replayed,true);await ao.releasePayment('r','p1');assert.equal((await getDoc(d(db,'sparkPayments/p1'))).data().remittanceId,null);assert.equal((await getDoc(d(db,'sparkRemittances/r'))).data().reason,'Not received');
+ await ao.createPayment('p1',{personId:'person1',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');await pres.declineRemittance('r','Not received');assert.equal((await pres.declineRemittance('r','Not received')).replayed,true);await ao.releasePayment('r','p1');assert.equal((await getDoc(d(db,'sparkPayments/p1'))).data().remittanceId,null);assert.equal((await getDoc(d(db,'sparkRemittances/r'))).data().reason,'Not received');
+});
+
+test('interrupted remittance resumes exactly the selected payments from confirmed server state',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'});
+ for(const [id,person] of [['p1','person1'],['p2','person2']])await ao.createPayment(id,{personId:person,absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});
+ await ao.createRemittance('r',['p1','p2']);assert.equal((await ao.createRemittance('r',['p1','p2'])).replayed,true);await assert.rejects(ao.createRemittance('r',['p1']));await ao.addPayment('r','p1');await assert.rejects(ao.submitRemittance('r'));
+ await assertFails(updateDoc(d(db,'sparkRemittances/r'),{status:'pending',presidentUid:'president',submittedAt:serverTimestamp()}));
+ const resumed=createIntegratedClient({db:client('ao'),api,orgId:'school',uid:'ao'}),view=await resumed.inspectRemittance('r');assert.deepEqual(view.linkedPaymentIds,['p1']);assert.deepEqual(view.missingPaymentIds,['p2']);assert.equal(view.amountCents,25000);
+ await resumed.addPayment('r','p2');await resumed.submitRemittance('r');await pres.accept('r');const finished=await resumed.inspectRemittance('r');assert.equal(finished.status,'accepted');assert.equal(finished.amountCents,50000);assert.deepEqual(finished.missingPaymentIds,[]);
+});
+
+test('remittance plan rejects duplicate or unselected payments and cannot be changed',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('../faculty-fund-spark-client.js'),db=client('ao'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});
+ for(const [id,day] of [['p1','2026-01-01'],['p2','2026-01-02']])await ao.createPayment(id,{personId:'person1',absenceDate:day,paymentDate:'2026-01-02',amountCents:25000});
+ await assert.rejects(ao.createRemittance('bad',['p1','p1']));await assertFails(setDoc(d(db,'sparkRemittances/forged'),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,paymentIds:['p1','p1'],createdBy:'ao',createdAt:serverTimestamp()}));
+ await ao.createRemittance('r',['p1']);await assert.rejects(ao.addPayment('r','p2'));await assertFails(updateDoc(d(db,'sparkRemittances/r'),{paymentIds:['p1','p2']}));
+ const b=writeBatch(db);b.update(d(db,'sparkPayments/p2'),{remittanceId:'r'});b.set(d(db,'sparkLines/r~p2'),{remittanceId:'r',paymentId:'p2',amountCents:25000,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(db,'sparkRemittances/r'),{amountCents:25000,count:1,lastPaymentId:'p2'});await assertFails(b.commit());
 });
