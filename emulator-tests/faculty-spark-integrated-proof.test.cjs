@@ -91,3 +91,22 @@ test('integrated client completes multi-wallet expense and retries each allocati
  await ao.createExpense('expense',{amountCents:40000,description:'Materials',payee:'Supplier',occurredAt});await ao.allocate('expense','one','partone',25000);await assert.rejects(ao.finalizeExpense('expense'));await ao.allocate('expense','two','parttwo',15000);assert.equal((await ao.allocate('expense','two','parttwo',15000)).replayed,true);await ao.finalizeExpense('expense');assert.equal((await ao.finalizeExpense('expense')).replayed,true);
  assert.equal((await getDoc(d(db,'sparkWallets/one'))).data().unspentCents,0);assert.equal((await getDoc(d(db,'sparkWallets/two'))).data().unspentCents,10000);
 });
+
+test('cannot fund an expense while atomically requesting correction of its handover',async()=>{
+ await setup();const ao=client('ao'),pres=client('president');await pending(ao,'r','person1');await accept(pres,'r');const at=(await getDoc(d(ao,'sparkWallets/r'))).data().acceptedAt;await expense(ao,'e',10000,at);
+ const b=writeBatch(ao);b.set(d(ao,'sparkCorrections/c'),{remittanceId:'r',status:'pending',requestedBy:'ao',requestedAt:serverTimestamp(),reason:'Review'});b.update(d(ao,'sparkRemittances/r'),{correctionId:'c'});
+ b.set(d(ao,'sparkAllocations/a'),{expenseId:'e',walletId:'r',amountCents:10000,recordedAt:serverTimestamp(),recordedBy:'ao',releasedAt:null,releasedBy:null});b.update(d(ao,'sparkWallets/r'),{unspentCents:15000,revision:1,lastAllocation:'a'});b.update(d(ao,'sparkExpenseDrafts/e'),{allocatedCents:10000,count:1,lastAllocation:'a'});await assertFails(b.commit());
+});
+
+test('a single expense increment cannot conceal allocations from two accepted wallets',async()=>{
+ await setup();const ao=client('ao'),pres=client('president');await pending(ao,'one','person1');await accept(pres,'one');await pending(ao,'two','person2');await accept(pres,'two');const at=(await getDoc(d(ao,'sparkWallets/two'))).data().acceptedAt;await expense(ao,'e',20000,at);
+ const b=writeBatch(ao);for(const [id,w] of [['a1','one'],['a2','two']]){b.set(d(ao,'sparkAllocations/'+id),{expenseId:'e',walletId:w,amountCents:10000,recordedAt:serverTimestamp(),recordedBy:'ao',releasedAt:null,releasedBy:null});b.update(d(ao,'sparkWallets/'+w),{unspentCents:15000,revision:1,lastAllocation:id});}b.update(d(ao,'sparkExpenseDrafts/e'),{allocatedCents:10000,count:1,lastAllocation:'a1'});await assertFails(b.commit());
+ assert.equal((await getDoc(d(ao,'sparkWallets/one'))).data().unspentCents,25000);assert.equal((await getDoc(d(ao,'sparkWallets/two'))).data().unspentCents,25000);
+});
+
+test('a fully released draft can be corrected, but a recorded expense cannot be cancelled as a draft',async()=>{
+ await setup();const ao=client('ao'),pres=client('president');await pending(ao,'one','person1');await accept(pres,'one');await pending(ao,'two','person2');await accept(pres,'two');const at=(await getDoc(d(ao,'sparkWallets/two'))).data().acceptedAt;
+ await expense(ao,'recorded',5000,at);await allocate(ao,'recorded','one','a',5000);await finalize(ao,'recorded');await assertFails(beginCancel(ao,'recorded'));
+ await expense(ao,'draft',5000,at);await allocate(ao,'draft','two','b',5000);await beginCancel(ao,'draft');await releaseAllocation(ao,'b');await finishCancel(ao,'draft');await requestCorrection(ao,'two','fix');await assertSucceeds(approveCorrection(pres,'two','fix'));
+ assert.equal((await getDoc(d(ao,'sparkWallets/one'))).data().unspentCents,20000);assert.equal((await getDoc(d(ao,'sparkWallets/two'))).data().status,'voided');
+});
