@@ -1,0 +1,39 @@
+// ISOLATED PROOF ONLY. Not complete production rules. Wallets are seeded by
+// tests to represent already-verified accepted remittances. Acceptance, wallet
+// creation, correction, expense grouping and UI are deliberately NOT provided.
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o,u) { return /databases/$(database)/documents/organizations/$(o)/members/$(u); }
+  function wallet(o,w) { return /databases/$(database)/documents/organizations/$(o)/walletProof/$(w); }
+  function allocation(o,a) { return /databases/$(database)/documents/organizations/$(o)/allocationProof/$(a); }
+  function signed(o) { return request.auth != null && exists(member(o,request.auth.uid)); }
+  function collector(o) { return signed(o) && get(member(o,request.auth.uid)).data.role in ['owner','disbursing']; }
+  function short(s,n) { return s is string && s.size() > 0 && s.size() <= n; }
+  match /organizations/{o}/walletProof/{w} {
+   allow read: if signed(o);
+   allow create, delete: if false;
+   allow update: if collector(o)
+     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unspentCents','revision','lastAllocation'])
+     && request.resource.data.revision == resource.data.revision + 1 && short(request.resource.data.lastAllocation,128)
+     && !exists(allocation(o,request.resource.data.lastAllocation))
+     && getAfter(allocation(o,request.resource.data.lastAllocation)).data.walletId == w
+     && getAfter(allocation(o,request.resource.data.lastAllocation)).data.recordedBy == request.auth.uid
+     && request.resource.data.unspentCents == resource.data.unspentCents - getAfter(allocation(o,request.resource.data.lastAllocation)).data.amountCents
+     && request.resource.data.unspentCents >= 0;
+  }
+  match /organizations/{o}/allocationProof/{a} {
+   allow read: if signed(o);
+   allow create: if collector(o)
+     && request.resource.data.keys().hasOnly(['walletId','expenseGroup','amountCents','occurredAt','recordedAt','recordedBy'])
+     && short(request.resource.data.walletId,128) && short(request.resource.data.expenseGroup,128)
+     && request.resource.data.amountCents is int && request.resource.data.amountCents > 0 && request.resource.data.amountCents <= 100000000
+     && request.resource.data.occurredAt is timestamp && request.resource.data.occurredAt <= request.time
+     && request.resource.data.occurredAt >= get(wallet(o,request.resource.data.walletId)).data.acceptedAt
+     && request.resource.data.recordedAt == request.time && request.resource.data.recordedBy == request.auth.uid
+     && getAfter(wallet(o,request.resource.data.walletId)).data.lastAllocation == a
+     && getAfter(wallet(o,request.resource.data.walletId)).data.revision == get(wallet(o,request.resource.data.walletId)).data.revision + 1;
+   allow update, delete: if false;
+  }
+ }
+}
