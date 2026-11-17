@@ -1,0 +1,42 @@
+'use strict';
+// The rules used here are an experiment, never the production ruleset.
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing');
+const api=require('firebase/firestore');const {doc,setDoc,getDoc,serverTimestamp}=api;
+const {createIntegratedClient}=require('../faculty-fund-spark-client.js'),{createSparkReader}=require('../faculty-fund-spark-read.js'),{projectFacultySpark}=require('../faculty-fund-spark-projection.js');
+const PROJECT='demo-pondo-security',root='organizations/school';
+if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
+let env;
+test.before(async()=>{env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'fixtures/faculty-spark-versioned-proof.rules'),'utf8')}})});
+test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();for(const [uid,role] of [['owner','owner'],['ao','disbursing'],['president','reviewer'],['reviewer','reviewer']])await setDoc(doc(db,`${root}/members/${uid}`),{uid,role});});});
+test.after(async()=>{if(env)await env.cleanup()});
+const db=uid=>env.authenticatedContext(uid).firestore(),ref=(d,p)=>doc(d,`${root}/${p}`),client=(d,uid)=>createIntegratedClient({db:d,api,orgId:'school',uid,useRevision:true});
+const reader=(d,opts={})=>createSparkReader({db:d,api:opts.api||api,orgId:'school',isCurrent:opts.isCurrent||(()=>true),project:projectFacultySpark,maxDocuments:opts.maxDocuments||1000});
+async function base(){const owner=db('owner'),aoDb=db('ao'),presDb=db('president'),ownerClient=client(owner,'owner'),ao=client(aoDb,'ao'),pres=client(presDb,'president');await ownerClient.assignPresident('president');await ao.createPerson('teacher','Ana');return {owner,aoDb,presDb,ownerClient,ao,pres};}
+
+test('versioned client writes are atomic, monotonic and do not advance on retry',async()=>{
+ const {aoDb,ao,pres}=await base();const afterBase=(await getDoc(ref(aoDb,'sparkRevision/current'))).data().revision;assert.equal(afterBase,2);assert.equal((await ao.createPerson('teacher','Ana')).replayed,true);assert.equal((await getDoc(ref(aoDb,'sparkRevision/current'))).data().revision,2);
+ await ao.createPayment('p',{personId:'teacher',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r',['p']);await ao.addPayment('r','p');await ao.submitRemittance('r');await pres.accept('r');
+ const at=(await getDoc(ref(aoDb,'sparkWallets/r'))).data().acceptedAt;await ao.createExpense('e',{amountCents:10000,description:'Books',payee:'Store',occurredAt:at});await ao.allocate('e','r','a',10000);await ao.finalizeExpense('e');
+ const view=await reader(aoDb).read();assert.equal(view.revision,10);assert.equal(view.projection.receivedCents,25000);assert.equal(view.projection.spentCents,10000);assert.equal(view.projection.spendableCents,15000);
+});
+
+test('financial writes without a matching revision, false timestamps and unauthorized revisions fail',async()=>{
+ const aoDb=db('ao'),reviewer=db('reviewer');await assertFails(setDoc(ref(aoDb,'sparkPeople/test'),{name:'Test',createdBy:'ao',createdAt:serverTimestamp()}));await assertFails(setDoc(ref(reviewer,'sparkRevision/current'),{revision:1,updatedBy:'reviewer',updatedAt:serverTimestamp()}));
+ await assertFails(setDoc(ref(aoDb,'sparkRevision/current'),{revision:2,updatedBy:'ao',updatedAt:serverTimestamp()}));await assertFails(setDoc(ref(aoDb,'sparkRevision/current'),{revision:1,updatedBy:'ao',updatedAt:new Date('2020-01-01')}));
+ const ao=client(aoDb,'ao');await ao.createPerson('test','Test');await assertFails(setDoc(ref(aoDb,'sparkPeople/other'),{name:'Other',createdBy:'ao',createdAt:serverTimestamp()}));
+});
+
+test('reader refuses concurrent financial changes and a changed workspace',async()=>{
+ const {aoDb,ao}=await base();let injected=false;
+ const racing={...api,getDocsFromServer:async q=>{const snap=await api.getDocsFromServer(q);if(!injected){injected=true;await ao.createPerson('new','New teacher');}return snap;}};
+ await assert.rejects(reader(aoDb,{api:racing}).read(),/changed while loading/);
+ let active=true;const switching={...api,getDocsFromServer:async q=>{const snap=await api.getDocsFromServer(q);active=false;return snap;}};
+ await assert.rejects(reader(aoDb,{api:switching,isCurrent:()=>active}).read(),/Workspace changed/);
+});
+
+test('reader rejects cached or pending data, excessive collections, and missing revision controls',async()=>{
+ const {aoDb,ao}=await base();const cached={...api,getDocsFromServer:async q=>{const snap=await api.getDocsFromServer(q);return {metadata:{fromCache:true,hasPendingWrites:false},docs:snap.docs,size:snap.size};}};await assert.rejects(reader(aoDb,{api:cached}).read(),/not server-confirmed/);
+ await ao.createPerson('second','Second');await assert.rejects(reader(aoDb,{maxDocuments:1}).read(),/safe loading limit/);
+ await env.withSecurityRulesDisabled(async c=>api.deleteDoc(ref(c.firestore(),'sparkRevision/current')));await assert.rejects(reader(aoDb).read(),/revision is missing/);
+});
