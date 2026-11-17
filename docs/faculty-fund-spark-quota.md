@@ -63,14 +63,29 @@ all full-ledger reads:
   revision changes. This is an individual-record list, **not a reconciled
   balance, complete audit, receipt or report**.
 
+A separate `faculty-fund-spark-discovery.js` experiment pages three filtered
+categories: remittance drafts, remittances with payments still to release, and
+unfinished expenses. Each page reads at most the selected page size plus one
+lookahead, with revision reads on both sides. The corresponding isolated rules
+fixture maintains a release counter and a discovery flag atomically with each
+payment link or release. Completing the three lists requires exhausting every
+page at the same revision; it is not a lock on subsequent changes.
+
+The discovery fixture uses a **new, separate `sparkDiscovery*` namespace**. It
+must not be pointed at older prototype records, which do not have protected
+counters; no migration has been implemented. Concurrent release attempts in the
+emulator hit Firestore's 1,000-expression rules limit for one contender. The
+test verifies that remaining work stays discoverable and an explicit retry can
+finish it, but the rules complexity and contention are not production-ready.
+
 These are request counts, not measured billable usage: rule-dependent reads,
 index entries, retries and other traffic are additional. The pages and focused
 reader rely on matching revision-enforcing rules and immutable record/link
 invariants; administrator writes bypass those rules. Firestore emulator tests
-exercise the experimental fixture, not production rules or production index
-requirements. Neither module is connected to the app. The full reader still
-serves the prototype's balances, reports and recovery discovery, so the 1,000
-record limit and high read costs remain for those paths.
+exercise isolated fixtures, not production rules or production index
+requirements. None of these modules is connected to the app. The full reader
+still serves the prototype's balances, reports and existing recovery adapter,
+so the 1,000-record limit and high read costs remain for those paths.
 
 ## Release gate
 

@@ -158,6 +158,16 @@ collection reads and shared revision. The illustrative calculation in
 exhaust the daily free-read quota after only 23 full refreshes, even before
 rule and other app costs; actual project usage and contention remain unmeasured.
 
+The newer `faculty-spark-discovery-proof.rules` and `faculty-fund-spark-discovery.js`
+experiment use a separate `sparkDiscovery*` namespace, a protected linked-payment
+counter and a release-needed flag to page recovery work without scanning all
+historical records. They cannot be mixed with the older namespace and have no
+migration or app integration. Emulator tests reject attempts to hide linked
+payments and test concurrent releases; a racing release encountered the rules
+1,000-expression limit and required explicit retry. Discovery and retry must
+remain available after any ambiguous result, and rules complexity, index needs
+and real-project behavior remain release blockers.
+
 The standalone experimental `faculty-fund-spark-recovery-ui.js` screen displays
 server-visible recovery records, their relevant payment and expense details,
 and explicit resume, cancel or finish actions. It treats a lost response as
