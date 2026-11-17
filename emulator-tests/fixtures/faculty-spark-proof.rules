@@ -158,14 +158,15 @@ service cloud.firestore {
      && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
      && get(payment(o,request.resource.data.paymentId)).data.remittanceId == request.resource.data.remittanceId
      && get(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
-     && get(remit(o,request.resource.data.remittanceId)).data.correctionId == null;
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.correctionId == null;
    allow update, delete: if false;
   }
   match /organizations/{o}/sparkRemittanceReceipts/{r} {
    allow read: if signed(o);
    allow create: if collector(o) && request.resource.data.keys().hasOnly(['printedBy','printedAt'])
      && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
-     && get(remit(o,r)).data.status == 'accepted' && get(remit(o,r)).data.correctionId == null;
+     && get(remit(o,r)).data.status == 'accepted' && getAfter(remit(o,r)).data.status == 'accepted' && getAfter(remit(o,r)).data.correctionId == null;
    allow update, delete: if false;
   }
   match /organizations/{o}/sparkLedger/{id} {

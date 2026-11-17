@@ -10,8 +10,9 @@ This experiment checks whether the most important part of a Spark-plan design
 can be enforced using authenticated clients, Firestore transactions and rules:
 
 * Only a current workspace owner assigns a current member as President.
-* An AO creates a separate payment per faculty ID and absence date. The document
-  ID prevents a second active payment for the same pair in this proof.
+* An AO creates immutable faculty roster records and separate payments linked
+  to a registered person. The document ID prevents another payment for the
+  same faculty ID and absence date in this proof (including after a void).
 * A draft remittance accumulates payments one at a time. A payment lock and
   matching increment of the draft's amount and count and an immutable history line must be committed together;
   the rules verify both sides. This avoids trusting an arbitrary list total.
@@ -20,7 +21,13 @@ can be enforced using authenticated clients, Firestore transactions and rules:
 * Acceptance and the corresponding increment of the accepted balance must be
   atomic. Expenses and the matching decrement must be atomic and cannot make
   the accepted balance negative, including when clients race.
-* A cancelled or declined batch releases its payments individually while its history lines remain immutable. Accepted payments cannot be released.
+* A cancelled or declined batch releases its payments individually while its
+  history lines remain immutable. A corrected acceptance requires an AO request
+  and a President decision. The proof allows approval only if no expense has
+  ever been recorded; this restriction is not the final product behavior.
+* Member and remittance receipt confirmations are separate immutable records,
+  only available after acceptance and not during a pending correction. A new
+  acceptance after correction has its own member receipt confirmation.
 * Existing records cannot be erased in the proof. No client may substitute its
   own actor identity or acceptance time.
 
@@ -31,13 +38,15 @@ is evidence about this fixture, not a security certification or a deployment.
 
 ## Important unfinished work
 
-The fixture does not implement the complete user workflow: roster/name
-validation, genuine calendar dates, Philippine-time payment dates,
-a complete interruption/release UI, correction/void history, audit, print
-tracking, reports, notifications, recovery, offline handling and UI integration
-are missing. Its expense uses server submission time; preserving the real
-expense time and preventing historical overdrafts requires an independently
-verified design. It has no opening balance import. It supports assembling a
+The fixture does not implement the complete user workflow: robust roster/name
+validation, genuine calendar dates, Philippine-time payment dates, a complete
+interruption/release UI, expense/payment voids, complete audit, receipt
+rendering, reports, notifications, recovery, offline handling and UI integration
+are missing. The current expense rule is deliberately conservative: an entered
+expense time must not precede the most recent acceptance or a previous expense.
+That rejects some legitimate historical expenses, and the proof will not allow
+correction once any expense has been recorded. A more flexible history-safe
+design must be developed and independently tested before rollout. It has no opening balance import. It supports assembling a
 batch through multiple transactions, so interruption and retries need an
 explicit, tested resume/cancel protocol. A prototype passing its tests must not
 be enabled for real records.

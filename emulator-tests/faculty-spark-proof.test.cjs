@@ -178,3 +178,9 @@ test('correction cannot remove an acceptance after an expense, even when remaini
  await assertSucceeds(spend(ao,'exp',10000));await assertSucceeds(requestCorrection(ao));await assertFails(decideCorrection(president));
  assert.equal((await getDoc(d(ao,'sparkLedger/current'))).data().balanceCents,45000);assert.equal((await getDoc(d(ao,'sparkRemittances/r'))).data().status,'accepted');
 });
+
+
+test('cannot confirm receipt in the same batch that creates a correction request',async()=>{
+ await setup();const ao=client('ao'),president=client('president');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));await assertSucceeds(accept(president));
+ const b=writeBatch(ao);b.set(d(ao,'sparkCorrections/c'),{remittanceId:'r',status:'pending',requestedBy:'ao',requestedAt:serverTimestamp(),reason:'Correction'});b.update(d(ao,'sparkRemittances/r'),{correctionId:'c'});b.set(d(ao,'sparkMemberReceipts/r~person1~2026-01-01'),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'ao',printedAt:serverTimestamp()});await assertFails(b.commit());
+});
