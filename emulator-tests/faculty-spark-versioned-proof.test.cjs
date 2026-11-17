@@ -70,3 +70,20 @@ test('President assignments are owner-only, linked to immutable audit records an
 test('reader refuses a President assignment that no longer matches its protected history',async()=>{
  const {aoDb}=await base();await env.withSecurityRulesDisabled(async c=>api.updateDoc(ref(c.firestore(),'sparkConfig/current'),{presidentUid:'reviewer'}));await assert.rejects(reader(aoDb).read(),/assignment history is inconsistent/);
 });
+
+test('read-only UI adapter uses versioned data for state, receipts, report and diagnostic export',async()=>{
+ const {owner,ao,pres}=await base(),{createSparkReadAdapter}=require('../faculty-fund-spark-read-adapter.js'),{createSparkReceiptView}=require('../faculty-fund-spark-receipts.js'),{makeSparkReport,sparkReportCsv}=require('../faculty-fund-spark-report.js'),{makeSparkDiagnosticExport,verifySparkDiagnosticExport}=require('../faculty-fund-spark-export.js');
+ await ao.createPayment('p',{personId:'teacher',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r',['p']);await ao.addPayment('r','p');await ao.submitRemittance('r');await pres.accept('r');
+ const ctx={orgId:'school',uid:'owner',role:'owner',scopeToken:1,memberConfirmed:true,orgName:'School',members:[{uid:'president',displayName:'President'}]};
+ const adapter=createSparkReadAdapter({getContext:()=>ctx,makeReader:(c,current)=>reader(owner,{isCurrent:current}),makeReceipts:createSparkReceiptView,makeReport:makeSparkReport,reportCsv:sparkReportCsv,makeExport:makeSparkDiagnosticExport});
+ assert.equal(adapter.transition,undefined);const state=await adapter.read({orgId:'school',view:'state'});assert.equal(state.role,'owner');assert.equal(state.ledger.receivedCents,25000);assert.equal(state.state.remittances[0].acceptedByName,'President');assert.ok(state.state.audit.some(x=>x.kind==='president-assigned'));assert.match((await adapter.read({orgId:'school',view:'memberReceipts',paymentIds:['p']})).html,/Ana/);assert.match((await adapter.read({orgId:'school',view:'csv'})).csv,/250\.00/);
+ const diagnostic=await adapter.export({orgId:'school'});assert.equal(await verifySparkDiagnosticExport(diagnostic),true);
+});
+
+test('read-only UI adapter rejects workspace switches and unfinished multi-step actions',async()=>{
+ const {aoDb,ao}=await base(),{createSparkReadAdapter}=require('../faculty-fund-spark-read-adapter.js'),{createSparkReceiptView}=require('../faculty-fund-spark-receipts.js'),{makeSparkReport,sparkReportCsv}=require('../faculty-fund-spark-report.js'),{makeSparkDiagnosticExport}=require('../faculty-fund-spark-export.js');
+ const ctx={orgId:'school',uid:'ao',role:'disbursing',scopeToken:1,memberConfirmed:true,members:[]},common={getContext:()=>ctx,makeReceipts:createSparkReceiptView,makeReport:makeSparkReport,reportCsv:sparkReportCsv,makeExport:makeSparkDiagnosticExport};
+ const adapter=createSparkReadAdapter({...common,makeReader:(c,current)=>reader(aoDb,{isCurrent:current})});await assert.rejects(adapter.export({orgId:'school'}),/owner/);
+ await ao.createPayment('p',{personId:'teacher',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r',['p']);await assert.rejects(adapter.read({orgId:'school',view:'state'}),/unfinished/);
+ const switching=createSparkReadAdapter({...common,makeReader:(c,current)=>({read:async()=>{const s=await reader(aoDb,{isCurrent:current}).read();ctx.scopeToken=2;return s;}})});await assert.rejects(switching.read({orgId:'school',view:'state'}),/Workspace changed/);
+});
