@@ -10,6 +10,21 @@ function createIntegratedClient({db,api,orgId,uid}) {
  const amount=v=>{if(!Number.isSafeInteger(v)||v<=0||v>100000000)fail('Invalid amount');return v};
  const text=(v,max)=>{if(typeof v!=='string'||!v.trim()||v.length>max)fail('Invalid text');return v};
  const millis=t=>t instanceof Date?t.getTime():typeof t?.toMillis==='function'?t.toMillis():NaN;
+ function date(v){if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(v))fail('Invalid date');const d=new Date(v+'T00:00:00Z');if(!Number.isFinite(d.getTime())||d.toISOString().slice(0,10)!==v)fail('Invalid date');return v;}
+ async function createPayment(paymentId,{personId,absenceDate,paymentDate,amountCents}){
+  identifier(paymentId);if(typeof personId!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(personId))fail('Invalid faculty member');date(absenceDate);date(paymentDate);amount(amountCents);
+  const slotId=personId+'~'+absenceDate,p=ref('sparkPayments',paymentId),s=ref('sparkPaymentSlots',slotId),person=ref('sparkPeople',personId);
+  return runTransaction(db,async tx=>{const [ps,ss,ms]=await Promise.all([tx.get(p),tx.get(s),tx.get(person)]);if(ps.exists()){const old=ps.data();if(old.slotId!==slotId||old.amountCents!==amountCents||old.paymentDate!==paymentDate||old.createdBy!==uid)fail('Payment ID already has different data');return {replayed:true,voided:!!old.voidedAt};}
+   if(!ms.exists())fail('Faculty member not registered');if(ss.exists()&&ss.data().activePaymentId!==null)fail('An active payment already exists for this absence');
+   tx.set(p,{slotId,personId,memberName:ms.data().name,absenceDate,paymentDate,amountCents,createdAt:serverTimestamp(),createdBy:uid,remittanceId:null,voidedAt:null,voidedBy:null,voidReason:null});
+   if(ss.exists())tx.update(s,{activePaymentId:paymentId,revision:ss.data().revision+1});else tx.set(s,{personId,absenceDate,activePaymentId:paymentId,revision:1});return {replayed:false};
+  });
+ }
+ async function voidPayment(paymentId,reason){identifier(paymentId);text(reason,500);const p=ref('sparkPayments',paymentId);return runTransaction(db,async tx=>{const ps=await tx.get(p);if(!ps.exists())fail('Payment missing');const old=ps.data();
+  if(old.voidedAt){if(old.voidedBy!==uid||old.voidReason!==reason)fail('Payment already voided for a different reason');return {replayed:true};}
+  if(old.remittanceId!==null)fail('Resolve the associated remittance before voiding this payment');const s=ref('sparkPaymentSlots',old.slotId),ss=await tx.get(s);if(!ss.exists()||ss.data().activePaymentId!==paymentId)fail('Payment slot is inconsistent');
+  tx.update(p,{voidedAt:serverTimestamp(),voidedBy:uid,voidReason:reason});tx.update(s,{activePaymentId:null,revision:ss.data().revision+1});return {replayed:false};
+ });}
  async function accept(remittanceId){
   const r=ref('sparkRemittances',identifier(remittanceId)),w=ref('sparkWallets',remittanceId);
   return runTransaction(db,async tx=>{const [rs,ws]=await Promise.all([tx.get(r),tx.get(w)]);if(!rs.exists())fail('Remittance unavailable');const rem=rs.data();
@@ -63,6 +78,6 @@ function createIntegratedClient({db,api,orgId,uid}) {
   if(['cancelled','voided'].includes(after.status)&&activeCount!==0)fail('Expense reversal is incomplete');
   return {status:after.status,amountCents:after.amountCents,allocatedCents:activeAmount,allocations:entries.sort((a,b)=>a.id.localeCompare(b.id))};
  }
- return {accept,createExpense,allocate,finalizeExpense,cancelExpense,release,finishCancellation,beginVoid,finishVoid,inspectExpense};
+ return {createPayment,voidPayment,accept,createExpense,allocate,finalizeExpense,cancelExpense,release,finishCancellation,beginVoid,finishVoid,inspectExpense};
 }
 module.exports={createIntegratedClient};
