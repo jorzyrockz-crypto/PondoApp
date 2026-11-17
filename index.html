@@ -4583,6 +4583,8 @@ body.dark-mode #appHeaderLogo,body.dark-mode #authGateLogo{background:#1c1c1c!im
 .auth-status-text{min-height:18px;font-size:12px;color:var(--ink2,#6b7280);margin:14px 0 0;}
 .auth-error{font-size:12px;color:#dc2626;background:#fef2f2;border-radius:10px;padding:10px 12px;margin:14px 0 0;line-height:1.4;}
 .auth-manual-fallback{font-size:12px;color:var(--ink2,#6b7280);background:var(--surface2,#f3f4f6);border-radius:10px;padding:10px 12px;margin:14px 0 0;line-height:1.5;text-align:left;}
+.auth-browser-help{margin:0 0 16px;padding:12px;background:var(--surface2,#f3f4f6);border:1px solid var(--line,#ddd);border-radius:10px;text-align:left;font-size:12px;line-height:1.5;color:var(--ink,#141414)}
+.auth-browser-help[hidden]{display:none!important}.auth-browser-help strong{display:block;font-size:13px}.auth-browser-help p{margin:6px 0}.auth-browser-help input{width:100%;font-size:12px;margin:6px 0}.auth-browser-help button{min-height:38px}.auth-browser-help-status{display:block;min-height:1em}
 .auth-manual-fallback-btn{display:inline;background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:var(--accent,#059669);text-decoration:underline;cursor:pointer;}
 body.dark-mode .auth-manual-fallback{color:#d1d5db;}
 #pondoApp{min-height:100%;}
@@ -4602,6 +4604,11 @@ body.dark-mode .team-member-row{background:#111827;}
 .team-member-row .tm-meta{font-size:11px;color:var(--ink2,#6b7280)}
 .team-member-row .tm-avatar{width:32px;height:32px;border-radius:50%;flex:none;object-fit:cover;background:var(--accent,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
 .team-collab-facepile{display:flex;align-items:center;}
+.header-team-presence{display:flex;align-items:center;border:0;background:transparent;padding:3px 2px;cursor:pointer;flex:none;min-height:38px;color:var(--ink,#141414)}
+.header-team-presence[hidden]{display:none!important}.header-team-presence:focus-visible{outline:2px solid var(--accent);border-radius:12px}
+.header-team-presence .team-collab-avatar,.header-team-presence .team-collab-more{width:30px;height:30px;margin-left:-8px}.header-team-presence .team-collab-avatar:first-child{margin-left:0}
+.header-presence-empty{font-size:11px;font-weight:600;color:var(--ink2)}
+@media(max-width:480px){.header-team-presence .team-collab-avatar,.header-team-presence .team-collab-more{width:26px;height:26px;margin-left:-10px}.header-team-presence .team-collab-avatar:first-child{margin-left:0}}
 .team-collab-facepile[hidden]{display:none!important}
 .team-collab-avatar,.team-collab-more{width:26px;height:26px;border-radius:50%;border:2px solid var(--surface,#fff);margin-left:-8px;object-fit:cover;background:var(--accent,#059669);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;}
 .team-collab-facepile img.team-collab-avatar{background:var(--surface2,#f0f0f0);}
@@ -8333,6 +8340,14 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <div class="logo" id="authGateLogo" style="width:56px;height:56px;border-radius:18px;font-size:22px;margin:0 auto 18px"><img src="icons/icon-96.png" alt="" class="org-logo-image"></div>
     <h1 id="authGateTitle" class="auth-gate-title">Pondo</h1>
     <p class="auth-gate-sub">Sign in for your workspaces, or use a separate tracker on this device.</p>
+    <div id="authBrowserHelp" class="auth-browser-help" hidden>
+      <strong>Open this link in Chrome or Safari</strong>
+      <p>Google sign-in may not work inside Messenger or another in-app browser. Use the app menu and choose “Open in browser”, or copy this link and paste it into Chrome or Safari. Keep invitation links private.</p>
+      <label for="authBrowserLink">Pondo link</label>
+      <input id="authBrowserLink" class="input" type="text" readonly>
+      <button id="authCopyBrowserLink" type="button" class="btn btn-light">Copy link</button>
+      <span id="authBrowserCopyStatus" class="auth-browser-help-status" role="status" aria-live="polite"></span>
+    </div>
     <button id="authSignInBtn" type="button" class="btn btn-dark auth-google-btn">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
       <span>Continue with Google</span>
@@ -8368,6 +8383,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
         <div id="teamSwitcherMenu" class="header-more-menu team-switcher-menu" hidden></div>
       </div>
       <div id="userChip" class="user-chip" hidden><img id="userChipAvatar" alt="" hidden><span id="userChipName"></span></div>
+      <button id="headerTeamPresence" class="header-team-presence" type="button" hidden aria-label="Team presence" title="Team presence" onclick="openSettings();switchSettingsTab('team')"></button>
       <div class="header-avatar-wrap">
         <button id="headerAvatarBtn" type="button" class="header-avatar-btn" hidden aria-haspopup="true" aria-expanded="false" aria-controls="headerAvatarMenu" onclick="toggleHeaderAvatarMenu()" title="Account &amp; workspace">
           <span id="headerAvatarDot" class="header-avatar-dot"></span>
@@ -8793,7 +8809,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
               <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
               <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
                 <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
-                <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button>
+                <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button><p style="font-size:12px;line-height:1.5;margin:8px 0 0;color:var(--ink2)">Send privately. Ask your teammate to open the link in Chrome or Safari rather than inside Messenger, then sign in with Google.</p>
               </div>
             </div>
             <div class="team-card">
@@ -8899,8 +8915,8 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 78</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>More room for contributor names</h4><ul><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 79</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Live team profiles and invitation guidance</h4><ul><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -8919,7 +8935,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='78', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='79', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -12400,6 +12416,8 @@ const pondoTeamState = {
   unsubMembers: null,
   unsubOrgDoc: null,
   unsubData: null,
+  presenceReady: false,
+  presenceTimes: new Map(),
   lastSyncedJSON: null,
   lastSyncedRevision: 0,
   pushTimer: null,
@@ -12526,14 +12544,20 @@ function updateHeaderTeamBadge() {
   const text = document.getElementById('teamHeaderBadgeText');
   const avatarBtn = document.getElementById('headerAvatarBtn');
   const notifBellBtn = document.getElementById('notifBellBtn');
+  const chip = document.getElementById('userChip');
+  const presence = document.getElementById('headerTeamPresence');
   if (!badge || !text) return;
   if (!window.pondoCurrentUser) {
     badge.hidden = true;
     if (avatarBtn) avatarBtn.hidden = true;
     if (notifBellBtn) notifBellBtn.hidden = true;
+    if (chip) chip.hidden = true;
+    if (presence) presence.hidden = true;
     return;
   }
   badge.hidden = false;
+  if (chip) chip.hidden = !!pondoTeamState.orgId;
+  renderHeaderTeamPresence();
   badge.classList.remove('live', 'offline');
   if (avatarBtn) { avatarBtn.hidden = false; avatarBtn.classList.remove('live', 'offline'); }
   // Notifications (reminders especially) are useful even in solo/personal
@@ -12559,18 +12583,74 @@ function updateHeaderTeamBadge() {
 // than in the header itself, so the header pill stays compact. Always shows
 // at least your own avatar (even when you're the workspace's only member)
 // so there's a consistent visual identity cue, not just name text.
-function buildTeamFacepileHtml(members) {
+function buildTeamFacepileHtml(members, max = 4) {
   if (!members || members.length < 1) return '';
-  const max = 4;
   const shown = members.slice(0, max);
   const esc = window.escapeTeamText || ((s) => String(s == null ? '' : s));
   return shown.map((m) => {
     const label = esc(m.displayName || m.email || 'Member');
     if (m.photoURL) return '<img class="team-collab-avatar" src="' + esc(m.photoURL).replace(/"/g, '&quot;') + '" alt="" title="' + label + '">';
-    const initial = (m.displayName || m.email || '?').trim().charAt(0).toUpperCase();
+    const initial = (m.displayName || m.email || '?').trim().split(/\s+/).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join('')||'?';
     return '<span class="team-collab-avatar" title="' + label + '">' + esc(initial) + '</span>';
   }).join('') + (members.length > max ? '<span class="team-collab-more" title="' + (members.length - max) + ' more member' + (members.length - max === 1 ? '' : 's') + '">+' + (members.length - max) + '</span>' : '');
 }
+
+window.buildTeamFacepileHtml=buildTeamFacepileHtml;
+
+function onlineTeamMembers(state,now=Date.now()) {
+  if(!state.orgId || !state.memberConfirmed || !state.presenceReady || !navigator.onLine)return [];
+  return (state.members||[]).filter(m=>{
+    const time=state.presenceTimes?.get(m.uid);
+    return Number.isFinite(time) && time<=now+30000 && now-time<150000;
+  }).sort((a,b)=>(a.uid===state.uid)-(b.uid===state.uid));
+}
+function renderHeaderTeamPresence(){
+  const button=document.getElementById('headerTeamPresence');
+  if(!button)return;
+  const state=pondoTeamState;
+  button.hidden=!window.pondoCurrentUser||!state.orgId;
+  if(button.hidden){button.replaceChildren();return;}
+  const ready=state.memberConfirmed&&state.presenceReady&&navigator.onLine;
+  const members=onlineTeamMembers(state);
+  const label=!ready?'Team presence unavailable':members.length?members.length+' recently active team member'+(members.length===1?'':'s'):'No recently active team members';
+  button.setAttribute('aria-label',label+'. Open team settings.');button.title=label+' · Status is approximate';
+  const max=window.matchMedia?.('(max-width: 360px)').matches?1:4;
+  button.innerHTML=members.length?buildTeamFacepileHtml(members,max):'<span class="header-presence-empty">Team</span>';
+}
+
+// Presence is a best-effort heartbeat, not proof a person is currently active.
+// One timestamp per member/org avoids unbounded per-tab documents. Multiple
+// tabs can refresh it; we never delete it on sign-out since another tab may run.
+let presenceUnsubscribe=null,presenceTimer=null,presenceInFlight=false,presenceGeneration=0;
+function stopTeamPresence(){
+  presenceGeneration++;if(presenceUnsubscribe){presenceUnsubscribe();presenceUnsubscribe=null;}
+  clearInterval(presenceTimer);presenceTimer=null;presenceInFlight=false;
+  pondoTeamState.presenceReady=false;pondoTeamState.presenceTimes=new Map();renderHeaderTeamPresence();
+}
+function startTeamPresence(orgId,uid){
+  if(presenceUnsubscribe||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
+  const generation=++presenceGeneration;
+  let lastBeat=0;
+  renderHeaderTeamPresence();
+  const current=()=>generation===presenceGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
+  const beat=()=>{
+    if(!current()||!navigator.onLine||presenceInFlight||Date.now()-lastBeat<60000)return;
+    presenceInFlight=true;lastBeat=Date.now();
+    setDoc(doc(firestoreDb,'organizations',orgId,'presence',uid),{lastSeen:serverTimestamp()}).catch(e=>{
+      if(current()){lastBeat=0;pondoTeamState.presenceReady=false;pondoTeamState.presenceTimes=new Map();renderHeaderTeamPresence();console.warn('Team presence unavailable:',e);}
+    }).finally(()=>{if(generation===presenceGeneration)presenceInFlight=false;});
+  };
+  presenceUnsubscribe=onSnapshot(collection(firestoreDb,'organizations',orgId,'presence'),{includeMetadataChanges:true},snap=>{
+    if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;
+    const times=new Map();snap.forEach(d=>{const ms=d.data()?.lastSeen?.toMillis?.();if(Number.isFinite(ms))times.set(d.id,ms)});
+    pondoTeamState.presenceTimes=times;pondoTeamState.presenceReady=true;renderHeaderTeamPresence();
+  },e=>{if(current()){pondoTeamState.presenceReady=false;pondoTeamState.presenceTimes=new Map();renderHeaderTeamPresence();console.warn('Team presence listener unavailable:',e);}});
+  beat();presenceTimer=setInterval(()=>{beat();renderHeaderTeamPresence()},30000);
+}
+window.addEventListener('resize',renderHeaderTeamPresence);
+window.addEventListener('offline',()=>{pondoTeamState.presenceReady=false;pondoTeamState.presenceTimes=new Map();renderHeaderTeamPresence();});
+window.addEventListener('online',()=>{if(pondoTeamState.orgId&&pondoTeamState.memberConfirmed){stopTeamPresence();startTeamPresence(pondoTeamState.orgId,pondoTeamState.uid);}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&pondoTeamState.orgId&&pondoTeamState.memberConfirmed){stopTeamPresence();startTeamPresence(pondoTeamState.orgId,pondoTeamState.uid);}});
 
 // Compare document contents, not property insertion order. Metadata is not
 // part of the financial snapshot and server timestamps are not comparable.
@@ -12674,6 +12754,7 @@ async function doPush() {
 window.pondoCloudSync = { push: schedulePush };
 
 function teardownOrgSubscriptions() {
+  stopTeamPresence();
   if (pondoTeamState.unsubMembers) { pondoTeamState.unsubMembers(); pondoTeamState.unsubMembers = null; }
   if (pondoTeamState.unsubOrgDoc) { pondoTeamState.unsubOrgDoc(); pondoTeamState.unsubOrgDoc = null; }
   if (pondoTeamState.unsubData) { pondoTeamState.unsubData(); pondoTeamState.unsubData = null; }
@@ -12684,6 +12765,7 @@ function handleTeamListenerError(orgId, label, err) {
   if (pondoTeamState.orgId !== orgId) return;
   const firstFailure = !pondoTeamState.listenerError;
   pondoTeamState.listenerError = true;
+  if(label==='Members'){pondoTeamState.memberConfirmed=false;stopTeamPresence();applyRoleUI();}
   setSyncBadge('error');
   if (firstFailure) notify('Team updates are unavailable. Your data may be out of date. Export a backup and check your connection and access.');
 }
@@ -12757,7 +12839,9 @@ function subscribeToOrg(orgId) {
     if (memberConfirmed) teamActivityMemory.membersByOrg[orgId] = members;
     pondoTeamState.members = members;
     const mine = members.find((m) => m.uid === pondoTeamState.uid);
-    if (!mine) { handleRemovedFromOrg(); return; }
+    if (!mine) { if(memberConfirmed) handleRemovedFromOrg(); else renderHeaderTeamPresence(); return; }
+    if(memberConfirmed)startTeamPresence(orgId,pondoTeamState.uid);
+    else if(presenceUnsubscribe)stopTeamPresence();
     pondoTeamState.role = mine.role;
     if (window.refreshDescriptionSuggestions && pondoTeamState.baselineReady) window.refreshDescriptionSuggestions();
     if (memberConfirmed && window.processMemberRoleNotification) window.processMemberRoleNotification(pondoTeamState);
@@ -12766,6 +12850,7 @@ function subscribeToOrg(orgId) {
       try { window.processReviewNotifications(JSON.parse(pondoTeamState.lastSyncedJSON), pondoTeamState); } catch (e) { console.warn('Review notifications unavailable:', e); }
     }
     renderTeamPanel();
+    renderHeaderTeamPresence();
     // Members load from Firestore asynchronously and can arrive after the
     // header badge/dropdown have already rendered (e.g. right after sign-in,
     // or while the dropdown happens to be open) -- keep the open dropdown's
@@ -13078,6 +13163,7 @@ async function joinWithInviteCode(code) {
   }, { merge: true });
   await switchActiveWorkspace(orgId);
   await refreshMemberships();
+  if(pondoTeamState.orgId!==orgId)throw new Error('Membership may have been created, but the workspace did not open. Check Settings → Team before retrying.');
 }
 
 async function joinWithPastedInput() {
@@ -13088,7 +13174,7 @@ async function joinWithPastedInput() {
     await joinWithInviteCode(code);
     if (input) input.value = '';
   } catch (err) {
-    notify('Could not join: ' + (err && err.message ? err.message : err));
+    notify('Could not finish opening the invitation: ' + (err && err.message ? err.message : err));
   }
 }
 
@@ -13444,9 +13530,9 @@ async function initCollaboration(user) {
         return;
       } catch (err) {
         console.warn('Could not join via invite link:', err);
+        notify('Could not finish opening the invitation. Membership may already have been created. Check Settings → Team and your connection before trying the original link again.');
       }
     }
-    clearInviteFromUrl();
 
     if (orgId) {
       try {
@@ -13527,6 +13613,34 @@ function isStandalonePwa() {
   } catch (e) { /* fall through */ }
   return false;
 }
+// Facebook/Messenger and Instagram may use an embedded browser where Google
+// sign-in and Firebase redirect storage cannot reliably return to this tab.
+function isKnownEmbeddedBrowser(){
+  return /FBAN|FBAV|FB_IAB|Instagram/i.test(window.navigator.userAgent||'');
+}
+function showEmbeddedBrowserHelp(){
+  const panel=document.getElementById('authBrowserHelp');
+  const field=document.getElementById('authBrowserLink');
+  if(!panel||!field)return;
+  // Preserve the invitation but omit unrelated query parameters and fragments.
+  const link=new URL(location.href),invite=link.searchParams.get('invite');
+  link.search='';link.hash='';if(invite)link.searchParams.set('invite',invite);
+  field.value=link.href;panel.hidden=false;
+}
+async function copyEmbeddedBrowserLink(){
+  const field=document.getElementById('authBrowserLink'),status=document.getElementById('authBrowserCopyStatus');
+  if(!field)return;
+  try{
+    if(!window.navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');
+    await window.navigator.clipboard.writeText(field.value);
+    if(status)status.textContent='Link copied. Paste it in Chrome or Safari.';
+  }catch(e){
+    field.focus();field.select();
+    if(status)status.textContent='Select and copy the link above, then paste it in Chrome or Safari.';
+  }
+}
+if(isKnownEmbeddedBrowser())showEmbeddedBrowserHelp();
+document.getElementById('authCopyBrowserLink')?.addEventListener('click',copyEmbeddedBrowserLink);
 const REDIRECT_PENDING_KEY='ft_auth_redirect_pending';
 function setRedirectPending(pending){
   try { if(pending) sessionStorage.setItem(REDIRECT_PENDING_KEY,'1'); else sessionStorage.removeItem(REDIRECT_PENDING_KEY); } catch(e) { /* storage may be unavailable */ }
@@ -13557,6 +13671,7 @@ async function startSignInRedirect(){
 }
 async function handleSignIn() {
   if(signInPending)return;
+  if(isKnownEmbeddedBrowser()){showEmbeddedBrowserHelp();showAuthError('Open this Pondo link in Chrome or Safari to sign in.');return;}
   authError.hidden=true;
   signInPending=true;
   armSignInWatchdog();
