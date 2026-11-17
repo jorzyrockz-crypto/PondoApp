@@ -25,8 +25,13 @@
    const last=await getDocFromServer(ref('sparkRevision','current')),end=marker(last);current();
    if(end!==revision)fail('Faculty Fund changed while loading; refresh and try again');
    if(revision===0&&(configSnapshot.exists()||Object.values(records).some(items=>items.length)))fail('Faculty Fund revision is missing; recovery is required');
+   const config=configSnapshot.exists()?configSnapshot.data():null;
+   if(config){
+    const assignment=records.presidentHistory.find(x=>x.id===config.assignmentId),millis=t=>typeof t?.toMillis==='function'?t.toMillis():NaN;
+    if(!assignment||assignment.presidentUid!==config.presidentUid||assignment.assignedBy!==config.assignedBy||!Number.isFinite(millis(config.assignedAt))||millis(config.assignedAt)!==millis(assignment.assignedAt))fail('President assignment history is inconsistent; recovery is required');
+   }else if(records.presidentHistory.length)fail('President assignment is missing; recovery is required');
    const projection=project({confirmed:true,...records});current();
-   return {revision,config:configSnapshot.exists()?configSnapshot.data():null,projection,records};
+   return {revision,config,projection,records};
   }
   return {read};
  }

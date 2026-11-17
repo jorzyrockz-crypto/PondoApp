@@ -66,3 +66,7 @@ test('President assignments are owner-only, linked to immutable audit records an
  await ownerClient.assignPresident('reviewer','assign2');await ownerClient.assignPresident('president','assign3');const old=await ownerClient.assignPresident('reviewer','assign2');assert.equal(old.replayed,true);assert.equal(old.currentlyAssigned,false);
  const snapshot=await reader(aoDb).read();assert.equal(snapshot.config.presidentUid,'president');assert.equal(snapshot.records.presidentHistory.length,3);const audit=snapshot.records.presidentHistory.find(x=>x.id==='assign2');assert.equal(audit.previousPresidentUid,'president');assert.equal(audit.presidentUid,'reviewer');await assertFails(api.deleteDoc(ref(owner,'sparkPresidentHistory/assign2')));
 });
+
+test('reader refuses a President assignment that no longer matches its protected history',async()=>{
+ const {aoDb}=await base();await env.withSecurityRulesDisabled(async c=>api.updateDoc(ref(c.firestore(),'sparkConfig/current'),{presidentUid:'reviewer'}));await assert.rejects(reader(aoDb).read(),/assignment history is inconsistent/);
+});
