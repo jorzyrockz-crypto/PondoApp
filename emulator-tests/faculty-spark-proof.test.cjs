@@ -16,7 +16,7 @@ const client=uid=>env.authenticatedContext(uid).firestore();
 const d=(db,p)=>doc(db,`${root}/${p}`);
 async function setup(){const owner=client('owner');await assertSucceeds(setDoc(d(owner,'sparkConfig/current'),{presidentUid:'president',assignedAt:serverTimestamp(),assignedBy:'owner'}));await assertSucceeds(setDoc(d(owner,'sparkLedger/current'),{balanceCents:0,revision:0,lastKind:'init',lastId:'',lastAcceptedAt:null,lastExpenseAt:null}));}
 async function makePayment(db,id='person1~2026-01-01',amount=25000){return setDoc(d(db,'sparkPayments/'+id),{personId:id.split('~')[0],memberName:id.split('~')[0],absenceDate:id.split('~')[1],paymentDate:'2026-01-02',amountCents:amount,createdAt:serverTimestamp(),createdBy:'ao',remittanceId:null});}
-async function makeDraft(db,id='r'){return setDoc(d(db,'sparkRemittances/'+id),{status:'draft',amountCents:0,count:0,lastPaymentId:null,createdBy:'ao',createdAt:serverTimestamp()});}
+async function makeDraft(db,id='r'){return setDoc(d(db,'sparkRemittances/'+id),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:'ao',createdAt:serverTimestamp()});}
 async function add(db,p,r='r',amount=25000,count=1,previous=0){let b=writeBatch(db);b.update(d(db,'sparkPayments/'+p),{remittanceId:r});b.set(d(db,'sparkLines/'+r+'~'+p),{remittanceId:r,paymentId:p,amountCents:amount,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(db,'sparkRemittances/'+r),{count,amountCents:previous+amount,lastPaymentId:p});return b.commit();}
 async function submit(db,r='r'){return updateDoc(d(db,'sparkRemittances/'+r),{status:'pending',presidentUid:'president',submittedAt:serverTimestamp()});}
 async function accept(db,r='r',balance=25000,revision=1){let b=writeBatch(db);b.update(d(db,'sparkRemittances/'+r),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()});b.update(d(db,'sparkLedger/current'),{balanceCents:balance,revision,lastKind:'accept',lastId:r,lastAcceptedAt:serverTimestamp()});return b.commit();}
@@ -128,17 +128,53 @@ test('expense time must not precede the latest accepted handover, go backwards, 
 
 test('receipt confirmations are separate, accepted-only, collector-only and immutable',async()=>{
  await setup();const ao=client('ao'),president=client('president'),reviewer=client('reviewer');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));
- const member='sparkMemberReceipts/person1~2026-01-01',remit='sparkRemittanceReceipts/r';
- await assertFails(setDoc(d(ao,member),{printedBy:'ao',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,remit),{printedBy:'ao',printedAt:serverTimestamp()}));
+ const member='sparkMemberReceipts/r~person1~2026-01-01',remit='sparkRemittanceReceipts/r';
+ await assertFails(setDoc(d(ao,member),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'ao',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,remit),{printedBy:'ao',printedAt:serverTimestamp()}));
  await assertSucceeds(accept(president));
- await assertFails(setDoc(d(reviewer,member),{printedBy:'reviewer',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,member),{printedBy:'owner',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,member),{printedBy:'ao',printedAt:new Date('2020-01-01')}));
- await assertSucceeds(setDoc(d(ao,member),{printedBy:'ao',printedAt:serverTimestamp()}));assert.equal((await getDoc(d(ao,remit))).exists(),false);
- await assertSucceeds(setDoc(d(ao,remit),{printedBy:'ao',printedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,member),{printedBy:'owner'}));await assertFails(deleteDoc(d(ao,remit)));
+ await assertFails(setDoc(d(reviewer,member),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'reviewer',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,member),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'owner',printedAt:serverTimestamp()}));await assertFails(setDoc(d(ao,member),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'ao',printedAt:new Date('2020-01-01')}));
+ await assertSucceeds(setDoc(d(ao,member),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'ao',printedAt:serverTimestamp()}));assert.equal((await getDoc(d(ao,remit))).exists(),false);
+ await assertSucceeds(setDoc(d(ao,remit),{printedBy:'ao',printedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,member),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'owner'}));await assertFails(deleteDoc(d(ao,remit)));
 });
 
 test('receipt confirmation client retries do not update the original server timestamp',async()=>{
  await setup();const api=require('firebase/firestore'),{createProofClient}=require('./fixtures/faculty-spark-proof-client.cjs');const db=client('ao'),pres=client('president'),ao=createProofClient({db,api,orgId:'school',uid:'ao'});
  await assertSucceeds(makePayment(db));await assertSucceeds(makeDraft(db));await assertSucceeds(add(db,'person1~2026-01-01'));await assertSucceeds(submit(db));await assertSucceeds(accept(pres));
- assert.equal((await ao.confirmPrint('member','person1~2026-01-01')).replayed,false);const before=(await getDoc(d(db,'sparkMemberReceipts/person1~2026-01-01'))).data().printedAt;
- assert.equal((await ao.confirmPrint('member','person1~2026-01-01')).replayed,true);assert.ok(before.isEqual((await getDoc(d(db,'sparkMemberReceipts/person1~2026-01-01'))).data().printedAt));assert.equal((await ao.confirmPrint('remittance','r')).replayed,false);
+ assert.equal((await ao.confirmPrint('member','person1~2026-01-01','r')).replayed,false);const before=(await getDoc(d(db,'sparkMemberReceipts/r~person1~2026-01-01'))).data().printedAt;
+ assert.equal((await ao.confirmPrint('member','person1~2026-01-01','r')).replayed,true);assert.ok(before.isEqual((await getDoc(d(db,'sparkMemberReceipts/r~person1~2026-01-01'))).data().printedAt));assert.equal((await ao.confirmPrint('remittance','r')).replayed,false);
+});
+
+async function requestCorrection(db,c='c',r='r'){
+ const b=writeBatch(db);b.set(d(db,'sparkCorrections/'+c),{remittanceId:r,status:'pending',requestedBy:'ao',requestedAt:serverTimestamp(),reason:'Correction requested'});b.update(d(db,'sparkRemittances/'+r),{correctionId:c});return b.commit();
+}
+async function decideCorrection(db,c='c',r='r',decision='approve'){
+ return runTransaction(db,async tx=>{
+  const ledger=d(db,'sparkLedger/current'),snapshot=await tx.get(ledger),l=snapshot.data();
+  if(decision==='decline'){
+   tx.update(d(db,'sparkCorrections/'+c),{status:'declined',decidedBy:'president',decidedAt:serverTimestamp(),decisionReason:'Not correct'});tx.update(d(db,'sparkRemittances/'+r),{correctionId:null});
+  }else{
+   tx.update(d(db,'sparkCorrections/'+c),{status:'approved',decidedBy:'president',decidedAt:serverTimestamp()});tx.update(d(db,'sparkRemittances/'+r),{status:'voided',voidedBy:'president',voidedAt:serverTimestamp()});
+   tx.update(ledger,{balanceCents:l.balanceCents-25000,revision:l.revision+1,lastKind:'correction',lastId:r});
+  }
+ });
+}
+
+test('correction requires two people and preserves old history and separate receipt status',async()=>{
+ await setup();const ao=client('ao'),president=client('president'),reviewer=client('reviewer');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));await assertSucceeds(accept(president));
+ await assertSucceeds(setDoc(d(ao,'sparkMemberReceipts/r~person1~2026-01-01'),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'ao',printedAt:serverTimestamp()}));
+ await assertFails(setDoc(d(ao,'sparkCorrections/no-pair'),{remittanceId:'r',status:'pending',requestedBy:'ao',requestedAt:serverTimestamp(),reason:'Problem'}));
+ await assertSucceeds(requestCorrection(ao));await assertFails(setDoc(d(ao,'sparkRemittanceReceipts/r'),{printedBy:'ao',printedAt:serverTimestamp()}));
+ await assertFails(decideCorrection(ao));await assertFails(decideCorrection(reviewer));await assertSucceeds(decideCorrection(president,'c','r','decline'));
+ assert.equal((await getDoc(d(ao,'sparkCorrections/c'))).data().status,'declined');await assertSucceeds(requestCorrection(ao,'c2'));await assertSucceeds(decideCorrection(president,'c2'));
+ const old=(await getDoc(d(ao,'sparkRemittances/r'))).data();assert.equal(old.status,'voided');assert.equal(old.acceptedBy,'president');assert.ok(old.acceptedAt);assert.equal((await getDoc(d(ao,'sparkLedger/current'))).data().balanceCents,0);
+ await assertFails(deleteDoc(d(ao,'sparkCorrections/c2')));await assertSucceeds(updateDoc(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:null}));
+ await assertSucceeds(makeDraft(ao,'new'));await assertSucceeds(add(ao,'person1~2026-01-01','new'));await assertSucceeds(submit(ao,'new'));await assertSucceeds(accept(president,'new',25000,3));
+ await assertSucceeds(setDoc(d(ao,'sparkMemberReceipts/new~person1~2026-01-01'),{paymentId:'person1~2026-01-01',remittanceId:'new',printedBy:'ao',printedAt:serverTimestamp()}));
+ assert.equal((await getDoc(d(ao,'sparkMemberReceipts/r~person1~2026-01-01'))).exists(),true);
+});
+
+test('correction cannot remove an acceptance after an expense, even when remaining cash is sufficient',async()=>{
+ await setup();const ao=client('ao'),president=client('president');await assertSucceeds(makePayment(ao));await assertSucceeds(makePayment(ao,'person2~2026-01-02',30000));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));await assertSucceeds(accept(president));
+ await assertSucceeds(makeDraft(ao,'r2'));await assertSucceeds(add(ao,'person2~2026-01-02','r2',30000));await assertSucceeds(submit(ao,'r2'));await assertSucceeds(accept(president,'r2',55000,2));
+ await assertSucceeds(spend(ao,'exp',10000));await assertSucceeds(requestCorrection(ao));await assertFails(decideCorrection(president));
+ assert.equal((await getDoc(d(ao,'sparkLedger/current'))).data().balanceCents,45000);assert.equal((await getDoc(d(ao,'sparkRemittances/r'))).data().status,'accepted');
 });

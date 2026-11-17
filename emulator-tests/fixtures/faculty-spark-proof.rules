@@ -10,6 +10,7 @@ service cloud.firestore {
   function payment(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPayments/$(p); }
   function remit(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkRemittances/$(r); }
   function line(o,r,p) { return /databases/$(database)/documents/organizations/$(o)/sparkLines/$(r + '~' + p); }
+  function correction(o,c) { return /databases/$(database)/documents/organizations/$(o)/sparkCorrections/$(c); }
   function expense(o,e) { return /databases/$(database)/documents/organizations/$(o)/sparkExpenses/$(e); }
   function signed(o) { return request.auth != null && exists(member(o,request.auth.uid)); }
   function role(o) { return get(member(o,request.auth.uid)).data.role; }
@@ -56,14 +57,14 @@ service cloud.firestore {
      && !exists(line(o,request.resource.data.remittanceId,p))
      && getAfter(line(o,request.resource.data.remittanceId,p)).data.paymentId == p)
      || (collector(o) && only(['remittanceId']) && resource.data.remittanceId is string && request.resource.data.remittanceId == null
-       && get(remit(o,resource.data.remittanceId)).data.status in ['declined','cancelled']);
+       && get(remit(o,resource.data.remittanceId)).data.status in ['declined','cancelled','voided']);
    allow delete: if false;
   }
   match /organizations/{o}/sparkRemittances/{r} {
    allow read: if signed(o);
-   allow create: if collector(o) && r.matches('^[A-Za-z0-9_-]{1,128}$') && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt'])
+   allow create: if collector(o) && r.matches('^[A-Za-z0-9_-]{1,128}$') && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt','correctionId'])
      && request.resource.data.status == 'draft' && request.resource.data.amountCents == 0 && request.resource.data.count == 0
-     && request.resource.data.lastPaymentId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+     && request.resource.data.lastPaymentId == null && request.resource.data.correctionId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
    allow update: if (
      collector(o) && resource.data.status == 'draft' && request.resource.data.status == 'draft'
      && only(['count','amountCents','lastPaymentId']) && resource.data.count < 200
@@ -93,7 +94,46 @@ service cloud.firestore {
      collector(o) && resource.data.status in ['draft','pending'] && only(['status','cancelledBy','cancelledAt','reason'])
      && request.resource.data.status == 'cancelled' && request.resource.data.cancelledBy == request.auth.uid
      && request.resource.data.cancelledAt == request.time && short(request.resource.data.reason,500)
+   ) || (
+     collector(o) && resource.data.status == 'accepted' && resource.data.correctionId == null
+     && only(['correctionId']) && short(request.resource.data.correctionId,128)
+     && !exists(correction(o,request.resource.data.correctionId))
+     && getAfter(correction(o,request.resource.data.correctionId)).data.remittanceId == r
+     && getAfter(correction(o,request.resource.data.correctionId)).data.status == 'pending'
+   ) || (
+     president(o) && resource.data.status == 'accepted' && resource.data.correctionId is string
+     && request.resource.data.correctionId == null && only(['correctionId'])
+     && get(correction(o,resource.data.correctionId)).data.status == 'pending'
+     && getAfter(correction(o,resource.data.correctionId)).data.status == 'declined'
+     && getAfter(correction(o,resource.data.correctionId)).data.decidedBy == request.auth.uid
+   ) || (
+     president(o) && resource.data.status == 'accepted' && resource.data.correctionId is string
+     && only(['status','voidedAt','voidedBy']) && request.resource.data.status == 'voided'
+     && request.resource.data.voidedAt == request.time && request.resource.data.voidedBy == request.auth.uid
+     && get(correction(o,resource.data.correctionId)).data.status == 'pending'
+     && getAfter(correction(o,resource.data.correctionId)).data.status == 'approved'
+     && getAfter(correction(o,resource.data.correctionId)).data.decidedBy == request.auth.uid
+     && getAfter(ledger(o)).data.lastKind == 'correction' && getAfter(ledger(o)).data.lastId == r
+     && getAfter(ledger(o)).data.revision == get(ledger(o)).data.revision + 1
    );
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkCorrections/{c} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['remittanceId','status','requestedBy','requestedAt','reason'])
+     && short(request.resource.data.remittanceId,128) && request.resource.data.status == 'pending'
+     && request.resource.data.requestedBy == request.auth.uid && request.resource.data.requestedAt == request.time && short(request.resource.data.reason,500)
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
+     && get(remit(o,request.resource.data.remittanceId)).data.correctionId == null
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.correctionId == c;
+   allow update: if president(o) && resource.data.status == 'pending'
+     && request.resource.data.decidedBy == request.auth.uid && request.resource.data.decidedAt == request.time
+     && get(remit(o,resource.data.remittanceId)).data.correctionId == c
+     && ((request.resource.data.status == 'declined' && only(['status','decidedBy','decidedAt','decisionReason'])
+       && short(request.resource.data.decisionReason,500) && getAfter(remit(o,resource.data.remittanceId)).data.correctionId == null)
+       || (request.resource.data.status == 'approved' && only(['status','decidedBy','decidedAt'])
+       && getAfter(remit(o,resource.data.remittanceId)).data.status == 'voided'
+       && getAfter(remit(o,resource.data.remittanceId)).data.voidedBy == request.auth.uid));
    allow delete: if false;
   }
   match /organizations/{o}/sparkLines/{lineId} {
@@ -110,19 +150,22 @@ service cloud.firestore {
    allow update, delete: if false;
   }
   // These are explicit human confirmations, not evidence of physical printing.
-  match /organizations/{o}/sparkMemberReceipts/{p} {
+  match /organizations/{o}/sparkMemberReceipts/{id} {
    allow read: if signed(o);
-   allow create: if collector(o) && request.resource.data.keys().hasOnly(['printedBy','printedAt'])
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['paymentId','remittanceId','printedBy','printedAt'])
+     && short(request.resource.data.paymentId,128) && short(request.resource.data.remittanceId,128)
+     && id == request.resource.data.remittanceId + '~' + request.resource.data.paymentId
      && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
-     && get(payment(o,p)).data.remittanceId is string
-     && get(remit(o,get(payment(o,p)).data.remittanceId)).data.status == 'accepted';
+     && get(payment(o,request.resource.data.paymentId)).data.remittanceId == request.resource.data.remittanceId
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
+     && get(remit(o,request.resource.data.remittanceId)).data.correctionId == null;
    allow update, delete: if false;
   }
   match /organizations/{o}/sparkRemittanceReceipts/{r} {
    allow read: if signed(o);
    allow create: if collector(o) && request.resource.data.keys().hasOnly(['printedBy','printedAt'])
      && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
-     && get(remit(o,r)).data.status == 'accepted';
+     && get(remit(o,r)).data.status == 'accepted' && get(remit(o,r)).data.correctionId == null;
    allow update, delete: if false;
   }
   match /organizations/{o}/sparkLedger/{id} {
@@ -141,6 +184,15 @@ service cloud.firestore {
        && getAfter(remit(o,request.resource.data.lastId)).data.status == 'accepted'
        && getAfter(remit(o,request.resource.data.lastId)).data.acceptedBy == request.auth.uid
        && request.resource.data.balanceCents == resource.data.balanceCents + get(remit(o,request.resource.data.lastId)).data.amountCents)
+      ||
+      (president(o) && request.resource.data.lastKind == 'correction'
+       && resource.data.lastExpenseAt == null && request.resource.data.lastExpenseAt == null
+       && request.resource.data.lastAcceptedAt == resource.data.lastAcceptedAt
+       && get(remit(o,request.resource.data.lastId)).data.status == 'accepted'
+       && getAfter(remit(o,request.resource.data.lastId)).data.status == 'voided'
+       && getAfter(remit(o,request.resource.data.lastId)).data.voidedBy == request.auth.uid
+       && request.resource.data.balanceCents == resource.data.balanceCents - get(remit(o,request.resource.data.lastId)).data.amountCents
+       && request.resource.data.balanceCents >= 0)
       ||
       (collector(o) && request.resource.data.lastKind == 'expense'
        && request.resource.data.lastAcceptedAt == resource.data.lastAcceptedAt

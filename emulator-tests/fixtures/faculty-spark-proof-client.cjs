@@ -21,7 +21,7 @@ function createProofClient({db,api,orgId,uid}){
  }
  async function draft(remittanceId){const r=ref('sparkRemittances',id(remittanceId));return runTransaction(db,async tx=>{
   const s=await tx.get(r);if(s.exists()){if(s.data().createdBy!==uid)failure('Remittance ID belongs to another actor');return {replayed:true};}
-  tx.set(r,{status:'draft',amountCents:0,count:0,lastPaymentId:null,createdBy:uid,createdAt:serverTimestamp()});return {replayed:false};
+  tx.set(r,{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:uid,createdAt:serverTimestamp()});return {replayed:false};
  });}
  async function add(remittanceId,paymentId){const r=ref('sparkRemittances',id(remittanceId)),p=ref('sparkPayments',id(paymentId));return runTransaction(db,async tx=>{
   const [rs,ps]=await Promise.all([tx.get(r),tx.get(p)]);if(!rs.exists()||!ps.exists())failure('Missing remittance or payment');const old=rs.data(),pay=ps.data();
@@ -46,10 +46,10 @@ function createProofClient({db,api,orgId,uid}){
    tx.set(e,{amountCents,description,occurredAt,createdAt:serverTimestamp(),createdBy:uid});tx.update(l,{balanceCents:bal.balanceCents-amountCents,revision:bal.revision+1,lastKind:'expense',lastId:expenseId,lastExpenseAt:occurredAt});return {replayed:false};
   });
  }
- async function confirmPrint(kind,recordId){
+ async function confirmPrint(kind,recordId,remittanceId){
   if(!['member','remittance'].includes(kind))failure('Invalid receipt kind');
-  const target=ref(kind==='member'?'sparkMemberReceipts':'sparkRemittanceReceipts',id(recordId));
-  return runTransaction(db,async tx=>{const s=await tx.get(target);if(s.exists())return {replayed:true};tx.set(target,{printedAt:serverTimestamp(),printedBy:uid});return {replayed:false};});
+  const target=ref(kind==='member'?'sparkMemberReceipts':'sparkRemittanceReceipts',kind==='member'?id(remittanceId)+'~'+id(recordId):id(recordId));
+  return runTransaction(db,async tx=>{const s=await tx.get(target);if(s.exists())return {replayed:true};tx.set(target,{...(kind==='member'?{paymentId:recordId,remittanceId}:{}),printedAt:serverTimestamp(),printedBy:uid});return {replayed:false};});
  }
  return {payment,draft,add,submit,accept,expense,confirmPrint};
 }
