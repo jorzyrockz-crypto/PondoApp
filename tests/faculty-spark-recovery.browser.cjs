@@ -9,7 +9,7 @@ async function main(){
   const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setContent('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><main id="recovery"></main>');
   await page.addStyleTag({path:path.join(__dirname,'..','faculty-fund-spark-recovery.css')});
-  for(const file of ['faculty-fund-spark-recovery.js','faculty-fund-spark-recovery-ui.js'])await page.addScriptTag({path:path.join(__dirname,'..',file)});
+  for(const file of ['faculty-fund-spark-recovery.js','faculty-fund-spark-paged-recovery.js','faculty-fund-spark-recovery-ui.js'])await page.addScriptTag({path:path.join(__dirname,'..',file)});
   await page.evaluate(()=>{
    const d=new Date('2025-01-01T00:00:00.000Z');window.ctx={orgId:'school',uid:'ao',role:'disbursing',memberConfirmed:true,scopeToken:1};
    const rem='rem_'+('a'.repeat(32)),exp='exp_'+('b'.repeat(32));window.ids={rem,exp};window.state={revision:1,records:{remittances:[{id:rem,status:'draft',createdBy:'ao',createdAt:d,amountCents:25000,count:1,paymentIds:['p1','p2']}],payments:[{id:'p1',memberName:'Teacher <script>bad</script>',absenceDate:'2024-01-01',amountCents:25000,remittanceId:rem},{id:'p2',memberName:'Second teacher',absenceDate:'2024-01-02',amountCents:25000,remittanceId:null}],expenses:[{id:exp,status:'draft',createdBy:'ao',createdAt:d,occurredAt:d,amountCents:25000,allocatedCents:10000,description:'Supplies',payee:'Shop',reference:'OR-1'}],allocations:[{id:'allocation',expenseId:exp,released:false}]}};
@@ -37,7 +37,18 @@ async function main(){
   await page.evaluate(()=>{ctx={...ctx,role:'reviewer',scopeToken:5};screen.reset();screen.refresh()});assert.match(await page.locator('[role=status]').innerText(),/authorized/);
   // A malformed server response is never rendered as a valid recovery list.
   await page.evaluate(()=>{ctx={...ctx,role:'disbursing',scopeToken:6};screen.reset();window.recovery={list:async()=>({items:[{kind:'remittance',id:'broken',status:'draft'}]})};screen.refresh()});await page.waitForFunction(()=>document.querySelector('[role=status]')?.textContent.includes('Unable to confirm'));assert.equal(await page.locator('[data-recovery-id]').count(),0);
-  assert.deepEqual(errors,[]);console.log('Isolated recovery UI: lost responses, cancelled allocations, confirmed outcomes, XSS and workspace switches passed.');
+  // Exercise paged bridge and ephemeral expense continuation in the same screen.
+  await page.evaluate(()=>{
+   ctx={orgId:'school',uid:'ao',role:'disbursing',memberConfirmed:true,scopeToken:7};screen.reset();const d=new Date('2025-01-01T00:00:00Z');let revision=1;const rem={status:'draft',createdBy:'ao',createdAt:d,amountCents:25000,linkedCount:1,paymentIds:['p']},exp={status:'draft',createdBy:'ao',createdAt:d,amountCents:20000,allocatedCents:0,description:'Paged supplies',payee:'Store',reference:'',occurredAt:d};window.pagedCalls=[];
+   const api={doc:(_db,path)=>path,getDocFromServer:async path=>{const value=path.endsWith('/sparkDiscoveryRevision/current')?{revision}:{memberName:'Teacher <script>no</script>',absenceDate:'2024-01-01',amountCents:25000,remittanceId:'rem',voidedAt:null};return {metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>value}}};
+   const makeDiscovery=()=>({reset(){},next:async category=>({revision,category,items:category==='draftRemittances'?[{id:'rem'}]:category==='expenses'&&exp.status==='draft'?[{id:'exp'}]:[],hasMore:false,complete:category==='expenses'})});
+   const makeResolver=()=>({inspect:async input=>{const item=input.kind==='expense'?exp:rem;return {kind:input.kind,id:input.id,revision,remaining:true,item}},resolve:async input=>{pagedCalls.push(input);revision++;if(!input.continuation)return {kind:'expense',id:'exp',status:'draft',remaining:true,revision,reason:'scan-limit',continuation:{version:1,orgId:'school',uid:'ao',expenseId:'exp',revision,walletId:'wallet'}};exp.status='recorded';return {kind:'expense',id:'exp',status:'recorded',remaining:false,revision}}});
+   window.recovery=createFacultyFundSparkPagedRecovery({getContext:()=>ctx,makeDb:()=>({}),api,makeDiscovery,makeResolver,supportsExpenseResume:true});window.confirm=async()=>true;screen.refresh();
+  });
+  await page.waitForSelector('[data-recovery-id="rem"]');assert.equal(await page.locator('#recovery script').count(),0);assert.match(await page.locator('#recovery').innerText(),/Teacher <script>no<\/script>/);
+  await page.locator('[data-recovery-action=next]').click();await page.waitForFunction(()=>document.querySelector('[role=status]')?.textContent.includes('No records on this page'));assert.ok(await page.locator('[data-recovery-action=next]').count());
+  await page.locator('[data-recovery-action=next]').click();await page.waitForSelector('[data-recovery-id="exp"]');await page.locator('[data-recovery-id="exp"] [data-recovery-action=resume]').click();await page.waitForSelector('[data-recovery-action=continue]');assert.match(await page.locator('[role=status]').innerText(),/remains unfinished/);await page.locator('[data-recovery-action=continue]').click();await page.waitForFunction(()=>document.querySelector('[role=status]')?.textContent.includes('Already recorded'));assert.equal(await page.evaluate(()=>pagedCalls[1].continuation.walletId),'wallet');
+  assert.deepEqual(errors,[]);console.log('Isolated recovery UI: lost responses, paged discovery, continuation, XSS and workspace switches passed.');
  }finally{await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exitCode=1});
