@@ -6,6 +6,7 @@ const {createIntegratedClient}=require('../faculty-fund-spark-client.js'),{creat
 const {createSparkDiscoveryRecovery}=require('../faculty-fund-spark-discovery-recovery.js');
 const {createSparkExpenseResumer}=require('../faculty-fund-spark-expense-resume.js');
 const {createSparkAcceptedFundsPager}=require('../faculty-fund-spark-accepted-funds.js');
+const {createSparkActivityPager}=require('../faculty-fund-spark-activity.js');
 const {createHash}=require('node:crypto');
 const PROJECT='demo-pondo-security',root='organizations/school';if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
 let env;test.before(async()=>{env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'fixtures/faculty-spark-discovery-proof.rules'),'utf8')}})});
@@ -119,4 +120,13 @@ test('bounded accepted-wallet totals distinguish reservations and frozen correct
 
 test('accepted funds reader rejects mixed revisions and malformed admin-written links',async()=>{
  const {ao,aoDb,pres}=await base();await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');await pres.accept('r');let once=true;const mutated={...api,getDocsFromServer:async q=>{const result=await api.getDocsFromServer(q);if(once){once=false;await ao.createPerson('other','Other')}return result}};const reader=createSparkAcceptedFundsPager({db:aoDb,api:mutated,orgId:'school',isCurrent:()=>true});await assert.rejects(reader.next(),/restart/);assert.equal((await reader.next()).unfrozenCents,25000);reader.reset();await env.withSecurityRulesDisabled(async c=>api.updateDoc(ref(c.firestore(),'sparkDiscoveryWallets/r'),{amountCents:30000}));await assert.rejects(reader.next(),/do not match/);
+});
+
+test('bounded dated activity retains corrections and Philippine day boundaries',async()=>{
+ const {ao,aoDb}=await base();await ao.voidPayment('p1','Duplicate entry');for(const [id,when] of [['before','2024-01-01T15:59:59.999Z'],['start','2024-01-01T16:00:00.000Z'],['end','2024-01-02T15:59:59.999Z'],['after','2024-01-02T16:00:00.000Z']])await ao.createExpense(id,{amountCents:10000,description:'Paper',payee:'Shop',occurredAt:new Date(when)});await ao.cancelExpense('end','Incorrect draft');await ao.finishCancellation('end');
+ const sizes=[],instrumented={...api,getDocsFromServer:async q=>{const s=await api.getDocsFromServer(q);sizes.push(s.size);return s}};const pager=createSparkActivityPager({db:aoDb,api:instrumented,orgId:'school',isCurrent:()=>true,from:'2024-01-02',to:'2024-01-02',pageSize:1});let p=await pager.next('payments');assert.equal(p.complete,false);assert.equal(p.hasMore,true);assert.deepEqual(p.items.map(x=>[x.id,x.status]),[['p1','voided']]);p=await pager.next('payments');assert.deepEqual(p.items.map(x=>[x.id,x.status]),[['p2','active']]);assert.equal(p.complete,false);p=await pager.next('expenses');assert.deepEqual(p.items.map(x=>[x.id,x.status]),[['start','draft']]);assert.equal(p.hasMore,true);p=await pager.next('expenses');assert.deepEqual(p.items.map(x=>[x.id,x.status]),[['end','cancelled']]);assert.equal(p.complete,true);assert.deepEqual(sizes,[2,1,2,1]);
+});
+
+test('activity reader rejects revision changes across pages and unauthorized reads',async()=>{
+ const {ao,aoDb}=await base();const opts={api,orgId:'school',isCurrent:()=>true,from:'2024-01-02',to:'2024-01-02',pageSize:1};const pager=createSparkActivityPager({...opts,db:aoDb});assert.equal((await pager.next('payments')).hasMore,true);await ao.voidPayment('p2','Duplicate');await assert.rejects(pager.next('payments'),/restart activity/);pager.reset();await pager.next('payments');assert.equal((await pager.next('payments')).items[0].status,'voided');const outsider=env.authenticatedContext('outsider').firestore(),unauthorized=createSparkActivityPager({...opts,db:outsider});await assert.rejects(unauthorized.next('payments'),/permission|insufficient/i);
 });
