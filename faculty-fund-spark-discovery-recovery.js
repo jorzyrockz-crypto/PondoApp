@@ -39,11 +39,11 @@
    for(const line of view.allocations)if(!line.released)await step(c,()=>client.release(line.id));await step(c,()=>mode==='cancel'?client.finishCancellation(key):client.finishVoid(key));
   }
   async function resolve(input){
-   const c=context(input?.orgId),kind=input?.kind,action=input?.action,key=input?.id;if(!['remittance','expense'].includes(kind)||!['resume','cancel','finish'].includes(action)||!id(key))fail('Invalid recovery selection');const db=makeDb(c),client=makeClient(c);if(!db||!client)fail('Recovery unavailable');let {item}=await parent(c,db,kind,key);
+   const c=context(input?.orgId),kind=input?.kind,action=input?.action,key=input?.id;if(!['remittance','expense'].includes(kind)||!['resume','cancel','finish'].includes(action)||!id(key))fail('Invalid recovery selection');if(input.continuation!==undefined&&(kind!=='expense'||action!=='resume'))fail('Invalid recovery continuation');const db=makeDb(c),client=makeClient(c);if(!db||!client)fail('Recovery unavailable');let {item}=await parent(c,db,kind,key),progress=null;
    if(action==='resume'){
     if(item.status==='draft'){
      if(item.createdBy!==c.uid)fail('Only the original collector can resume this draft');
-     if(kind==='expense'){const resumer=makeExpenseResumer?.(c);if(!resumer?.resume)fail('Resuming an expense is not available; leave it pending or cancel it');await step(c,()=>resumer.resume({orgId:c.orgId,id:key}));}
+     if(kind==='expense'){const resumer=makeExpenseResumer?.(c);if(!resumer?.resume)fail('Resuming an expense is not available; leave it pending or cancel it');progress=await step(c,()=>resumer.resume({orgId:c.orgId,id:key,...(input.continuation!==undefined?{continuation:input.continuation}:{})}));}
      else{for(const paymentId of item.paymentIds)await step(c,()=>client.addPayment(key,paymentId));await step(c,()=>client.submitRemittance(key));}
     }
    }else if(action==='cancel'){
@@ -57,7 +57,9 @@
     else if(kind==='expense'&&item.status==='voiding')await finishExpense(c,client,key,'void');
     else if(remaining(kind,item))fail('Choose resume or cancel for a draft');
    }
-   const result=await parent(c,db,kind,key);guard(c);return {kind,id:key,status:result.item.status,remaining:remaining(kind,result.item),revision:result.revision};
+   const result=await parent(c,db,kind,key);guard(c);const output={kind,id:key,status:result.item.status,remaining:remaining(kind,result.item),revision:result.revision};
+   if(progress?.continuation){if(output.status!=='draft'||progress.revision!==output.revision)fail('Faculty Fund changed; restart the wallet scan');output.reason='scan-limit';output.continuation=progress.continuation;}
+   return output;
   }
   return {inspect,resolve};
  }

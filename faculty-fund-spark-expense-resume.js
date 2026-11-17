@@ -45,10 +45,22 @@
   async function resume(input){
    const c=context(input?.orgId),expenseId=input?.id;if(!validId(expenseId))fail('Invalid expense selection');const db=makeDb(c),client=makeClient(c);if(!db||!client)fail('Expense recovery unavailable');let snapshot=await state(c,db,expenseId),e=snapshot.item;if(e.status!=='draft')return result(expenseId,e,snapshot.revision);if(e.createdBy!==c.uid)fail('Only the original collector can resume this expense');const initial=e;
    let cursor=null,scanned=0;
+   if(input.continuation!==undefined){
+    const token=input.continuation;if(!token||token.version!==1||token.orgId!==c.orgId||token.uid!==c.uid||token.expenseId!==expenseId||!validId(token.walletId)||!Number.isSafeInteger(token.revision)||token.revision<1)fail('Invalid expense scan continuation');
+    if(token.revision!==snapshot.revision)fail('Faculty Fund changed; restart the wallet scan');
+    const before=await rev(c,db),s=await get(c,db,'sparkDiscoveryWallets',token.walletId),after=await rev(c,db);
+    if(before!==token.revision||after!==token.revision)fail('Faculty Fund changed; restart the wallet scan');
+    if(!s.exists()||s.data().status!=='open'||!Number.isFinite(ms(s.data().acceptedAt))||ms(s.data().acceptedAt)>ms(e.occurredAt))fail('Wallet scan continuation is unavailable; restart the wallet scan');cursor=s;
+   }
    while(true){
     snapshot=await state(c,db,expenseId);e=snapshot.item;if(e.createdBy!==initial.createdBy||e.amountCents!==initial.amountCents||ms(e.occurredAt)!==ms(initial.occurredAt))fail('Expense changed; review recovery');if(e.status!=='draft')return result(expenseId,e,snapshot.revision);
     if(e.allocatedCents===e.amountCents){await step(c,()=>client.finalizeExpense(expenseId));const final=await state(c,db,expenseId);return result(expenseId,final.item,final.revision);}
-    if(scanned>=maxWallets)fail('Wallet scan limit reached; this draft remains unfinished. Cancel it or review recovery.');
+    if(scanned>=maxWallets){
+     // A continuation is only a scan hint, not a guarantee that earlier wallets
+     // remain ineligible or that the expense can be funded. Never return a
+     // completed status here; rules still authorize each subsequent mutation.
+     return {...result(expenseId,e,snapshot.revision),reason:'scan-limit',continuation:{version:1,orgId:c.orgId,uid:c.uid,expenseId,revision:snapshot.revision,walletId:cursor.id}};
+    }
     const n=Math.min(pageSize,maxWallets-scanned),wallets=await page(c,db,e.occurredAt,cursor,n);if(!wallets.length)fail('Expense remains unfinished; retry when eligible funds are available or cancel the draft.');
     for(const wallet of wallets){
      scanned++;cursor=wallet;const key=await allocationId(expenseId,wallet.id);guard(c);const checked=await candidate(c,db,expenseId,wallet.id,key,initial);e=checked.expense;if(e.status!=='draft')return result(expenseId,e,checked.revision);if(e.allocatedCents===e.amountCents)break;if(checked.skip)continue;if(e.count>=200)fail('This draft has too many allocations; cancel or review recovery.');
