@@ -47,3 +47,14 @@ test('versioned snapshots produce separate receipts and a scoped cash report',as
  let snapshot=await reader(aoDb).read(),view=createSparkReceiptView(snapshot,{organizationName:'School'});assert.deepEqual(view.unprinted(),['p']);assert.match(view.remittanceHtml('r'),/₱250\.00/);assert.match(view.membersHtml(['p']),/Ana/);assert.equal(makeSparkReport(snapshot).receivedCents,25000);
  await ao.confirmPrint('member','p','r');snapshot=await reader(aoDb).read();view=createSparkReceiptView(snapshot);assert.deepEqual(view.unprinted(),[]);assert.equal(view.remittancePrinted('r'),false);await ao.confirmPrint('remittance','r');snapshot=await reader(aoDb).read();assert.equal(createSparkReceiptView(snapshot).remittancePrinted('r'),true);assert.match(sparkReportCsv(makeSparkReport(snapshot)),/250\.00/);
 });
+
+test('rules reject impossible dates and future Philippine payment dates even from a modified client',async()=>{
+ const {aoDb,ao}=await base();
+ async function rawPayment(id,absenceDate,paymentDate){
+  const slotId='teacher~'+absenceDate,marker=await getDoc(ref(aoDb,'sparkRevision/current')),n=marker.data().revision,b=api.writeBatch(aoDb);
+  b.set(ref(aoDb,'sparkPayments/'+id),{slotId,personId:'teacher',memberName:'Ana',absenceDate,paymentDate,amountCents:25000,createdAt:serverTimestamp(),createdBy:'ao',remittanceId:null,voidedAt:null,voidedBy:null,voidReason:null});
+  b.set(ref(aoDb,'sparkPaymentSlots/'+slotId),{personId:'teacher',absenceDate,activePaymentId:id,revision:1});b.set(ref(aoDb,'sparkRevision/current'),{revision:n+1,updatedAt:serverTimestamp(),updatedBy:'ao'});return b.commit();
+ }
+ await assertFails(rawPayment('invalid1','2026-02-29','2026-01-02'));await assertFails(rawPayment('invalid2','2024-04-31','2024-01-02'));await assertFails(rawPayment('invalid3','2024-02-29','2024-02-30'));await assertFails(rawPayment('future','2024-02-29','2099-01-01'));
+ await ao.createPayment('leap',{personId:'teacher',absenceDate:'2024-02-29',paymentDate:'2024-03-01',amountCents:25000});assert.equal((await getDoc(ref(aoDb,'sparkPayments/leap'))).exists(),true);
+});
