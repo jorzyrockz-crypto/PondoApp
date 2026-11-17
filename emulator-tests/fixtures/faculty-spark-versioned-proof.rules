@@ -5,6 +5,7 @@ service cloud.firestore {
  match /databases/{database}/documents {
   function member(o,u) { return /databases/$(database)/documents/organizations/$(o)/members/$(u); }
   function version(o) { return /databases/$(database)/documents/organizations/$(o)/sparkRevision/current; }
+  function assignment(o,a) { return /databases/$(database)/documents/organizations/$(o)/sparkPresidentHistory/$(a); }
   function config(o) { return /databases/$(database)/documents/organizations/$(o)/sparkConfig/current; }
   function wallet(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkWallets/$(r); }
   function expenseDraft(o,e) { return /databases/$(database)/documents/organizations/$(o)/sparkExpenseDrafts/$(e); }
@@ -58,12 +59,27 @@ service cloud.firestore {
   }
   match /organizations/{o}/sparkConfig/{id} {
    allow read: if signed(o) && id == 'current';
-   allow create, update: if (id == 'current' && owner(o)
-     && request.resource.data.keys().hasOnly(['presidentUid','assignedAt','assignedBy'])
-     && short(request.resource.data.presidentUid,128)
-     && exists(member(o,request.resource.data.presidentUid))
-     && request.resource.data.assignedAt == request.time && request.resource.data.assignedBy == request.auth.uid) && revisionAdvanced(o);
+   allow create, update: if id == 'current' && owner(o)
+     && request.resource.data.keys().hasOnly(['presidentUid','assignedAt','assignedBy','assignmentId'])
+     && short(request.resource.data.presidentUid,128) && exists(member(o,request.resource.data.presidentUid))
+     && short(request.resource.data.assignmentId,128) && !exists(assignment(o,request.resource.data.assignmentId))
+     && request.resource.data.assignedAt == request.time && request.resource.data.assignedBy == request.auth.uid
+     && getAfter(assignment(o,request.resource.data.assignmentId)).data.presidentUid == request.resource.data.presidentUid
+     && getAfter(assignment(o,request.resource.data.assignmentId)).data.assignedAt == request.time
+     && getAfter(assignment(o,request.resource.data.assignmentId)).data.assignedBy == request.auth.uid
+     && revisionAdvanced(o);
    allow delete: if false;
+  }
+  match /organizations/{o}/sparkPresidentHistory/{a} {
+   allow read: if signed(o);
+   allow create: if owner(o) && a.matches('^[A-Za-z0-9_-]{1,128}$')
+     && request.resource.data.keys().hasOnly(['presidentUid','previousPresidentUid','assignedBy','assignedAt'])
+     && short(request.resource.data.presidentUid,128) && exists(member(o,request.resource.data.presidentUid))
+     && request.resource.data.previousPresidentUid == (exists(config(o)) ? get(config(o)).data.presidentUid : null)
+     && request.resource.data.assignedBy == request.auth.uid && request.resource.data.assignedAt == request.time
+     && getAfter(config(o)).data.assignmentId == a && getAfter(config(o)).data.presidentUid == request.resource.data.presidentUid
+     && revisionAdvanced(o);
+   allow update, delete: if false;
   }
   match /organizations/{o}/sparkPeople/{p} {
    allow read: if signed(o);

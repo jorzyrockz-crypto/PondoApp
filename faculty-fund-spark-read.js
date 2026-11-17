@@ -15,7 +15,7 @@
   async function read(){
    current();const first=await getDocFromServer(ref('sparkRevision','current')),revision=marker(first);current();
    const configSnapshot=await getDocFromServer(ref('sparkConfig','current'));stable(configSnapshot);current();
-   const paths={people:'sparkPeople',payments:'sparkPayments',slots:'sparkPaymentSlots',remittances:'sparkRemittances',lines:'sparkLines',wallets:'sparkWallets',expenses:'sparkExpenseDrafts',allocations:'sparkAllocations',corrections:'sparkCorrections',memberReceipts:'sparkMemberReceipts',remittanceReceipts:'sparkRemittanceReceipts'};
+   const paths={people:'sparkPeople',payments:'sparkPayments',slots:'sparkPaymentSlots',remittances:'sparkRemittances',lines:'sparkLines',wallets:'sparkWallets',expenses:'sparkExpenseDrafts',allocations:'sparkAllocations',corrections:'sparkCorrections',presidentHistory:'sparkPresidentHistory',memberReceipts:'sparkMemberReceipts',remittanceReceipts:'sparkRemittanceReceipts'};
    const records={};
    for(const [name,path] of Object.entries(paths)){
     const snapshot=await getDocsFromServer(query(collection(db,`${root}/${path}`),limit(maxDocuments+1)));stable(snapshot);current();

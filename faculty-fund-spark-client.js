@@ -28,9 +28,13 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
   if(typeof personId!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(personId))fail('Invalid faculty ID');text(name,160);name=name.trim();const p=ref('sparkPeople',personId);
   return atomic(async tx=>{const s=await tx.get(p);if(s.exists()){if(s.data().name!==name||s.data().createdBy!==uid)fail('Faculty ID already has different data');return {replayed:true};}tx.set(p,{name,createdBy:uid,createdAt:serverTimestamp()});return {replayed:false};});
  }
- async function assignPresident(presidentUid){
+ async function assignPresident(presidentUid,assignmentId){
   if(typeof presidentUid!=='string'||!presidentUid||presidentUid.length>128||presidentUid.includes('/'))fail('Invalid President');const c=ref('sparkConfig','current');
-  return atomic(async tx=>{const s=await tx.get(c);if(s.exists()&&s.data().presidentUid===presidentUid)return {replayed:true};tx.set(c,{presidentUid,assignedBy:uid,assignedAt:serverTimestamp()});return {replayed:false};});
+  if(!useRevision)return atomic(async tx=>{const s=await tx.get(c);if(s.exists()&&s.data().presidentUid===presidentUid)return {replayed:true};tx.set(c,{presidentUid,assignedBy:uid,assignedAt:serverTimestamp()});return {replayed:false};});
+  const h=ref('sparkPresidentHistory',identifier(assignmentId));return atomic(async tx=>{const [config,history]=await Promise.all([tx.get(c),tx.get(h)]);const prior=config.exists()?config.data().presidentUid:null;
+   if(history.exists()){const old=history.data();if(old.presidentUid!==presidentUid||old.assignedBy!==uid)fail('Assignment ID already has different data');return {replayed:true,currentlyAssigned:prior===presidentUid};}
+   if(prior===presidentUid)return {replayed:true,currentlyAssigned:true};tx.set(h,{presidentUid,previousPresidentUid:prior,assignedBy:uid,assignedAt:serverTimestamp()});tx.set(c,{presidentUid,assignmentId,assignedBy:uid,assignedAt:serverTimestamp()});return {replayed:false,currentlyAssigned:true};
+  });
  }
  async function createRemittance(remittanceId,paymentIds){
   identifier(remittanceId);if(!Array.isArray(paymentIds)||!paymentIds.length||paymentIds.length>200||new Set(paymentIds).size!==paymentIds.length)fail('Select distinct payments');paymentIds.forEach(identifier);
