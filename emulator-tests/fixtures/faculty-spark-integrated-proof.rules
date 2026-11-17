@@ -1,5 +1,5 @@
 // INTEGRATION EXPERIMENT ONLY. Not Pondo production rules. Incomplete: expense
-// receipt rendering, recorded-expense voids, exports, recovery and UI are not provided.
+// receipt rendering, exports, recovery and UI are not provided.
 rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
@@ -238,7 +238,7 @@ service cloud.firestore {
      && request.resource.data.status == 'cancelling' && short(request.resource.data.cancelReason,500)
      && request.resource.data.cancelRequestedBy == request.auth.uid && request.resource.data.cancelRequestedAt == request.time
    ) || (
-     collector(o) && resource.data.status == 'cancelling' && resource.data.count > 0
+     collector(o) && resource.data.status in ['cancelling','voiding'] && resource.data.count > 0
      && only(['allocatedCents','count','lastRelease']) && short(request.resource.data.lastRelease,128)
      && get(allocation(o,request.resource.data.lastRelease)).data.expenseId == e
      && get(allocation(o,request.resource.data.lastRelease)).data.releasedAt == null
@@ -250,6 +250,13 @@ service cloud.firestore {
    ) || (
      collector(o) && resource.data.status == 'cancelling' && resource.data.allocatedCents == 0 && resource.data.count == 0
      && only(['status','cancelledAt']) && request.resource.data.status == 'cancelled' && request.resource.data.cancelledAt == request.time
+   ) || (
+     collector(o) && resource.data.status == 'recorded' && only(['status','voidReason','voidRequestedBy','voidRequestedAt'])
+     && request.resource.data.status == 'voiding' && short(request.resource.data.voidReason,500)
+     && request.resource.data.voidRequestedBy == request.auth.uid && request.resource.data.voidRequestedAt == request.time
+   ) || (
+     collector(o) && resource.data.status == 'voiding' && resource.data.allocatedCents == 0 && resource.data.count == 0
+     && only(['status','voidedAt']) && request.resource.data.status == 'voided' && request.resource.data.voidedAt == request.time
    );
    allow delete: if false;
   }
@@ -269,7 +276,7 @@ service cloud.firestore {
      && getAfter(expenseDraft(o,request.resource.data.expenseId)).data.count == get(expenseDraft(o,request.resource.data.expenseId)).data.count + 1;
    allow update: if collector(o) && resource.data.releasedAt == null && only(['releasedAt','releasedBy'])
      && request.resource.data.releasedAt == request.time && request.resource.data.releasedBy == request.auth.uid
-     && get(expenseDraft(o,resource.data.expenseId)).data.status == 'cancelling'
+     && get(expenseDraft(o,resource.data.expenseId)).data.status in ['cancelling','voiding']
      && get(wallet(o,resource.data.walletId)).data.status == 'open'
      && getAfter(wallet(o,resource.data.walletId)).data.lastRelease == a
      && getAfter(wallet(o,resource.data.walletId)).data.revision == get(wallet(o,resource.data.walletId)).data.revision + 1

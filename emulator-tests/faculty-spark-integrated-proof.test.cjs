@@ -110,3 +110,19 @@ test('a fully released draft can be corrected, but a recorded expense cannot be 
  await expense(ao,'draft',5000,at);await allocate(ao,'draft','two','b',5000);await beginCancel(ao,'draft');await releaseAllocation(ao,'b');await finishCancel(ao,'draft');await requestCorrection(ao,'two','fix');await assertSucceeds(approveCorrection(pres,'two','fix'));
  assert.equal((await getDoc(d(ao,'sparkWallets/one'))).data().unspentCents,20000);assert.equal((await getDoc(d(ao,'sparkWallets/two'))).data().status,'voided');
 });
+
+test('voiding a recorded expense requires a reason and releases each allocation exactly once',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),reviewer=createIntegratedClient({db:client('reviewer'),api,orgId:'school',uid:'reviewer'}),pres=createIntegratedClient({db:p,api,orgId:'school',uid:'president'});
+ await pending(db,'one','person1');await pres.accept('one');await pending(db,'two','person2');await pres.accept('two');const occurredAt=(await getDoc(d(db,'sparkWallets/two'))).data().acceptedAt;
+ await ao.createExpense('e',{amountCents:40000,description:'Materials',payee:'Supplier',occurredAt});await ao.allocate('e','one','a',25000);await ao.allocate('e','two','b',15000);await ao.finalizeExpense('e');
+ await assert.rejects(ao.beginVoid('e',''));await assert.rejects(reviewer.beginVoid('e','Wrong receipt'));await ao.beginVoid('e','Wrong receipt');assert.equal((await ao.beginVoid('e','Wrong receipt')).replayed,true);
+ await assert.rejects(ao.finishVoid('e'));await ao.release('a');assert.equal((await ao.release('a')).replayed,true);await assert.rejects(ao.finishVoid('e'));await ao.release('b');await ao.finishVoid('e');assert.equal((await ao.finishVoid('e')).replayed,true);
+ const history=(await getDoc(d(db,'sparkExpenseDrafts/e'))).data();assert.equal(history.status,'voided');assert.equal(history.amountCents,40000);assert.equal(history.voidReason,'Wrong receipt');assert.ok(history.recordedAt);assert.ok(history.voidRequestedAt);assert.ok(history.voidedAt);assert.equal(history.allocatedCents,0);
+ assert.equal((await getDoc(d(db,'sparkWallets/one'))).data().unspentCents,25000);assert.equal((await getDoc(d(db,'sparkWallets/two'))).data().unspentCents,25000);assert.ok((await getDoc(d(db,'sparkAllocations/a'))).data().releasedAt);
+});
+
+test('no actor can forge a partial void or refund an allocation twice',async()=>{
+ await setup();const ao=client('ao'),pres=client('president');await pending(ao,'r','person1');await accept(pres,'r');const at=(await getDoc(d(ao,'sparkWallets/r'))).data().acceptedAt;await expense(ao,'e',10000,at);await allocate(ao,'e','r','a',10000);await finalize(ao,'e');
+ await assertFails(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voided',voidedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voiding',voidReason:'',voidRequestedBy:'ao',voidRequestedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voiding',voidReason:'Incorrect entry',voidRequestedBy:'ao',voidRequestedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voided',voidedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,'sparkWallets/r'),{unspentCents:25000,revision:2,lastRelease:'a'}));await assertSucceeds(releaseAllocation(ao,'a'));await assertFails(releaseAllocation(ao,'a'));await assertSucceeds(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voided',voidedAt:serverTimestamp()}));
+});
