@@ -9,6 +9,7 @@ service cloud.firestore {
   function expenseDraft(o,e) { return /databases/$(database)/documents/organizations/$(o)/sparkExpenseDrafts/$(e); }
   function allocation(o,a) { return /databases/$(database)/documents/organizations/$(o)/sparkAllocations/$(a); }
   function person(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPeople/$(p); }
+  function slot(o,s) { return /databases/$(database)/documents/organizations/$(o)/sparkPaymentSlots/$(s); }
   function payment(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPayments/$(p); }
   function remit(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkRemittances/$(r); }
   function line(o,r,p) { return /databases/$(database)/documents/organizations/$(o)/sparkLines/$(r + '~' + p); }
@@ -38,17 +39,47 @@ service cloud.firestore {
      && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid;
    allow update, delete: if false;
   }
+  // A member/date slot points to at most one active payment. Voiding and a
+  // later replacement retain both immutable payment records for audit.
+  match /organizations/{o}/sparkPaymentSlots/{s} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['personId','absenceDate','activePaymentId','revision'])
+     && short(request.resource.data.personId,80) && request.resource.data.personId.matches('^[A-Za-z0-9_-]+$')
+     && request.resource.data.absenceDate is string && request.resource.data.absenceDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && s == request.resource.data.personId + '~' + request.resource.data.absenceDate
+     && short(request.resource.data.activePaymentId,128) && request.resource.data.revision == 1
+     && !exists(payment(o,request.resource.data.activePaymentId))
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.slotId == s
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.personId == request.resource.data.personId
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.absenceDate == request.resource.data.absenceDate
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.voidedAt == null;
+   allow update: if collector(o) && only(['activePaymentId','revision']) && request.resource.data.revision == resource.data.revision + 1
+     && ((resource.data.activePaymentId == null && short(request.resource.data.activePaymentId,128)
+          && !exists(payment(o,request.resource.data.activePaymentId))
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.slotId == s
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.personId == resource.data.personId
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.absenceDate == resource.data.absenceDate
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.voidedAt == null)
+       || (resource.data.activePaymentId is string && request.resource.data.activePaymentId == null
+          && getAfter(payment(o,resource.data.activePaymentId)).data.voidedAt == request.time
+          && getAfter(payment(o,resource.data.activePaymentId)).data.voidedBy == request.auth.uid));
+   allow delete: if false;
+  }
   match /organizations/{o}/sparkPayments/{p} {
    allow read: if signed(o);
-   allow create: if collector(o) && request.resource.data.keys().hasOnly(['personId','memberName','absenceDate','paymentDate','amountCents','createdAt','createdBy','remittanceId'])
+   allow create: if collector(o) && p.matches('^[A-Za-z0-9_-]{1,128}$')
+     && request.resource.data.keys().hasOnly(['slotId','personId','memberName','absenceDate','paymentDate','amountCents','createdAt','createdBy','remittanceId','voidedAt','voidedBy','voidReason'])
      && short(request.resource.data.personId,80) && request.resource.data.personId.matches('^[A-Za-z0-9_-]+$')
      && exists(person(o,request.resource.data.personId)) && request.resource.data.memberName == get(person(o,request.resource.data.personId)).data.name
      && request.resource.data.absenceDate is string && request.resource.data.absenceDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-     && p == request.resource.data.personId + '~' + request.resource.data.absenceDate
+     && request.resource.data.slotId == request.resource.data.personId + '~' + request.resource.data.absenceDate
+     && getAfter(slot(o,request.resource.data.slotId)).data.activePaymentId == p
+     && getAfter(slot(o,request.resource.data.slotId)).data.revision == (exists(slot(o,request.resource.data.slotId)) ? get(slot(o,request.resource.data.slotId)).data.revision + 1 : 1)
      && request.resource.data.paymentDate is string && request.resource.data.paymentDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
      && validAmount(request.resource.data.amountCents) && request.resource.data.createdAt == request.time
-     && request.resource.data.createdBy == request.auth.uid && request.resource.data.remittanceId == null;
-   allow update: if (collector(o) && only(['remittanceId']) && resource.data.remittanceId == null
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.remittanceId == null
+     && request.resource.data.voidedAt == null && request.resource.data.voidedBy == null && request.resource.data.voidReason == null;
+   allow update: if (collector(o) && only(['remittanceId']) && resource.data.voidedAt == null && resource.data.remittanceId == null
      && short(request.resource.data.remittanceId,128)
      && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
      && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
@@ -57,8 +88,13 @@ service cloud.firestore {
      && getAfter(remit(o,request.resource.data.remittanceId)).data.amountCents == get(remit(o,request.resource.data.remittanceId)).data.amountCents + resource.data.amountCents
      && !exists(line(o,request.resource.data.remittanceId,p))
      && getAfter(line(o,request.resource.data.remittanceId,p)).data.paymentId == p)
-     || (collector(o) && only(['remittanceId']) && resource.data.remittanceId is string && request.resource.data.remittanceId == null
-       && get(remit(o,resource.data.remittanceId)).data.status in ['declined','cancelled','voided']);
+     || (collector(o) && only(['remittanceId']) && resource.data.voidedAt == null && resource.data.remittanceId is string && request.resource.data.remittanceId == null
+       && get(remit(o,resource.data.remittanceId)).data.status in ['declined','cancelled','voided'])
+     || (collector(o) && only(['voidedAt','voidedBy','voidReason']) && resource.data.voidedAt == null && resource.data.remittanceId == null
+       && request.resource.data.voidedAt == request.time && request.resource.data.voidedBy == request.auth.uid && short(request.resource.data.voidReason,500)
+       && get(slot(o,resource.data.slotId)).data.activePaymentId == p
+       && getAfter(slot(o,resource.data.slotId)).data.activePaymentId == null
+       && getAfter(slot(o,resource.data.slotId)).data.revision == get(slot(o,resource.data.slotId)).data.revision + 1);
    allow delete: if false;
   }
   match /organizations/{o}/sparkRemittances/{r} {

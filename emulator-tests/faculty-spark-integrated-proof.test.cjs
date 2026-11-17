@@ -12,8 +12,8 @@ test.after(async()=>{if(env)await env.cleanup()});
 const client=uid=>env.authenticatedContext(uid).firestore();const d=(db,p)=>doc(db,`${root}/${p}`);
 async function setup(){await setDoc(d(client('owner'),'sparkConfig/current'),{presidentUid:'president',assignedAt:serverTimestamp(),assignedBy:'owner'});}
 async function pending(db,r,p,amount=25000){
- await setDoc(d(db,'sparkPayments/'+p+'~2026-01-01'),{personId:p,memberName:p,absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:amount,createdAt:serverTimestamp(),createdBy:'ao',remittanceId:null});
- await setDoc(d(db,'sparkRemittances/'+r),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:'ao',createdAt:serverTimestamp()});const id=p+'~2026-01-01',b=writeBatch(db);
+ const id='pay_'+p,slotId=p+'~2026-01-01',create=writeBatch(db);create.set(d(db,'sparkPayments/'+id),{slotId,personId:p,memberName:p,absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:amount,createdAt:serverTimestamp(),createdBy:'ao',remittanceId:null,voidedAt:null,voidedBy:null,voidReason:null});create.set(d(db,'sparkPaymentSlots/'+slotId),{personId:p,absenceDate:'2026-01-01',activePaymentId:id,revision:1});await create.commit();
+ await setDoc(d(db,'sparkRemittances/'+r),{status:'draft',amountCents:0,count:0,lastPaymentId:null,correctionId:null,createdBy:'ao',createdAt:serverTimestamp()});const b=writeBatch(db);
  b.update(d(db,'sparkPayments/'+id),{remittanceId:r});b.set(d(db,'sparkLines/'+r+'~'+id),{remittanceId:r,paymentId:id,amountCents:amount,linkedAt:serverTimestamp(),linkedBy:'ao'});b.update(d(db,'sparkRemittances/'+r),{amountCents:amount,count:1,lastPaymentId:id});await b.commit();await updateDoc(d(db,'sparkRemittances/'+r),{status:'pending',presidentUid:'president',submittedAt:serverTimestamp()});
 }
 async function accept(db,r,amount=25000){const b=writeBatch(db);b.update(d(db,'sparkRemittances/'+r),{status:'accepted',acceptedBy:'president',acceptedAt:serverTimestamp()});b.set(d(db,'sparkWallets/'+r),{status:'open',amountCents:amount,unspentCents:amount,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null,lastRelease:null});return b.commit();}
