@@ -58,3 +58,24 @@ test('assignment, decline, field integrity, and membership are checked by rules'
  await env.withSecurityRulesDisabled(async c=>deleteDoc(d(c.firestore(),'members/president')));
  await assertFails(getDoc(d(president,'sparkRemittances/r')));assert.equal((await getDoc(d(owner,'sparkLedger/current'))).data().balanceCents,0);
 });
+
+test('two payments cannot share one forged draft increment',async()=>{
+ await setup();const ao=client('ao');await assertSucceeds(makePayment(ao));await assertSucceeds(makePayment(ao,'person2~2026-01-01'));await assertSucceeds(makeDraft(ao));
+ const b=writeBatch(ao);b.update(d(ao,'sparkPayments/person1~2026-01-01'),{remittanceId:'r'});b.update(d(ao,'sparkPayments/person2~2026-01-01'),{remittanceId:'r'});b.update(d(ao,'sparkRemittances/r'),{count:1,amountCents:25000,lastPaymentId:'person1~2026-01-01'});await assertFails(b.commit());
+ assert.equal((await getDoc(d(ao,'sparkRemittances/r'))).data().amountCents,0);assert.equal((await getDoc(d(ao,'sparkPayments/person2~2026-01-01'))).data().remittanceId,null);
+});
+
+test('reassignment invalidates old addressed approvals; acceptance timestamp cannot be faked',async()=>{
+ await setup();const ao=client('ao'),president=client('president'),reviewer=client('reviewer'),owner=client('owner');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));
+ let b=writeBatch(president);b.update(d(president,'sparkRemittances/r'),{status:'accepted',acceptedBy:'president',acceptedAt:new Date('2020-01-01')});b.update(d(president,'sparkLedger/current'),{balanceCents:25000,revision:1,lastKind:'accept',lastId:'r'});await assertFails(b.commit());
+ await assertSucceeds(setDoc(d(owner,'sparkConfig/current'),{presidentUid:'reviewer',assignedBy:'owner',assignedAt:serverTimestamp()}));
+ await assertFails(accept(president));b=writeBatch(reviewer);b.update(d(reviewer,'sparkRemittances/r'),{status:'accepted',acceptedBy:'reviewer',acceptedAt:serverTimestamp()});b.update(d(reviewer,'sparkLedger/current'),{balanceCents:25000,revision:1,lastKind:'accept',lastId:'r'});await assertFails(b.commit());
+ assert.equal((await getDoc(d(owner,'sparkLedger/current'))).data().balanceCents,0);
+});
+
+test('expense records must be paired and immutable, and payment amounts cannot be edited',async()=>{
+ await setup();const ao=client('ao'),president=client('president');await assertSucceeds(makePayment(ao));await assertFails(updateDoc(d(ao,'sparkPayments/person1~2026-01-01'),{amountCents:90000}));await assertFails(makePayment(ao));
+ await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));await assertSucceeds(accept(president));
+ await assertFails(setDoc(d(ao,'sparkExpenses/unpaired'),{amountCents:1,description:'Unpaired',createdAt:serverTimestamp(),createdBy:'ao'}));
+ await assertSucceeds(spend(ao,'safe',10000));await assertFails(updateDoc(d(ao,'sparkExpenses/safe'),{amountCents:1}));await assertFails(deleteDoc(d(ao,'sparkExpenses/safe')));
+});
