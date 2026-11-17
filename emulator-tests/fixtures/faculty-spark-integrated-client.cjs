@@ -38,6 +38,31 @@ function createIntegratedClient({db,api,orgId,uid}) {
  async function finishCancellation(expenseId){const e=ref('sparkExpenseDrafts',identifier(expenseId));return runTransaction(db,async tx=>{const s=await tx.get(e);if(!s.exists())fail('Expense missing');const old=s.data();if(old.status==='cancelled')return {replayed:true};if(old.status!=='cancelling'||old.allocatedCents!==0||old.count!==0)fail('Release every allocation before finishing cancellation');tx.update(e,{status:'cancelled',cancelledAt:serverTimestamp()});return {replayed:false};});}
  async function beginVoid(expenseId,reason){const e=ref('sparkExpenseDrafts',identifier(expenseId));text(reason,500);return runTransaction(db,async tx=>{const s=await tx.get(e);if(!s.exists())fail('Expense missing');const old=s.data();if(['voiding','voided'].includes(old.status)){if(old.voidReason!==reason||old.voidRequestedBy!==uid)fail('Expense already voided for a different reason');return {replayed:true,status:old.status};}if(old.status!=='recorded')fail('Only a recorded expense can be voided');tx.update(e,{status:'voiding',voidReason:reason,voidRequestedBy:uid,voidRequestedAt:serverTimestamp()});return {replayed:false,status:'voiding'};});}
  async function finishVoid(expenseId){const e=ref('sparkExpenseDrafts',identifier(expenseId));return runTransaction(db,async tx=>{const s=await tx.get(e);if(!s.exists())fail('Expense missing');const old=s.data();if(old.status==='voided')return {replayed:true};if(old.status!=='voiding'||old.allocatedCents!==0||old.count!==0)fail('Release every allocation before finishing the void');tx.update(e,{status:'voided',voidedAt:serverTimestamp()});return {replayed:false};});}
- return {accept,createExpense,allocate,finalizeExpense,cancelExpense,release,finishCancellation,beginVoid,finishVoid};
+ // Read only from Firestore's server, not an offline or locally pending view.
+ // Double-read the monotonic parent around the allocation query. No client may
+ // treat an inconsistent view as proof that a multi-step operation completed.
+ async function inspectExpense(expenseId){
+  identifier(expenseId);const {collection,query,where,getDocFromServer,getDocsFromServer}=api;
+  if(!collection||!query||!where||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
+  const parent=ref('sparkExpenseDrafts',expenseId),lines=collection(db,`organizations/${orgId}/sparkAllocations`);
+  const clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
+  const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Expense missing');
+  const result=await getDocsFromServer(query(lines,where('expenseId','==',expenseId)));clean(result);
+  const two=await getDocFromServer(parent);clean(two);if(!two.exists())fail('Expense changed; reload');
+  const before=one.data(),after=two.data();
+  const fingerprint=x=>JSON.stringify([x.status,x.amountCents,x.allocatedCents,x.count,x.lastAllocation,x.lastRelease,x.createdBy]);
+  if(fingerprint(before)!==fingerprint(after))fail('Expense changed during recovery; reload');
+  if(!['draft','recorded','cancelling','cancelled','voiding','voided'].includes(after.status)||!Number.isSafeInteger(after.amountCents)||after.amountCents<=0||!Number.isSafeInteger(after.allocatedCents)||!Number.isSafeInteger(after.count)||result.size>200)fail('Expense recovery data is invalid');
+  const entries=[];let activeAmount=0,activeCount=0;
+  for(const snap of result.docs){clean(snap);const row=snap.data();if(row.expenseId!==expenseId||typeof row.walletId!=='string'||!Number.isSafeInteger(row.amountCents)||row.amountCents<=0||!(row.releasedAt===null||typeof row.releasedAt?.toMillis==='function')||(row.releasedAt===null?row.releasedBy!==null:typeof row.releasedBy!=='string'))fail('Expense allocation data is invalid');
+   if(row.releasedAt===null){activeAmount+=row.amountCents;activeCount++;if(!Number.isSafeInteger(activeAmount))fail('Expense allocation total is invalid');}
+   entries.push({id:snap.id,walletId:row.walletId,amountCents:row.amountCents,released:row.releasedAt!==null});
+  }
+  if(activeAmount!==after.allocatedCents||activeCount!==after.count||activeAmount>after.amountCents)fail('Expense allocations are inconsistent; reload');
+  if(after.status==='recorded'&&activeAmount!==after.amountCents)fail('Recorded expense is incomplete');
+  if(['cancelled','voided'].includes(after.status)&&activeCount!==0)fail('Expense reversal is incomplete');
+  return {status:after.status,amountCents:after.amountCents,allocatedCents:activeAmount,allocations:entries.sort((a,b)=>a.id.localeCompare(b.id))};
+ }
+ return {accept,createExpense,allocate,finalizeExpense,cancelExpense,release,finishCancellation,beginVoid,finishVoid,inspectExpense};
 }
 module.exports={createIntegratedClient};

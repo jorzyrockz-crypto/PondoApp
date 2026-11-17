@@ -126,3 +126,16 @@ test('no actor can forge a partial void or refund an allocation twice',async()=>
  await assertFails(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voided',voidedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voiding',voidReason:'',voidRequestedBy:'ao',voidRequestedAt:serverTimestamp()}));
  await assertSucceeds(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voiding',voidReason:'Incorrect entry',voidRequestedBy:'ao',voidRequestedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voided',voidedAt:serverTimestamp()}));await assertFails(updateDoc(d(ao,'sparkWallets/r'),{unspentCents:25000,revision:2,lastRelease:'a'}));await assertSucceeds(releaseAllocation(ao,'a'));await assertFails(releaseAllocation(ao,'a'));await assertSucceeds(updateDoc(d(ao,'sparkExpenseDrafts/e'),{status:'voided',voidedAt:serverTimestamp()}));
 });
+
+test('a second client can inspect and finish an interrupted expense reversal',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),pres=createIntegratedClient({db:client('president'),api,orgId:'school',uid:'president'}),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});
+ await pending(db,'one','person1');await pres.accept('one');await pending(db,'two','person2');await pres.accept('two');const at=(await getDoc(d(db,'sparkWallets/two'))).data().acceptedAt;
+ await ao.createExpense('resume',{amountCents:40000,description:'Supplies',payee:'Supplier',occurredAt:at});await ao.allocate('resume','one','line1',25000);await ao.allocate('resume','two','line2',15000);await ao.finalizeExpense('resume');await ao.beginVoid('resume','Incorrect');await ao.release('line1');
+ const resumed=createIntegratedClient({db:client('ao'),api,orgId:'school',uid:'ao'}),view=await resumed.inspectExpense('resume');assert.equal(view.status,'voiding');assert.equal(view.allocatedCents,15000);assert.deepEqual(view.allocations.map(x=>[x.id,x.released]),[['line1',true],['line2',false]]);
+ await resumed.release('line2');await resumed.finishVoid('resume');const final=await resumed.inspectExpense('resume');assert.equal(final.status,'voided');assert.equal(final.allocatedCents,0);assert.equal(final.allocations.filter(x=>x.released).length,2);
+});
+
+test('expense recovery refuses inconsistent allocation data instead of guessing',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),pres=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'});await pending(db,'r','person1');await accept(pres,'r');const at=(await getDoc(d(db,'sparkWallets/r'))).data().acceptedAt;await ao.createExpense('e',{amountCents:10000,description:'Supplies',payee:'Supplier',occurredAt:at});await ao.allocate('e','r','a',10000);
+ await env.withSecurityRulesDisabled(async c=>updateDoc(d(c.firestore(),'sparkExpenseDrafts/e'),{allocatedCents:9999}));await assert.rejects(ao.inspectExpense('e'),/inconsistent/);
+});
