@@ -97,10 +97,10 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false}) {
    tx.set(w,{status:'open',amountCents:rem.amountCents,unspentCents:rem.amountCents,acceptedAt:serverTimestamp(),revision:0,lastAllocation:null,lastRelease:null});return {replayed:false};
   });
  }
- async function createExpense(expenseId,{amountCents,description,payee,occurredAt}){
-  identifier(expenseId);amount(amountCents);text(description,300);text(payee,160);if(!Number.isFinite(millis(occurredAt)))fail('Invalid expense time');const e=ref('sparkExpenseDrafts',expenseId);
-  return atomic(async tx=>{const s=await tx.get(e);if(s.exists()){const old=s.data();if(old.amountCents!==amountCents||old.description!==description||old.payee!==payee||millis(old.occurredAt)!==millis(occurredAt)||old.createdBy!==uid)fail('Expense ID already has different data');return {replayed:true,status:old.status};}
-   tx.set(e,{status:'draft',amountCents,allocatedCents:0,count:0,lastAllocation:null,lastRelease:null,description,payee,occurredAt,createdAt:serverTimestamp(),createdBy:uid});return {replayed:false,status:'draft'};
+ async function createExpense(expenseId,{amountCents,description,payee,reference='',occurredAt}){
+  identifier(expenseId);amount(amountCents);text(description,300);text(payee,160);if(typeof reference!=='string'||reference.length>160)fail('Invalid reference');if(!Number.isFinite(millis(occurredAt)))fail('Invalid expense time');const e=ref('sparkExpenseDrafts',expenseId);
+  return atomic(async tx=>{const s=await tx.get(e);if(s.exists()){const old=s.data();if(old.amountCents!==amountCents||old.description!==description||old.payee!==payee||old.reference!==reference||millis(old.occurredAt)!==millis(occurredAt)||old.createdBy!==uid)fail('Expense ID already has different data');return {replayed:true,status:old.status};}
+   tx.set(e,{status:'draft',amountCents,allocatedCents:0,count:0,lastAllocation:null,lastRelease:null,description,payee,reference,occurredAt,createdAt:serverTimestamp(),createdBy:uid});return {replayed:false,status:'draft'};
   });
  }
  async function allocate(expenseId,walletId,allocationId,amountCents){

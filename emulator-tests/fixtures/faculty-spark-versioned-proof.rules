@@ -305,10 +305,11 @@ service cloud.firestore {
   match /organizations/{o}/sparkExpenseDrafts/{e} {
    allow read: if signed(o);
    allow create: if (collector(o) && e.matches('^[A-Za-z0-9_-]{1,128}$')
-     && request.resource.data.keys().hasOnly(['status','amountCents','allocatedCents','count','lastAllocation','lastRelease','description','payee','occurredAt','createdAt','createdBy'])
+     && request.resource.data.keys().hasOnly(['status','amountCents','allocatedCents','count','lastAllocation','lastRelease','description','payee','reference','occurredAt','createdAt','createdBy'])
      && request.resource.data.status == 'draft' && validAmount(request.resource.data.amountCents)
      && request.resource.data.allocatedCents == 0 && request.resource.data.count == 0 && request.resource.data.lastAllocation == null && request.resource.data.lastRelease == null
      && short(request.resource.data.description,300) && short(request.resource.data.payee,160)
+     && request.resource.data.reference is string && request.resource.data.reference.size() <= 160
      && request.resource.data.occurredAt is timestamp && request.resource.data.occurredAt <= request.time
      && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid) && revisionAdvanced(o);
    allow update: if ((
