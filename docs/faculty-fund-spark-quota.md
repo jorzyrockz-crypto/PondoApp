@@ -50,8 +50,8 @@ measurement.
 
 ## Bounded experiments
 
-Two isolated modules reduce reads for specific purposes, but do **not** replace
-all full-ledger reads:
+Several isolated modules reduce reads for specific purposes, but do **not**
+replace all full-ledger reads:
 
 * `faculty-fund-spark-pending-reader.js` checks one known uncertain request. It
   requests three server documents (revision, parent, revision) in the common
@@ -83,7 +83,24 @@ index entries, retries and other traffic are additional. The pages and focused
 reader rely on matching revision-enforcing rules and immutable record/link
 invariants; administrator writes bypass those rules. Firestore emulator tests
 exercise isolated fixtures, not production rules or production index
-requirements. The isolated targeted resolver can resume remittance drafts and
+requirements. `faculty-fund-spark-accepted-funds.js` is a separate paged
+summary of the remaining accepted wallets in the discovery namespace. It
+reads at most page size plus one wallets, the corresponding remittance per
+visible wallet, an additional correction document for each frozen wallet, and
+the revision before and after each page. Lookahead documents can be read again
+on the next page. All pages must finish at one revision before a total is
+returned; any intervening protected write requires a restart. The summary
+separates unfrozen and correction-frozen unspent amounts and includes the effect
+of draft reservations. It is **not** total cash, income, expense, a reconciled
+ledger, a report, or authorization to spend: an expense's date and later
+changes can further limit which funds it may use. It does not independently
+reconstruct each allocation or detect all administrator corruption.
+
+This reduces the scope to accepted wallets but still grows with their count,
+including fully spent open wallets; it does not guarantee free-quota operation.
+Firestore rules and query index needs, real-project costs, concurrent changes
+and the user experience of restarting must be evaluated before integration.
+The isolated targeted resolver can resume remittance drafts and
 finish cancellations or reversals without that full reader. Its optional
 expense resumer pages eligible wallets, rechecks individual records and uses
 retry-safe allocations. It scans at most 200 wallets by default and fails

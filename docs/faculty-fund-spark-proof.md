@@ -174,6 +174,14 @@ distinguishes an already accepted or recorded transaction from a cancellation.
 The client caps its per-record line and allocation inspection at 201 documents,
 rejecting a result above 200.
 
+The separate accepted-funds pager checks each open wallet against its accepted
+remittance and any pending correction, pins all pages to one protected
+revision, and releases a summary only when all pages are exhausted. It is a
+partial view of remaining accepted funds, not a full balance, report, audit or
+spending permission. It does not validate the full allocation history, and
+administrator writes can bypass the rules and revision. It remains experimental
+and outside the app; see the quota document for growth and read limitations.
+
 These modules cannot be mixed with the older namespace and have no migration or
 app integration. Emulator tests reject attempts to hide linked payments and test
 concurrent releases; a racing release encountered the rules 1,000-expression
