@@ -51,6 +51,44 @@ function createProofClient({db,api,orgId,uid}){
   const target=ref(kind==='member'?'sparkMemberReceipts':'sparkRemittanceReceipts',kind==='member'?id(remittanceId)+'~'+id(recordId):id(recordId));
   return runTransaction(db,async tx=>{const s=await tx.get(target);if(s.exists())return {replayed:true};tx.set(target,{...(kind==='member'?{paymentId:recordId,remittanceId}:{}),printedAt:serverTimestamp(),printedBy:uid});return {replayed:false};});
  }
- return {payment,draft,add,submit,accept,expense,confirmPrint};
+ async function createPerson(personId,name){
+  if(!/^[A-Za-z0-9_-]{1,80}$/.test(personId)||typeof name!=='string'||!name.trim()||name.trim().length>160)failure('Invalid faculty member');
+  name=name.trim();const p=ref('sparkPeople',personId);return runTransaction(db,async tx=>{const s=await tx.get(p);if(s.exists()){if(s.data().name!==name||s.data().createdBy!==uid)failure('Person ID already has different data');return {replayed:true};}tx.set(p,{name,createdAt:serverTimestamp(),createdBy:uid});return {replayed:false};});
+ }
+ async function cancel(remittanceId,reason){
+  if(typeof reason!=='string'||!reason.trim()||reason.length>500)failure('A cancellation reason is required');const r=ref('sparkRemittances',id(remittanceId));return runTransaction(db,async tx=>{
+   const s=await tx.get(r);if(!s.exists())failure('Missing remittance');const old=s.data();
+   if(old.status==='cancelled'&&old.cancelledBy===uid&&old.reason===reason)return {replayed:true};if(!['draft','pending'].includes(old.status))failure('Remittance cannot be cancelled');
+   tx.update(r,{status:'cancelled',cancelledBy:uid,cancelledAt:serverTimestamp(),reason});return {replayed:false};
+  });
+ }
+ async function decline(remittanceId,reason){
+  if(typeof reason!=='string'||!reason.trim()||reason.length>500)failure('A decline reason is required');const r=ref('sparkRemittances',id(remittanceId));return runTransaction(db,async tx=>{
+   const s=await tx.get(r);if(!s.exists())failure('Missing remittance');const old=s.data();
+   if(old.status==='declined'&&old.declinedBy===uid&&old.reason===reason)return {replayed:true};if(old.status!=='pending'||old.presidentUid!==uid)failure('Remittance cannot be declined');
+   tx.update(r,{status:'declined',declinedBy:uid,declinedAt:serverTimestamp(),reason});return {replayed:false};
+  });
+ }
+ async function release(remittanceId,paymentId){
+  const r=ref('sparkRemittances',id(remittanceId)),p=ref('sparkPayments',id(paymentId)),line=ref('sparkLines',remittanceId+'~'+paymentId);
+  return runTransaction(db,async tx=>{const [rs,ps,ls]=await Promise.all([tx.get(r),tx.get(p),tx.get(line)]);if(!rs.exists()||!ps.exists()||!ls.exists()||!['declined','cancelled','voided'].includes(rs.data().status))failure('Payment cannot be released');
+   if(ps.data().remittanceId===null)return {replayed:true};if(ps.data().remittanceId!==remittanceId)failure('Payment belongs to another remittance');tx.update(p,{remittanceId:null});return {replayed:false};});
+ }
+ async function requestCorrection(correctionId,remittanceId,reason){
+  if(typeof reason!=='string'||!reason.trim()||reason.length>500)failure('A correction reason is required');const c=ref('sparkCorrections',id(correctionId)),r=ref('sparkRemittances',id(remittanceId));
+  return runTransaction(db,async tx=>{const [cs,rs]=await Promise.all([tx.get(c),tx.get(r)]);if(cs.exists()){const old=cs.data();if(old.remittanceId!==remittanceId||old.requestedBy!==uid||old.reason!==reason)failure('Correction ID already has different data');return {replayed:true};}
+   if(!rs.exists()||rs.data().status!=='accepted'||rs.data().correctionId!==null)failure('Remittance cannot be corrected');
+   tx.set(c,{remittanceId,status:'pending',requestedBy:uid,requestedAt:serverTimestamp(),reason});tx.update(r,{correctionId});return {replayed:false};});
+ }
+ async function decideCorrection(correctionId,decision,reason=''){
+  if(!['approved','declined'].includes(decision)||(decision==='declined'&&(typeof reason!=='string'||!reason.trim()||reason.length>500)))failure('Invalid correction decision');const c=ref('sparkCorrections',id(correctionId));
+  return runTransaction(db,async tx=>{const cs=await tx.get(c);if(!cs.exists())failure('Missing correction');const old=cs.data();
+   if(old.status===decision&&old.decidedBy===uid&&(decision!=='declined'||old.decisionReason===reason))return {replayed:true};if(old.status!=='pending')failure('Correction is already decided');
+   const r=ref('sparkRemittances',id(old.remittanceId)),l=ref('sparkLedger','current'),[rs,ls]=await Promise.all([tx.get(r),tx.get(l)]);if(!rs.exists()||!ls.exists()||rs.data().correctionId!==correctionId)failure('Correction no longer pending');
+   if(decision==='declined'){tx.update(c,{status:decision,decidedBy:uid,decidedAt:serverTimestamp(),decisionReason:reason});tx.update(r,{correctionId:null});}
+   else{const balance=ls.data(),rem=rs.data();if(balance.lastExpenseAt!==null||balance.balanceCents<rem.amountCents)failure('Correction cannot yet be approved after expenses');tx.update(c,{status:decision,decidedBy:uid,decidedAt:serverTimestamp()});tx.update(r,{status:'voided',voidedBy:uid,voidedAt:serverTimestamp()});tx.update(l,{balanceCents:balance.balanceCents-rem.amountCents,revision:balance.revision+1,lastKind:'correction',lastId:old.remittanceId});}
+   return {replayed:false};});
+ }
+ return {createPerson,payment,draft,add,submit,accept,expense,confirmPrint,cancel,decline,release,requestCorrection,decideCorrection};
 }
 module.exports={createProofClient};

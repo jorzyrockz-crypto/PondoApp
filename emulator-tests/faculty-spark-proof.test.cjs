@@ -184,3 +184,17 @@ test('cannot confirm receipt in the same batch that creates a correction request
  await setup();const ao=client('ao'),president=client('president');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));await assertSucceeds(accept(president));
  const b=writeBatch(ao);b.set(d(ao,'sparkCorrections/c'),{remittanceId:'r',status:'pending',requestedBy:'ao',requestedAt:serverTimestamp(),reason:'Correction'});b.update(d(ao,'sparkRemittances/r'),{correctionId:'c'});b.set(d(ao,'sparkMemberReceipts/r~person1~2026-01-01'),{paymentId:'person1~2026-01-01',remittanceId:'r',printedBy:'ao',printedAt:serverTimestamp()});await assertFails(b.commit());
 });
+
+test('prototype client resumes cancelled batches and correction decisions without duplication',async()=>{
+ await setup();const api=require('firebase/firestore'),{createProofClient}=require('./fixtures/faculty-spark-proof-client.cjs');const db=client('ao'),ao=createProofClient({db,api,orgId:'school',uid:'ao'}),president=createProofClient({db:client('president'),api,orgId:'school',uid:'president'});
+ assert.equal((await ao.createPerson('newperson','Ana')).replayed,false);assert.equal((await ao.createPerson('newperson','Ana')).replayed,true);await assert.rejects(ao.createPerson('newperson','Other'));
+ const p=await ao.payment({personId:'newperson',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.draft('cancelled');await ao.add('cancelled',p.paymentId);await ao.cancel('cancelled','Wrong batch');assert.equal((await ao.cancel('cancelled','Wrong batch')).replayed,true);await ao.release('cancelled',p.paymentId);assert.equal((await ao.release('cancelled',p.paymentId)).replayed,true);
+ await ao.draft('accepted');await ao.add('accepted',p.paymentId);await ao.submit('accepted');await president.accept('accepted');await ao.requestCorrection('fix','accepted','Wrong amount');assert.equal((await ao.requestCorrection('fix','accepted','Wrong amount')).replayed,true);
+ await assert.rejects(ao.decideCorrection('fix','approved'));await president.decideCorrection('fix','approved');assert.equal((await president.decideCorrection('fix','approved')).replayed,true);await ao.release('accepted',p.paymentId);assert.equal((await getDoc(d(db,'sparkLedger/current'))).data().balanceCents,0);
+});
+
+test('simultaneous spending and correction approval cannot both commit',async()=>{
+ await setup();const ao=client('ao'),president=client('president');await assertSucceeds(makePayment(ao));await assertSucceeds(makeDraft(ao));await assertSucceeds(add(ao,'person1~2026-01-01'));await assertSucceeds(submit(ao));await assertSucceeds(accept(president));await assertSucceeds(requestCorrection(ao));
+ const results=await Promise.allSettled([spend(ao,'race',20000),decideCorrection(president)]);assert.equal(results.filter(x=>x.status==='fulfilled').length,1);
+ const balance=(await getDoc(d(ao,'sparkLedger/current'))).data().balanceCents,rem=(await getDoc(d(ao,'sparkRemittances/r'))).data();assert.ok((balance===0&&rem.status==='voided')||(balance===5000&&rem.status==='accepted'));
+});
