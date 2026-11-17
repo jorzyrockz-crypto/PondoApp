@@ -163,6 +163,16 @@ service cloud.firestore {
      && request.resource.data.lastPaymentId == null && request.resource.data.correctionId == null
      && request.resource.data.linkedCount == 0 && request.resource.data.needsRelease == false && request.resource.data.lastReleasedPaymentId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time) && revisionAdvanced(o);
    allow update: if ((
+     collector(o) && resource.data.status in ['declined','cancelled','voided'] && resource.data.needsRelease == true
+     && resource.data.linkedCount is int && resource.data.linkedCount > 0
+     && only(['linkedCount','needsRelease','lastReleasedPaymentId'])
+     && short(request.resource.data.lastReleasedPaymentId,128)
+     && request.resource.data.lastReleasedPaymentId in resource.data.paymentIds
+     && get(payment(o,request.resource.data.lastReleasedPaymentId)).data.remittanceId == r
+     && getAfter(payment(o,request.resource.data.lastReleasedPaymentId)).data.remittanceId == null
+     && request.resource.data.linkedCount == resource.data.linkedCount - 1
+     && request.resource.data.needsRelease == (request.resource.data.linkedCount > 0)
+    ) || (
      collector(o) && resource.data.status == 'draft' && request.resource.data.status == 'draft'
      && only(['count','amountCents','lastPaymentId','linkedCount']) && resource.data.count < 200
      && short(request.resource.data.lastPaymentId,128) && request.resource.data.lastPaymentId in resource.data.paymentIds
@@ -194,16 +204,6 @@ service cloud.firestore {
      && request.resource.data.needsRelease == (resource.data.linkedCount > 0)
      && request.resource.data.status == 'cancelled' && request.resource.data.cancelledBy == request.auth.uid
      && request.resource.data.cancelledAt == request.time && short(request.resource.data.reason,500)
-   ) || (
-     collector(o) && resource.data.status in ['declined','cancelled','voided'] && resource.data.needsRelease == true
-     && resource.data.linkedCount is int && resource.data.linkedCount > 0
-     && only(['linkedCount','needsRelease','lastReleasedPaymentId'])
-     && short(request.resource.data.lastReleasedPaymentId,128)
-     && request.resource.data.lastReleasedPaymentId in resource.data.paymentIds
-     && get(payment(o,request.resource.data.lastReleasedPaymentId)).data.remittanceId == r
-     && getAfter(payment(o,request.resource.data.lastReleasedPaymentId)).data.remittanceId == null
-     && request.resource.data.linkedCount == resource.data.linkedCount - 1
-     && request.resource.data.needsRelease == (request.resource.data.linkedCount > 0)
    ) || (
      collector(o) && resource.data.status == 'accepted' && resource.data.correctionId == null
      && only(['correctionId']) && short(request.resource.data.correctionId,128)
