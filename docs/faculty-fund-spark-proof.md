@@ -91,13 +91,26 @@ its individual allocations released once each, with an immutable release record.
 A pending remittance correction freezes new allocations from that wallet; the
 President can approve the correction only when that wallet is fully unspent.
 
-The integrated client fixture demonstrates retries after a committed response is
-lost. Firestore emulator tests exercise competing expenses, forged allocation
-pairs, incomplete drafts, correction races, receipt locks, and partial-draft
-releases. This is still an isolated research fixture, **not app integration or
-production rules**. Recorded-expense voids, a complete recovery/export story,
-validated date handling, safe browser persistence of multi-step operation plans,
-reports, notifications, receipt rendering, and integration with the existing
-team rules and UI remain unfinished. Do not publish the fixture or enter real
+The experimental `faculty-fund-spark-client.js` demonstrates retries after a
+committed response is lost. The integrated fixture supports recorded-expense
+voids with reason and server-stamped, individually released allocations;
+server-confirmed inspection can resume an interrupted reversal. Payment slots
+preserve void history while preventing two active payments for a member/date.
+Remittance drafts retain their immutable selected-payment plan, and cannot be
+submitted until every selection is linked. Emulator tests exercise these paths,
+competing expenses, forged allocation pairs, correction races, receipt locks,
+and partial-draft releases.
+
+`faculty-fund-spark-projection.js` checks relationships and reconciles accepted,
+spent, reserved and unremitted cash from provided records, exposing unfinished
+actions rather than treating draft spending as completed. It is not a security
+boundary and multiple separate Firestore reads do not form an atomic snapshot;
+consistent, bounded and fully confirmed loading still needs design and tests.
+
+This is still an isolated experiment, **not app integration or production
+rules**. A complete recovery/export story, server-enforced valid calendar dates,
+safe browser persistence of multi-step expense plans, reports, notifications,
+receipt rendering, and integration with existing team rules and UI remain
+unfinished. Do not publish the fixture or enter real
 fund data based on this experiment. Emulator tests do not replace actual
 multi-account tests in Firebase.
