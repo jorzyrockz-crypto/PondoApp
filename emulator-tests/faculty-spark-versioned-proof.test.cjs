@@ -40,3 +40,10 @@ test('reader rejects cached or pending data, excessive collections, and missing 
  await ao.createPerson('second','Second');await assert.rejects(reader(aoDb,{maxDocuments:1}).read(),/safe loading limit/);
  await env.withSecurityRulesDisabled(async c=>api.deleteDoc(ref(c.firestore(),'sparkRevision/current')));await assert.rejects(reader(aoDb).read(),/revision is missing/);
 });
+
+test('versioned snapshots produce separate receipts and a scoped cash report',async()=>{
+ const {aoDb,ao,pres}=await base(),{createSparkReceiptView}=require('../faculty-fund-spark-receipts.js'),{makeSparkReport,sparkReportCsv}=require('../faculty-fund-spark-report.js');
+ await ao.createPayment('p',{personId:'teacher',absenceDate:'2026-01-01',paymentDate:'2026-01-02',amountCents:25000});await ao.createRemittance('r',['p']);await ao.addPayment('r','p');await ao.submitRemittance('r');await pres.accept('r');
+ let snapshot=await reader(aoDb).read(),view=createSparkReceiptView(snapshot,{organizationName:'School'});assert.deepEqual(view.unprinted(),['p']);assert.match(view.remittanceHtml('r'),/₱250\.00/);assert.match(view.membersHtml(['p']),/Ana/);assert.equal(makeSparkReport(snapshot).receivedCents,25000);
+ await ao.confirmPrint('member','p','r');snapshot=await reader(aoDb).read();view=createSparkReceiptView(snapshot);assert.deepEqual(view.unprinted(),[]);assert.equal(view.remittancePrinted('r'),false);await ao.confirmPrint('remittance','r');snapshot=await reader(aoDb).read();assert.equal(createSparkReceiptView(snapshot).remittancePrinted('r'),true);assert.match(sparkReportCsv(makeSparkReport(snapshot)),/250\.00/);
+});
