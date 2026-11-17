@@ -121,6 +121,19 @@ the existing UI cannot yet resume. The diagnostic export checksum detects
 accidental changes, not authenticity, and **cannot restore President
 acceptances**. The normal app backup does not include this separate data.
 
+The experimental `faculty-fund-spark-write-adapter.js` also translates UI
+operations to deterministic, retryable client operations. Its cancellation
+helper does not treat a missing record as cancelled: an earlier request may
+still arrive. It distinguishes an already accepted remittance or recorded
+expense from a cancellation, and must finish releasing reserved records before
+reporting cancellation. Acceptance or finalization can race with cancellation;
+a failed cancellation must be retried and reconciled against the server. The
+adapter is not loaded by the app. In particular, a device-only pending token
+cannot yet recover safely if the draft is absent, storage is lost, or the user
+changes devices. The proposed cancellation UI was withheld until these paths
+and matching browser/emulator tests are complete; connecting the read-only
+adapter now would hide unfinished records and can strand a user.
+
 This is still an isolated experiment, **not app integration or production
 rules**. A complete safe restore procedure, browser UI for recovering or
 cancelling multi-step expense operations, notifications, print pagination on

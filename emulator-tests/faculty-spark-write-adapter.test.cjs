@@ -35,3 +35,16 @@ test('scope changes preserve the retry token and do not duplicate a committed pe
  await assert.rejects(a.transition(input),e=>e.code==='functions/unavailable');await a.transition(input);const people=await api.getDocs(api.collection(h.dbs.ao,`${root}/sparkPeople`));assert.equal(people.size,1);
  await assert.rejects(a.abortPending(h.input(5,'submitRemittance',{paymentIds:['p'],reason:'Cancel'})),/retry the original/);
 });
+
+test('cancellation never claims success when acceptance wins a race',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const payment=await addPersonAndPayment(h,a,2),input=h.input(4,'submitRemittance',{paymentIds:[payment.paymentId]});const rem=await a.transition(input);
+ let once=true;const racing=createSparkWriteAdapter({getContext:()=>h.ctx,makeReader:h.reader,makeClient:c=>{const client=h.factory(c),cancel=client.cancelRemittance;return {...client,cancelRemittance:async(...args)=>{if(once){once=false;await h.factory({uid:'president',orgId:'school'}).accept(rem.remittanceId)}return cancel(...args)}}}});
+ await assert.rejects(racing.abortPending({...input,reason:'Cancel'}),e=>e.code==='functions/unavailable');const resolved=await a.abortPending({...input,reason:'Cancel'});assert.equal(resolved.status,'accepted');assert.equal((await get(h.dbs.ao,'sparkRemittances/'+rem.remittanceId)).data().status,'accepted');assert.equal((await get(h.dbs.ao,'sparkPayments/'+payment.paymentId)).data().remittanceId,rem.remittanceId);
+});
+
+test('cancellation never claims success when expense finalization wins a race',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const payment=await addPersonAndPayment(h,a,2),rem=await a.transition(h.input(4,'submitRemittance',{paymentIds:[payment.paymentId]}));h.use('president','reviewer');await a.transition(h.input(5,'accept',{remittanceId:rem.remittanceId}));h.use('ao','disbursing');const client=h.factory(h.ctx),wallet=(await get(h.dbs.ao,'sparkWallets/'+rem.remittanceId)).data(),at=new Date(Math.ceil(wallet.acceptedAt.toMillis())).toISOString(),input=h.input(6,'recordExpense',{amountCents:10000,description:'Supplies',payee:'Store',reference:'',occurredAt:at}),expenseId='exp_'+tok(6);
+ await client.createExpense(expenseId,{...input,occurredAt:new Date(at)});await client.allocate(expenseId,rem.remittanceId,'alloc_race',10000);
+ let once=true;const racing=createSparkWriteAdapter({getContext:()=>h.ctx,makeReader:h.reader,makeClient:c=>{const inner=h.factory(c),cancel=inner.cancelExpense;return {...inner,cancelExpense:async(...args)=>{if(once){once=false;await inner.finalizeExpense(expenseId)}return cancel(...args)}}}});
+ await assert.rejects(racing.abortPending({...input,reason:'Cancel'}),e=>e.code==='functions/unavailable');const resolved=await a.abortPending({...input,reason:'Cancel'});assert.equal(resolved.status,'recorded');assert.equal((await get(h.dbs.ao,'sparkExpenseDrafts/'+expenseId)).data().status,'recorded');assert.equal((await get(h.dbs.ao,'sparkWallets/'+rem.remittanceId)).data().unspentCents,15000);
+});
