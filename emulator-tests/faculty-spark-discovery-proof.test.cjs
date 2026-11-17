@@ -36,8 +36,11 @@ test('acceptance racing cancellation never hides a cancelled linked payment',asy
  const {aoDb,ao,pres}=await base();await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');const results=await Promise.allSettled([ao.cancelRemittance('r','Cancel'),pres.accept('r')]);assert.equal(results.filter(x=>x.status==='fulfilled').length,1);const r=await get(aoDb,'sparkDiscoveryRemittances/r');assert.ok(['cancelled','accepted'].includes(r.status));assert.equal(r.needsRelease,r.status==='cancelled');assert.equal(r.linkedCount,1);
 });
 
-test('independent collectors concurrently release different payments without hiding remaining work',async()=>{
- const {owner,aoDb,ao}=await base(),other=client(owner,'owner');await ao.createRemittance('r',['p1','p2']);await ao.addPayment('r','p1');await ao.addPayment('r','p2');await ao.cancelRemittance('r','Wrong batch');const [a,b]=await Promise.all([ao.releasePayment('r','p1'),other.releasePayment('r','p2')]);assert.equal(a.replayed,false);assert.equal(b.replayed,false);const r=await get(aoDb,'sparkDiscoveryRemittances/r');assert.equal(r.linkedCount,0);assert.equal(r.needsRelease,false);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p1')).remittanceId,null);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p2')).remittanceId,null);
+test('concurrent releases retain discoverable work if contention requires a retry',async()=>{
+ const {owner,aoDb,ao}=await base(),other=client(owner,'owner');await ao.createRemittance('r',['p1','p2']);await ao.addPayment('r','p1');await ao.addPayment('r','p2');await ao.cancelRemittance('r','Wrong batch');const [a,b]=await Promise.allSettled([ao.releasePayment('r','p1'),other.releasePayment('r','p2')]);assert.ok([a,b].some(x=>x.status==='fulfilled'));let r=await get(aoDb,'sparkDiscoveryRemittances/r');const p1=await get(aoDb,'sparkDiscoveryPayments/p1'),p2=await get(aoDb,'sparkDiscoveryPayments/p2'),attached=[p1,p2].filter(p=>p.remittanceId==='r').length;assert.equal(r.linkedCount,attached);assert.equal(r.needsRelease,attached>0);
+ // The rules evaluator can reject a racing transaction; retry the same ID
+ // only after confirming its result was not reported as successful.
+ if(a.status==='rejected')await ao.releasePayment('r','p1');if(b.status==='rejected')await other.releasePayment('r','p2');r=await get(aoDb,'sparkDiscoveryRemittances/r');assert.equal(r.linkedCount,0);assert.equal(r.needsRelease,false);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p1')).remittanceId,null);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p2')).remittanceId,null);
 });
 
 test('all recovery categories match the protected dataset across multiple pages',async()=>{
