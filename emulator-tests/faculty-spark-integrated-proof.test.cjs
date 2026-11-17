@@ -76,3 +76,18 @@ test('a release cannot increase a wallet without matching cancellation and alloc
  await setup();const ao=client('ao'),pres=client('president');await pending(ao,'r','person1');await accept(pres,'r');const at=(await getDoc(d(ao,'sparkWallets/r'))).data().acceptedAt;await expense(ao,'e',10000,at);await allocate(ao,'e','r','a',10000);await beginCancel(ao,'e');
  await assertFails(updateDoc(d(ao,'sparkWallets/r'),{unspentCents:25000,revision:2,lastRelease:'a'}));await assertFails(updateDoc(d(ao,'sparkAllocations/a'),{releasedAt:serverTimestamp(),releasedBy:'ao'}));await assertSucceeds(releaseAllocation(ao,'a'));
 });
+
+test('integrated client can retry lost responses without duplicate acceptance, expense or release',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),aoDb=client('ao'),pDb=client('president'),ao=createIntegratedClient({db:aoDb,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:pDb,api,orgId:'school',uid:'president'});
+ await pending(aoDb,'r','person1');assert.equal((await pres.accept('r')).replayed,false);assert.equal((await pres.accept('r')).replayed,true);const occurredAt=(await getDoc(d(aoDb,'sparkWallets/r'))).data().acceptedAt;
+ const values={amountCents:20000,description:'School supplies',payee:'Supplier',occurredAt};assert.equal((await ao.createExpense('expense1',values)).replayed,false);assert.equal((await ao.createExpense('expense1',values)).replayed,true);await assert.rejects(ao.createExpense('expense1',{...values,amountCents:10000}));
+ assert.equal((await ao.allocate('expense1','r','alloc1',10000)).replayed,false);assert.equal((await ao.allocate('expense1','r','alloc1',10000)).replayed,true);await assert.rejects(ao.allocate('expense1','r','alloc1',9000));
+ await ao.cancelExpense('expense1','Wrong amount');assert.equal((await ao.cancelExpense('expense1','Wrong amount')).replayed,true);await ao.release('alloc1');assert.equal((await ao.release('alloc1')).replayed,true);await ao.finishCancellation('expense1');assert.equal((await ao.finishCancellation('expense1')).replayed,true);assert.equal((await getDoc(d(aoDb,'sparkWallets/r'))).data().unspentCents,25000);
+});
+
+test('integrated client completes multi-wallet expense and retries each allocation safely',async()=>{
+ await setup();const api=require('firebase/firestore'),{createIntegratedClient}=require('./fixtures/faculty-spark-integrated-client.cjs'),db=client('ao'),p=client('president'),ao=createIntegratedClient({db,api,orgId:'school',uid:'ao'}),pres=createIntegratedClient({db:p,api,orgId:'school',uid:'president'});
+ await pending(db,'one','person1');await pres.accept('one');await pending(db,'two','person2');await pres.accept('two');const occurredAt=(await getDoc(d(db,'sparkWallets/two'))).data().acceptedAt;
+ await ao.createExpense('expense',{amountCents:40000,description:'Materials',payee:'Supplier',occurredAt});await ao.allocate('expense','one','partone',25000);await assert.rejects(ao.finalizeExpense('expense'));await ao.allocate('expense','two','parttwo',15000);assert.equal((await ao.allocate('expense','two','parttwo',15000)).replayed,true);await ao.finalizeExpense('expense');assert.equal((await ao.finalizeExpense('expense')).replayed,true);
+ assert.equal((await getDoc(d(db,'sparkWallets/one'))).data().unspentCents,0);assert.equal((await getDoc(d(db,'sparkWallets/two'))).data().unspentCents,10000);
+});
