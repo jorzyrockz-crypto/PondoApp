@@ -2,6 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {initializeTestEnvironment}=require('@firebase/rules-unit-testing'),api=require('firebase/firestore');
 const {createIntegratedClient}=require('../faculty-fund-spark-client.js'),{createSparkReader}=require('../faculty-fund-spark-read.js'),{projectFacultySpark}=require('../faculty-fund-spark-projection.js'),{createSparkWriteAdapter}=require('../faculty-fund-spark-write-adapter.js');
+const {createSparkRecovery}=require('../faculty-fund-spark-recovery.js');
 const PROJECT='demo-pondo-security',root='organizations/school';if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
 let env;test.before(async()=>{env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'fixtures/faculty-spark-versioned-proof.rules'),'utf8')}})});
 test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();for(const [uid,role] of [['owner','owner'],['ao','disbursing'],['president','reviewer']])await api.setDoc(api.doc(db,`${root}/members/${uid}`),{uid,role});});});test.after(async()=>{if(env)await env.cleanup()});
@@ -47,4 +48,39 @@ test('cancellation never claims success when expense finalization wins a race',a
  await client.createExpense(expenseId,{...input,occurredAt:new Date(at)});await client.allocate(expenseId,rem.remittanceId,'alloc_race',10000);
  let once=true;const racing=createSparkWriteAdapter({getContext:()=>h.ctx,makeReader:h.reader,makeClient:c=>{const inner=h.factory(c),cancel=inner.cancelExpense;return {...inner,cancelExpense:async(...args)=>{if(once){once=false;await inner.finalizeExpense(expenseId)}return cancel(...args)}}}});
  await assert.rejects(racing.abortPending({...input,reason:'Cancel'}),e=>e.code==='functions/unavailable');const resolved=await a.abortPending({...input,reason:'Cancel'});assert.equal(resolved.status,'recorded');assert.equal((await get(h.dbs.ao,'sparkExpenseDrafts/'+expenseId)).data().status,'recorded');assert.equal((await get(h.dbs.ao,'sparkWallets/'+rem.remittanceId)).data().unspentCents,15000);
+});
+
+function recovery(h,makeClient=h.factory){return createSparkRecovery({getContext:()=>h.ctx,makeReader:h.reader,makeClient,makeWriteAdapter:()=>h.adapter()});}
+
+test('server discovery resumes a partial remittance on another device without a local token',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p1=await addPersonAndPayment(h,a,2),p2=await addPersonAndPayment(h,a,4),remId='rem_'+tok(6),client=h.factory(h.ctx);
+ await client.createRemittance(remId,[p1.paymentId,p2.paymentId]);await client.addPayment(remId,p1.paymentId);
+ // A fresh adapter represents a different device with no saved browser data.
+ const secondDevice=recovery(h);let work=await secondDevice.list({orgId:'school'});assert.deepEqual(work.items.map(x=>[x.id,x.linkedCount,x.canResume]),[[remId,1,true]]);
+ h.use('owner','owner');work=await secondDevice.list({orgId:'school'});assert.equal(work.items[0].canResume,false);await assert.rejects(secondDevice.resolve({orgId:'school',kind:'remittance',id:remId,action:'resume'}),/original collector/);
+ h.use('ao','disbursing');const result=await secondDevice.resolve({orgId:'school',kind:'remittance',id:remId,action:'resume'});assert.equal(result.status,'pending');assert.equal(result.remaining,false);assert.equal((await get(h.dbs.ao,'sparkRemittances/'+remId)).data().count,2);assert.deepEqual((await secondDevice.list({orgId:'school'})).items,[]);
+ h.use('president','reviewer');await assert.rejects(secondDevice.list({orgId:'school'}),/authorized/);
+});
+
+test('different collectors can finish an interrupted cancellation and recover reserved cash',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p=await addPersonAndPayment(h,a,2),rem=await a.transition(h.input(4,'submitRemittance',{paymentIds:[p.paymentId]}));h.use('president','reviewer');await a.transition(h.input(5,'accept',{remittanceId:rem.remittanceId}));h.use('ao','disbursing');const client=h.factory(h.ctx),wallet=(await get(h.dbs.ao,'sparkWallets/'+rem.remittanceId)).data(),at=new Date(Math.ceil(wallet.acceptedAt.toMillis())),id='exp_'+tok(6);
+ await client.createExpense(id,{amountCents:10000,description:'Supplies',payee:'Store',reference:'',occurredAt:at});await client.allocate(id,rem.remittanceId,'alloc_saved',10000);
+ h.use('owner','owner');const fresh=recovery(h),listed=await fresh.list({orgId:'school'});assert.equal(listed.items[0].id,id);assert.equal(listed.items[0].canResume,false);assert.equal(listed.items[0].allocatedCents,10000);
+ let once=true;const broken=recovery(h,c=>{const inner=h.factory(c),cancel=inner.cancelExpense;return {...inner,cancelExpense:async(...args)=>{const result=await cancel(...args);if(once){once=false;throw Error('Lost cancellation response')}return result}}});
+ await assert.rejects(broken.resolve({orgId:'school',kind:'expense',id,action:'cancel',reason:'Duplicate'}),/Lost cancellation/);assert.equal((await get(h.dbs.owner,'sparkExpenseDrafts/'+id)).data().status,'cancelling');
+ // Another collector finishes the already-authorized cancellation without
+ // changing the recorded reason or pretending to be the original canceller.
+ h.use('ao','disbursing');const result=await fresh.resolve({orgId:'school',kind:'expense',id,action:'finish'});assert.equal(result.status,'cancelled');assert.equal(result.remaining,false);const exp=(await get(h.dbs.ao,'sparkExpenseDrafts/'+id)).data();assert.equal(exp.cancelRequestedBy,'owner');assert.equal(exp.cancelReason,'Duplicate');assert.equal((await get(h.dbs.ao,'sparkWallets/'+rem.remittanceId)).data().unspentCents,25000);assert.deepEqual((await fresh.list({orgId:'school'})).items,[]);
+ const replay=await fresh.resolve({orgId:'school',kind:'expense',id,action:'finish'});assert.equal(replay.status,'cancelled');assert.equal(replay.remaining,false);
+});
+
+test('remittance release and expense voids are discoverable until fully recovered',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p1=await addPersonAndPayment(h,a,2),p2=await addPersonAndPayment(h,a,4),r1=await a.transition(h.input(6,'submitRemittance',{paymentIds:[p1.paymentId]})),r2=await a.transition(h.input(7,'submitRemittance',{paymentIds:[p2.paymentId]}));h.use('president','reviewer');await a.transition(h.input(8,'accept',{remittanceId:r1.remittanceId}));await a.transition(h.input(9,'decline',{remittanceId:r2.remittanceId,reason:'Not received'}));h.use('ao','disbursing');const wallet=(await get(h.dbs.ao,'sparkWallets/'+r1.remittanceId)).data(),at=new Date(Math.ceil(wallet.acceptedAt.toMillis())).toISOString(),expense=await a.transition(h.input(10,'recordExpense',{amountCents:10000,description:'Supplies',payee:'Store',reference:'',occurredAt:at})),client=h.factory(h.ctx);await client.beginVoid(expense.expenseId,'Mistake');
+ const fresh=recovery(h);const work=await fresh.list({orgId:'school'});assert.deepEqual(new Set(work.items.map(x=>x.id)),new Set([r2.remittanceId,expense.expenseId]));const r=await fresh.resolve({orgId:'school',kind:'remittance',id:r2.remittanceId,action:'finish'}),e=await fresh.resolve({orgId:'school',kind:'expense',id:expense.expenseId,action:'finish'});assert.equal(r.status,'declined');assert.equal(e.status,'voided');assert.equal(r.remaining,false);assert.equal(e.remaining,false);assert.equal((await get(h.dbs.ao,'sparkPayments/'+p2.paymentId)).data().remittanceId,null);assert.equal((await get(h.dbs.ao,'sparkWallets/'+r1.remittanceId)).data().unspentCents,25000);
+});
+
+test('recovery rechecks context after a committed action and reconciles on retry',async()=>{
+ const h=harness(),a=h.adapter();await a.transition(h.input(1,'assignPresident',{presidentUid:'president'}));h.use('ao','disbursing');const p=await addPersonAndPayment(h,a,2),id='rem_'+tok(4),client=h.factory(h.ctx);await client.createRemittance(id,[p.paymentId]);await client.addPayment(id,p.paymentId);
+ let once=true;const changed=recovery(h,c=>{const inner=h.factory(c),cancel=inner.cancelRemittance;return {...inner,cancelRemittance:async(...args)=>{const result=await cancel(...args);if(once){once=false;h.ctx.scopeToken++}return result}}});
+ await assert.rejects(changed.resolve({orgId:'school',kind:'remittance',id,action:'cancel',reason:'Start over'}),/Workspace changed/);const retry=await recovery(h).resolve({orgId:'school',kind:'remittance',id,action:'finish'});assert.equal(retry.status,'cancelled');assert.equal(retry.remaining,false);assert.equal((await get(h.dbs.ao,'sparkPayments/'+p.paymentId)).data().remittanceId,null);
 });
