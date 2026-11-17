@@ -1,0 +1,111 @@
+// EXPERIMENT ONLY. This is not Pondo's deployed ruleset and is not a complete
+// Faculty Fund. It proves a small subset of the direct-Firestore design.
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o,u) { return /databases/$(database)/documents/organizations/$(o)/members/$(u); }
+  function config(o) { return /databases/$(database)/documents/organizations/$(o)/sparkConfig/current; }
+  function ledger(o) { return /databases/$(database)/documents/organizations/$(o)/sparkLedger/current; }
+  function payment(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPayments/$(p); }
+  function remit(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkRemittances/$(r); }
+  function expense(o,e) { return /databases/$(database)/documents/organizations/$(o)/sparkExpenses/$(e); }
+  function signed(o) { return request.auth != null && exists(member(o,request.auth.uid)); }
+  function role(o) { return get(member(o,request.auth.uid)).data.role; }
+  function collector(o) { return signed(o) && role(o) in ['owner','disbursing']; }
+  function owner(o) { return signed(o) && role(o) == 'owner'; }
+  function president(o) { return signed(o) && exists(config(o)) && get(config(o)).data.presidentUid == request.auth.uid; }
+  function only(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+  function short(s, n) { return s is string && s.size() > 0 && s.size() <= n; }
+  function validAmount(n) { return n is int && n > 0 && n <= 100000000; }
+  match /organizations/{o}/sparkConfig/{id} {
+   allow read: if signed(o) && id == 'current';
+   allow create, update: if id == 'current' && owner(o)
+     && request.resource.data.keys().hasOnly(['presidentUid','assignedAt','assignedBy'])
+     && short(request.resource.data.presidentUid,128)
+     && exists(member(o,request.resource.data.presidentUid))
+     && request.resource.data.assignedAt == request.time && request.resource.data.assignedBy == request.auth.uid;
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkPayments/{p} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['personId','absenceDate','paymentDate','amountCents','createdAt','createdBy','remittanceId'])
+     && short(request.resource.data.personId,80) && request.resource.data.personId.matches('^[A-Za-z0-9_-]+$')
+     && request.resource.data.absenceDate is string && request.resource.data.absenceDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && p == request.resource.data.personId + '~' + request.resource.data.absenceDate
+     && request.resource.data.paymentDate is string && request.resource.data.paymentDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && validAmount(request.resource.data.amountCents) && request.resource.data.createdAt == request.time
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.remittanceId == null;
+   allow update: if collector(o) && only(['remittanceId']) && resource.data.remittanceId == null
+     && short(request.resource.data.remittanceId,128)
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.lastPaymentId == p
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.count == get(remit(o,request.resource.data.remittanceId)).data.count + 1
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.amountCents == get(remit(o,request.resource.data.remittanceId)).data.amountCents + resource.data.amountCents;
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkRemittances/{r} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt'])
+     && request.resource.data.status == 'draft' && request.resource.data.amountCents == 0 && request.resource.data.count == 0
+     && request.resource.data.lastPaymentId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+   allow update: if (
+     collector(o) && resource.data.status == 'draft' && request.resource.data.status == 'draft'
+     && only(['count','amountCents','lastPaymentId']) && resource.data.count < 200
+     && short(request.resource.data.lastPaymentId,128)
+     && get(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == null
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == r
+     && request.resource.data.count == resource.data.count + 1
+     && request.resource.data.amountCents == resource.data.amountCents + get(payment(o,request.resource.data.lastPaymentId)).data.amountCents
+    ) || (
+     collector(o) && resource.data.status == 'draft' && resource.data.count > 0
+     && only(['status','presidentUid','submittedAt']) && request.resource.data.status == 'pending'
+     && request.resource.data.presidentUid == get(config(o)).data.presidentUid
+     && exists(member(o,request.resource.data.presidentUid)) && request.resource.data.submittedAt == request.time
+    ) || (
+     president(o) && resource.data.status == 'pending' && resource.data.presidentUid == request.auth.uid
+     && only(['status','acceptedBy','acceptedAt']) && request.resource.data.status == 'accepted'
+     && request.resource.data.acceptedBy == request.auth.uid && request.resource.data.acceptedAt == request.time
+     && getAfter(ledger(o)).data.lastKind == 'accept' && getAfter(ledger(o)).data.lastId == r
+     && getAfter(ledger(o)).data.revision == get(ledger(o)).data.revision + 1
+    ) || (
+     president(o) && resource.data.status == 'pending' && resource.data.presidentUid == request.auth.uid
+     && only(['status','declinedBy','declinedAt','reason']) && request.resource.data.status == 'declined'
+     && request.resource.data.declinedBy == request.auth.uid && request.resource.data.declinedAt == request.time && short(request.resource.data.reason,500)
+    );
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkLedger/{id} {
+   allow read: if signed(o) && id == 'current';
+   allow create: if owner(o) && id == 'current' && request.resource.data.keys().hasOnly(['balanceCents','revision','lastKind','lastId'])
+     && request.resource.data.balanceCents == 0 && request.resource.data.revision == 0
+     && request.resource.data.lastKind == 'init' && request.resource.data.lastId == '';
+   allow update: if id == 'current' && signed(o) && only(['balanceCents','revision','lastKind','lastId'])
+     && request.resource.data.revision == resource.data.revision + 1 && short(request.resource.data.lastId,128)
+     && (
+      (president(o) && request.resource.data.lastKind == 'accept'
+       && get(remit(o,request.resource.data.lastId)).data.status == 'pending'
+       && get(remit(o,request.resource.data.lastId)).data.presidentUid == request.auth.uid
+       && getAfter(remit(o,request.resource.data.lastId)).data.status == 'accepted'
+       && getAfter(remit(o,request.resource.data.lastId)).data.acceptedBy == request.auth.uid
+       && request.resource.data.balanceCents == resource.data.balanceCents + get(remit(o,request.resource.data.lastId)).data.amountCents)
+      ||
+      (collector(o) && request.resource.data.lastKind == 'expense'
+       && !exists(expense(o,request.resource.data.lastId))
+       && getAfter(expense(o,request.resource.data.lastId)).data.createdBy == request.auth.uid
+       && request.resource.data.balanceCents == resource.data.balanceCents - getAfter(expense(o,request.resource.data.lastId)).data.amountCents
+       && request.resource.data.balanceCents >= 0)
+     );
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkExpenses/{e} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['amountCents','description','createdAt','createdBy'])
+     && validAmount(request.resource.data.amountCents) && short(request.resource.data.description,300)
+     && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid
+     && getAfter(ledger(o)).data.lastKind == 'expense' && getAfter(ledger(o)).data.lastId == e
+     && getAfter(ledger(o)).data.revision == get(ledger(o)).data.revision + 1;
+   allow update, delete: if false;
+  }
+ }
+}
