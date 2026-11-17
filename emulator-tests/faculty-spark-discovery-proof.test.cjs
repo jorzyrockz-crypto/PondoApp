@@ -3,6 +3,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing'),api=require('firebase/firestore');
 const {createIntegratedClient}=require('../faculty-fund-spark-client.js'),{createSparkDiscovery}=require('../faculty-fund-spark-discovery.js');
+const {createSparkDiscoveryRecovery}=require('../faculty-fund-spark-discovery-recovery.js');
 const PROJECT='demo-pondo-security',root='organizations/school';if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
 let env;test.before(async()=>{env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'fixtures/faculty-spark-discovery-proof.rules'),'utf8')}})});
 test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();for(const [uid,role] of [['owner','owner'],['ao','disbursing'],['president','reviewer'],['reviewer','reviewer']])await api.setDoc(api.doc(db,`${root}/members/${uid}`),{uid,role});});});test.after(async()=>{if(env)await env.cleanup()});
@@ -49,4 +50,26 @@ test('all recovery categories match the protected dataset across multiple pages'
  for(const id of ['e1','e2','e3','e4'])await ao.createExpense(id,{amountCents:10000,description:'Supplies',payee:'Shop',occurredAt:wallet.acceptedAt});await ao.cancelExpense('e2','Cancel');await ao.cancelExpense('e4','Cancel');await ao.finishCancellation('e4');await ao.allocate('e3','accepted','allocation',10000);await ao.finalizeExpense('e3');await ao.beginVoid('e3','Correction');
  const pager=createSparkDiscovery({db:aoDb,api,orgId:'school',isCurrent:()=>true,pageSize:1}),found={};for(const category of ['draftRemittances','releaseRemittances','expenses']){found[category]=[];let page;do{page=await pager.next(category);found[category].push(...page.items.map(x=>x.id));}while(page.hasMore);if(category==='expenses')assert.equal(page.complete,true);}
  assert.deepEqual(found.draftRemittances,['draft']);assert.deepEqual(found.releaseRemittances,['release']);assert.deepEqual(found.expenses,['e1','e2','e3']);
+});
+
+function targeted({aoDb,owner,presDb,reviewer},overrides={}){const ctx={orgId:'school',uid:'ao',role:'disbursing',memberConfirmed:true,scopeToken:1},dbs={ao:aoDb,owner,president:presDb,reviewer},factory=c=>client(dbs[c.uid],c.uid),recovery=createSparkDiscoveryRecovery({getContext:()=>ctx,makeDb:c=>dbs[c.uid],api:overrides.api||api,makeClient:overrides.makeClient||factory});return {ctx,factory,recovery,dbs};}
+
+test('targeted recovery resumes selected remittance without full-collection scans',async()=>{
+ const envs=await base(),{ao}=envs;await ao.createRemittance('r',['p1','p2']);await ao.addPayment('r','p1');let reads=0,queries=0;const counted={...api,getDocFromServer:async r=>{reads++;return api.getDocFromServer(r)},getDocsFromServer:async q=>{queries++;return api.getDocsFromServer(q)}},t=targeted(envs,{api:counted});
+ const outcome=await t.recovery.resolve({orgId:'school',kind:'remittance',id:'r',action:'resume'});assert.equal(outcome.status,'pending');assert.equal(outcome.remaining,false);assert.equal(reads,6);assert.equal(queries,0);const record=await get(envs.aoDb,'sparkDiscoveryRemittances/r');assert.equal(record.count,2);assert.equal(record.linkedCount,2);
+});
+
+test('targeted cancellation lost after commit is finished by another collector',async()=>{
+ const envs=await base(),{ao,aoDb}=envs;await ao.createRemittance('r',['p1','p2']);await ao.addPayment('r','p1');let once=true;const t=targeted(envs),broken=createSparkDiscoveryRecovery({getContext:()=>t.ctx,makeDb:c=>t.dbs[c.uid],api,makeClient:c=>{const inner=t.factory(c),cancel=inner.cancelRemittance;return {...inner,cancelRemittance:async(...args)=>{const result=await cancel(...args);if(once){once=false;throw Error('Lost response')}return result}}}});
+ await assert.rejects(broken.resolve({orgId:'school',kind:'remittance',id:'r',action:'cancel',reason:'Wrong batch'}),/Lost response/);assert.equal((await get(aoDb,'sparkDiscoveryRemittances/r')).needsRelease,true);t.ctx.uid='owner';t.ctx.role='owner';t.ctx.scopeToken++;const outcome=await t.recovery.resolve({orgId:'school',kind:'remittance',id:'r',action:'finish'});assert.equal(outcome.status,'cancelled');assert.equal(outcome.remaining,false);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p1')).remittanceId,null);
+});
+
+test('targeted expense cancellation and void finish release only associated allocations',async()=>{
+ const envs=await base(),{ao,pres,aoDb}=envs;await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');await pres.accept('r');const wallet=await get(aoDb,'sparkDiscoveryWallets/r');await ao.createExpense('e',{amountCents:10000,description:'Supplies',payee:'Store',occurredAt:wallet.acceptedAt});await ao.allocate('e','r','alloc_e',10000);const t=targeted(envs);await assert.rejects(t.recovery.resolve({orgId:'school',kind:'expense',id:'e',action:'resume'}),/not available/);let result=await t.recovery.resolve({orgId:'school',kind:'expense',id:'e',action:'cancel',reason:'Duplicate'});assert.equal(result.status,'cancelled');assert.equal(result.remaining,false);assert.equal((await get(aoDb,'sparkDiscoveryWallets/r')).unspentCents,25000);
+ await ao.createExpense('e2',{amountCents:10000,description:'Books',payee:'Store',occurredAt:wallet.acceptedAt});await ao.allocate('e2','r','alloc_e2',10000);await ao.finalizeExpense('e2');await ao.beginVoid('e2','Correction');result=await t.recovery.resolve({orgId:'school',kind:'expense',id:'e2',action:'finish'});assert.equal(result.status,'voided');assert.equal(result.remaining,false);assert.equal((await get(aoDb,'sparkDiscoveryWallets/r')).unspentCents,25000);
+});
+
+test('targeted recovery never claims cancellation after acceptance wins',async()=>{
+ const envs=await base(),{ao,pres,aoDb}=envs;await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');const t=targeted(envs);let once=true;const raced=createSparkDiscoveryRecovery({getContext:()=>t.ctx,makeDb:c=>t.dbs[c.uid],api,makeClient:c=>{const inner=t.factory(c),cancel=inner.cancelRemittance;return {...inner,cancelRemittance:async(...args)=>{if(once){once=false;await pres.accept('r')}return cancel(...args)}}}});await assert.rejects(raced.resolve({orgId:'school',kind:'remittance',id:'r',action:'cancel',reason:'Wrong'}));const result=await t.recovery.resolve({orgId:'school',kind:'remittance',id:'r',action:'cancel',reason:'Wrong'});assert.equal(result.status,'accepted');assert.equal(result.remaining,false);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p1')).remittanceId,'r');
+ t.ctx.uid='reviewer';t.ctx.role='reviewer';t.ctx.scopeToken++;await assert.rejects(t.recovery.inspect({orgId:'school',kind:'remittance',id:'r'}),/authorized/);
 });
