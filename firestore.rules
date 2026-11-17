@@ -176,6 +176,23 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // Reserved for a future server-authoritative Faculty Fund service. The
+      // client cannot create, modify, or erase these records. Acceptance and
+      // assignment must never rely on the editable shared snapshot below.
+      match /facultyFund/{docId} {
+        allow read: if docId in ['config', 'state'] && isMember(orgId);
+        allow write: if false;
+      }
+      // Backup snapshots and operation receipts are server-only. An uploaded
+      // JSON file must never be treated as a President's authorization.
+      match /facultyFundBackups/{backupId} {
+        allow read, write: if false;
+      }
+      // Idempotency records are internal to the trusted service.
+      match /facultyFundOperations/{operationId} {
+        allow read, write: if false;
+      }
+
       match /data/{docId} {
         allow read: if isMember(orgId);
         // Old clients performed unconditional snapshot writes. Reject them and

@@ -18,3 +18,8 @@ test('detailed report preserves escaped people, payments, totals, periods and wa
 });
 test('totals-only report excludes named records, notes and details or project labels',()=>{let t=create();t.context.printContributionSummary('a');let s=t.target.innerHTML;for(let part of ['Private &lt;name&gt;','Another person','Receiver','Secret reference','Private note','Sensitive details','Secret project'])assert.ok(!s.includes(part),part);assert.match(s,/Contributor-month status counts/);assert.match(s,/2 contributor-month records/);assert.match(s,/TOTALS-ONLY REPORT/)});
 test('office print styling uses white paper and keeps multi-page table headers',()=>{assert.match(html,/html body\.contribution-printing:not\(\.dark-mode\)\[data-background\]/);assert.match(html,/contribution-office-report thead \{ display:table-header-group/);assert.match(html,/contribution-office-report tr \{ break-inside:avoid/);assert.match(html,/office-payments th:nth-child\(6\)/)});
+test('dialog-open contribution print unlocks root overflow and uses paginating normal flow',()=>{
+ assert.match(html,/html:has\(body\.contribution-printing\), html body\.contribution-printing \{[^}]*height:auto!important;[^}]*overflow:visible!important/);
+ assert.match(html,/body\.contribution-printing #pondoApp, body\.contribution-printing #contributionPrint \{[^}]*position:static!important;[^}]*max-height:none!important;[^}]*overflow:visible!important/);
+ assert.match(html,/body\.contribution-printing #pondoApp > :not\(#contributionPrint\) \{ display:none!important; \}/);
+});

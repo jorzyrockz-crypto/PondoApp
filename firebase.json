@@ -1,5 +1,11 @@
 {
   "firestore": {
     "rules": "firestore.rules"
-  }
+  },
+  "functions": [
+    {
+      "source": "faculty-fund-functions",
+      "codebase": "faculty-fund"
+    }
+  ]
 }
