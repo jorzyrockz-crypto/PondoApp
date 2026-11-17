@@ -58,3 +58,22 @@ its console. Real multi-account testing with fictitious records is still needed.
 Spark quotas apply; free usage is not unlimited. A Firebase admin remains able
 to override rules, and a normal exported JSON backup is not proof of an
 acceptance. No billing upgrade is required to test this approach.
+
+## Separate historical-expense experiment
+
+The independent `faculty-spark-wallet-proof.rules` fixture explores one
+alternative to the conservative timestamp restriction: allocate each expense
+portion to a particular accepted remittance, and require the expense's actual
+claimed time to be no earlier than that remittance's acceptance. Each atomic
+allocation decrements that remittance's unspent amount. Emulator tests cover
+late-entered and out-of-order expenses, rejection of spending a later
+acceptance at an earlier time, and competing allocations. The tests seed the
+accepted-remittance balances using rules-disabled setup: **they do not prove
+that a client cannot forge creation or correction of those balances**.
+
+This experiment does not yet connect acceptance, corrections, reports, refunds,
+voids, app UI, or fully validated multi-remittance expense grouping. In
+particular, a shared expense-group label is not an authoritative grouping or
+proof that a multi-part expense completed. It is not integrated with the first
+prototype, and neither fixture may be published as production rules. No claim
+of a complete or audited accounting workflow follows from the tests.
