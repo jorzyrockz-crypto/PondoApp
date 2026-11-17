@@ -179,8 +179,12 @@ remittance and any pending correction, pins all pages to one protected
 revision, and releases a summary only when all pages are exhausted. It is a
 partial view of remaining accepted funds, not a full balance, report, audit or
 spending permission. It does not validate the full allocation history, and
-administrator writes can bypass the rules and revision. It remains experimental
-and outside the app; see the quota document for growth and read limitations.
+administrator writes can bypass the rules and revision. The separate activity
+pager provides date-filtered payment and expense records while retaining their
+void, draft and cancellation states; it does not calculate cash or period
+report totals or prove historical completeness against privileged corruption.
+Both readers remain experimental and outside the app; see the quota document
+for growth and read limitations.
 
 These modules cannot be mixed with the older namespace and have no migration or
 app integration. Emulator tests reject attempts to hide linked payments and test

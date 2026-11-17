@@ -62,6 +62,13 @@ replace all full-ledger reads:
   reads the revision before and after. It refuses to combine pages after the
   revision changes. This is an individual-record list, **not a reconciled
   balance, complete audit, receipt or report**.
+* `faculty-fund-spark-activity.js` similarly pages date-filtered payments and
+  expenses in the separate discovery namespace. Payment dates are date-only;
+  expense occurrence timestamps are grouped by UTC+08:00, with inclusive date
+  endpoints. Both categories must finish at one revision to exhaust that
+  window. Results keep draft, cancellation and void statuses and provide no
+  totals. The list is not a balance, audit, period report, or proof that
+  entered dates or cash movements reflect real events.
 
 A separate `faculty-fund-spark-discovery.js` experiment pages three filtered
 categories: remittance drafts, remittances with payments still to release, and
