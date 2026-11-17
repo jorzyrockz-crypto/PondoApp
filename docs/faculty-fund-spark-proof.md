@@ -139,11 +139,19 @@ and whether recovery remains; callers must distinguish `accepted` or `recorded`
 from `cancelled`. Emulator tests exercise a second device with no local token,
 other collectors finishing reversals, changed workspaces and lost responses.
 This listing is not a lock; writes and final reconciliation can still fail or
-race and need retry. Only records already visible on the server can be found:
+race and need retry. The experimental `faculty-fund-spark-pending.js` inspector
+compares an original local remittance or expense request against a revision-checked
+server record. It does not permit treating a missing record or unfinished release
+as safe to clear, and reports the actual status of a matching completed record.
+It is not yet connected to the existing UI's pending-token lifecycle. Only records
+already visible on the server can be found:
 a missing draft does not prove an earlier request cannot still arrive. Nor can
 this discover a completed operation's original browser intent if its local token
 was lost. This remains dependent on the experimental rules, bounded full
-collection reads and shared revision, with quota and contention unmeasured.
+collection reads and shared revision. The illustrative calculation in
+`faculty-fund-spark-quota.md` shows that a modest hypothetical history can
+exhaust the daily free-read quota after only 23 full refreshes, even before
+rule and other app costs; actual project usage and contention remain unmeasured.
 
 The standalone experimental `faculty-fund-spark-recovery-ui.js` screen displays
 server-visible recovery records, their relevant payment and expense details,
