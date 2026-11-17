@@ -124,10 +124,10 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false,trackRemitta
  // caller resume a partially assembled remittance on another device. This is
  // still a recovery view, not a lock: subsequent writes must use transactions.
  async function inspectRemittance(remittanceId){
-  identifier(remittanceId);const {collection,query,where,getDocFromServer,getDocsFromServer}=api;
-  if(!collection||!query||!where||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
-  const parent=ref('sparkRemittances',remittanceId),lines=collection(db,`organizations/${orgId}/${pathName('sparkLines')}`),clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
-  const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Remittance missing');const result=await getDocsFromServer(query(lines,where('remittanceId','==',remittanceId)));clean(result);const two=await getDocFromServer(parent);clean(two);if(!two.exists())fail('Remittance changed; reload');
+  identifier(remittanceId);const {collection,query,where,limit,getDocFromServer,getDocsFromServer}=api;
+  if(!collection||!query||!where||!limit||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
+  const parent=ref('sparkRemittances',remittanceId),lines=collection(db,`organizations/${orgId}/${pathName('sparkLines')}`),clean=s=>{if(!s.metadata||s.metadata.fromCache||s.metadata.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
+  const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Remittance missing');const result=await getDocsFromServer(query(lines,where('remittanceId','==',remittanceId),limit(201)));clean(result);const two=await getDocFromServer(parent);clean(two);if(!two.exists())fail('Remittance changed; reload');
   const before=one.data(),after=two.data(),fingerprint=x=>JSON.stringify([x.status,x.amountCents,x.count,x.lastPaymentId,x.paymentIds,x.correctionId,x.presidentUid]);
   if(fingerprint(before)!==fingerprint(after))fail('Remittance changed during recovery; reload');
   if(!['draft','pending','accepted','declined','cancelled','voided'].includes(after.status)||!Array.isArray(after.paymentIds)||after.paymentIds.some(x=>typeof x!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(x))||after.paymentIds.length<1||after.paymentIds.length>200||new Set(after.paymentIds).size!==after.paymentIds.length||result.size>200||!Number.isSafeInteger(after.count)||!Number.isSafeInteger(after.amountCents))fail('Remittance recovery data is invalid');
@@ -139,12 +139,12 @@ function createIntegratedClient({db,api,orgId,uid,useRevision=false,trackRemitta
  // Double-read the monotonic parent around the allocation query. No client may
  // treat an inconsistent view as proof that a multi-step operation completed.
  async function inspectExpense(expenseId){
-  identifier(expenseId);const {collection,query,where,getDocFromServer,getDocsFromServer}=api;
-  if(!collection||!query||!where||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
+  identifier(expenseId);const {collection,query,where,limit,getDocFromServer,getDocsFromServer}=api;
+  if(!collection||!query||!where||!limit||!getDocFromServer||!getDocsFromServer)fail('Server reads are unavailable');
   const parent=ref('sparkExpenseDrafts',expenseId),lines=collection(db,`organizations/${orgId}/${pathName('sparkAllocations')}`);
-  const clean=s=>{if(s.metadata?.fromCache||s.metadata?.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
+  const clean=s=>{if(!s.metadata||s.metadata.fromCache||s.metadata.hasPendingWrites)fail('Unconfirmed data; connect and retry');};
   const one=await getDocFromServer(parent);clean(one);if(!one.exists())fail('Expense missing');
-  const result=await getDocsFromServer(query(lines,where('expenseId','==',expenseId)));clean(result);
+  const result=await getDocsFromServer(query(lines,where('expenseId','==',expenseId),limit(201)));clean(result);
   const two=await getDocFromServer(parent);clean(two);if(!two.exists())fail('Expense changed; reload');
   const before=one.data(),after=two.data();
   const fingerprint=x=>JSON.stringify([x.status,x.amountCents,x.allocatedCents,x.count,x.lastAllocation,x.lastRelease,x.createdBy]);

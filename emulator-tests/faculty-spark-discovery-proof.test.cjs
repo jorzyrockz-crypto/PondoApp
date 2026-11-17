@@ -73,3 +73,10 @@ test('targeted recovery never claims cancellation after acceptance wins',async()
  const envs=await base(),{ao,pres,aoDb}=envs;await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');const t=targeted(envs);let once=true;const raced=createSparkDiscoveryRecovery({getContext:()=>t.ctx,makeDb:c=>t.dbs[c.uid],api,makeClient:c=>{const inner=t.factory(c),cancel=inner.cancelRemittance;return {...inner,cancelRemittance:async(...args)=>{if(once){once=false;await pres.accept('r')}return cancel(...args)}}}});await assert.rejects(raced.resolve({orgId:'school',kind:'remittance',id:'r',action:'cancel',reason:'Wrong'}));const result=await t.recovery.resolve({orgId:'school',kind:'remittance',id:'r',action:'cancel',reason:'Wrong'});assert.equal(result.status,'accepted');assert.equal(result.remaining,false);assert.equal((await get(aoDb,'sparkDiscoveryPayments/p1')).remittanceId,'r');
  t.ctx.uid='reviewer';t.ctx.role='reviewer';t.ctx.scopeToken++;await assert.rejects(t.recovery.inspect({orgId:'school',kind:'remittance',id:'r'}),/authorized/);
 });
+
+test('recovery inspection caps reads and rejects oversized histories',async()=>{
+ const {aoDb,ao}=await base();await ao.createRemittance('r',['p1']);await ao.createExpense('e',{amountCents:10000,description:'Supplies',payee:'Store',occurredAt:new Date('2024-01-01T00:00:00Z')});
+ // Simulate corrupt/admin-written history; admin SDK writes bypass the rules.
+ await env.withSecurityRulesDisabled(async c=>{const d=c.firestore(),b=api.writeBatch(d);for(let i=0;i<215;i++){b.set(ref(d,'sparkDiscoveryAllocations/a'+i),{expenseId:'e'});b.set(ref(d,'sparkDiscoveryLines/l'+i),{remittanceId:'r'});}await b.commit();});
+ const sizes=[],bounded={...api,getDocsFromServer:async q=>{const result=await api.getDocsFromServer(q);sizes.push(result.size);return result}},reader=createIntegratedClient({db:aoDb,api:bounded,orgId:'school',uid:'ao',useRevision:true,trackRemittanceReleases:true});await assert.rejects(reader.inspectExpense('e'),/invalid/i);await assert.rejects(reader.inspectRemittance('r'),/invalid/i);assert.deepEqual(sizes,[201,201]);
+});
