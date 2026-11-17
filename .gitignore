@@ -1,6 +1,8 @@
 assets/icon-concepts/
 functions/node_modules/
 functions/*.log
+faculty-fund-functions/node_modules/
+faculty-fund-functions/*.log
 organization-functions/node_modules/
 organization-functions/*.log
 

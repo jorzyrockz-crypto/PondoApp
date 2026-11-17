@@ -9,6 +9,26 @@ local to this account, workspace, and browser profile; they do not sync between
 devices. A notification that a refund payment was *recorded* is not proof that
 the recipient received funds.
 
+## Team profiles and navigation
+
+Team activity alerts show the relevant confirmed member’s profile photo when
+available, or their initials. Photos are loaded only from approved Google
+profile-image hosts; missing, removed, unavailable or untrusted profiles use a
+neutral fallback. The stored feed contains the member UID, not a copy of the
+photo; the profile is resolved from the current workspace’s confirmed members.
+Older alerts without an actor UID use the neutral fallback. OS alerts still use
+the app icon.
+
+Click or keyboard-activate an alert to open its destination in the **currently
+active** workspace. When a newly observed contribution payment can be matched
+unambiguously to one activity and monthly period, it opens that activity;
+ambiguous or no-longer-available records open the contributions workspace
+instead. Donation and Death Aid alerts retain their transactions destination;
+review and reminder destinations are unchanged. Older team alerts use their
+summary to choose a workspace, or the dashboard if it is unclear. Alerts do
+not switch organizations. If a dialog is open, close it and activate the alert
+again; the alert is not marked read until navigation can proceed.
+
 ## Covered events
 
 - Existing pending refund and linked-record deletion requests are surfaced to
@@ -55,3 +75,15 @@ unit tests use mocks and do not substitute for Firestore emulator or browser
 multi-device tests. Firestore rules do not independently enforce the app's
 financial approval checks; see `team-sync-rollout.md`. Do not deploy the
 incomplete public-report backend.
+
+## Faculty Fund (requires matching deployed backend and rules)
+
+In a confirmed team workspace, server-confirmed Faculty Fund snapshots can
+notify the addressed President of a pending remittance or correction, and the
+submitting AO of a subsequent acceptance or decline. Messages are generic and
+omit names, amounts and absence dates. Clicking one opens the Faculty Fund in
+the same workspace. Cursor state is local to the account/workspace; existing
+pending items may alert on first confirmed load, but historical decisions are
+not replayed on first load. These are best-effort alerts, not evidence of a
+handover or a replacement for checking the register. The Faculty Fund backend
+is disabled until separately deployed and explicitly enabled after testing.

@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v79';
+const CACHE_VERSION = 'pondo-v80';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -50,6 +50,8 @@ const APP_SHELL = [
   './assets/branding/share-banner.jpg',
   './functions/projection.js',
   './organization-firestore.mjs',
+  './faculty-fund-ui.js',
+  './faculty-fund-notifications.js',
 ];
 
 // Firebase Auth SDK (loaded from the CDN) is cached at runtime too, see the
@@ -67,6 +69,7 @@ const RUNTIME_CACHEABLE_ORIGINS = ['https://www.gstatic.com'];
 // (e.g. offline during install) can't abort the app-shell install itself.
 const FIREBASE_SDK_URLS = [
   'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js',
+  'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js',
   'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js',
   'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js',
 ];
@@ -97,7 +100,7 @@ self.addEventListener('activate', (event) => {
       const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
       if (obsolete.length) {
         // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
-        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v79', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v80', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
       }
       await Promise.all(obsolete.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())

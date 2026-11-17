@@ -105,3 +105,46 @@ test('presence is member-only and each user can write only their own server time
  await assertFails(setDoc(ref(reviewer,path+'reviewer'),{lastSeen:serverTimestamp()}));
  await assertFails(getDocs(collection(reviewer,'organizations/school/presence')));
 });
+
+test('Faculty Fund state and acceptance cannot be forged by any client',async()=>{
+ await seed({'organizations/school':{name:'School'},'organizations/school/members/owner':{uid:'owner',role:'owner'},'organizations/school/members/ao':{uid:'ao',role:'disbursing'},'organizations/school/members/president':{uid:'president',role:'reviewer'},'organizations/school/facultyFund/config':{presidentUid:'president'},'organizations/school/facultyFund/control':{revision:1},'organizations/school/facultyFund/state':{payments:[],remittances:[{id:'r',status:'pending'}],audit:[]},'organizations/school/facultyFundOperations/op':{uid:'ao',hash:'private'},'organizations/school/facultyFundBackups/backup':{workspaceId:'school',revision:1}});
+ const root='organizations/school',owner=client('owner'),ao=client('ao'),president=client('president'),outsider=client('outsider');
+ for(const db of [owner,ao,president]){
+  await assertSucceeds(getDoc(ref(db,`${root}/facultyFund/config`)));
+  await assertSucceeds(getDoc(ref(db,`${root}/facultyFund/state`)));
+  await assertFails(updateDoc(ref(db,`${root}/facultyFund/state`),{remittances:[{id:'r',status:'accepted',acceptedByUid:'president'}]}));
+  await assertFails(setDoc(ref(db,`${root}/facultyFund/config`),{presidentUid:'ao'}));
+  await assertFails(deleteDoc(ref(db,`${root}/facultyFund/state`)));
+  await assertFails(getDoc(ref(db,`${root}/facultyFund/control`)));
+  await assertFails(setDoc(ref(db,`${root}/facultyFund/control`),{revision:999}));
+  await assertFails(getDoc(ref(db,`${root}/facultyFundOperations/op`)));
+  await assertFails(getDoc(ref(db,`${root}/facultyFundBackups/backup`)));
+  await assertFails(setDoc(ref(db,`${root}/facultyFundBackups/forged`),{revision:1}));
+  await assertFails(setDoc(ref(db,`${root}/facultyFundOperations/forged`),{uid:'ao'}));
+ }
+ await assertFails(getDoc(ref(outsider,`${root}/facultyFund/state`)));
+ await assertFails(getDoc(ref(owner,`${root}/facultyFund/other`)));
+ await assertFails(getDocs(collection(owner,`${root}/facultyFund`)));
+ await assertSucceeds(deleteDoc(ref(owner,`${root}/members/president`)));
+ await assertFails(getDoc(ref(president,`${root}/facultyFund/state`)));
+});
+
+test('Faculty Fund server transactions enforce membership, idempotency and concurrent cash safeguards',async()=>{
+ const {initializeApp,deleteApp}=require('firebase-admin/app'),{getFirestore}=require('firebase-admin/firestore');
+ const {createFacultyFundService}=require('../faculty-fund-functions/faculty-fund-service.cjs');
+ const admin=initializeApp({projectId:PROJECT},'faculty-fund-emulator-'+Date.now()),db=getFirestore(admin),root='organizations/school';
+ try{
+  await seed({[root]:{name:'School'},[`${root}/members/owner`]:{uid:'owner',role:'owner'},[`${root}/members/ao`]:{uid:'ao',role:'disbursing'},[`${root}/members/president`]:{uid:'president',role:'reviewer'},[`${root}/members/reviewer`]:{uid:'reviewer',role:'reviewer'}});
+  let count=0;const run=createFacultyFundService({db,clock:()=>new Date('2026-11-09T11:00:00.000Z')});
+  const invoke=(uid,operation,fields={},requestId=String(++count).padStart(32,'0'))=>run({auth:{uid},input:{orgId:'school',operation,requestId,...fields}});
+  await assert.rejects(invoke('reviewer','assignPresident',{presidentUid:'president',role:'owner'}));await invoke('owner','assignPresident',{presidentUid:'president'});
+  const person=await invoke('ao','registerPerson',{name:'Teacher'}),paymentData={personId:person.personId,absenceDate:'2026-11-08',paymentDate:'2026-11-09'},token='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const payment=await invoke('ao','recordPayment',paymentData,token),replay=await invoke('ao','recordPayment',paymentData,token);assert.equal(payment.paymentId,replay.paymentId);assert.equal(replay.replayed,true);
+  const submissions=await Promise.allSettled([invoke('ao','submitRemittance',{paymentIds:[payment.paymentId]}),invoke('ao','submitRemittance',{paymentIds:[payment.paymentId]})]);assert.equal(submissions.filter(x=>x.status==='fulfilled').length,1);const remittance=submissions.find(x=>x.status==='fulfilled').value;
+  await assert.rejects(invoke('ao','accept',{remittanceId:remittance.remittanceId,uid:'president'}));await invoke('president','accept',{remittanceId:remittance.remittanceId});
+  const expense={occurredAt:'2026-11-09T11:00:00.000Z',amountCents:20000,description:'School activity',payee:'Supplier'};const expenses=await Promise.allSettled([invoke('ao','recordExpense',expense),invoke('ao','recordExpense',expense)]);assert.equal(expenses.filter(x=>x.status==='fulfilled').length,1);
+  const saved=(await db.doc(`${root}/facultyFund/state`).get()).data();assert.equal(saved.payments.length,1);assert.equal(saved.expenses.length,1);assert.equal(saved.remittances[0].acceptedByUid,'president');assert.equal(saved.remittances[0].acceptedAt,'2026-11-09T11:00:00.000Z');
+  await assertFails(updateDoc(ref(client('president'),`${root}/facultyFund/state`),{remittances:[]}));
+  await db.doc(`${root}/members/president`).delete();await assert.rejects(invoke('president','approveRemittanceVoid',{remittanceId:remittance.remittanceId}));
+ }finally{await deleteApp(admin)}
+});
