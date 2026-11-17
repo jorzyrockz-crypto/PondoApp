@@ -1,0 +1,72 @@
+/* EXPERIMENTAL recovery screen; not imported by the live app. Host must call
+ * reset() immediately when auth, role, workspace or scope changes. The adapter
+ * and Firestore rules, not this UI, enforce authorization and consistency. */
+(function(global){
+ 'use strict';
+ const fail=m=>{throw Error(m)};
+ function createRecoveryUI({root,getContext,makeRecovery,askReason,confirmAction}){
+  if(!root||![getContext,makeRecovery,askReason,confirmAction].every(x=>typeof x==='function'))fail('Invalid recovery screen setup');
+  let generation=0,busy=false,items=[],note='Refresh to check for unfinished work.',viewContext=null;
+  const valid=c=>!!c&&c.memberConfirmed===true&&typeof c.uid==='string'&&!!c.uid&&typeof c.orgId==='string'&&!!c.orgId&&['owner','disbursing'].includes(c.role)&&['string','number'].includes(typeof c.scopeToken);
+  function capture(){const c=getContext();if(!valid(c))fail('Open an authorized team workspace.');return {...c};}
+  function same(a){const b=getContext();return !!a&&valid(b)&&a.uid===b.uid&&a.orgId===b.orgId&&a.role===b.role&&a.scopeToken===b.scopeToken;}
+  const current=(c,g)=>g===generation&&same(c);
+  const node=(tag,text)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);return el;};
+  const money=n=>Number.isSafeInteger(n)&&n>=0?'₱'+(n/100).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2}):'Unavailable';
+  function when(value){const d=new Date(value);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat('en-PH',{timeZone:'Asia/Manila',dateStyle:'medium',timeStyle:'short'}).format(d)+' (Philippine time)':'Unavailable';}
+  function button(text,action,handler){const el=node('button',text);el.type='button';el.dataset.recoveryAction=action;el.disabled=busy;el.addEventListener('click',handler);return el;}
+  function show(){
+   root.replaceChildren();root.classList.add('faculty-recovery');root.append(node('h2','Unfinished Faculty Fund work'));
+   root.append(node('p','Only server-visible unfinished records appear here. An empty list does not prove that an earlier request failed. Check transaction and remittance history before making another entry.'));
+   const status=node('p',note);status.setAttribute('role','status');status.setAttribute('aria-live','polite');root.append(status);
+   root.append(button('Refresh recovery','refresh',()=>{void refresh()}));
+   if(busy){root.append(node('p','Checking the server…'));return;}
+   for(const item of items){
+    const card=node('section');card.className='faculty-recovery-card';card.dataset.recoveryId=item.id;
+    card.append(node('h3',(item.kind==='expense'?'Expense':'Remittance')+' · '+item.status));
+    card.append(node('p','Record ID: '+item.id+' · Created by: '+item.createdBy+' · '+when(item.createdAt)));
+    if(item.kind==='expense'){
+     card.append(node('p','Expense: '+item.description+' · Payee: '+item.payee));if(item.reference)card.append(node('p','Reference: '+item.reference));
+     card.append(node('p','Occurred: '+when(item.occurredAt)+' · Amount: '+money(item.amountCents)+' · Currently reserved: '+money(item.allocatedCents)));
+    }else{
+     card.append(node('p','Linked payments: '+item.linkedCount+' of '+item.payments.length+' · Linked amount: '+money(item.amountCents)));
+     const list=node('ul');for(const p of item.payments){const text=p.missing?'Payment unavailable: '+p.id:(p.memberName+' · absence '+p.absenceDate+' · '+money(p.amountCents)+' · '+(p.linked?'linked':'not linked')+' · '+p.id);list.append(node('li',text));}card.append(list);
+    }
+    if(item.status==='draft'){
+     if(item.canResume)card.append(button('Resume this draft','resume',()=>{void act(item,'resume')}));else card.append(node('p','Only the original collector can resume this draft. An authorized collector may cancel it.'));
+     card.append(button('Cancel this draft','cancel',()=>{void act(item,'cancel')}));
+    }else card.append(button('Finish recovery','finish',()=>{void act(item,'finish')}));
+    root.append(card);
+   }
+  }
+  function reset(){generation++;busy=false;items=[];viewContext=null;note='Refresh to check for unfinished work.';show();}
+  async function refresh(){
+   if(busy)return;let c;try{c=capture()}catch(e){reset();note=e.message;show();return;}
+   const g=++generation;busy=true;items=[];viewContext=c;note='Checking unfinished work.';show();
+   try{const adapter=makeRecovery(c);if(!adapter?.list)fail('Recovery is unavailable');const data=await adapter.list({orgId:c.orgId});if(!current(c,g))return;if(!Array.isArray(data?.items))fail('Invalid recovery response');items=data.items;note=items.length?'Review each record before choosing an action.':'No server-visible unfinished work was found. Review history for any uncertain request.';}
+   catch(e){if(current(c,g)){items=[];note='Unable to confirm unfinished work. Reconnect and refresh; do not assume a request failed.';}}
+   finally{if(current(c,g)){busy=false;show();}}
+  }
+  function outcome(result,item){
+   const known=item.kind==='remittance'?['draft','pending','accepted','declined','cancelled','voided']:['draft','recorded','cancelling','cancelled','voiding','voided'];
+   if(!result||result.kind!==item.kind||result.id!==item.id||!known.includes(result.status)||typeof result.remaining!=='boolean'||!Number.isSafeInteger(result.revision))fail('Invalid recovery result');
+   if(result.remaining)return 'Server status: '+result.status+'. Further recovery is still required; review and refresh.';
+   const messages={pending:'Submitted and awaiting the Faculty President’s decision.',accepted:'Already accepted by the Faculty President; it was not cancelled.',recorded:'Already recorded as an expense; it was not cancelled.',cancelled:'Cancelled; the server reports no remaining recovery for this record.',declined:'Declined; the server reports no remaining recovery for this record.',voided:'Voided; the server reports no remaining recovery for this record.'};
+   return messages[result.status]||'Server status: '+result.status+'. Review the record history.';
+  }
+  async function act(item,action){
+   if(busy||!viewContext||!same(viewContext))return;const c=viewContext,g=++generation;busy=true;note='Reviewing the selected action.';show();let submitted=false;
+   try{
+    let reason;if(action==='cancel'){reason=await askReason('Why are you cancelling this draft?');if(!current(c,g))return;if(reason==null||!String(reason).trim()){note='No cancellation was requested.';return;}reason=String(reason).trim();if(reason.length>500){note='The cancellation reason must be 500 characters or fewer.';return;}}
+    const prompt=action==='resume'?'Resume this draft? It may submit the remittance or record the expense.':action==='cancel'?'Cancel this draft? Check history if it was already accepted or recorded.':'Finish releasing this record’s reserved amounts?';
+    const confirmed=await confirmAction(prompt);if(!current(c,g))return;if(!confirmed){note='No change was requested.';return;}
+    const adapter=makeRecovery(c);if(!adapter?.resolve||!adapter?.list)fail('Recovery is unavailable');submitted=true;const result=await adapter.resolve({orgId:c.orgId,kind:item.kind,id:item.id,action,...(reason?{reason}:{})});if(!current(c,g))return;const summary=outcome(result,item);items=[];note=summary;
+    try{const data=await adapter.list({orgId:c.orgId});if(!current(c,g))return;if(!Array.isArray(data?.items))fail('Invalid recovery response');items=data.items;}
+    catch(e){if(current(c,g))note=summary+' Unable to refresh the recovery list; refresh before another action.';}
+   }catch(e){if(current(c,g)){items=[];note=submitted?'The result is unconfirmed. Refresh and review the record history before trying again; it may already have completed.':'No change was requested. Refresh and try again.';}}
+   finally{if(current(c,g)){busy=false;show();}}
+  }
+  reset();return {refresh,reset};
+ }
+ if(typeof module==='object'&&module.exports)module.exports={createSparkRecoveryUI:createRecoveryUI};else global.createFacultyFundSparkRecoveryUI=createRecoveryUI;
+})(typeof window!=='undefined'?window:globalThis);

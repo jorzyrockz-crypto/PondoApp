@@ -17,7 +17,11 @@
    return ['draft','cancelling','voiding'].includes(item.status);
   }
   function token(kind,id){const m=(kind==='remittance'?/^rem_([a-f0-9]{32})$/:/^exp_([a-f0-9]{32})$/).exec(id);return m?m[1]:null;}
-  function display(snapshot,c,kind,item){return {kind,id:item.id,status:item.status,createdBy:item.createdBy,amountCents:item.amountCents,remaining:true,canResume:item.status==='draft'&&item.createdBy===c.uid&&!!token(kind,item.id),...(kind==='remittance'?{paymentIds:[...item.paymentIds],linkedCount:item.count}:{description:item.description,payee:item.payee,allocatedCents:item.allocatedCents})};}
+  function display(snapshot,c,kind,item){
+   const base={kind,id:item.id,status:item.status,createdBy:item.createdBy,createdAt:asISO(item.createdAt),amountCents:item.amountCents,remaining:true,canResume:item.status==='draft'&&item.createdBy===c.uid&&!!token(kind,item.id)};
+   if(kind==='expense')return {...base,description:item.description,payee:item.payee,reference:item.reference??'',occurredAt:asISO(item.occurredAt),allocatedCents:item.allocatedCents};
+   const payments=new Map(snapshot.records.payments.map(p=>[p.id,p]));return {...base,linkedCount:item.count,payments:item.paymentIds.map(id=>{const p=payments.get(id);return p?{id,memberName:p.memberName,absenceDate:p.absenceDate,amountCents:p.amountCents,linked:p.remittanceId===item.id}:{id,missing:true};})};
+  }
   async function list(input){const c=context(input?.orgId),s=await load(c),items=[];for(const r of s.records.remittances)if(remaining(s,'remittance',r))items.push(display(s,c,'remittance',r));for(const e of s.records.expenses)if(remaining(s,'expense',e))items.push(display(s,c,'expense',e));guard(c);return {revision:s.revision,items};}
   function asISO(value){const ms=value instanceof Date?value.getTime():typeof value?.toMillis==='function'?value.toMillis():NaN;if(!Number.isFinite(ms))fail('Invalid expense time');return new Date(ms).toISOString();}
   function original(c,kind,item){const requestId=token(kind,item.id);if(!requestId||item.createdBy!==c.uid)fail('Only the original collector can resume this draft; cancel it instead');return kind==='remittance'?{orgId:c.orgId,requestId,operation:'submitRemittance',paymentIds:[...item.paymentIds]}:{orgId:c.orgId,requestId,operation:'recordExpense',amountCents:item.amountCents,description:item.description,payee:item.payee,reference:item.reference??'',occurredAt:asISO(item.occurredAt)};}

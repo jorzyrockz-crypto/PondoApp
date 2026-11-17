@@ -28,3 +28,4 @@ jobs:
           export CHROMIUM_PATH="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
           test -n "$CHROMIUM_PATH"
           node tests/faculty-fund-ui.browser.cjs
+          node tests/faculty-spark-recovery.browser.cjs
