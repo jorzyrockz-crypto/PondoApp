@@ -21,6 +21,6 @@ test('reference-inspired table keeps history controls associated and accessible'
 });
 test('contributor initials handle names without rendering markup',()=>{
  const vm=require('node:vm'),source=html.slice(html.indexOf('function contributorInitials('),html.indexOf('function openContributionDetails('));const c=vm.createContext({});vm.runInContext(source,c);
- assert.equal(c.contributorInitials('Nora Reyes'),'NR');assert.equal(c.contributorInitials('  Mae   Navarro Silva  '),'MN');assert.equal(c.contributorInitials('Ana'),'A');assert.equal(c.contributorInitials(''),'?');
+ assert.equal(c.contributorInitials('Nora Reyes'),'NR');assert.equal(c.contributorInitials('  Mae   Navarro Silva  '),'MN');assert.equal(c.contributorInitials('Ana'),'A');assert.equal(c.contributorInitials('Jay - r'),'JR');assert.equal(c.contributorInitials('  -- Ana!!  '),'A');assert.equal(c.contributorInitials('Ñora Émile'),'ÑÉ');assert.equal(c.contributorInitials('---'),'?');assert.equal(c.contributorInitials(''),'?');
  assert.ok(ui.includes('escapeText(contributorInitials(p.name))'));
 });

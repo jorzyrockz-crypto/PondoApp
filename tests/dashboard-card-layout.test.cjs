@@ -17,7 +17,8 @@ test('contribution section is unboxed in light and dark and both cards share dar
 test('rails are keyboard focusable and retain card detail actions',()=>{
  assert.match(html,/id="fundCards" class="grid-funds" tabindex="0" role="region" aria-label="Funds: scroll horizontally to see more"/);
  assert.match(html,/id="dashboardContributionCards" class="dashboard-contribution-rail" tabindex="0" role="region" aria-label="Contribution activities: scroll horizontally to see more"/);
- assert.match(html,/card\.addEventListener\('keydown'.*openFundDetails/);
+ assert.match(html,/const open=\(\)=>card\.classList\.contains\('cash-donation-fund-card'\)\?openCashDonationFunds\(\):openFundDetails\(card\.dataset\.fundId\)/);
+ assert.match(html,/card\.addEventListener\('keydown'.*open\(\)/);
  assert.match(html,/card\.querySelector\('button'\)\.onclick=\(\)=>openContributionDetails/);
  assert.match(html,/function updateFundRailHint\(\)\{[^}]*rail\.scrollWidth<=rail\.clientWidth\+1/);
  assert.match(html,/fundCards\.innerHTML=fundCardsHtml; fundCards\.scrollLeft=fundScroll/);

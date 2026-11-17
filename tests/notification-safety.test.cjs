@@ -32,3 +32,10 @@ test('backup export, snooze and reminders all use account and workspace keys',()
 test('unknown or unconfirmed membership cannot generate team alerts',()=>{
  const t=setupFeed();t.state.memberConfirmed=false;assert.equal(t.ctx.pushNotification({title:'Team update'}),null);t.state.memberConfirmed=true;assert.ok(t.ctx.pushNotification({title:'Team update'}));
 });
+test('confirmed snapshot diffs detect donations and nested Death Aid payments by ID without private details',()=>{
+ const start=html.indexOf('function newTypedTeamActivity('),end=html.indexOf('window.newTypedTeamActivity=',start),c=vm.createContext({});vm.runInContext(html.slice(start,end),c);
+ const before={txs:[{id:'ordinary'}],contributionActivities:[{id:'a',deathAid:{payments:[{id:'old',name:'Private'}]}}]};
+ const after={txs:[{id:'ordinary',cashDonation:{donor:'Private'}},{id:'expense',deathAidPaymentId:'new'}],contributionActivities:[{id:'a',deathAid:{payments:[{id:'old',name:'Private'},{id:'new',name:'Secret person',source:'fund'}]}}]};
+ let summary=c.newTypedTeamActivity(before,after);assert.equal(summary.donations,1);assert.equal(summary.deathPayments,1);assert.doesNotMatch(JSON.stringify(summary),/Private|Secret/);let unchanged=c.newTypedTeamActivity(after,after);assert.equal(unchanged.donations,0);assert.equal(unchanged.deathPayments,0);
+ assert.match(html,/prevJSON && prevJSON!==incomingJSON && pondoTeamState.memberConfirmed && updatedBy!==pondoTeamState.uid/);assert.match(html,/action:\(typed.donations\|\|typed.deathPayments\)\?\{tab:'transactions'\}/);
+});

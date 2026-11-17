@@ -85,3 +85,42 @@ test('notification delivery failures do not mark pending or decision events as d
 test('unconfirmed membership cannot create targeted alerts',()=>{
  const e=environment(),snap=snapshot(),s=state();snap.funds.push({id:'f',name:'Fund',pendingDeletion:req()});s.memberConfirmed=false;e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,0);assert.equal(e.store.size,0);s.memberConfirmed=true;e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,1);
 });
+
+test('non-cash grant and void notify requester and officers privately, with catch-up and no self alerts',()=>{
+ const blank=snapshot();blank.txs=[];blank.payables.push({id:'r',kind:'advance',createdBy:{uid:'requester'},description:'Private trip',reimburseTo:'Secret Person'});
+ const store=new Map(),reqEnv=environment(store),offEnv=environment(store),other=environment(store);
+ for(const [e,s] of [[reqEnv,state('requester','project-manager')],[offEnv,state('officer','disbursing')],[other,state('other','reviewer')]])e.context.processReviewNotifications(blank,s);
+ blank.auditLog.push({id:'grant',action:'grant absence credit',by:{uid:'owner'},record:{payableId:'r',absenceDate:'2026-11-09',amount:250}});
+ for(const [e,s] of [[reqEnv,state('requester','project-manager')],[offEnv,state('officer','disbursing')],[other,state('other','reviewer')]])e.context.processReviewNotifications(blank,s);
+ assert.equal(reqEnv.notifications.length,1);assert.equal(offEnv.notifications.length,1);assert.equal(other.notifications.length,0);
+ assert.equal(reqEnv.notifications[0].title,'Refund non-cash credit granted');assert.equal(reqEnv.notifications[0].approverOnly,false);assert.equal(offEnv.notifications[0].approverOnly,true);
+ assert.doesNotMatch(JSON.stringify(reqEnv.notifications),/Private trip|Secret Person|2026-11-09|250/);
+ blank.auditLog.push({id:'void',action:'void absence credit',by:{uid:'officer'},record:{payableId:'r'},refundContext:{kind:'advance',createdBy:{uid:'requester'}}});blank.payables=[];
+ const restarted=environment(store);restarted.context.processReviewNotifications(blank,state('requester','project-manager'));assert.equal(restarted.notifications.length,1);assert.equal(restarted.notifications[0].title,'Refund non-cash credit voided');
+ offEnv.context.processReviewNotifications(blank,state('officer','disbursing'));assert.equal(offEnv.notifications.length,1);
+ restarted.context.processReviewNotifications(blank,state('requester','project-manager'));assert.equal(restarted.notifications.length,1);
+});
+test('cash and personal contribution voids alert only officers and avoid duplicate refund requester alerts',()=>{
+ const e=environment(),snap=snapshot(),s=state('officer','owner');snap.txs=[];snap.payables.push({id:'r',kind:'advance',createdBy:{uid:'officer'}});e.context.fmt=String;e.context.processReviewNotifications(snap,s);
+ snap.auditLog.push({id:'tx',action:'void transaction',by:{uid:'other'},record:{type:'IN',description:'Sensitive',amount:999}},{id:'contrib',action:'void contribution payment',by:{uid:'other'},record:{description:'Private member'}},{id:'refund',action:'void transaction',by:{uid:'other'},record:{type:'OUT',payableId:'r'}});
+ e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,3);
+ assert.equal(e.notifications.filter(n=>n.title==='Refund payment voided').length,1);
+ assert.equal(e.notifications.filter(n=>n.title==='Cash transaction voided').length,1);
+ assert.equal(e.notifications.filter(n=>n.title==='Contribution payment voided').length,1);
+ assert.doesNotMatch(JSON.stringify(e.notifications.filter(n=>n.approverOnly)),/Sensitive|Private member|999/);
+ const outsider=environment();const original=snapshot();original.txs=[];outsider.context.processReviewNotifications(original,state('viewer','reviewer'));outsider.context.processReviewNotifications(snap,state('viewer','reviewer'));assert.equal(outsider.notifications.length,0);
+});
+test('financial alerts seed historical events, retry delivery, guard access, and isolate workspaces',()=>{
+ const e=environment(),snap=snapshot(),s=state();snap.txs=[];snap.auditLog.push({id:'old',action:'void transaction',by:{uid:'other'},record:{type:'IN'}});
+ e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,0);
+ snap.auditLog.push({id:'new',action:'void contribution payment',by:{uid:'other'},record:{}});
+ for(const bad of [{memberConfirmed:false},{baselineReady:false},{syncError:true},{listenerError:true},{recoveryLocked:true}])e.context.processReviewNotifications(snap,{...s,...bad});assert.equal(e.notifications.length,0);
+ let fail=true;e.context.pushNotification=n=>{if(fail)return null;e.notifications.push(n);return n};e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,0);fail=false;e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,1);e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,1);
+ e.context.processReviewNotifications(snap,state('owner','owner','other-org'));assert.equal(e.notifications.length,1);
+});
+
+test('fund-funded Death Aid reversals notify financial officers without exposing details',()=>{
+ const e=environment(),snap=snapshot(),s=state('officer','disbursing');snap.txs=[];e.context.processReviewNotifications(snap,s);
+ snap.auditLog.push({id:'personal',action:'void death aid payment',by:{uid:'other'},record:{name:'Private person'}},{id:'funded',action:'void death aid payment',by:{uid:'other'},linkedTransaction:{type:'OUT',amount:100},record:{name:'Private person'}});
+ e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,1);assert.equal(e.notifications[0].title,'Cash transaction voided');assert.doesNotMatch(JSON.stringify(e.notifications),/Private person|100/);
+});

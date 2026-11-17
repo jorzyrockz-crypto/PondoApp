@@ -16,5 +16,5 @@ test('KPI actions remain keyboard accessible and disclose initial receipts',()=>
  assert.equal((html.match(/class="hero-stat" role="button" tabindex="0"/g)||[]).length,3);
  assert.match(html,/Income transactions exclude initial fund receipts/);assert.match(html,/openingNotice\.hidden=filter!=='IN'/);
  assert.match(html,/@media screen and \(min-width:1024px\)\s*\{\s*#fab \{display:none!important\}/);
- assert.match(html,/#teamHeaderBadgeText \{max-width:none;min-width:0\}/);assert.match(html,/#appHeaderLogo svg \{width:24px/);assert.match(html,/id="appHeaderLogo"><svg/);
+ assert.match(html,/#teamHeaderBadgeText \{max-width:none;min-width:0\}/);assert.match(html,/id="appHeaderLogo"><img src="icons\/icon-96\.png"/);
 });
