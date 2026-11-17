@@ -77,3 +77,27 @@ particular, a shared expense-group label is not an authoritative grouping or
 proof that a multi-part expense completed. It is not integrated with the first
 prototype, and neither fixture may be published as production rules. No claim
 of a complete or audited accounting workflow follows from the tests.
+
+## Integrated acceptance-and-allocation experiment
+
+The separate `faculty-spark-integrated-proof.rules` fixture now tests the two
+mechanisms together rather than seeding accepted wallets: President acceptance
+and the creation of the corresponding accepted-funds wallet are an atomic
+write. Each expense draft is funded by atomic allocations from one or more
+wallets; the rules require each allocation's wallet to have been accepted by
+that expense's claimed occurrence time. A draft cannot be recorded until its
+allocations add up to its amount. If interrupted, a draft can be cancelled and
+its individual allocations released once each, with an immutable release record.
+A pending remittance correction freezes new allocations from that wallet; the
+President can approve the correction only when that wallet is fully unspent.
+
+The integrated client fixture demonstrates retries after a committed response is
+lost. Firestore emulator tests exercise competing expenses, forged allocation
+pairs, incomplete drafts, correction races, receipt locks, and partial-draft
+releases. This is still an isolated research fixture, **not app integration or
+production rules**. Recorded-expense voids, a complete recovery/export story,
+validated date handling, safe browser persistence of multi-step operation plans,
+reports, notifications, receipt rendering, and integration with the existing
+team rules and UI remain unfinished. Do not publish the fixture or enter real
+fund data based on this experiment. Emulator tests do not replace actual
+multi-account tests in Firebase.
