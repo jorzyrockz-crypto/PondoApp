@@ -4,8 +4,8 @@
 (function(global){
  'use strict';
  const fail=m=>{throw Error(m)},id=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(v);
- function createDiscoveryRecovery({getContext,makeDb,api,makeClient}){
-  if([getContext,makeDb,makeClient].some(x=>typeof x!=='function')||!api||typeof api.doc!=='function'||typeof api.getDocFromServer!=='function')fail('Invalid recovery setup');
+ function createDiscoveryRecovery({getContext,makeDb,api,makeClient,makeExpenseResumer}){
+  if([getContext,makeDb,makeClient].some(x=>typeof x!=='function')||makeExpenseResumer!==undefined&&typeof makeExpenseResumer!=='function'||!api||typeof api.doc!=='function'||typeof api.getDocFromServer!=='function')fail('Invalid recovery setup');
   function context(orgId){const c=getContext();if(!c||c.memberConfirmed!==true||typeof c.uid!=='string'||!c.uid||typeof c.orgId!=='string'||!c.orgId||c.orgId!==orgId||!['owner','disbursing'].includes(c.role)||!['string','number'].includes(typeof c.scopeToken))fail('Open an authorized workspace');return {...c};}
   function current(c){const n=getContext();return !!n&&n.memberConfirmed===true&&n.uid===c.uid&&n.orgId===c.orgId&&n.role===c.role&&n.scopeToken===c.scopeToken;}
   function guard(c){if(!current(c))fail('Workspace changed; return to the original workspace');}
@@ -42,8 +42,9 @@
    const c=context(input?.orgId),kind=input?.kind,action=input?.action,key=input?.id;if(!['remittance','expense'].includes(kind)||!['resume','cancel','finish'].includes(action)||!id(key))fail('Invalid recovery selection');const db=makeDb(c),client=makeClient(c);if(!db||!client)fail('Recovery unavailable');let {item}=await parent(c,db,kind,key);
    if(action==='resume'){
     if(item.status==='draft'){
-     if(kind==='expense')fail('Resuming an expense is not available; leave it pending or cancel it');if(item.createdBy!==c.uid)fail('Only the original collector can resume this draft');
-     for(const paymentId of item.paymentIds)await step(c,()=>client.addPayment(key,paymentId));await step(c,()=>client.submitRemittance(key));
+     if(item.createdBy!==c.uid)fail('Only the original collector can resume this draft');
+     if(kind==='expense'){const resumer=makeExpenseResumer?.(c);if(!resumer?.resume)fail('Resuming an expense is not available; leave it pending or cancel it');await step(c,()=>resumer.resume({orgId:c.orgId,id:key}));}
+     else{for(const paymentId of item.paymentIds)await step(c,()=>client.addPayment(key,paymentId));await step(c,()=>client.submitRemittance(key));}
     }
    }else if(action==='cancel'){
     if(item.status==='draft'||kind==='remittance'&&item.status==='pending'){

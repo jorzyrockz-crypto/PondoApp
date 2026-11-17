@@ -4,6 +4,8 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing'),api=require('firebase/firestore');
 const {createIntegratedClient}=require('../faculty-fund-spark-client.js'),{createSparkDiscovery}=require('../faculty-fund-spark-discovery.js');
 const {createSparkDiscoveryRecovery}=require('../faculty-fund-spark-discovery-recovery.js');
+const {createSparkExpenseResumer}=require('../faculty-fund-spark-expense-resume.js');
+const {createHash}=require('node:crypto');
 const PROJECT='demo-pondo-security',root='organizations/school';if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
 let env;test.before(async()=>{env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'fixtures/faculty-spark-discovery-proof.rules'),'utf8')}})});
 test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();for(const [uid,role] of [['owner','owner'],['ao','disbursing'],['president','reviewer'],['reviewer','reviewer']])await api.setDoc(api.doc(db,`${root}/members/${uid}`),{uid,role});});});test.after(async()=>{if(env)await env.cleanup()});
@@ -79,4 +81,21 @@ test('recovery inspection caps reads and rejects oversized histories',async()=>{
  // Simulate corrupt/admin-written history; admin SDK writes bypass the rules.
  await env.withSecurityRulesDisabled(async c=>{const d=c.firestore(),b=api.writeBatch(d);for(let i=0;i<215;i++){b.set(ref(d,'sparkDiscoveryAllocations/a'+i),{expenseId:'e'});b.set(ref(d,'sparkDiscoveryLines/l'+i),{remittanceId:'r'});}await b.commit();});
  const sizes=[],bounded={...api,getDocsFromServer:async q=>{const result=await api.getDocsFromServer(q);sizes.push(result.size);return result}},reader=createIntegratedClient({db:aoDb,api:bounded,orgId:'school',uid:'ao',useRevision:true,trackRemittanceReleases:true});await assert.rejects(reader.inspectExpense('e'),/invalid/i);await assert.rejects(reader.inspectRemittance('r'),/invalid/i);assert.deepEqual(sizes,[201,201]);
+});
+
+
+function resumer(t,overrides={}){return createSparkExpenseResumer({getContext:()=>t.ctx,makeDb:c=>t.dbs[c.uid],api:overrides.api||api,makeClient:overrides.makeClient||t.factory,pageSize:overrides.pageSize||1,maxWallets:overrides.maxWallets||200});}
+const allocId=(e,w)=>'alloc_'+createHash('sha256').update(e+'\0'+w).digest('hex');
+test('bounded expense resumption survives a lost response without duplicating allocations',async()=>{
+ const envs=await base(),{ao,pres,aoDb}=envs;for(const [r,p] of [['r1','p1'],['r2','p2']]){await ao.createRemittance(r,[p]);await ao.addPayment(r,p);await ao.submitRemittance(r);await pres.accept(r)}const later=(await get(aoDb,'sparkDiscoveryWallets/r2')).acceptedAt;await ao.createExpense('e',{amountCents:40000,description:'Supplies',payee:'Store',occurredAt:later});await ao.allocate('e','r1',allocId('e','r1'),25000);
+ const t=targeted(envs);let once=true;const broken=resumer(t,{makeClient:c=>{const inner=t.factory(c),allocate=inner.allocate;return {...inner,allocate:async(...args)=>{const value=await allocate(...args);if(once){once=false;throw Error('Lost allocation response')}return value}}}});await assert.rejects(broken.resume({orgId:'school',id:'e'}),/Lost allocation/);let draft=await get(aoDb,'sparkDiscoveryExpenseDrafts/e');assert.equal(draft.status,'draft');assert.equal(draft.allocatedCents,40000);
+ const resolver=createSparkDiscoveryRecovery({getContext:()=>t.ctx,makeDb:c=>t.dbs[c.uid],api,makeClient:t.factory,makeExpenseResumer:()=>resumer(t)}),result=await resolver.resolve({orgId:'school',kind:'expense',id:'e',action:'resume'});assert.equal(result.status,'recorded');assert.equal(result.remaining,false);draft=await get(aoDb,'sparkDiscoveryExpenseDrafts/e');assert.equal(draft.count,2);assert.equal(draft.allocatedCents,40000);assert.equal((await get(aoDb,'sparkDiscoveryWallets/r1')).unspentCents,0);assert.equal((await get(aoDb,'sparkDiscoveryWallets/r2')).unspentCents,10000);
+});
+
+test('resumption never uses funds accepted after the claimed expense time',async()=>{
+ const envs=await base(),{ao,pres,aoDb}=envs;await ao.createRemittance('old',['p1']);await ao.addPayment('old','p1');await ao.submitRemittance('old');await pres.accept('old');const at=(await get(aoDb,'sparkDiscoveryWallets/old')).acceptedAt;await ao.createExpense('e',{amountCents:40000,description:'Paper',payee:'Store',occurredAt:at});await ao.createRemittance('later',['p2']);await ao.addPayment('later','p2');await ao.submitRemittance('later');await pres.accept('later');const newer=(await get(aoDb,'sparkDiscoveryWallets/later')).acceptedAt;assert.ok(newer.toMillis()>at.toMillis());const t=targeted(envs);await assert.rejects(resumer(t).resume({orgId:'school',id:'e'}),/unfinished/);assert.equal((await get(aoDb,'sparkDiscoveryExpenseDrafts/e')).allocatedCents,25000);assert.equal((await get(aoDb,'sparkDiscoveryWallets/later')).unspentCents,25000);const cancelled=await t.recovery.resolve({orgId:'school',kind:'expense',id:'e',action:'cancel',reason:'Insufficient accepted funds'});assert.equal(cancelled.status,'cancelled');assert.equal((await get(aoDb,'sparkDiscoveryWallets/old')).unspentCents,25000);
+});
+
+test('a pending correction freezes its wallet during expense resumption',async()=>{
+ const envs=await base(),{ao,pres,aoDb}=envs;await ao.createRemittance('r',['p1']);await ao.addPayment('r','p1');await ao.submitRemittance('r');await pres.accept('r');const at=(await get(aoDb,'sparkDiscoveryWallets/r')).acceptedAt;await ao.createExpense('e',{amountCents:10000,description:'Paper',payee:'Store',occurredAt:at});await ao.requestCorrection('cor','r','Review handover');const t=targeted(envs);await assert.rejects(resumer(t).resume({orgId:'school',id:'e'}),/unfinished/);assert.equal((await get(aoDb,'sparkDiscoveryExpenseDrafts/e')).allocatedCents,0);await pres.decideCorrection('cor','declined','Handover is correct');assert.equal((await resumer(t).resume({orgId:'school',id:'e'})).status,'recorded');
 });
