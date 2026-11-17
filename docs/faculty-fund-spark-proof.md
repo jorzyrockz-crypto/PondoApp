@@ -145,13 +145,20 @@ this discover a completed operation's original browser intent if its local token
 was lost. This remains dependent on the experimental rules, bounded full
 collection reads and shared revision, with quota and contention unmeasured.
 
-The proposed cancellation UI was withheld until these paths and matching
-browser/emulator tests are complete; connecting the read-only adapter now would
-hide unfinished records and can strand a user.
+The standalone experimental `faculty-fund-spark-recovery-ui.js` screen displays
+server-visible recovery records, their relevant payment and expense details,
+and explicit resume, cancel or finish actions. It treats a lost response as
+unconfirmed and distinguishes accepted/recorded records from cancellations.
+The host must reset it on every authentication, role or workspace change. Its
+synthetic browser test uses an in-memory reader and client: it is not a real
+Firestore or app integration test. The screen is not loaded by the app. The
+existing read-only adapter still hides unfinished records, so connecting it
+without a separate accessible recovery path can strand a user.
 
 This is still an isolated experiment, **not app integration or production
-rules**. A complete safe restore procedure, browser UI for recovering or
-cancelling multi-step expense operations, notifications, print pagination on
-real devices, and integration with existing team rules and UI remain
-unfinished. Do not publish the fixture or enter real fund data based on this
-experiment. Emulator tests do not replace actual multi-account tests in Firebase.
+rules**. A complete safe restore procedure, integration of recovery with the
+app and its local pending-token workflow, notifications, print pagination on
+real devices, and integration with existing team rules remain unfinished. Do
+not publish the fixture or enter real fund data based on this experiment.
+Emulator and synthetic-browser tests do not replace actual multi-account tests
+in Firebase.

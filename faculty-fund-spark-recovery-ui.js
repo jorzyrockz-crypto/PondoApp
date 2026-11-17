@@ -39,11 +39,23 @@
     root.append(card);
    }
   }
+  function validateItems(data){
+   if(!Array.isArray(data?.items))fail('Invalid recovery response');const seen=new Set();
+   for(const x of data.items){
+    const statuses=x?.kind==='remittance'?['draft','cancelled','declined','voided']:x?.kind==='expense'?['draft','cancelling','voiding']:[];
+    if(typeof x?.id!=='string'||!x.id||x.id.length>128||seen.has(x.kind+':'+x.id)||!statuses.includes(x.status)||typeof x.createdBy!=='string'||!x.createdBy||typeof x.createdAt!=='string'||!Number.isFinite(Date.parse(x.createdAt))||!Number.isSafeInteger(x.amountCents)||x.amountCents<0||typeof x.canResume!=='boolean'||x.remaining!==true)fail('Invalid recovery record');
+    seen.add(x.kind+':'+x.id);
+    if(x.kind==='expense'){
+     if(typeof x.description!=='string'||typeof x.payee!=='string'||typeof x.reference!=='string'||typeof x.occurredAt!=='string'||!Number.isFinite(Date.parse(x.occurredAt))||!Number.isSafeInteger(x.allocatedCents)||x.allocatedCents<0||x.allocatedCents>x.amountCents)fail('Invalid expense recovery record');
+    }else if(!Number.isSafeInteger(x.linkedCount)||x.linkedCount<0||!Array.isArray(x.payments)||x.payments.length<1||x.payments.length>200||x.linkedCount>x.payments.length||x.payments.some(p=>!p||typeof p.id!=='string'||!p.id||(!p.missing&&(typeof p.memberName!=='string'||typeof p.absenceDate!=='string'||!Number.isSafeInteger(p.amountCents)||p.amountCents<=0||typeof p.linked!=='boolean'))))fail('Invalid remittance recovery record');
+   }
+   return data.items;
+  }
   function reset(){generation++;busy=false;items=[];viewContext=null;note='Refresh to check for unfinished work.';show();}
   async function refresh(){
    if(busy)return;let c;try{c=capture()}catch(e){reset();note=e.message;show();return;}
    const g=++generation;busy=true;items=[];viewContext=c;note='Checking unfinished work.';show();
-   try{const adapter=makeRecovery(c);if(!adapter?.list)fail('Recovery is unavailable');const data=await adapter.list({orgId:c.orgId});if(!current(c,g))return;if(!Array.isArray(data?.items))fail('Invalid recovery response');items=data.items;note=items.length?'Review each record before choosing an action.':'No server-visible unfinished work was found. Review history for any uncertain request.';}
+   try{const adapter=makeRecovery(c);if(!adapter?.list)fail('Recovery is unavailable');const data=await adapter.list({orgId:c.orgId});if(!current(c,g))return;items=validateItems(data);note=items.length?'Review each record before choosing an action.':'No server-visible unfinished work was found. Review history for any uncertain request.';}
    catch(e){if(current(c,g)){items=[];note='Unable to confirm unfinished work. Reconnect and refresh; do not assume a request failed.';}}
    finally{if(current(c,g)){busy=false;show();}}
   }
@@ -61,7 +73,7 @@
     const prompt=action==='resume'?'Resume this draft? It may submit the remittance or record the expense.':action==='cancel'?'Cancel this draft? Check history if it was already accepted or recorded.':'Finish releasing this record’s reserved amounts?';
     const confirmed=await confirmAction(prompt);if(!current(c,g))return;if(!confirmed){note='No change was requested.';return;}
     const adapter=makeRecovery(c);if(!adapter?.resolve||!adapter?.list)fail('Recovery is unavailable');submitted=true;const result=await adapter.resolve({orgId:c.orgId,kind:item.kind,id:item.id,action,...(reason?{reason}:{})});if(!current(c,g))return;const summary=outcome(result,item);items=[];note=summary;
-    try{const data=await adapter.list({orgId:c.orgId});if(!current(c,g))return;if(!Array.isArray(data?.items))fail('Invalid recovery response');items=data.items;}
+    try{const data=await adapter.list({orgId:c.orgId});if(!current(c,g))return;items=validateItems(data);}
     catch(e){if(current(c,g))note=summary+' Unable to refresh the recovery list; refresh before another action.';}
    }catch(e){if(current(c,g)){items=[];note=submitted?'The result is unconfirmed. Refresh and review the record history before trying again; it may already have completed.':'No change was requested. Refresh and try again.';}}
    finally{if(current(c,g)){busy=false;show();}}
