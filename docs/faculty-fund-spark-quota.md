@@ -83,9 +83,14 @@ index entries, retries and other traffic are additional. The pages and focused
 reader rely on matching revision-enforcing rules and immutable record/link
 invariants; administrator writes bypass those rules. Firestore emulator tests
 exercise isolated fixtures, not production rules or production index
-requirements. None of these modules is connected to the app. The full reader
-still serves the prototype's balances, reports and existing recovery adapter,
-so the 1,000-record limit and high read costs remain for those paths.
+requirements. The isolated targeted resolver can resume remittance drafts and
+finish cancellations or reversals without that full reader. Its individual
+remittance release may still read up to 200 selected payments; its expense
+inspection fetches at most 201 allocation records and rejects more than 200.
+Resuming expense drafts remains unimplemented there. None of these modules is
+connected to the app. The full reader still serves the prototype's balances,
+reports and existing recovery adapter, so the 1,000-record limit and high read
+costs remain for those paths.
 
 ## Release gate
 

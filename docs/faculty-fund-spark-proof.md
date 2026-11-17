@@ -161,12 +161,20 @@ rule and other app costs; actual project usage and contention remain unmeasured.
 The newer `faculty-spark-discovery-proof.rules` and `faculty-fund-spark-discovery.js`
 experiment use a separate `sparkDiscovery*` namespace, a protected linked-payment
 counter and a release-needed flag to page recovery work without scanning all
-historical records. They cannot be mixed with the older namespace and have no
-migration or app integration. Emulator tests reject attempts to hide linked
-payments and test concurrent releases; a racing release encountered the rules
-1,000-expression limit and required explicit retry. Discovery and retry must
-remain available after any ambiguous result, and rules complexity, index needs
-and real-project behavior remain release blockers.
+historical records. `faculty-fund-spark-discovery-recovery.js` can resume a
+remittance draft, cancel a draft, and finish releasing a remittance or reversing
+an expense using targeted server reads. A response lost after a mutation remains
+unconfirmed until another server read; it distinguishes an already accepted or
+recorded transaction from a cancellation. The client caps its per-record line
+and allocation inspection at 201 documents, rejecting a result above 200.
+Resuming an expense draft is not supported by this targeted resolver.
+
+These modules cannot be mixed with the older namespace and have no migration or
+app integration. Emulator tests reject attempts to hide linked payments and test
+concurrent releases; a racing release encountered the rules 1,000-expression
+limit and required explicit retry. Discovery and retry must remain available
+after any ambiguous result, and rules complexity, index needs and real-project
+behavior remain release blockers.
 
 The standalone experimental `faculty-fund-spark-recovery-ui.js` screen displays
 server-visible recovery records, their relevant payment and expense details,
