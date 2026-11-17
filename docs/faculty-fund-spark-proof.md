@@ -174,10 +174,11 @@ distinguishes an already accepted or recorded transaction from a cancellation.
 A bounded wallet scan can return an unfinished status and a continuation hint
 for the same account, workspace, draft and server revision. Another write
 invalidates that hint. It is only a scan position, not evidence that all earlier
-wallets remain unavailable; a full restart may still be necessary. Cursor
-storage, user-facing continuation, and behavior under sustained contention are
-not implemented or proven. The client caps its per-record line and allocation
-inspection at 201 documents, rejecting a result above 200.
+wallets remain unavailable; a full restart may still be necessary. The isolated
+screen offers an in-memory continuation, but durable cursor storage and behavior
+under sustained contention are not implemented or proven. The client caps its
+per-record line and allocation inspection at 201 documents, rejecting a result
+above 200.
 
 The separate accepted-funds pager checks each open wallet against its accepted
 remittance and any pending correction, pins all pages to one protected
@@ -200,13 +201,19 @@ behavior remain release blockers.
 
 The standalone experimental `faculty-fund-spark-recovery-ui.js` screen displays
 server-visible recovery records, their relevant payment and expense details,
-and explicit resume, cancel or finish actions. It treats a lost response as
-unconfirmed and distinguishes accepted/recorded records from cancellations.
-The host must reset it on every authentication, role or workspace change. Its
-synthetic browser test uses an in-memory reader and client: it is not a real
-Firestore or app integration test. The screen is not loaded by the app. The
-existing read-only adapter still hides unfinished records, so connecting it
-without a separate accessible recovery path can strand a user.
+and explicit resume, cancel or finish actions. The new optional
+`faculty-fund-spark-paged-recovery.js` bridge connects it to discovery and the
+targeted resolver: it loads one recovery record per page and inspects at most
+200 selected payment documents for a remittance. It requires the page, selected
+record and payment reads to agree on the protected revision. Empty pages are
+not mistaken for exhaustion, and the screen offers an in-memory expense-scan
+continuation. A lost response remains unconfirmed; accepted/recorded outcomes
+are distinguished from cancellations. The host must reset it on every
+authentication, membership, role or workspace change. The browser test uses
+in-memory data, while separate emulator tests exercise the bridge against
+fixture rules: neither is a real-account or app integration test. The screen
+is not loaded by the app. The existing read-only adapter still hides unfinished
+records, so connecting it without an accessible recovery path can strand users.
 
 This is still an isolated experiment, **not app integration or production
 rules**. A complete safe restore procedure, integration of recovery with the

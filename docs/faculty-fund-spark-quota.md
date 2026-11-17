@@ -116,8 +116,10 @@ an unfinished status; callers can continue the scan rather than repeatedly
 starting at the oldest wallets. A changed revision invalidates the hint and
 requires a restart. The cursor is not proof that all earlier wallets remain
 ineligible: review or restart the scan if later funds cannot complete the draft.
-The hint cannot authenticate history or guarantee progress under ongoing writes,
-and it is not yet connected to a user interface or durable pending workflow.
+The hint cannot authenticate history or guarantee progress under ongoing writes.
+The isolated recovery screen can continue with it while the screen remains
+open, but does not persist it across refreshes or connect it to the app's
+pending-token workflow.
 If available funds are exhausted the operation remains unfinished; partial
 allocations stay reserved until resumed or cancelled. A release can still read
 up to 200 selected payments; expense inspection fetches at most 201 allocation
