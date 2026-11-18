@@ -1,0 +1,328 @@
+// INTEGRATION EXPERIMENT ONLY. Not Pondo production rules. Incomplete: expense
+// receipt rendering, exports, recovery and UI are not provided.
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o,u) { return /databases/$(database)/documents/organizations/$(o)/members/$(u); }
+  function config(o) { return /databases/$(database)/documents/organizations/$(o)/sparkConfig/current; }
+  function wallet(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkWallets/$(r); }
+  function expenseDraft(o,e) { return /databases/$(database)/documents/organizations/$(o)/sparkExpenseDrafts/$(e); }
+  function allocation(o,a) { return /databases/$(database)/documents/organizations/$(o)/sparkAllocations/$(a); }
+  function person(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPeople/$(p); }
+  function slot(o,s) { return /databases/$(database)/documents/organizations/$(o)/sparkPaymentSlots/$(s); }
+  function payment(o,p) { return /databases/$(database)/documents/organizations/$(o)/sparkPayments/$(p); }
+  function remit(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkRemittances/$(r); }
+  function line(o,r,p) { return /databases/$(database)/documents/organizations/$(o)/sparkLines/$(r + '~' + p); }
+  function correction(o,c) { return /databases/$(database)/documents/organizations/$(o)/sparkCorrections/$(c); }
+  function signed(o) { return request.auth != null && exists(member(o,request.auth.uid)); }
+  function role(o) { return get(member(o,request.auth.uid)).data.role; }
+  function collector(o) { return signed(o) && role(o) in ['owner','disbursing']; }
+  function owner(o) { return signed(o) && role(o) == 'owner'; }
+  function president(o) { return signed(o) && exists(config(o)) && get(config(o)).data.presidentUid == request.auth.uid; }
+  function only(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+  function short(s, n) { return s is string && s.size() > 0 && s.size() <= n; }
+  function validAmount(n) { return n is int && n > 0 && n <= 100000000; }
+  match /organizations/{o}/sparkConfig/{id} {
+   allow read: if signed(o) && id == 'current';
+   allow create, update: if id == 'current' && owner(o)
+     && request.resource.data.keys().hasOnly(['presidentUid','assignedAt','assignedBy'])
+     && short(request.resource.data.presidentUid,128)
+     && exists(member(o,request.resource.data.presidentUid))
+     && request.resource.data.assignedAt == request.time && request.resource.data.assignedBy == request.auth.uid;
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkPeople/{p} {
+   allow read: if signed(o);
+   allow create: if collector(o) && p.matches('^[A-Za-z0-9_-]{1,80}$')
+     && request.resource.data.keys().hasOnly(['name','createdAt','createdBy'])
+     && short(request.resource.data.name,160) && request.resource.data.name.matches('.*[^ ].*')
+     && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid;
+   allow update, delete: if false;
+  }
+  // A member/date slot points to at most one active payment. Voiding and a
+  // later replacement retain both immutable payment records for audit.
+  match /organizations/{o}/sparkPaymentSlots/{s} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['personId','absenceDate','activePaymentId','revision'])
+     && short(request.resource.data.personId,80) && request.resource.data.personId.matches('^[A-Za-z0-9_-]+$')
+     && request.resource.data.absenceDate is string && request.resource.data.absenceDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && s == request.resource.data.personId + '~' + request.resource.data.absenceDate
+     && short(request.resource.data.activePaymentId,128) && request.resource.data.revision == 1
+     && !exists(payment(o,request.resource.data.activePaymentId))
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.slotId == s
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.personId == request.resource.data.personId
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.absenceDate == request.resource.data.absenceDate
+     && getAfter(payment(o,request.resource.data.activePaymentId)).data.voidedAt == null;
+   allow update: if collector(o) && only(['activePaymentId','revision']) && request.resource.data.revision == resource.data.revision + 1
+     && ((resource.data.activePaymentId == null && short(request.resource.data.activePaymentId,128)
+          && !exists(payment(o,request.resource.data.activePaymentId))
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.slotId == s
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.personId == resource.data.personId
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.absenceDate == resource.data.absenceDate
+          && getAfter(payment(o,request.resource.data.activePaymentId)).data.voidedAt == null)
+       || (resource.data.activePaymentId is string && request.resource.data.activePaymentId == null
+          && getAfter(payment(o,resource.data.activePaymentId)).data.voidedAt == request.time
+          && getAfter(payment(o,resource.data.activePaymentId)).data.voidedBy == request.auth.uid));
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkPayments/{p} {
+   allow read: if signed(o);
+   allow create: if collector(o) && p.matches('^[A-Za-z0-9_-]{1,128}$')
+     && request.resource.data.keys().hasOnly(['slotId','personId','memberName','absenceDate','paymentDate','amountCents','createdAt','createdBy','remittanceId','voidedAt','voidedBy','voidReason'])
+     && short(request.resource.data.personId,80) && request.resource.data.personId.matches('^[A-Za-z0-9_-]+$')
+     && exists(person(o,request.resource.data.personId)) && request.resource.data.memberName == get(person(o,request.resource.data.personId)).data.name
+     && request.resource.data.absenceDate is string && request.resource.data.absenceDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && request.resource.data.slotId == request.resource.data.personId + '~' + request.resource.data.absenceDate
+     && getAfter(slot(o,request.resource.data.slotId)).data.activePaymentId == p
+     && getAfter(slot(o,request.resource.data.slotId)).data.revision == (exists(slot(o,request.resource.data.slotId)) ? get(slot(o,request.resource.data.slotId)).data.revision + 1 : 1)
+     && request.resource.data.paymentDate is string && request.resource.data.paymentDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && validAmount(request.resource.data.amountCents) && request.resource.data.createdAt == request.time
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.remittanceId == null
+     && request.resource.data.voidedAt == null && request.resource.data.voidedBy == null && request.resource.data.voidReason == null;
+   allow update: if (collector(o) && only(['remittanceId']) && resource.data.voidedAt == null && resource.data.remittanceId == null
+     && short(request.resource.data.remittanceId,128)
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && p in get(remit(o,request.resource.data.remittanceId)).data.paymentIds
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.lastPaymentId == p
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.count == get(remit(o,request.resource.data.remittanceId)).data.count + 1
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.amountCents == get(remit(o,request.resource.data.remittanceId)).data.amountCents + resource.data.amountCents
+     && !exists(line(o,request.resource.data.remittanceId,p))
+     && getAfter(line(o,request.resource.data.remittanceId,p)).data.paymentId == p)
+     || (collector(o) && only(['remittanceId']) && resource.data.voidedAt == null && resource.data.remittanceId is string && request.resource.data.remittanceId == null
+       && get(remit(o,resource.data.remittanceId)).data.status in ['declined','cancelled','voided'])
+     || (collector(o) && only(['voidedAt','voidedBy','voidReason']) && resource.data.voidedAt == null && resource.data.remittanceId == null
+       && request.resource.data.voidedAt == request.time && request.resource.data.voidedBy == request.auth.uid && short(request.resource.data.voidReason,500)
+       && get(slot(o,resource.data.slotId)).data.activePaymentId == p
+       && getAfter(slot(o,resource.data.slotId)).data.activePaymentId == null
+       && getAfter(slot(o,resource.data.slotId)).data.revision == get(slot(o,resource.data.slotId)).data.revision + 1);
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkRemittances/{r} {
+   allow read: if signed(o);
+   allow create: if collector(o) && r.matches('^[A-Za-z0-9_-]{1,128}$') && request.resource.data.keys().hasOnly(['status','amountCents','count','lastPaymentId','createdBy','createdAt','correctionId','paymentIds'])
+     && request.resource.data.status == 'draft' && request.resource.data.amountCents == 0 && request.resource.data.count == 0
+     && request.resource.data.paymentIds is list && request.resource.data.paymentIds.size() > 0 && request.resource.data.paymentIds.size() <= 200
+     && request.resource.data.paymentIds.toSet().size() == request.resource.data.paymentIds.size()
+     && request.resource.data.lastPaymentId == null && request.resource.data.correctionId == null && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+   allow update: if (
+     collector(o) && resource.data.status == 'draft' && request.resource.data.status == 'draft'
+     && only(['count','amountCents','lastPaymentId']) && resource.data.count < 200
+     && short(request.resource.data.lastPaymentId,128) && request.resource.data.lastPaymentId in resource.data.paymentIds
+     && get(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == null
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.remittanceId == r
+     && !exists(line(o,r,request.resource.data.lastPaymentId))
+     && getAfter(line(o,r,request.resource.data.lastPaymentId)).data.paymentId == request.resource.data.lastPaymentId
+     && request.resource.data.count == resource.data.count + 1
+     && request.resource.data.amountCents == resource.data.amountCents + get(payment(o,request.resource.data.lastPaymentId)).data.amountCents
+    ) || (
+     collector(o) && resource.data.status == 'draft' && resource.data.count > 0 && resource.data.count == resource.data.paymentIds.size()
+     && only(['status','presidentUid','submittedAt']) && request.resource.data.status == 'pending'
+     && request.resource.data.presidentUid == get(config(o)).data.presidentUid
+     && exists(member(o,request.resource.data.presidentUid)) && request.resource.data.submittedAt == request.time
+    ) || (
+     president(o) && resource.data.status == 'pending' && resource.data.presidentUid == request.auth.uid
+     && only(['status','acceptedBy','acceptedAt']) && request.resource.data.status == 'accepted'
+     && request.resource.data.acceptedBy == request.auth.uid && request.resource.data.acceptedAt == request.time
+     && !exists(wallet(o,r)) && getAfter(wallet(o,r)).data.status == 'open'
+     && getAfter(wallet(o,r)).data.amountCents == resource.data.amountCents
+     && getAfter(wallet(o,r)).data.acceptedAt == request.time
+    ) || (
+     president(o) && resource.data.status == 'pending' && resource.data.presidentUid == request.auth.uid
+     && only(['status','declinedBy','declinedAt','reason']) && request.resource.data.status == 'declined'
+     && request.resource.data.declinedBy == request.auth.uid && request.resource.data.declinedAt == request.time && short(request.resource.data.reason,500)
+    ) || (
+     collector(o) && resource.data.status in ['draft','pending'] && only(['status','cancelledBy','cancelledAt','reason'])
+     && request.resource.data.status == 'cancelled' && request.resource.data.cancelledBy == request.auth.uid
+     && request.resource.data.cancelledAt == request.time && short(request.resource.data.reason,500)
+   ) || (
+     collector(o) && resource.data.status == 'accepted' && resource.data.correctionId == null
+     && only(['correctionId']) && short(request.resource.data.correctionId,128)
+     && !exists(correction(o,request.resource.data.correctionId))
+     && getAfter(correction(o,request.resource.data.correctionId)).data.remittanceId == r
+     && getAfter(correction(o,request.resource.data.correctionId)).data.status == 'pending'
+   ) || (
+     president(o) && resource.data.status == 'accepted' && resource.data.correctionId is string
+     && request.resource.data.correctionId == null && only(['correctionId'])
+     && get(correction(o,resource.data.correctionId)).data.status == 'pending'
+     && getAfter(correction(o,resource.data.correctionId)).data.status == 'declined'
+     && getAfter(correction(o,resource.data.correctionId)).data.decidedBy == request.auth.uid
+   ) || (
+     president(o) && resource.data.status == 'accepted' && resource.data.correctionId is string
+     && only(['status','voidedAt','voidedBy']) && request.resource.data.status == 'voided'
+     && request.resource.data.voidedAt == request.time && request.resource.data.voidedBy == request.auth.uid
+     && get(correction(o,resource.data.correctionId)).data.status == 'pending'
+     && getAfter(correction(o,resource.data.correctionId)).data.status == 'approved'
+     && getAfter(correction(o,resource.data.correctionId)).data.decidedBy == request.auth.uid
+     && get(wallet(o,r)).data.unspentCents == get(wallet(o,r)).data.amountCents
+     && getAfter(wallet(o,r)).data.status == 'voided'
+   );
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkCorrections/{c} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['remittanceId','status','requestedBy','requestedAt','reason'])
+     && short(request.resource.data.remittanceId,128) && request.resource.data.status == 'pending'
+     && request.resource.data.requestedBy == request.auth.uid && request.resource.data.requestedAt == request.time && short(request.resource.data.reason,500)
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
+     && get(remit(o,request.resource.data.remittanceId)).data.correctionId == null
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.correctionId == c;
+   allow update: if president(o) && resource.data.status == 'pending'
+     && request.resource.data.decidedBy == request.auth.uid && request.resource.data.decidedAt == request.time
+     && get(remit(o,resource.data.remittanceId)).data.correctionId == c
+     && ((request.resource.data.status == 'declined' && only(['status','decidedBy','decidedAt','decisionReason'])
+       && short(request.resource.data.decisionReason,500) && getAfter(remit(o,resource.data.remittanceId)).data.correctionId == null)
+       || (request.resource.data.status == 'approved' && only(['status','decidedBy','decidedAt'])
+       && getAfter(remit(o,resource.data.remittanceId)).data.status == 'voided'
+       && getAfter(remit(o,resource.data.remittanceId)).data.voidedBy == request.auth.uid));
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkLines/{lineId} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['remittanceId','paymentId','amountCents','linkedAt','linkedBy'])
+     && short(request.resource.data.remittanceId,128) && short(request.resource.data.paymentId,128)
+     && lineId == request.resource.data.remittanceId + '~' + request.resource.data.paymentId
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'draft'
+     && get(payment(o,request.resource.data.paymentId)).data.remittanceId == null
+     && getAfter(payment(o,request.resource.data.paymentId)).data.remittanceId == request.resource.data.remittanceId
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.lastPaymentId == request.resource.data.paymentId
+     && request.resource.data.amountCents == get(payment(o,request.resource.data.paymentId)).data.amountCents
+     && request.resource.data.linkedAt == request.time && request.resource.data.linkedBy == request.auth.uid;
+   allow update, delete: if false;
+  }
+  // These are explicit human confirmations, not evidence of physical printing.
+  match /organizations/{o}/sparkMemberReceipts/{id} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['paymentId','remittanceId','printedBy','printedAt'])
+     && short(request.resource.data.paymentId,128) && short(request.resource.data.remittanceId,128)
+     && id == request.resource.data.remittanceId + '~' + request.resource.data.paymentId
+     && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
+     && get(payment(o,request.resource.data.paymentId)).data.remittanceId == request.resource.data.remittanceId
+     && get(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.status == 'accepted'
+     && getAfter(remit(o,request.resource.data.remittanceId)).data.correctionId == null;
+   allow update, delete: if false;
+  }
+  match /organizations/{o}/sparkRemittanceReceipts/{r} {
+   allow read: if signed(o);
+   allow create: if collector(o) && request.resource.data.keys().hasOnly(['printedBy','printedAt'])
+     && request.resource.data.printedBy == request.auth.uid && request.resource.data.printedAt == request.time
+     && get(remit(o,r)).data.status == 'accepted' && getAfter(remit(o,r)).data.status == 'accepted' && getAfter(remit(o,r)).data.correctionId == null;
+   allow update, delete: if false;
+  }
+  // One balance per accepted remittance. Creation is inseparable from the
+  // President's acceptance. A correction can remove only a fully unspent wallet.
+  match /organizations/{o}/sparkWallets/{r} {
+   allow read: if signed(o);
+   allow create: if president(o) && request.resource.data.keys().hasOnly(['status','amountCents','unspentCents','acceptedAt','revision','lastAllocation','lastRelease'])
+     && get(remit(o,r)).data.status == 'pending' && get(remit(o,r)).data.presidentUid == request.auth.uid
+     && getAfter(remit(o,r)).data.status == 'accepted' && getAfter(remit(o,r)).data.acceptedBy == request.auth.uid
+     && getAfter(remit(o,r)).data.acceptedAt == request.time && request.resource.data.acceptedAt == request.time
+     && request.resource.data.status == 'open' && request.resource.data.amountCents == get(remit(o,r)).data.amountCents
+     && request.resource.data.unspentCents == request.resource.data.amountCents && request.resource.data.revision == 0
+     && request.resource.data.lastAllocation == null && request.resource.data.lastRelease == null;
+   allow update: if (
+     collector(o) && resource.data.status == 'open' && only(['unspentCents','revision','lastAllocation'])
+     && get(remit(o,r)).data.status == 'accepted' && getAfter(remit(o,r)).data.status == 'accepted'
+     && getAfter(remit(o,r)).data.correctionId == null
+     && request.resource.data.revision == resource.data.revision + 1 && short(request.resource.data.lastAllocation,128)
+     && !exists(allocation(o,request.resource.data.lastAllocation))
+     && getAfter(allocation(o,request.resource.data.lastAllocation)).data.walletId == r
+     && getAfter(allocation(o,request.resource.data.lastAllocation)).data.recordedBy == request.auth.uid
+     && request.resource.data.unspentCents == resource.data.unspentCents - getAfter(allocation(o,request.resource.data.lastAllocation)).data.amountCents
+     && request.resource.data.unspentCents >= 0
+   ) || (
+     collector(o) && resource.data.status == 'open' && only(['unspentCents','revision','lastRelease'])
+     && getAfter(remit(o,r)).data.status == 'accepted' && request.resource.data.revision == resource.data.revision + 1
+     && short(request.resource.data.lastRelease,128)
+     && get(allocation(o,request.resource.data.lastRelease)).data.walletId == r
+     && get(allocation(o,request.resource.data.lastRelease)).data.releasedAt == null
+     && getAfter(allocation(o,request.resource.data.lastRelease)).data.releasedAt == request.time
+     && getAfter(allocation(o,request.resource.data.lastRelease)).data.releasedBy == request.auth.uid
+     && request.resource.data.unspentCents == resource.data.unspentCents + get(allocation(o,request.resource.data.lastRelease)).data.amountCents
+     && request.resource.data.unspentCents <= resource.data.amountCents
+   ) || (
+     president(o) && resource.data.status == 'open' && only(['status']) && request.resource.data.status == 'voided'
+     && resource.data.unspentCents == resource.data.amountCents
+     && get(remit(o,r)).data.status == 'accepted' && get(remit(o,r)).data.correctionId is string
+     && getAfter(remit(o,r)).data.status == 'voided' && getAfter(remit(o,r)).data.voidedBy == request.auth.uid
+   );
+   allow delete: if false;
+  }
+  // Each complete expense equals its immutable allocation lines. An interrupted
+  // draft reserves allocations until cancelled and safely released one at a time.
+  match /organizations/{o}/sparkExpenseDrafts/{e} {
+   allow read: if signed(o);
+   allow create: if collector(o) && e.matches('^[A-Za-z0-9_-]{1,128}$')
+     && request.resource.data.keys().hasOnly(['status','amountCents','allocatedCents','count','lastAllocation','lastRelease','description','payee','reference','occurredAt','createdAt','createdBy'])
+     && request.resource.data.status == 'draft' && validAmount(request.resource.data.amountCents)
+     && request.resource.data.allocatedCents == 0 && request.resource.data.count == 0 && request.resource.data.lastAllocation == null && request.resource.data.lastRelease == null
+     && short(request.resource.data.description,300) && short(request.resource.data.payee,160)
+     && request.resource.data.reference is string && request.resource.data.reference.size() <= 160
+     && request.resource.data.occurredAt is timestamp && request.resource.data.occurredAt <= request.time
+     && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid;
+   allow update: if (
+     collector(o) && resource.data.status == 'draft' && request.resource.data.status == 'draft'
+     && only(['allocatedCents','count','lastAllocation']) && resource.data.count < 200
+     && short(request.resource.data.lastAllocation,128) && !exists(allocation(o,request.resource.data.lastAllocation))
+     && getAfter(allocation(o,request.resource.data.lastAllocation)).data.expenseId == e
+     && request.resource.data.count == resource.data.count + 1
+     && request.resource.data.allocatedCents == resource.data.allocatedCents + getAfter(allocation(o,request.resource.data.lastAllocation)).data.amountCents
+     && request.resource.data.allocatedCents <= resource.data.amountCents
+   ) || (
+     collector(o) && resource.data.status == 'draft' && only(['status','recordedAt'])
+     && resource.data.allocatedCents == resource.data.amountCents && resource.data.count > 0
+     && request.resource.data.status == 'recorded' && request.resource.data.recordedAt == request.time
+   ) || (
+     collector(o) && resource.data.status == 'draft' && only(['status','cancelReason','cancelRequestedBy','cancelRequestedAt'])
+     && request.resource.data.status == 'cancelling' && short(request.resource.data.cancelReason,500)
+     && request.resource.data.cancelRequestedBy == request.auth.uid && request.resource.data.cancelRequestedAt == request.time
+   ) || (
+     collector(o) && resource.data.status in ['cancelling','voiding'] && resource.data.count > 0
+     && only(['allocatedCents','count','lastRelease']) && short(request.resource.data.lastRelease,128)
+     && get(allocation(o,request.resource.data.lastRelease)).data.expenseId == e
+     && get(allocation(o,request.resource.data.lastRelease)).data.releasedAt == null
+     && getAfter(allocation(o,request.resource.data.lastRelease)).data.releasedAt == request.time
+     && getAfter(allocation(o,request.resource.data.lastRelease)).data.releasedBy == request.auth.uid
+     && request.resource.data.count == resource.data.count - 1
+     && request.resource.data.allocatedCents == resource.data.allocatedCents - get(allocation(o,request.resource.data.lastRelease)).data.amountCents
+     && request.resource.data.allocatedCents >= 0
+   ) || (
+     collector(o) && resource.data.status == 'cancelling' && resource.data.allocatedCents == 0 && resource.data.count == 0
+     && only(['status','cancelledAt']) && request.resource.data.status == 'cancelled' && request.resource.data.cancelledAt == request.time
+   ) || (
+     collector(o) && resource.data.status == 'recorded' && only(['status','voidReason','voidRequestedBy','voidRequestedAt'])
+     && request.resource.data.status == 'voiding' && short(request.resource.data.voidReason,500)
+     && request.resource.data.voidRequestedBy == request.auth.uid && request.resource.data.voidRequestedAt == request.time
+   ) || (
+     collector(o) && resource.data.status == 'voiding' && resource.data.allocatedCents == 0 && resource.data.count == 0
+     && only(['status','voidedAt']) && request.resource.data.status == 'voided' && request.resource.data.voidedAt == request.time
+   );
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkAllocations/{a} {
+   allow read: if signed(o);
+   allow create: if collector(o) && a.matches('^[A-Za-z0-9_-]{1,128}$')
+     && request.resource.data.keys().hasOnly(['expenseId','walletId','amountCents','recordedAt','recordedBy','releasedAt','releasedBy'])
+     && short(request.resource.data.expenseId,128) && short(request.resource.data.walletId,128)
+     && validAmount(request.resource.data.amountCents) && request.resource.data.recordedAt == request.time
+     && request.resource.data.recordedBy == request.auth.uid && request.resource.data.releasedAt == null && request.resource.data.releasedBy == null
+     && get(expenseDraft(o,request.resource.data.expenseId)).data.status == 'draft'
+     && get(wallet(o,request.resource.data.walletId)).data.status == 'open'
+     && get(expenseDraft(o,request.resource.data.expenseId)).data.occurredAt >= get(wallet(o,request.resource.data.walletId)).data.acceptedAt
+     && getAfter(wallet(o,request.resource.data.walletId)).data.lastAllocation == a
+     && getAfter(wallet(o,request.resource.data.walletId)).data.revision == get(wallet(o,request.resource.data.walletId)).data.revision + 1
+     && getAfter(expenseDraft(o,request.resource.data.expenseId)).data.lastAllocation == a
+     && getAfter(expenseDraft(o,request.resource.data.expenseId)).data.count == get(expenseDraft(o,request.resource.data.expenseId)).data.count + 1;
+   allow update: if collector(o) && resource.data.releasedAt == null && only(['releasedAt','releasedBy'])
+     && request.resource.data.releasedAt == request.time && request.resource.data.releasedBy == request.auth.uid
+     && get(expenseDraft(o,resource.data.expenseId)).data.status in ['cancelling','voiding']
+     && get(wallet(o,resource.data.walletId)).data.status == 'open'
+     && getAfter(wallet(o,resource.data.walletId)).data.lastRelease == a
+     && getAfter(wallet(o,resource.data.walletId)).data.revision == get(wallet(o,resource.data.walletId)).data.revision + 1
+     && getAfter(expenseDraft(o,resource.data.expenseId)).data.lastRelease == a
+     && getAfter(expenseDraft(o,resource.data.expenseId)).data.count == get(expenseDraft(o,resource.data.expenseId)).data.count - 1;
+   allow delete: if false;
+  }
+ }
+}

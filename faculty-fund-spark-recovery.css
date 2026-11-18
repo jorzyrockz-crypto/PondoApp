@@ -1,0 +1,8 @@
+/* Experimental screen styles; not loaded by the production application. */
+.faculty-recovery { display: grid; gap: .65rem; min-width: 0; overflow-wrap: anywhere; }
+.faculty-recovery h2, .faculty-recovery h3, .faculty-recovery p { margin: 0; }
+.faculty-recovery button { cursor: pointer; font: inherit; max-width: 100%; padding: .55rem .8rem; white-space: normal; }
+.faculty-recovery button:disabled { cursor: wait; opacity: .6; }
+.faculty-recovery-card { border: 1px solid #cbd5e1; border-radius: .65rem; display: grid; gap: .5rem; min-width: 0; padding: .8rem; }
+.faculty-recovery-card ul { margin: 0; padding-inline-start: 1.4rem; }
+.faculty-recovery-card li { overflow-wrap: anywhere; }
