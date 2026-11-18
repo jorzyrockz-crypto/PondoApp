@@ -26,7 +26,12 @@
    return modules.createActivityPager({db,api,orgId:c.orgId,isCurrent:same,from,to,pageSize:25});
   }
   async function safeRead(input){const result=await read.read(input);if(realAccountTest&&result?.html)result.html=result.html.replaceAll('Faculty Fund · Special Collection','TEST ONLY — NOT A REAL RECEIPT · Faculty Fund');if(realAccountTest&&result?.csv)result.csv='"TEST ONLY — NOT A REAL FINANCIAL REPORT"\r\n'+result.csv.replace(/^\ufeff/,'');return result;}
-  return {read:safeRead,transition:write.transition,inspectPending:pending.inspect,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,mode:realAccountTest?'firebase-test-only':'emulator-test-only'}};
+  async function diagnosticExport(input){
+   if(typeof read.export!=='function')throw Error('Faculty Fund diagnostic export is unavailable');
+   const result=await read.export(input);
+   return {...result,notice:'TEST ONLY — diagnostic copy; not an authenticated backup or a restore file.'};
+  }
+  return {read:safeRead,export:diagnosticExport,transition:write.transition,inspectPending:pending.inspect,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,diagnosticExport:true,mode:realAccountTest?'firebase-test-only':'emulator-test-only'}};
  }
  if(typeof module==='object'&&module.exports)module.exports={createSparkApp};else global.createFacultyFundSparkApp=createSparkApp;
 })(typeof window!=='undefined'?window:globalThis);

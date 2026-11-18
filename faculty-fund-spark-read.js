@@ -21,7 +21,7 @@
     getDocFromServer(ref('sparkConfig','current')),
     Promise.all(Object.entries(paths).map(async ([name,path])=>{
      const snapshot=await getDocsFromServer(query(collection(db,`${root}/${nameOf(path)}`),limit(maxDocuments+1)));stable(snapshot);current();
-     if(snapshot.size>maxDocuments)fail('Faculty Fund exceeds the safe loading limit; archival is required');
+     if(snapshot.size>maxDocuments)fail('Faculty Fund exceeds the safe loading limit; no data was deleted');
      return [name,snapshot.docs.map(item=>{stable(item);return {...item.data(),id:item.id};})];
     }))
    ]);stable(configSnapshot);current();const records=Object.fromEntries(entries);

@@ -308,3 +308,19 @@ module imports it and no live rules or data are changed. It is an incremental
 proof of a possible atomic binding pattern only. Each additional operation
 needs equivalent cross-document rules and adversarial tests, including rules
 access/expression limits, before any integration or migration is considered.
+
+### Diagnostic copies during release preparation
+
+The test-only app now exposes its existing revision-checked diagnostic export
+to a workspace owner. It re-reads and reconciles the full ledger, then downloads
+a clearly marked test diagnostic file. It is separate from regular Pondo
+backups, includes sensitive member and absence data, and must be stored
+privately. Its checksum detects accidental changes only; it proves neither
+authenticity nor authority and **cannot restore** the fund. All confirmed
+workspace members can already read these records under the current test rules,
+so the owner-only export control is not a confidentiality boundary. The copy
+is unavailable when the full reader exceeds its 1,000-document cap or cannot
+confirm a consistent snapshot, including revision races. No partial export is
+produced. The loading-limit error now tells users no records were deleted and
+that the financial view is unavailable. This is a preparation step, not the
+protected backup/restore needed for a real-use release.
