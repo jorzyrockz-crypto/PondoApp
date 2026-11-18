@@ -8820,9 +8820,9 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
               <select id="teamInviteRole" class="input" style="margin-bottom:10px" aria-describedby="teamFacultyRoleHelp">
                 <option value="disbursing">Administrative Officer (AO) / Disbursing Officer — full edit access</option>
                 <option value="project-manager">Project Manager — full edit access</option>
-                <option value="reviewer">Reviewer (for Faculty President, assign separately) — read only</option>
+                <option value="reviewer">Viewer / Reviewer — read only</option>
               </select>
-              <p id="teamFacultyRoleHelp" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">For the AO, choose Administrative Officer (AO) / Disbursing Officer. For the Faculty President, invite them as a Reviewer, then after they join, assign them in Funds → Faculty Fund. Choosing Reviewer alone does not assign the President or let them accept a handover.</p>
+              <p id="teamFacultyRoleHelp" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">Invite the President as a Viewer. Once they join, choose Faculty President beside their name in Members. For the AO, choose Administrative Officer (AO).</p>
               <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
               <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
                 <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
@@ -8831,8 +8831,8 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
             </div>
             <div class="team-card">
               <p style="font-weight:700;font-size:14px;margin:0 0 10px">Members</p>
-              <p style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">Administrative Officer (AO) uses the Disbursing Officer team role. Faculty President is a separate Faculty Fund assignment, not a team role; only the assigned member can accept a handover.</p>
-              <button id="teamAssignFacultyPresident" type="button" class="btn btn-light" hidden style="margin-bottom:10px" onclick="closeSettings();switchTab('funds');window.PondoFacultyFundUI?.open()">Open Faculty Fund to assign President</button>
+              <p style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">To assign a Faculty President, choose Faculty President beside a Viewer’s name. They keep Viewer access and can accept Faculty Fund handovers. To change Presidents, assign another Viewer.</p>
+              <p id="teamFacultyPresidentStatus" role="status" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px"></p>
               <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
             </div>
             <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
@@ -8860,7 +8860,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
         </div>
         <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Note: receipt attachments and the organization logo are not synced between devices yet — only funds, transactions, projects, payables and contribution records sync in real time.</p>
       </div>
-      <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Role ideas · preview only</p><p>This preview does not assign a person or change their permissions. To manage actual team roles, use Settings → Team.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Administrative Officer (AO) / Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><p>For Faculty President, add the person to the team and assign them separately in Funds → Faculty Fund.</p><button class="btn btn-light" type="button" onclick="switchSettingsTab('team')">Go to Team settings</button></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
+      <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Role ideas · preview only</p><p>This preview does not assign a person or change their permissions. To manage actual team roles, use Settings → Team.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Administrative Officer (AO) / Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><p>To assign a Faculty President, go to Team settings and choose Faculty President beside a Viewer’s name.</p><button class="btn btn-light" type="button" onclick="switchSettingsTab('team')">Go to Team settings</button></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 10px">Organization</p><div style="display:flex; flex-direction:column; gap:8px"><input id="settingsOrgName" class="input" placeholder="Org Name"><input id="settingsOrgLoc" class="input" placeholder="Location"><div style="display:flex; gap:8px"><input id="settingsPeriodFrom" type="date" class="input" style="flex:1"><input id="settingsPeriodTo" type="date" class="input" style="flex:1"></div><button class="btn btn-dark" style="height:44px" onclick="saveOrgFromSettings()">Save Organization</button></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 8px">Signatories</p><div id="settingsSigs" style="display:flex; flex-direction:column; gap:8px"></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5; font-size:12px; color:var(--ink2)"><p style="margin:0">Pondo · Fund tracking</p><p style="margin:6px 0 0">Financial data: transactional browser storage after upgrade; settings remain in browser storage.</p><p style="margin:6px 0 0">Last backup export in this workspace: <span id="lastBackup">Never</span></p></div>
@@ -8934,7 +8934,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 83</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 84</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -8956,7 +8956,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='83', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='84', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -12699,7 +12699,7 @@ function updateHeaderTeamBadge() {
     badge.title = hasOtherOrgs ? 'Working with personal, local-only data. Tap to switch workspace.' : 'You are the only person who can see this data. Tap to set up team collaboration.';
     text.textContent = hasOtherOrgs ? 'Personal · Switch' : 'Solo · Add team';
   } else {
-    const roleLabel = ROLE_LABELS[pondoTeamState.role] || '';
+    const roleLabel = facultyPresidentKnown && facultyPresidentUid===pondoTeamState.uid ? 'Faculty President' : (ROLE_LABELS[pondoTeamState.role] || '');
     badge.title = (pondoTeamState.orgName || 'Team') + ' — Network status only, not proof of sync. Tap to switch workspace or manage members.';
     text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
@@ -12886,15 +12886,28 @@ window.pondoCloudSync = { push: schedulePush };
 // Faculty Fund is server-authoritative and separate from the regular snapshot.
 // Only confirmed member and server snapshots may generate best-effort alerts.
 let facultyStateUnsub=null,facultyConfigUnsub=null,facultyWatchGeneration=0;
-function stopFacultyWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();facultyStateUnsub=facultyConfigUnsub=null;}
+// Only server-confirmed config determines who is displayed as President.
+let facultyPresidentUid=null,facultyPresidentKnown=false;
+function stopFacultyWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();facultyStateUnsub=facultyConfigUnsub=null;facultyPresidentUid=null;facultyPresidentKnown=false;}
 function startFacultyWatch(orgId,uid){
- if(['emulator-test-only','firebase-test-only'].includes(window.pondoFacultyAPI?.capabilities?.mode)||facultyStateUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
+ if(facultyConfigUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
+ const mode=window.pondoFacultyAPI?.capabilities?.mode;
+ if(mode==='firebase-test-only'&&!/^org~faculty fund test .+/.test(orgId))return;
+ const isTest=mode==='firebase-test-only'||mode==='emulator-test-only';
  const generation=++facultyWatchGeneration;let facultyState=null,facultyConfig=null,gotState=false,gotConfig=false;
  const current=()=>generation===facultyWatchGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
  const deliver=()=>{if(!current()||!gotState||!gotConfig)return;try{window.processFacultyNotifications?.(facultyState||{remittances:[]},pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
- const failed=err=>{if(!current())return;console.warn('Faculty Fund updates unavailable:',err);stopFacultyWatch();window.PondoFacultyFundUI?.reset();};
- facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'facultyFund','state'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;facultyState=snap.exists()?snap.data():null;gotState=true;deliver();window.PondoFacultyFundUI?.refresh();},failed);
- facultyConfigUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'facultyFund','config'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;facultyConfig=snap.exists()?snap.data():null;gotConfig=true;deliver();},failed);
+ const failed=err=>{if(!current())return;console.warn('Faculty Fund updates unavailable:',err);stopFacultyWatch();renderTeamPanel();window.PondoFacultyFundUI?.reset();};
+ if(!isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'facultyFund','state'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;facultyState=snap.exists()?snap.data():null;gotState=true;deliver();window.PondoFacultyFundUI?.refresh();},failed);
+ const configPath=isTest?['sparkDiscoveryConfig','current']:['facultyFund','config'];
+ facultyConfigUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,...configPath),{includeMetadataChanges:true},snap=>{
+  if(!current())return;
+  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){facultyPresidentKnown=false;facultyPresidentUid=null;renderTeamPanel();return;}
+  facultyConfig=snap.exists()?snap.data():null;
+  const valid=!facultyConfig||(typeof facultyConfig.presidentUid==='string'&&!!facultyConfig.presidentUid);
+  facultyPresidentKnown=valid;facultyPresidentUid=valid?facultyConfig?.presidentUid||null:null;
+  gotConfig=true;deliver();renderTeamPanel();
+ },failed);
 }
 function teardownOrgSubscriptions() {
   stopFacultyWatch();
@@ -13357,12 +13370,36 @@ function copyInviteLink() {
 }
 
 async function changeMemberRole(uid, role) {
-  if (pondoTeamState.role !== 'owner' || !pondoTeamState.orgId) return;
+  if (pondoTeamState.role !== 'owner' || !pondoTeamState.orgId || !['owner','disbursing','project-manager','reviewer'].includes(role)) return;
   try {
     await updateDoc(doc(firestoreDb, 'organizations', pondoTeamState.orgId, 'members', uid), { role });
   } catch (err) {
     notify('Could not change role: ' + (err && err.message ? err.message : err));
   }
+}
+
+async function selectMemberRole(uid, role) {
+  const s=pondoTeamState,expected={orgId:s.orgId,uid:s.uid,role:s.role};
+  const current=()=>s.orgId===expected.orgId&&s.uid===expected.uid&&s.role===expected.role&&s.memberConfirmed;
+  if(!current()||expected.role!=='owner')return;
+  const member=s.members.find(m=>m.uid===uid);
+  if(!member)return;
+  if(role==='faculty-president'){
+    if(member.role!=='reviewer'){notify('Choose a Viewer / Reviewer to assign as Faculty President.');return;}
+    if(!facultyPresidentKnown){notify('Faculty President status is unavailable. Check that the Faculty Fund test rules are published and this is a Faculty Fund Test workspace.');return;}
+    if(facultyPresidentUid===uid)return;
+    if(!await confirmAction('Assign '+(member.displayName||member.email||'this member')+' as Faculty President? This replaces the current President. Their Viewer access stays the same.')){if(current())renderTeamPanel();return;}
+    if(!current()||!s.members.some(m=>m.uid===uid&&m.role==='reviewer')){if(current())renderTeamPanel();return;}
+    try{
+      if(!window.PondoFacultyFundUI?.assignPresident)throw Error('Faculty Fund assignment is unavailable.');
+      await window.PondoFacultyFundUI.assignPresident(uid,expected);
+      if(current())notify('Assignment submitted. The President label appears when the server confirms it.');
+    }catch(err){if(current())notify(err?.message||'Could not assign Faculty President.');}
+    if(current())renderTeamPanel();return;
+  }
+  if(facultyPresidentKnown&&facultyPresidentUid===uid){notify('Assign another Faculty President before changing this member’s team role.');renderTeamPanel();return;}
+  await changeMemberRole(uid,role);
+  if(current())renderTeamPanel();
 }
 
 async function removeMember(uid) {
@@ -13456,8 +13493,10 @@ function renderTeamPanel() {
   }
 
   document.getElementById('teamOrgName').textContent = pondoTeamState.orgName || 'Organization';
-  const roleLabels = { owner: 'Owner', disbursing: 'Administrative Officer (AO) / Disbursing Officer', reviewer: 'Reviewer (read-only)', 'project-manager': 'Project Manager' };
-  document.getElementById('teamMyRole').textContent = roleLabels[pondoTeamState.role] || pondoTeamState.role || '—';
+  const roleLabels = { owner: 'Owner', disbursing: 'Administrative Officer (AO) / Disbursing Officer', reviewer: 'Viewer / Reviewer (read-only)', 'project-manager': 'Project Manager' };
+  document.getElementById('teamMyRole').textContent = (facultyPresidentKnown&&facultyPresidentUid===pondoTeamState.uid?'Faculty President · ':'') + (roleLabels[pondoTeamState.role] || pondoTeamState.role || '—');
+  const presidentStatus=document.getElementById('teamFacultyPresidentStatus');
+  if(presidentStatus){const member=pondoTeamState.members.find(m=>m.uid===facultyPresidentUid);presidentStatus.textContent=facultyPresidentKnown?(facultyPresidentUid?'Faculty President: '+(member?.displayName||member?.email||'not a current team member'):'Faculty President: not assigned'):'Faculty President status unavailable until the test workspace and rules are ready.';}
   const draftRecovery = document.getElementById('teamDraftRecovery');
   if (draftRecovery) draftRecovery.hidden = !pondoTeamState.recoveryLocked;
   setSyncBadge(navigator.onLine ? 'live' : 'offline');
@@ -13469,8 +13508,6 @@ function renderTeamPanel() {
 
   const inviteCard = document.getElementById('teamInviteCard');
   if (inviteCard) inviteCard.hidden = pondoTeamState.role !== 'owner';
-  const assignFacultyPresident = document.getElementById('teamAssignFacultyPresident');
-  if (assignFacultyPresident) assignFacultyPresident.hidden = pondoTeamState.role !== 'owner';
 
   const list = document.getElementById('teamMembersList');
   if (list) {
@@ -13499,7 +13536,7 @@ function renderTeamPanel() {
       name.textContent = m.displayName || m.email || m.uid;
       const meta = document.createElement('div');
       meta.className = 'tm-meta';
-      meta.textContent = m.uid === pondoTeamState.uid ? 'You' : (m.email || '');
+      meta.textContent = (m.uid === pondoTeamState.uid ? 'You' : (m.email || '')) + (facultyPresidentKnown&&m.uid===facultyPresidentUid?' · Faculty President · '+(roleLabels[m.role]||m.role):'');
       info.append(name, meta);
       identity.appendChild(info);
       row.appendChild(identity);
@@ -13507,12 +13544,14 @@ function renderTeamPanel() {
       if (pondoTeamState.role === 'owner' && m.uid !== pondoTeamState.uid) {
         const select = document.createElement('select');
         select.setAttribute('aria-label', 'Team role for ' + (m.displayName || m.email || 'member'));
-        [['owner', 'Owner'], ['disbursing', 'Administrative Officer (AO) / Disbursing Officer'], ['project-manager', 'Project Manager'], ['reviewer', 'Reviewer (President assigned separately)']].forEach(([val, label]) => {
+        const assigned=facultyPresidentKnown&&facultyPresidentUid===m.uid;
+        [['owner', 'Owner'], ['disbursing', 'Administrative Officer (AO) / Disbursing Officer'], ['project-manager', 'Project Manager'], ['reviewer', 'Viewer / Reviewer']].forEach(([val, label]) => {
           const opt = document.createElement('option');
-          opt.value = val; opt.textContent = label; opt.selected = m.role === val;
+          opt.value = val; opt.textContent = label; opt.selected = !assigned && m.role === val;
           select.appendChild(opt);
         });
-        select.addEventListener('change', () => changeMemberRole(m.uid, select.value));
+        if(m.role==='reviewer'||assigned){const opt=document.createElement('option');opt.value='faculty-president';opt.textContent='Faculty President';opt.selected=assigned;select.appendChild(opt);}
+        select.addEventListener('change', async () => {const choice=select.value;select.disabled=true;try{await selectMemberRole(m.uid,choice);}catch(err){notify(err?.message||'Could not change role.');}finally{select.disabled=false;renderTeamPanel();}});
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.className = 'btn btn-light';
