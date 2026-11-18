@@ -1,0 +1,33 @@
+rules_version = '2';
+// Isolated capture proof only; not the real app rules or a restore facility.
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o) { return /databases/$(database)/documents/organizations/$(o)/members/$(request.auth.uid); }
+  function owner(o) { return request.auth != null && exists(member(o)) && get(member(o)).data.role == 'owner'; }
+  function version(o) { return /databases/$(database)/documents/organizations/$(o)/sparkDiscoveryRevision/current; }
+  function header(o,b) { return /databases/$(database)/documents/organizations/$(o)/sparkVerifiedBackups/$(b); }
+  function source(o,k,id) { return /databases/$(database)/documents/organizations/$(o)/$(k)/$(id); }
+  function kind(k) { return k in ['sparkDiscoveryPeople','sparkDiscoveryPayments','sparkDiscoveryPaymentSlots','sparkDiscoveryRemittances','sparkDiscoveryLines','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations','sparkDiscoveryCorrections','sparkDiscoveryPresidentHistory','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryConfig']; }
+  match /organizations/{o}/sparkDiscoveryRevision/{id} {
+   allow read: if owner(o) && id == 'current';
+  }
+  match /organizations/{o}/{k}/{id} {
+   allow read: if owner(o) && kind(k);
+  }
+  match /organizations/{o}/sparkVerifiedBackups/{b} {
+   allow read: if owner(o);
+   allow create: if owner(o) && b.matches('^[A-Za-z0-9_-]{16,128}$') && exists(version(o))
+     && request.resource.data.keys().hasOnly(['revision','createdBy','createdAt'])
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time
+     && request.resource.data.revision == get(version(o)).data.revision;
+   allow update, delete: if false;
+   match /collections/{k}/entries/{id} {
+    allow read: if owner(o);
+    allow create: if owner(o) && kind(k) && (k != 'sparkDiscoveryConfig' || id == 'current')
+      && exists(header(o,b)) && get(header(o,b)).data.revision == get(version(o)).data.revision
+      && exists(source(o,k,id)) && request.resource.data == get(source(o,k,id)).data;
+    allow update, delete: if false;
+   }
+  }
+ }
+}

@@ -469,3 +469,17 @@ real operation and reader, verified completion and safe unlocking, quota and
 privacy handling, app buttons, and adversarial tests against the actual rules.
 A local JSON checksum is not evidence that a President accepted a handover.
 No app, candidate or live rules have been enabled by this experiment.
+
+The experimental `faculty-fund-spark-capture.js` now exercises the capture
+side against the real twelve collection names plus configuration, using a
+reconciled reader, a revision-pinned immutable copy per source document, an
+owner-scoped backup ID, retry checks and a final confirmed revision read. Its
+matching rules are **only** `emulator-tests/fixtures/faculty-spark-capture-proof.rules`;
+they are not the candidate or live rules. The module is not loaded by the app.
+The capture deliberately returns `copies-created-not-restorable`: copies alone
+are not an authenticated completeness proof, a self-contained file, a safe
+unlock protocol or a restore. An interrupted attempt can leave immutable
+partial copies. Privileged writes bypass the revision, and a second Firestore
+copy does not protect against loss of the whole project. Each document costs
+additional reads, writes and storage; quota, retention, resumability and
+recovery from partial captures need explicit treatment before integration.
