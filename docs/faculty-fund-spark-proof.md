@@ -514,3 +514,12 @@ never written as deployable rules. Even if that test passes, the app's readers,
 notifications and older clients have not been integrated with that lock, and
 manifest completeness is still a client assertion. It does not provide a
 self-contained file restore or an approved production rollout.
+
+The full-ledger reader has an optional, off-by-default restore-lock check: when
+used with matching rules, it requires a server-confirmed absent lock both before
+and after the read, alongside its revision checks. Recovery itself must use a
+separate controlled reader while the lock is held. Activity, pending inspection,
+notifications and older clients still need coordinated handling before this
+can be enabled. The integrated emulator scenario also covers eight roster
+members, a President-accepted payment and an expense; it is not an assertion
+that the real project's rules or quota have been verified.

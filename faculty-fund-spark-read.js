@@ -4,16 +4,17 @@
 (function(global){
  'use strict';
  const fail=message=>{throw Error(message)};
- function createSparkReader({db,api,orgId,isCurrent,project,maxDocuments=1000,trackRemittanceReleases=false}){
-  if(!db||!api||typeof orgId!=='string'||!orgId||orgId.includes('/')||typeof isCurrent!=='function'||typeof project!=='function'||typeof trackRemittanceReleases!=='boolean'||!Number.isSafeInteger(maxDocuments)||maxDocuments<1||maxDocuments>5000)fail('Invalid Faculty Fund reader setup');
+ function createSparkReader({db,api,orgId,isCurrent,project,maxDocuments=1000,trackRemittanceReleases=false,checkRestoreLock=false}){
+  if(!db||!api||typeof orgId!=='string'||!orgId||orgId.includes('/')||typeof isCurrent!=='function'||typeof project!=='function'||(typeof trackRemittanceReleases!=='boolean'||typeof checkRestoreLock!=='boolean')||!Number.isSafeInteger(maxDocuments)||maxDocuments<1||maxDocuments>5000)fail('Invalid Faculty Fund reader setup');
   const {doc,collection,query,limit,getDocFromServer,getDocsFromServer}=api;
   if(!doc||!collection||!query||!limit||!getDocFromServer||!getDocsFromServer)fail('Server-only Firestore reads are unavailable');
   const root=`organizations/${orgId}`,nameOf=name=>trackRemittanceReleases?name.replace(/^spark/,'sparkDiscovery'):name,ref=(name,id)=>doc(db,`${root}/${nameOf(name)}/${id}`);
   const stable=s=>{if(!s.metadata||s.metadata.fromCache||s.metadata.hasPendingWrites)fail('Faculty Fund data is not server-confirmed');};
   const current=()=>{if(!isCurrent())fail('Workspace changed while Faculty Fund was loading');};
   const marker=s=>{stable(s);if(!s.exists())return 0;const n=s.data().revision;if(!Number.isSafeInteger(n)||n<1)fail('Faculty Fund revision is invalid');return n;};
+  async function unlocked(){if(!checkRestoreLock)return;const s=await getDocFromServer(doc(db,`${root}/sparkRestoreProof/current`));stable(s);current();if(s.exists())fail('Faculty Fund restore is in progress');}
   async function read(){
-   current();const first=await getDocFromServer(ref('sparkRevision','current')),revision=marker(first);current();
+   current();await unlocked();const first=await getDocFromServer(ref('sparkRevision','current')),revision=marker(first);current();
    const paths={people:'sparkPeople',payments:'sparkPayments',slots:'sparkPaymentSlots',remittances:'sparkRemittances',lines:'sparkLines',wallets:'sparkWallets',expenses:'sparkExpenseDrafts',allocations:'sparkAllocations',corrections:'sparkCorrections',presidentHistory:'sparkPresidentHistory',memberReceipts:'sparkMemberReceipts',remittanceReceipts:'sparkRemittanceReceipts'};
    // These independent server reads can run together. The revision read after
    // all of them still rejects a mixed snapshot if any write raced the load.
@@ -25,7 +26,7 @@
      return [name,snapshot.docs.map(item=>{stable(item);return {...item.data(),id:item.id};})];
     }))
    ]);stable(configSnapshot);current();const records=Object.fromEntries(entries);
-   const last=await getDocFromServer(ref('sparkRevision','current')),end=marker(last);current();
+   const last=await getDocFromServer(ref('sparkRevision','current')),end=marker(last);current();await unlocked();
    if(end!==revision)fail('Faculty Fund changed while loading; refresh and try again');
    if(revision===0&&(configSnapshot.exists()||Object.values(records).some(items=>items.length)))fail('Faculty Fund revision is missing; recovery is required');
    const config=configSnapshot.exists()?configSnapshot.data():null;

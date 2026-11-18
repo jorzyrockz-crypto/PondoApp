@@ -41,3 +41,13 @@ test('a revision arriving during a read is compared against the newly confirmed 
 test('unexpected backwards signals fail safe rather than suppressing a queued refresh',async()=>{
  const s=liveScheduler();s.ctx.loaded={ctx:{orgId:'school'},revision:5};s.ctx.schedule(6);s.ctx.schedule(5);const p=s.flush();assert.equal(s.reads(),1);s.resolve();await p;
 });
+test('optional restore lock guard blocks a partial ledger and detects a restore race',async()=>{
+ let exists=false,revision=5,readCount=0,mode='none';const snap=value=>({metadata,exists:()=>value!==null,data:()=>value});
+ const api={doc:(_db,p)=>p,collection:(_db,p)=>p,query:p=>p,limit:n=>n,getDocFromServer:async p=>{if(p.includes('sparkRestoreProof'))return snap(exists?{active:true}:null);if(p.includes('Revision'))return snap({revision});return snap(null)},getDocsFromServer:async()=>{if(++readCount===1){if(mode==='locked')exists=true;if(mode==='completed')revision=7;}return {metadata,size:0,docs:[]}}};
+ const reader=createSparkReader({db:{},api,orgId:'school',isCurrent:()=>true,project:()=>({}),trackRemittanceReleases:true,checkRestoreLock:true});
+ exists=true;await assert.rejects(reader.read(),/restore is in progress/);assert.equal(readCount,0);exists=false;mode='locked';await assert.rejects(reader.read(),/restore is in progress/);exists=false;revision=5;readCount=0;mode='completed';await assert.rejects(reader.read(),/changed while loading/);
+});
+test('optional restore lock guard refuses a cached lock snapshot and scope changes',async()=>{
+ const s={metadata:{fromCache:true,hasPendingWrites:false},exists:()=>false};let current=true;const api={doc:(_db,p)=>p,collection:()=>{},query:()=>{},limit:()=>{},getDocFromServer:async()=>s,getDocsFromServer:async()=>{throw Error('unexpected')}};
+ const reader=createSparkReader({db:{},api,orgId:'school',isCurrent:()=>current,project:()=>({}),checkRestoreLock:true});await assert.rejects(reader.read(),/not server-confirmed/);s.metadata.fromCache=false;current=false;await assert.rejects(reader.read(),/Workspace changed/);
+});
