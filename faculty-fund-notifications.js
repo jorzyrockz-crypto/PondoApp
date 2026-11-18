@@ -11,7 +11,7 @@
   function deliver(event,title,actorUid){
    if(seen.has(event))return true;
    const result=io.push({type:'team',title,body:'Open the Faculty Fund in this workspace to review.',actorUid,recipientUid:state.uid,orgId:state.orgId,action:{tab:'funds',facultyFund:true}});
-   if(result)next.add(event);return !!result;
+   if(result){next.add(event);try{io.toast?.(title);}catch(e){/* Bell remains available. */}}return !!result;
   }
   for(const r of snapshot.remittances){
    if(!r||typeof r.id!=='string'||!r.id)continue;
@@ -35,6 +35,19 @@
   }
   const bounded=[...next].slice(-5000);memory.set(key,new Set(bounded));try{io.storage.setItem(key,JSON.stringify(bounded))}catch(e){/* session memory still avoids repeats */}
  }
- if(typeof module==='object'&&module.exports)module.exports={processFacultyNotifications};
- else global.processFacultyNotifications=processFacultyNotifications;
+ // Adapt only server-confirmed Spark documents; callers must scope the
+ // snapshots to the current confirmed member and reject cached/pending data.
+ function processSparkFacultyNotifications(remittances,corrections,state,config,io){
+  if(!Array.isArray(remittances)||!Array.isArray(corrections))return;
+  const byId=new Map(corrections.map(c=>[c.id,c]));
+  const stamp=t=>{try{const n=t?.toMillis?.();return Number.isFinite(n)?String(n):null;}catch(e){return null;}};
+  const rows=remittances.map(r=>{
+   const c=byId.get(r.correctionId),at=c?.status==='pending'&&c.remittanceId===r.id?stamp(c.requestedAt):null;
+   return {id:r.id,status:r.status,presidentUid:r.presidentUid,submittedByUid:r.createdBy,acceptedByUid:r.acceptedBy,declinedByUid:r.declinedBy,acceptedAt:stamp(r.acceptedAt),declinedAt:stamp(r.declinedAt),voidRequest:at?{requestedAt:at,requestedByUid:c.requestedBy}:null};
+  });
+  processFacultyNotifications({remittances:rows},state,config,io);
+ }
+ if(typeof module==='object'&&module.exports)module.exports={processFacultyNotifications,processSparkFacultyNotifications};
+ else{global.processFacultyNotifications=processFacultyNotifications;global.processSparkFacultyNotifications=processSparkFacultyNotifications;}
+
 })(typeof window!=='undefined'?window:globalThis);

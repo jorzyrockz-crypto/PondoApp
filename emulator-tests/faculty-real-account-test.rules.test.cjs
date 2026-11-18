@@ -82,3 +82,29 @@ test('test rules allow only bounded public organization suggestions',async()=>{
  const snap=await api.getDocs(q);assert.deepEqual(snap.docs.map(d=>d.id),[testOrg]);
  await assertFails(api.getDocs(api.query(api.collection(outsider,'organizations'),api.limit(10))));
 });
+
+test('members can listen to bounded Faculty Fund notification collections; outsiders cannot',async()=>{
+ const president=db('president'),outsider=db('outsider');
+ for(const path of ['sparkDiscoveryRemittances','sparkDiscoveryCorrections']){
+  const q=d=>api.query(api.collection(d,`organizations/${testOrg}/${path}`),api.limit(1001));
+  const snap=await new Promise((resolve,reject)=>{let unsub=()=>{};unsub=api.onSnapshot(q(president),{includeMetadataChanges:true},s=>{if(!s.metadata.fromCache&&!s.metadata.hasPendingWrites){unsub();resolve(s);}},reject)});
+  assert.equal(snap.size,0);await assertFails(api.getDocs(q(outsider)));
+ }
+});
+
+test('confirmed Firestore events notify the President and AO across accounts',async()=>{
+ const {processSparkFacultyNotifications}=require('../faculty-fund-notifications.js');const unsubs=[];
+ function watch(uid,role){
+  const state={uid,orgId:testOrg,role,memberConfirmed:true},events=[],values=new Map();let remits=null,corrections=null;const io={storage:{getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)},push:n=>{events.push(n);check();return n}};let waiters=[];
+  function check(){for(const w of [...waiters])if(w.condition()){waiters=waiters.filter(x=>x!==w);clearTimeout(w.timer);w.resolve();}}
+  function until(condition){if(condition())return Promise.resolve();return new Promise((resolve,reject)=>{const w={condition,resolve,timer:setTimeout(()=>reject(Error('notification listener timed out')),15000)};waiters.push(w);});}
+  function received(path,assign){const q=api.query(api.collection(db(uid),`organizations/${testOrg}/${path}`),api.limit(1001));unsubs.push(api.onSnapshot(q,{includeMetadataChanges:true},s=>{if(s.metadata.fromCache||s.metadata.hasPendingWrites)return;const rows=s.docs.map(d=>({...d.data(),id:d.id}));assign(rows);if(remits&&corrections)processSparkFacultyNotifications(remits,corrections,state,{presidentUid:'president'},io);check();}));}
+  received('sparkDiscoveryRemittances',v=>remits=v);received('sparkDiscoveryCorrections',v=>corrections=v);return {events,ready:()=>until(()=>!!remits&&!!corrections),sawPending:()=>until(()=>remits?.some(r=>r.id==='r'&&r.status==='pending')),until};
+ }
+ try{
+  const owner=client('owner'),ao=client('ao'),president=client('president');await owner.assignPresident('president','assignment');const p=watch('president','reviewer'),a=watch('ao','disbursing');await Promise.all([p.ready(),a.ready()]);
+  await ao.createPerson('sample','Sample');await ao.createPayment('p',{personId:'sample',absenceDate:'2024-01-01',paymentDate:'2024-01-02',amountCents:25000});await ao.createRemittance('r',['p']);await ao.addPayment('r','p');await ao.submitRemittance('r');await p.until(()=>p.events.some(n=>/awaiting acceptance/.test(n.title)));await a.sawPending();
+  await president.accept('r');await a.until(()=>a.events.some(n=>/remittance accepted/.test(n.title)));await ao.requestCorrection('c','r','Sample correction');await p.until(()=>p.events.some(n=>/correction awaiting review/.test(n.title)));
+  assert.equal(p.events.filter(n=>/awaiting acceptance/.test(n.title)).length,1);assert.equal(a.events.filter(n=>/remittance accepted/.test(n.title)).length,1);
+ }finally{unsubs.forEach(u=>u());}
+});

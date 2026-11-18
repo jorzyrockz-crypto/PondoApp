@@ -16,3 +16,18 @@ test('unconfirmed membership, other workspace and failed delivery do not misdire
 test('current assigned President receives pending correction without the reason',()=>{
  const e=env('president','school-d'),r={...pending,status:'accepted',acceptedAt:'x',acceptedByUid:'president',voidRequest:{requestedAt:'y',requestedByUid:'ao',reason:'Sensitive reason'}};process({remittances:[r]},e.state,{presidentUid:'president'},e.io);assert.equal(e.events.length,1);assert.match(e.events[0].title,/correction/);assert.doesNotMatch(JSON.stringify(e.events),/Sensitive reason/);
 });
+
+test('Spark remittances notify the President and then their AO, with no repeats',()=>{
+ const {processSparkFacultyNotifications:spark}=require('../faculty-fund-notifications.js');const ts=n=>({toMillis:()=>n});
+ const president=env('president','spark-school-x'),ao=env('ao','spark-school-x');let toast=0;president.io.toast=()=>toast++;
+ const pending={id:'r2',status:'pending',presidentUid:'president',createdBy:'ao',submittedAt:ts(10)};
+ spark([pending],[],president.state,{presidentUid:'president'},president.io);spark([pending],[],ao.state,{presidentUid:'president'},ao.io);
+ assert.equal(president.events.length,1);assert.equal(toast,1);assert.equal(ao.events.length,0);
+ const accepted={...pending,status:'accepted',acceptedBy:'president',acceptedAt:ts(20)};
+ spark([accepted],[],ao.state,{presidentUid:'president'},ao.io);spark([accepted],[],ao.state,{presidentUid:'president'},ao.io);assert.equal(ao.events.length,1);assert.match(ao.events[0].title,/accepted/);
+});
+test('Spark correction notifications require a matching pending correction',()=>{
+ const {processSparkFacultyNotifications:spark}=require('../faculty-fund-notifications.js');const e=env('president','spark-school-y');const r={id:'r',createdBy:'ao',status:'accepted',acceptedBy:'president',acceptedAt:{toMillis:()=>1},correctionId:'c'};
+ spark([r],[{id:'c',remittanceId:'wrong',status:'pending',requestedBy:'ao',requestedAt:{toMillis:()=>2}}],e.state,{presidentUid:'president'},e.io);assert.equal(e.events.length,0);
+ spark([r],[{id:'c',remittanceId:'r',status:'pending',requestedBy:'ao',requestedAt:{toMillis:()=>2}}],e.state,{presidentUid:'president'},e.io);assert.equal(e.events.length,1);assert.match(e.events[0].title,/correction/);
+});

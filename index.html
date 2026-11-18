@@ -9044,7 +9044,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 91</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 92</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9066,7 +9066,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='91', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='92', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9483,6 +9483,11 @@ function pushNotification({type,title,body,action,recipientUid,orgId,approverOnl
   return entry;
 }
 window.pushNotification=pushNotification;
+// A non-blocking in-app notice complements the bell even without OS permission.
+let facultyNoticeTimer=null;
+window.clearFacultyNotice=()=>{clearTimeout(facultyNoticeTimer);document.getElementById('facultyNoticeToast')?.remove();};
+window.pondoFacultyNotice=title=>{window.clearFacultyNotice();const el=document.createElement('div');el.id='facultyNoticeToast';el.setAttribute('role','status');el.textContent=title+' · Check the notification bell';el.style.cssText='position:fixed;z-index:9501;top:max(16px,env(safe-area-inset-top));right:16px;max-width:min(360px,calc(100vw - 32px));padding:13px 16px;border-radius:12px;background:#153c2c;color:white;font:600 14px/1.4 system-ui;box-shadow:0 5px 24px #0005;pointer-events:none';document.body.appendChild(el);facultyNoticeTimer=setTimeout(()=>el.remove(),6000);};
+
 function markNotificationRead(id){if(id.startsWith('approved:')){const n=visibleNotifications().find(n=>n.id===id&&n.kind==='workspaceApproval');if(n)window.pondoMarkApprovalRead?.(n.orgId,n.approvalKey);return;}if(id.startsWith('join:')){markJoinNoticesRead([id]);return;}if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
 function markAllNotificationsRead(){for(const n of visibleNotifications().filter(n=>n.kind==='workspaceApproval'&&!n.read))window.pondoMarkApprovalRead?.(n.orgId,n.approvalKey);markJoinNoticesRead(visibleNotifications().filter(n=>n.kind==='joinRequest').map(n=>n.id));for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
@@ -13033,31 +13038,45 @@ window.pondoCloudSync = { push: schedulePush };
 
 // Faculty Fund is server-authoritative and separate from the regular snapshot.
 // Only confirmed member and server snapshots may generate best-effort alerts.
-let facultyStateUnsub=null,facultyConfigUnsub=null,facultyWatchGeneration=0;
+let facultyStateUnsub=null,facultyConfigUnsub=null,facultyRemitUnsub=null,facultyCorrectionUnsub=null,facultyWatchGeneration=0;
 // Only server-confirmed config determines who is displayed as President.
 let facultyPresidentUid=null,facultyPresidentKnown=false;
-function stopFacultyWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();facultyStateUnsub=facultyConfigUnsub=null;facultyPresidentUid=null;facultyPresidentKnown=false;}
+function stopFacultyWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();if(facultyRemitUnsub)facultyRemitUnsub();if(facultyCorrectionUnsub)facultyCorrectionUnsub();facultyStateUnsub=facultyConfigUnsub=facultyRemitUnsub=facultyCorrectionUnsub=null;facultyPresidentUid=null;facultyPresidentKnown=false;window.clearFacultyNotice?.();}
 function startFacultyWatch(orgId,uid){
  if(facultyConfigUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
  const mode=window.pondoFacultyAPI?.capabilities?.mode;
  if(mode==='firebase-test-only'&&!/^org~faculty fund test .+/.test(orgId))return;
  const isTest=mode==='firebase-test-only'||mode==='emulator-test-only';
- const generation=++facultyWatchGeneration;let facultyState=null,facultyConfig=null,gotState=false,gotConfig=false;
+ const generation=++facultyWatchGeneration;let facultyState=null,facultyConfig=null,gotState=false,gotConfig=false,sparkRemits=null,sparkCorrections=null;
  const current=()=>generation===facultyWatchGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
- const deliver=()=>{if(!current()||!gotState||!gotConfig)return;try{window.processFacultyNotifications?.(facultyState||{remittances:[]},pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
+ const deliver=()=>{if(!current()||!gotState||!gotConfig)return;try{window.processFacultyNotifications?.(facultyState||{remittances:[]},pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification,toast:window.pondoFacultyNotice});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
+ const deliverSpark=()=>{if(!current()||!gotConfig||!sparkRemits||!sparkCorrections)return;try{window.processSparkFacultyNotifications?.(sparkRemits,sparkCorrections,pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification,toast:window.pondoFacultyNotice});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
  const failed=err=>{if(!current())return;console.warn('Faculty Fund updates unavailable:',err);stopFacultyWatch();renderTeamPanel();window.PondoFacultyFundUI?.reset();};
+ const noticeFailed=err=>{if(current())console.warn('Faculty Fund notifications unavailable:',err);};
  if(!isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'facultyFund','state'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;facultyState=snap.exists()?snap.data():null;gotState=true;deliver();window.PondoFacultyFundUI?.refresh();},failed);
  // Test-mode writes atomically advance this marker. Only use confirmed changes
  // as an invalidation signal; the UI still performs its guarded server read.
  if(isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'sparkDiscoveryRevision','current'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;window.PondoFacultyFundUI?.scheduleLiveRefresh?.();},failed);
+ // Separate bounded, server-confirmed listeners keep the bell active even
+ // with the modal closed, without rereading all financial collections.
+ if(isTest){
+  const watchNotices=(path,assign)=>onSnapshot(query(collection(firestoreDb,'organizations',orgId,path),limit(1001)),{includeMetadataChanges:true},snap=>{
+   if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;
+   if(snap.size>1000){assign(null);console.warn('Faculty Fund notification history exceeds the safe limit.');return;}
+   const rows=[];snap.forEach(d=>rows.push({...d.data(),id:d.id}));assign(rows);deliverSpark();
+  },noticeFailed);
+  facultyRemitUnsub=watchNotices('sparkDiscoveryRemittances',rows=>{sparkRemits=rows;});
+  facultyCorrectionUnsub=watchNotices('sparkDiscoveryCorrections',rows=>{sparkCorrections=rows;});
+ }
+
  const configPath=isTest?['sparkDiscoveryConfig','current']:['facultyFund','config'];
  facultyConfigUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,...configPath),{includeMetadataChanges:true},snap=>{
   if(!current())return;
-  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){facultyPresidentKnown=false;facultyPresidentUid=null;renderTeamPanel();return;}
+  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){gotConfig=false;facultyPresidentKnown=false;facultyPresidentUid=null;renderTeamPanel();return;}
   facultyConfig=snap.exists()?snap.data():null;
   const valid=!facultyConfig||(typeof facultyConfig.presidentUid==='string'&&!!facultyConfig.presidentUid);
   facultyPresidentKnown=valid;facultyPresidentUid=valid?facultyConfig?.presidentUid||null:null;
-  gotConfig=true;deliver();renderTeamPanel();
+  gotConfig=true;deliver();if(isTest)deliverSpark();renderTeamPanel();
  },failed);
 }
 function teardownOrgSubscriptions() {
