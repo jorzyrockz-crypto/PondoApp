@@ -3122,6 +3122,8 @@ body{
 .faculty-list{display:grid;gap:8px;margin:10px 0}.faculty-list label,.faculty-item{padding:10px;border:1px solid #dbe4ee;border-radius:9px;overflow-wrap:anywhere}.faculty-item strong,.faculty-item small{display:block}.faculty-item small{font-size:12px;margin-top:4px}.faculty-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.faculty-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.faculty-metrics div{padding:10px;background:#eef5fb;border-radius:9px;font-size:12px;color:#183455}.faculty-metrics strong{display:block;font-size:16px}.faculty-warning{border:1px solid #dcaa38;background:#fff7dc;color:#5c4300;padding:10px;border-radius:9px;margin:8px 0}
 body.dark-mode .faculty-fund{background:#192d46;color:#e1ecf8;border-color:#3a526b}body.dark-mode .faculty-fund details,body.dark-mode .faculty-item,body.dark-mode .faculty-list label{border-color:#3a526b}
 
+/* The tab animation transforms its contents; suspend it while the fixed modal is open. */
+body.faculty-modal-open #tab-funds{animation:none!important;transform:none!important}
 /* Faculty Fund is a focused workspace; forms are grouped by task, not accordions. */
 .faculty-modal{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:24px;color:#183455}
 .faculty-modal-backdrop{position:absolute;inset:0;background:rgba(7,20,29,.66);backdrop-filter:blur(4px)}
