@@ -78,6 +78,28 @@ service cloud.firestore {
       match /organizationRequests/{orgId} {
         allow read, write: if signedIn() && uid() == userId;
       }
+
+      // An owner can notify a removed member only in the same atomic write
+      // that actually removes that member. The recipient can read/mark it read
+      // without retaining access to the former workspace.
+      match /teamNotices/{noticeId} {
+        allow read: if signedIn() && uid() == userId;
+        allow create: if signedIn() && uid() != userId
+          && request.resource.data.keys().hasOnly(['kind','orgId','orgName','actorUid','createdAt','read'])
+          && request.resource.data.keys().hasAll(['kind','orgId','orgName','actorUid','createdAt','read'])
+          && request.resource.data.kind == 'removed'
+          && request.resource.data.orgId is string && request.resource.data.orgId.size() > 0 && request.resource.data.orgId.size() <= 150
+          && request.resource.data.orgName is string && request.resource.data.orgName.size() > 0 && request.resource.data.orgName.size() <= 120
+          && request.resource.data.actorUid == uid() && request.resource.data.createdAt == request.time && request.resource.data.read == false
+          && isOwner(request.resource.data.orgId)
+          && exists(memberPath(request.resource.data.orgId,userId))
+          && !existsAfter(memberPath(request.resource.data.orgId,userId))
+          && request.resource.data.orgName == get(orgPath(request.resource.data.orgId)).data.name;
+        allow update: if signedIn() && uid() == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && resource.data.read == false && request.resource.data.read == true;
+        allow delete: if false;
+      }
     }
 
     // ---- organizations ----

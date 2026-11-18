@@ -162,3 +162,20 @@ test('shared appearance is owner-only and cannot alter the registered name or ar
  await assertFails(updateDoc(org,{teamColor:'rose',teamIcon:'heart',name:'Different'}));
  await assertFails(deleteDoc(org));
 });
+test('removal notice is atomic, private, and remains readable after access is revoked',async()=>{
+ const owner=directory('owner'),other=directory('other'),member=directory('member'),orgId=(await owner.service.orgCreate({name:'Notice School'})).orgId;
+ await seed({[`organizations/${orgId}/members/member`]:{uid:'member',role:'reviewer'},[`organizations/${orgId}/members/other`]:{uid:'other',role:'reviewer'}});
+ const noticePath='users/member/teamNotices/notice1',memberPath=`organizations/${orgId}/members/member`;
+ const payload={kind:'removed',orgId,orgName:'Notice School',actorUid:'owner',createdAt:serverTimestamp(),read:false};
+ await assertFails(setDoc(ref(owner.db,noticePath),payload));
+ let forged=writeBatch(other.db);forged.set(ref(other.db,noticePath),{...payload,actorUid:'other'});forged.delete(ref(other.db,memberPath));await assertFails(forged.commit());
+ let bad=writeBatch(owner.db);bad.set(ref(owner.db,noticePath),{...payload,orgName:'False name'});bad.delete(ref(owner.db,memberPath));await assertFails(bad.commit());
+ assert.ok((await getDoc(ref(member.db,memberPath))).exists());
+ let batch=writeBatch(owner.db);batch.set(ref(owner.db,noticePath),payload);batch.delete(ref(owner.db,memberPath));await assertSucceeds(batch.commit());
+ await assertFails(getDoc(ref(member.db,`organizations/${orgId}`)));assert.equal((await getDoc(ref(member.db,noticePath))).data().kind,'removed');
+ assert.equal((await getDocs(collection(member.db,'users/member/teamNotices'))).size,1);
+ await assertFails(getDoc(ref(owner.db,noticePath)));await assertFails(getDoc(ref(other.db,noticePath)));
+ await assertFails(updateDoc(ref(member.db,noticePath),{orgName:'Forged'}));
+ await assertSucceeds(updateDoc(ref(member.db,noticePath),{read:true}));await assertFails(updateDoc(ref(member.db,noticePath),{read:false}));
+ await assertFails(deleteDoc(ref(member.db,noticePath)));await assertFails(setDoc(ref(owner.db,'users/member/teamNotices/notice2'),payload));
+});

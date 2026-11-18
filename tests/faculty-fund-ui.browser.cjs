@@ -45,6 +45,9 @@ async function main(){
    assert.equal(await page.evaluate(()=>document.activeElement.id),'teamModalClose');
    await page.keyboard.press('Escape');assert.equal(await page.locator('#teamModal').isHidden(),true);
   }
+  // Account notices remain visible even outside the former workspace.
+  await page.evaluate(()=>{window.pondoRemovalNotices=[{id:'removed:example',type:'account',title:'Workspace access removed',body:'Your access to Former School was removed.',recipientUid:'ao',orgId:null,read:false,ts:Date.now(),action:null}];window._readRemoval='';window.pondoMarkRemovalNoticeRead=id=>window._readRemoval=id;renderNotifCenter()});
+  assert.match(await page.locator('#notifCenterMenu').innerText(),/Former School/);await page.evaluate(()=>openNotification('removed:example'));assert.equal(await page.evaluate(()=>window._readRemoval),'example');
   assert.deepEqual(errors,[]);console.log('Faculty Fund browser workflow passed: forms, acceptance, receipts, expense, retry, recovery access and pending reconciliation.');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}
 }

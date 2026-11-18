@@ -39,3 +39,9 @@ test('confirmed snapshot diffs detect donations and nested Death Aid payments by
  let summary=c.newTypedTeamActivity(before,after);assert.equal(summary.donations,1);assert.equal(summary.deathPayments,1);assert.doesNotMatch(JSON.stringify(summary),/Private|Secret/);let unchanged=c.newTypedTeamActivity(after,after);assert.equal(unchanged.donations,0);assert.equal(unchanged.deathPayments,0);
  assert.match(html,/prevJSON && prevJSON!==incomingJSON && pondoTeamState.memberConfirmed && updatedBy!==pondoTeamState.uid/);assert.match(html,/action:window\.teamActivityAction\(prev,rest,typed\)/);
 });
+test('account removal notices remain visible across workspaces only to their recipient',()=>{
+ const t=setupFeed();t.win.pondoRemovalNotices=[{id:'removed:id',recipientUid:'u1',orgId:null,read:false,ts:5},{id:'removed:other',recipientUid:'u2',orgId:null,read:false,ts:6}];
+ assert.equal(t.ctx.visibleNotifications().length,1);assert.equal(t.ctx.unreadNotificationCount(),1);t.state.orgId='b';assert.equal(t.ctx.visibleNotifications().length,1);
+ const seen=[];t.win.pondoMarkRemovalNoticeRead=id=>seen.push(id);t.ctx.markNotificationRead('removed:id');assert.deepEqual(seen,['id']);
+ t.win.pondoCurrentUser.uid='u2';assert.equal(t.ctx.visibleNotifications()[0].id,'removed:other');
+});

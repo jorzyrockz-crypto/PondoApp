@@ -68,3 +68,11 @@ test('test rules preserve shared appearance owner restriction outside and inside
   await assertFails(api.updateDoc(api.doc(db('owner'),`organizations/${org}`),{teamColor:'invalid',teamIcon:'star'}));
  }
 });
+test('test rules allow an atomic private removal notice without granting workspace access',async()=>{
+ await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();await api.setDoc(api.doc(admin,`organizations/${normalOrg}`),{name:'Normal Workspace'});});
+ const owner=db('owner'),reviewer=db('reviewer'),notice='users/reviewer/teamNotices/n1',member=`organizations/${normalOrg}/members/reviewer`;
+ const payload={kind:'removed',orgId:normalOrg,orgName:'Normal Workspace',actorUid:'owner',createdAt:api.serverTimestamp(),read:false};
+ await assertFails(api.setDoc(api.doc(owner,notice),payload));
+ const b=api.writeBatch(owner);b.set(api.doc(owner,notice),payload);b.delete(api.doc(owner,member));await b.commit();
+ assert.equal((await api.getDoc(api.doc(reviewer,notice))).data().kind,'removed');await assertFails(api.getDoc(api.doc(reviewer,`organizations/${normalOrg}`)));
+});

@@ -8978,7 +8978,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 85</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 86</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9000,7 +9000,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='85', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='86', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9366,9 +9366,9 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('headerA
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('headerMoreMenu').hidden){e.preventDefault();e.stopPropagation();closeHeaderMore(true)}});
 
 // --- Notification center --------------------------------------------------
-// A device-local notification feed -- there's no backend push server behind
-// this app (static hosting + Firestore only, see sw.js), so this covers two
-// kinds of events without one:
+// Most notifications are device-local. Workspace-removal notices also use a
+// private account-scoped Firestore inbox. No backend push server is used, so
+// notifications cannot appear while the app is fully closed. Local events:
 //   - "team": built from the live Firestore listeners in subscribeToOrg()
 //     (module script below) when a teammate joins/leaves/changes role, or
 //     edits shared workspace data.
@@ -9391,7 +9391,9 @@ function loadNotifications(){try{const key=notificationStorageKey(),raw=key&&loc
 function saveNotifications(list){try{const key=notificationStorageKey();if(!key)return false;localStorage.setItem(key,JSON.stringify(list.slice(0,NOTIF_MAX)));return true}catch(e){return false}}
 function visibleNotifications(){
   const state=window.pondoTeamState, uid=window.pondoCurrentUser?.uid;
-  return loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
+  const local=loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
+  const account=(window.pondoRemovalNotices||[]).filter(n=>uid&&n.recipientUid===uid);
+  return local.concat(account).sort((a,b)=>b.ts-a.ts);
 }
 function unreadNotificationCount(){return visibleNotifications().filter(n=>!n.read).length}
 function pushNotification({type,title,body,action,recipientUid,orgId,approverOnly,actorUid}={}){
@@ -9409,8 +9411,8 @@ function pushNotification({type,title,body,action,recipientUid,orgId,approverOnl
   return entry;
 }
 window.pushNotification=pushNotification;
-function markNotificationRead(id){const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
-function markAllNotificationsRead(){const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
+function markNotificationRead(id){if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
+function markAllNotificationsRead(){for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
 function updateNotifBadge(){const btn=document.getElementById('notifBellBtn'),badge=document.getElementById('notifBellCount');if(!btn||!badge)return;const count=unreadNotificationCount();badge.hidden=count===0;badge.textContent=count>99?'99+':String(count)}
 window.updateNotifBadge=updateNotifBadge;
@@ -9434,7 +9436,8 @@ function renderNotifCenter(){
   const canAskPermission=('Notification' in window)&&Notification.permission==='default';
   const permissionDenied=('Notification' in window)&&Notification.permission==='denied';
   let html='<div class="notif-center-head"><strong>Notifications</strong>'+(list.some(n=>!n.read)?'<button type="button" class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>':'')+'</div>';
-  html+='<div class="notif-permission-row"><span>Alerts are device-local. Open the team workspace to check for updates. Older unscoped alerts are hidden for privacy.</span></div>';
+  html+='<div class="notif-permission-row"><span>Most alerts are device-local. Workspace removal notices are delivered to your account when you open the app online. Older unscoped alerts are hidden for privacy.</span></div>';
+  if(window.pondoRemovalInboxUnavailable)html+='<div class="notif-permission-row"><span>Workspace removal notices are unavailable. Check your connection and access.</span></div>';
   if(canAskPermission){
     html+='<div class="notif-permission-row"><span>Get alerts here even when this tab isn\u2019t focused.</span><button type="button" onclick="requestNotifPermission()">Enable</button></div>';
   }else if(permissionDenied){
@@ -12590,6 +12593,7 @@ const HEAVY_IMAGE_KEYS = ['payables', 'txs', 'contributionPayments'];
 // worth a "X joined/left" notification, or just the very first snapshot
 // after subscribing (which would otherwise look like everyone "just joined").
 const teamActivityMemory = { membersByOrg: {} };
+const pendingTeamRemovals=new Set();
 const notify = (msg) => { if (window.appAlert) window.appAlert(msg); else alert(msg); };
 const confirmAction = (msg) => (window.appConfirm ? window.appConfirm(msg) : Promise.resolve(confirm(msg)));
 
@@ -13059,6 +13063,7 @@ function subscribeToOrg(orgId) {
       prevByUid.forEach((m, uid) => {
         if (uid === pondoTeamState.uid) return;
         if (!nextByUid.has(uid)) {
+          const key=orgId+'\0'+uid;if(pendingTeamRemovals.delete(key))return;
           const label = m.displayName || m.email || 'A teammate';
           window.pushNotification({ type: 'team', title: label + ' left ' + orgLabel });
         }
@@ -13475,15 +13480,32 @@ async function selectMemberRole(uid, role) {
 
 async function removeMember(uid) {
   const s=pondoTeamState,orgId=s.orgId,actor=s.uid;
-  const current=()=>s.orgId===orgId&&s.uid===actor&&s.role==='owner'&&s.memberConfirmed;
-  if (!orgId || !current() || uid===actor || !s.members.some(m=>m.uid===uid)) return;
+  const scoped=()=>s.orgId===orgId&&s.uid===actor&&window.pondoCurrentUser?.uid===actor;
+  const current=()=>scoped()&&s.role==='owner'&&s.memberConfirmed;
+  const member=s.members.find(m=>m.uid===uid);
+  if (!orgId || !current() || uid===actor || !member) return;
   if (facultyPresidentKnown&&facultyPresidentUid===uid) {notify('Assign another Faculty President and resolve any pending handovers before removing this member.');return;}
-  if (!await confirmAction('Remove this member from this workspace? They will lose access to its shared data.')) return;
+  if (!navigator.onLine) {notify('Connect to the internet before removing a member.');return;}
+  if (!await confirmAction('Remove this member from this workspace? They will lose access and receive an in-app notice when they next open Pondo online.')) return;
   if (!current() || !s.members.some(m=>m.uid===uid)) return;
+  const key=orgId+'\0'+uid;if(pendingTeamRemovals.has(key))return;pendingTeamRemovals.add(key);
   try {
-    await deleteDoc(doc(firestoreDb, 'organizations', orgId, 'members', uid));
+    const orgRef=doc(firestoreDb,'organizations',orgId),memberRef=doc(firestoreDb,'organizations',orgId,'members',uid);
+    const noticeRef=doc(collection(firestoreDb,'users',uid,'teamNotices'));
+    await runTransaction(firestoreDb,async tx=>{
+      const [orgSnap,memberSnap]=await Promise.all([tx.get(orgRef),tx.get(memberRef)]);
+      if(!orgSnap.exists()||!memberSnap.exists())throw Error('Workspace or membership no longer exists.');
+      tx.set(noticeRef,{kind:'removed',orgId,orgName:orgSnap.data().name,actorUid:actor,createdAt:serverTimestamp(),read:false});
+      tx.delete(memberRef);
+    });
+    if(scoped()){
+      if(current())window.pushNotification?.({type:'team',title:(member.displayName||member.email||'Member')+' was removed',body:'Access to '+(s.orgName||'the workspace')+' was removed.',action:{tab:'dashboard'}});
+      notify('Member removed. Their account will show a notice when they open Pondo online.');
+    }
+    setTimeout(()=>pendingTeamRemovals.delete(key),60000);
   } catch (err) {
-    if(current())notify('Could not remove member: ' + (err && err.message ? err.message : err));
+    pendingTeamRemovals.delete(key);
+    if(scoped())notify('Removal could not be confirmed. Refresh the member list before trying again. The updated notification rules may be required.');
   }
 }
 
@@ -13860,6 +13882,32 @@ function teardownCollaboration() {
   renderTeamPanel();
 }
 
+// Account-scoped notices remain available after workspace access is revoked.
+// This is an in-app inbox, not background push or email.
+let removalInboxUnsub=null,removalInboxGeneration=0;
+function stopRemovalInbox(){
+ removalInboxGeneration++;if(removalInboxUnsub)removalInboxUnsub();removalInboxUnsub=null;
+ window.pondoRemovalNotices=[];window.pondoRemovalInboxUnavailable=false;
+ window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
+}
+function startRemovalInbox(uid){
+ stopRemovalInbox();if(!uid)return;const generation=++removalInboxGeneration;
+ const current=()=>generation===removalInboxGeneration&&window.pondoCurrentUser?.uid===uid;
+ removalInboxUnsub=onSnapshot(query(collection(firestoreDb,'users',uid,'teamNotices'),orderBy('createdAt','desc'),limit(60)),{includeMetadataChanges:true},snap=>{
+  if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;
+  const notices=[];snap.forEach(item=>{const v=item.data(),ts=v.createdAt?.toMillis?.();
+   if(v.kind!=='removed'||typeof v.orgName!=='string'||typeof v.read!=='boolean'||!Number.isFinite(ts))return;
+   notices.push({id:'removed:'+item.id,type:'account',title:'Workspace access removed',body:'Your access to '+v.orgName+' was removed.',ts,read:v.read,action:null,recipientUid:uid,orgId:null});
+  });
+  window.pondoRemovalNotices=notices;window.pondoRemovalInboxUnavailable=false;window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
+ },err=>{if(current()){window.pondoRemovalNotices=[];window.pondoRemovalInboxUnavailable=true;window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();console.warn('Workspace notice inbox unavailable:',err);}});
+}
+window.pondoMarkRemovalNoticeRead=async id=>{
+ const uid=window.pondoCurrentUser?.uid;if(!uid||!id||!window.pondoRemovalNotices?.some(n=>n.id==='removed:'+id&&n.recipientUid===uid&&!n.read))return;
+ try{await updateDoc(doc(firestoreDb,'users',uid,'teamNotices',id),{read:true});}
+ catch(err){if(window.pondoCurrentUser?.uid===uid)notify('Could not mark the notice as read. Check your connection and try again.');}
+};
+
 const authGate = document.getElementById('authGate');
 const pondoApp = document.getElementById('pondoApp');
 const authSignInBtn = document.getElementById('authSignInBtn');
@@ -14065,6 +14113,7 @@ onAuthStateChanged(auth, (user) => {
       }
     }
     window.pondoCurrentUser = user;
+    startRemovalInbox(user.uid);
     upsertUserProfile(user);
     initCollaboration(user);
     // Local tracker storage (and its single-tab edit lock) is only relevant once someone is
@@ -14080,6 +14129,7 @@ onAuthStateChanged(auth, (user) => {
     if (window.closeNotifCenter) window.closeNotifCenter();
     if(!signInPending) setGateBusy(false, '');
     window.pondoCurrentUser = null;
+    stopRemovalInbox();
     clearTimeout(settingsPushTimer);
     teardownCollaboration();
   }
