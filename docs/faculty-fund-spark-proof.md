@@ -483,3 +483,17 @@ partial copies. Privileged writes bypass the revision, and a second Firestore
 copy does not protect against loss of the whole project. Each document costs
 additional reads, writes and storage; quota, retention, resumability and
 recovery from partial captures need explicit treatment before integration.
+
+An isolated restore coordinator now preflights immutable copies from a
+manifest, reconciles them, and resumes a session by claiming each matching
+record exactly once. In the synthetic fixture it refuses differing live records,
+recreates only absent exact copies, reconciles again, and records completion
+before releasing the fixture lock. A persistent session makes a lost response
+retryable. This is still **not an app restore**: the fixture does not lock the
+real financial rules/readers or advance their revision during restore. Its
+manifest is supplied by a client and Firestore rules cannot prove it lists
+every original source document; the post-restore reconciliation is likewise a
+client check. A privileged administrator can bypass rules. The experiment
+limits a capture to 1,000 records total and 500 KB of IDs, stores extra copies
+and receipts, and cannot restore loss of the Firebase project itself. No UI,
+candidate rules, or real deployment use it.
