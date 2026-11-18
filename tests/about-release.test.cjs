@@ -7,14 +7,14 @@ async function activation(keys,{failPut=false}={}){
  vm.runInNewContext(worker,{self,caches,URL,Response:class{constructor(body){this.body=body}},Promise,console:{warn(){}}});let pending;handlers.activate({waitUntil:p=>pending=p});await pending;return {puts,deleted,claimed};
 }
 test('worker records the release marker only on an update and keeps other apps caches',async()=>{
- let fresh=await activation(['pondo-v87','other-app']);assert.equal(fresh.puts.length,0);assert.deepEqual(fresh.deleted,[]);assert.equal(fresh.claimed,1);
- let update=await activation(['pondo-v86','pondo-v87','other-app']);assert.deepEqual(update.puts,[['pondo-v87','./.pondo-update-ready-v87','updated']]);assert.deepEqual(update.deleted,['pondo-v86']);assert.equal(update.claimed,1);
+ let fresh=await activation(['pondo-v88','other-app']);assert.equal(fresh.puts.length,0);assert.deepEqual(fresh.deleted,[]);assert.equal(fresh.claimed,1);
+ let update=await activation(['pondo-v87','pondo-v88','other-app']);assert.deepEqual(update.puts,[['pondo-v88','./.pondo-update-ready-v88','updated']]);assert.deepEqual(update.deleted,['pondo-v87']);assert.equal(update.claimed,1);
 });
-test('marker storage failure never prevents update activation',async()=>{let result=await activation(['pondo-v86','pondo-v87'],{failPut:true});assert.deepEqual(result.deleted,['pondo-v86']);assert.equal(result.claimed,1)});
+test('marker storage failure never prevents update activation',async()=>{let result=await activation(['pondo-v87','pondo-v88'],{failPut:true});assert.deepEqual(result.deleted,['pondo-v87']);assert.equal(result.claimed,1)});
 test('About dialog, release version, update marker and readiness hooks stay in sync',()=>{
  assert.match(html,/id="aboutMenuItem"[^>]*onclick="closeHeaderMore\(\);openPondoAbout\(\)"/);
  assert.match(html,/id="aboutOverlay"[^>]*hidden/);assert.match(html,/role="dialog" aria-modal="true" aria-labelledby="aboutTitle"/);
- assert.match(html,/App version 87/);assert.match(worker,/CACHE_VERSION = 'pondo-v87'/);assert.match(html,/const release='87'/);assert.match(worker,/\.pondo-update-ready-v87/);
+ assert.match(html,/App version 88/);assert.match(worker,/CACHE_VERSION = 'pondo-v88'/);assert.match(html,/const release='88'/);assert.match(worker,/\.pondo-update-ready-v88/);
  assert.match(html,/await navigator\.serviceWorker\.ready/);assert.match(html,/worker\.state==='activated'/);assert.match(html,/worker\.addEventListener\('statechange',changed\)/);assert.match(html,/cache\.match\(marker\)/);assert.match(html,/window\.pondoCheckWhatsNew\?\.\(\)/);
  assert.match(html,/if\(automatic\)acknowledge\(\)/);assert.match(html,/document\.body\.classList\.contains\('modal-open'\)/);
  assert.match(html,/window\.pondoAppUpdates\.checkNow\(\)/);assert.match(html,/window\.pondoAppUpdates\?\.apply\(\)/);

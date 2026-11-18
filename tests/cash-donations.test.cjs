@@ -25,7 +25,7 @@ test('backup validation restricts donation metadata to valid income references',
  const {ctx}=setup(),good={donor:'A',project:'',dpdsRef:'',dpdsStatus:'checked',notes:''};assert.equal(ctx.validCashDonation(good,'IN'),true);assert.equal(ctx.validCashDonation(good,'OUT'),false);assert.equal(ctx.validCashDonation({...good,dpdsStatus:'submitted'},'IN'),false);assert.match(html,/t\.cashDonation!=null&&!validCashDonation\(t\.cashDonation,t\.type\)/);
 });
 test('dashboard access, manual DPDS language and signed filtered print remain available',()=>{
- assert.match(html,/id="recordCashDonation" onclick="openCashDonation\(\)"/);assert.match(html,/id="donationRegisterTitle" tabindex="-1">Cash donations/);assert.match(html,/Not an automatic submission or confirmation/);assert.match(source,/function printCashDonations\(\)[\s\S]*cashDonationRows\(\)[\s\S]*signatorySection\(\)/);assert.match(source,/body\.classList\.contains\('role-reviewer'\)/);assert.match(html,/Attachments stay on this device/);
+ assert.match(html,/id="recordCashDonation" onclick="openCashDonation\(\)"/);assert.match(html,/id="donationRegisterTitle" tabindex="0"[\s\S]*?<strong>Cash donations/);assert.match(html,/Not an automatic submission or confirmation/);assert.match(source,/function printCashDonations\(\)[\s\S]*cashDonationRows\(\)[\s\S]*signatorySection\(\)/);assert.match(source,/body\.classList\.contains\('role-reviewer'\)/);assert.match(html,/Attachments stay on this device/);
 });
 
 test('linking cannot turn a mixed or fundraising fund into a donation source',async()=>{

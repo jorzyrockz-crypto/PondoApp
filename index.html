@@ -8269,6 +8269,48 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
  .donation-form-group[hidden] {display:none!important}
  body.role-reviewer #recordCashDonation, body.role-reviewer .donation-edit {display:none!important}
  @media(max-width:560px) {.donation-register {padding:14px}.donation-filters label {flex-basis:140px}.donation-entry-actions {width:100%}}
+/* Secondary records sit below the fund-source workspace, not inside its list. */
+#tab-funds .fund-extras{margin-top:28px;padding:22px;border:1px solid #dbe4ef;border-radius:20px;background:#f5f8fc}
+#tab-funds .fund-extras-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+#tab-funds .fund-extras-heading .report-eyebrow{margin:0 0 7px;color:#58709a;font-size:10px;font-weight:800;letter-spacing:.09em}
+#tab-funds .fund-extras-heading h3{margin:0;color:#1d355f;font-size:18px;letter-spacing:-.03em}
+#tab-funds .fund-extras-heading p:last-child{max-width:650px;margin:6px 0 0;color:#647994;font-size:12px;line-height:1.5}
+.fund-extras-badge{flex:none;padding:6px 9px;border:1px solid #d5e1ee;border-radius:999px;background:#fff;color:#637994;font-size:10px;font-weight:800;letter-spacing:.06em}
+.fund-extras-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+#tab-funds .fund-extras-grid > .donation-register,#tab-funds .fund-extras-grid > .faculty-fund{min-width:0;margin:0;padding:18px;border:1px solid #dbe4ef;border-radius:16px;background:#fff;color:#1d355f;box-shadow:0 4px 14px #173d6509}
+#tab-funds .fund-extras-grid > .donation-register[open],#tab-funds .fund-extras-grid > .faculty-fund.is-open,#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{grid-column:1 / -1}
+#facultyFundRecoveryRoot[hidden]{display:none!important}
+#tab-funds .donation-register > summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer}
+#tab-funds .donation-register > summary::-webkit-details-marker{display:none}
+.register-symbol{width:46px;height:46px;display:grid;place-items:center;flex:none;border-radius:14px}
+.register-symbol svg{width:23px;height:23px}
+.donation-symbol{background:#fff1e7;color:#d26e32}.faculty-symbol{background:#e9f3ff;color:#2874bd}
+.register-summary-text{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+#tab-funds .register-label{display:block;color:#7186a1;font-size:10px;font-weight:800;letter-spacing:.08em;line-height:1.2}
+#tab-funds .donation-register > summary strong{display:block;color:#1d355f;font-size:16px;line-height:1.25}
+#tab-funds .donation-register > summary small{color:#697e98;font-size:12px;font-weight:400;line-height:1.4}
+#tab-funds .donation-register > summary #donationCount{font-size:12px;color:#71829b}
+.register-chevron{color:#71829b;font-size:22px;line-height:1;transition:transform .2s}
+.donation-register[open] .register-chevron{transform:rotate(180deg)}
+#tab-funds .donation-register-head{border-top:1px solid #edf1f6;margin-top:16px;padding-top:12px}
+#tab-funds .faculty-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 210px}
+#tab-funds .faculty-header{align-items:center;gap:16px}
+#tab-funds .faculty-header h3{margin:5px 0;color:#1d355f;font-size:16px}
+#tab-funds .faculty-header p{margin:0;color:#697e98;font-size:12px;line-height:1.4}
+#tab-funds .faculty-header button{min-height:40px;flex:none}
+#tab-funds .faculty-fund [data-status]:empty{display:none}
+#tab-funds .faculty-fund [data-status]:not(:empty){margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#f5f8fc;color:#435c7b}
+#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{margin-top:0}
+#tab-funds .fund-extras :focus-visible{outline:3px solid #2a88e5;outline-offset:3px}
+body.dark-mode #tab-funds .fund-extras{background:#101f35;border-color:#2b456b}
+body.dark-mode #tab-funds .fund-extras-heading h3,body.dark-mode #tab-funds .donation-register > summary strong,body.dark-mode #tab-funds .faculty-header h3{color:#f3f7ff}
+body.dark-mode #tab-funds .fund-extras-heading p:last-child,body.dark-mode #tab-funds .donation-register > summary small,body.dark-mode #tab-funds .faculty-header p,body.dark-mode #tab-funds .register-label{color:#b8c9e2}
+body.dark-mode #tab-funds .fund-extras-grid > .donation-register,body.dark-mode #tab-funds .fund-extras-grid > .faculty-fund{background:#172942;color:#e1ecf8;border-color:#2b456b}
+body.dark-mode #tab-funds .faculty-fund [data-status]:not(:empty){background:#223a59;color:#e1ecf8}
+body.dark-mode .fund-extras-badge{background:#172942;color:#b8c9e2;border-color:#385579}
+@media(max-width:700px){#tab-funds .fund-extras{padding:16px;margin-top:20px}.fund-extras-grid{grid-template-columns:minmax(0,1fr)}#tab-funds .fund-extras-grid > .donation-register[open],#tab-funds .fund-extras-grid > .faculty-fund.is-open,#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{grid-column:auto}.fund-extras-badge{display:none}#tab-funds .faculty-header button{width:100%}}
+@media(prefers-reduced-motion:reduce){.register-chevron{transition:none}}
+
 }
 @media screen {
  #tab-transactions #txList[hidden],#tab-transactions .personal-death-transactions[hidden] {display:none!important}
@@ -8525,16 +8567,22 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
   <section id="tab-funds" class="tab-section" style="display:none">
      <div class="fund-page-head funds-page-head"><div><p class="report-eyebrow">FUND MANAGEMENT</p><h2>Fund sources</h2><p>Track the balance and activity for each source.</p></div><button class="btn btn-emerald" onclick="openFundModal()"><span aria-hidden="true">+</span> Add fund</button></div>
      <div class="fund-page-summary funds-page-summary"><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg><span>Fund sources</span><strong id="fundSourceCount">0</strong><small>Active sources</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M4 19h16"/></svg><span>Total received</span><strong id="fundSourceReceived">—</strong><small>Regular sources only; Faculty Fund shown separately</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><path d="M15 10a6 6 0 1 1-5 5"/></svg><span>Cash balance</span><strong id="fundSourceBalance">—</strong><small>Available to allocate</small></div></div>
-     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">SOURCE WORKSPACE</p><h3>All fund sources</h3><p>Balances include linked transactions.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderAll()"></label></div>
+     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">SOURCE WORKSPACE</p><h3>Fund sources</h3><p>Balances include linked transactions. Search applies to these sources only.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderAll()"></label></div>
+    <div id="fundsList" style="display:flex; flex-direction:column; gap:10px"></div>
+    <section class="fund-extras no-print" aria-labelledby="fundExtrasTitle">
+      <div class="fund-extras-heading"><div><p class="report-eyebrow">MORE WAYS TO TRACK</p><h3 id="fundExtrasTitle">Registers &amp; special funds</h3><p>Cash donations refer to fund-source receipts. Faculty Fund is separate and is not included in the source totals above.</p></div><span class="fund-extras-badge">SEPARATE VIEWS</span></div>
+      <div class="fund-extras-grid">
     <details id="donationRegister" class="donation-register no-print" aria-labelledby="donationRegisterTitle">
-      <summary id="donationRegisterTitle" tabindex="-1">Cash donations <span id="donationCount"></span></summary>
+      <summary id="donationRegisterTitle" tabindex="0"><span class="register-symbol donation-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.5-7.5-10a4.5 4.5 0 0 1 7.5-3.35A4.5 4.5 0 0 1 19.5 11c0 5.5-7.5 10-7.5 10Z"/></svg></span><span class="register-summary-text"><span class="register-label">RECEIPT REGISTER</span><strong>Cash donations <span id="donationCount"></span></strong><small>Review donations recorded in fund sources above.</small></span><span class="register-chevron" aria-hidden="true">⌄</span></summary>
       <div class="donation-register-head"><p>Each new cash donation has its own fund. Search receipts here; open its fund to track spending and project allocations. DPDS and official accounting records remain separate. To correct an amount, void the linked income in Transactions and record a new donation if balance safeguards allow; remove the empty fund if no longer needed.</p><button type="button" class="btn btn-light" onclick="printCashDonations()">Print summary</button></div>
       <div class="donation-filters"><label>Search<input id="donationSearch" class="input" type="search" placeholder="Donor or reference" oninput="renderCashDonations()"></label><label>From<input id="donationFrom" class="input" type="date" onchange="renderCashDonations()"></label><label>To<input id="donationTo" class="input" type="date" onchange="renderCashDonations()"></label><label>Fund<select id="donationFundFilter" class="input" onchange="renderCashDonations()"><option value="">All funds</option></select></label><label>Project<input id="donationProjectFilter" class="input" type="search" placeholder="Project name" oninput="renderCashDonations()"></label></div>
       <p id="donationSummary" aria-live="polite"></p><div id="donationList"></div>
     </details>
     <section id="facultyFundRoot" class="faculty-fund no-print" aria-label="Faculty Fund"></section>
     <section id="facultyFundRecoveryRoot" class="faculty-fund no-print" aria-label="Faculty Fund recovery" hidden></section>
-    <div id="fundsList" style="display:flex; flex-direction:column; gap:10px"></div>
+      </div>
+    </section>
+
   </section>
 
   <!-- TRANSACTIONS -->
@@ -8980,7 +9028,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 87</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 88</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9002,7 +9050,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='87', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='88', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -11350,7 +11398,7 @@ function renderAll(){
   if(!txList.children.length) txList.innerHTML='<div class="empty-state"><strong>No transactions found</strong>Try another search or add a transaction.</div>';
   if(!recent.children.length) recent.innerHTML=dashboardActivityEmpty('transactions');
   if(!recentRefund.children.length) recentRefund.innerHTML=dashboardActivityEmpty('refundPayments');
-  if(!fundsList.children.length) fundsList.innerHTML=fundQuery?'<div class="empty-state"><strong>No matching funds</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>';
+  if(!fundsList.children.length) fundsList.innerHTML=fundQuery?'<div class="empty-state"><strong>No matching funds</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('fund')+'<strong>No fund sources yet</strong>Add a fund source to get started.</div>';
   if(!funds.length) fundCards.insertAdjacentHTML('beforeend','<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>');
   if(!byFundDiv.children.length) byFundDiv.innerHTML='<p style="font-size:13px;color:var(--ink2)">No spending yet</p>';
   renderProjectCards(); renderProjectReport(); renderPayableReport(); renderSeriesComparison(); renderContributionPage(); renderContributionDashboard(); renderDeathAid(); updateBackupReminder();updateDataSafetyWarnings();updateSetupChecklist();if(window.checkReminderNotifications)window.checkReminderNotifications();
