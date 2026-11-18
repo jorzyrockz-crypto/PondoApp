@@ -61,7 +61,7 @@ test('test rules preserve ordinary workspace discovery, membership, and snapshot
  }
 });
 test('test rules preserve shared appearance owner restriction outside and inside test workspaces',async()=>{
- await env.withSecurityRulesDisabled(async c=>{for(const org of [testOrg,normalOrg])await api.setDoc(api.doc(c.firestore(),`organizations/${org}`),{name:org,createdBy:'owner'});});
+ await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();for(const org of [testOrg,normalOrg])await api.setDoc(api.doc(admin,`organizations/${org}`),{name:org,createdBy:'owner'});});
  for(const org of [testOrg,normalOrg]){
   await api.updateDoc(api.doc(db('owner'),`organizations/${org}`),{teamColor:'violet',teamIcon:'star'});
   await assertFails(api.updateDoc(api.doc(db('reviewer'),`organizations/${org}`),{teamColor:'rose',teamIcon:'heart'}));
