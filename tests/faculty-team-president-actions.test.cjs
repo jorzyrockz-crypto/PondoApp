@@ -67,4 +67,11 @@ test('release-preview notifications use the same existing organization without t
  const t=watchSetup();t.state.orgId='org~normal school';t.ctx.window.pondoFacultyAPI.capabilities.mode='release-preview-only';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[0].path.at(-2),'sparkDiscoveryRevision');assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig');
 });
 
-test('restore demo suppresses notifications and watchers while recovery is under development',()=>{const t=watchSetup();t.ctx.window.pondoFacultyAPI.capabilities.experimentalOwnerRecovery=true;t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,0);});
+test('recovery-aware watchers run only after the server confirms no lock, and resume after recovery',()=>{
+ const t=watchSetup();t.ctx.window.pondoFacultyAPI.capabilities.experimentalOwnerRecovery=true;t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,1);const lock=t.listeners[0];assert.equal(lock.path.at(-2),'sparkRestoreProof');
+ const snap=(exists,metadata={fromCache:false,hasPendingWrites:false})=>({metadata,exists:()=>exists});
+ lock.next(snap(false,{fromCache:true,hasPendingWrites:false}));assert.equal(t.listeners.length,1);lock.next(snap(false));assert.equal(t.listeners.length,5);
+ const config=t.listeners[4];config.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({presidentUid:'viewer'})});assert.equal(t.ctx.presidentStatus().known,true);
+ lock.next(snap(true));assert.equal(t.ctx.presidentStatus().known,false);config.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({presidentUid:'stale'})});assert.equal(t.ctx.presidentStatus().known,false);
+ lock.next(snap(false));assert.equal(t.listeners.length,9);t.ctx.stopFacultyWatch();lock.next(snap(false));assert.equal(t.listeners.length,9);
+});

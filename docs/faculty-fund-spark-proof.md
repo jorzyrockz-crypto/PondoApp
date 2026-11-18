@@ -1,8 +1,10 @@
 # Faculty Fund on the free Firebase plan: security proof
 
-**Experiment only: not enabled, not deployed, and not a complete workflow.**
-The production app still uses the disabled callable backend and the existing
-production rules still deny direct Faculty Fund writes. Never paste or publish
+**Experimental preview: not a complete or standalone backup.**
+This branch enables the limited recovery preview in the app. The matching
+recovery rules and any ordinary-workspace release marker have not been deployed
+by this branch. The currently published faculty-test rules do not support
+recovery; publishing the app before matching rules can break Faculty Fund access. Never paste or publish
 `emulator-tests/fixtures/faculty-spark-proof.rules` as production rules; it is
 an isolated test fixture, not a replacement for the application's rules.
 
@@ -346,8 +348,8 @@ readable by all confirmed team members, including absence dates; the owner-only
 diagnostic-export button is not a privacy boundary. Rule-dependent reads and
 expression limits can affect free quota and transactions.
 
-**Do not paste or deploy this candidate:** its app connection is disabled,
-it lacks a protected backup/restore and approved migration plan, and it has
+**Review before deployment:** this earlier release candidate lacks the
+recovery rules and an approved migration plan, and it has
 not been reviewed against the actual published Firebase rules. Existing
 Faculty Fund *test* workspaces retain their original prefix-based access.
 The current deployed rules may differ from the repository. Before rollout,
@@ -365,12 +367,12 @@ activate the real app or publish rules. Existing fictional records created in a
 separate test workspace do not automatically move into the existing workspace;
 no data migration should be implied or attempted without a reviewed plan.
 
-### Disabled same-workspace app connection
+### Same-workspace experimental app connection
 
-The app now includes a **disabled** `FACULTY_FUND_RELEASE_PREVIEW` mode for a
-future same-workspace release. The checked-in setting remains false; the
-current real-account test mode and its test-workspace gate remain unchanged.
-If both modes are eventually enabled, a test-named workspace retains its
+This branch enables `FACULTY_FUND_RELEASE_PREVIEW` and
+`FACULTY_FUND_RECOVERY_PREVIEW` at the owner’s request for testing. It requires
+the matching recovery rules; existing faculty-test rules will deny recovery
+lock reads and break the preview. A test-named workspace retains its
 existing test path while an ordinary workspace requires the release control.
 In preview mode, the app checks the workspace's server-confirmed release
 control before reads, writes, pending inspection, diagnostic export and each
@@ -381,9 +383,9 @@ adds Firestore quota usage. Live refresh and notifications use the existing
 workspace's Spark paths. Preview receipts and UI still carry test-only labels.
 
 The candidate rules and app mode have only been checked in the emulator; they
-are not a release or safe restore. They require the matching rules and an
-administrator-provisioned control, which have **not** been deployed. Do not
-change the disabled flag or provision the control in the live project yet.
+are not a production security review. Ordinary workspaces require the matching
+rules and an administrator-provisioned control, neither of which has been
+deployed by this branch. Coordinate rules and app versions carefully.
 
 ### Local diagnostic check (not restore)
 
@@ -451,7 +453,7 @@ recover lost records. Protected, tested recovery, realistic quota/cap review,
 accounting and privacy/security review are still required. No production flag,
 marker, rules or data are changed by this procedure.
 
-### Owner-operated limited recovery: disabled review candidate
+### Owner-operated limited recovery: enabled experimental preview
 
 The owner-selected approach is intentionally limited: the downloaded recovery
 file **requires matching immutable server copies**, cannot recover a deleted
@@ -485,10 +487,10 @@ candidate and recovery proof. It is an **undeployed review candidate**, not
 the configured `firestore.rules`. Emulator tests exercise an eight-person
 workspace, accepted payment, expense, interruptions, lock access and the
 existing-workspace app contract, but not the actual Firebase project. Both
-`FACULTY_FUND_RELEASE_PREVIEW` and `FACULTY_FUND_RECOVERY_PREVIEW` remain false.
-The controls retain **test-only** labels; while this preview is enabled,
-Faculty Fund notification watchers are suppressed. No rules, markers or live
-data were deployed or changed.
+preview flags are enabled on this branch for owner testing. Faculty Fund
+watchers start only after the server confirms that no restore lock exists;
+they pause during recovery and restart when the lock is cleared. No rules,
+markers or live data were deployed or changed by this branch.
 
 Before release, compare a fresh copy of the actual published rules with the
 recovery candidate, review all ordinary workspace permissions, quotas, privacy,

@@ -9044,7 +9044,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 104</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 105</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9066,7 +9066,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='104', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='105', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -12555,12 +12555,12 @@ try {
 // it is not a production ledger and has no protected backup or restore.
 const FACULTY_FUND_SPARK_DEMO = false;
 const FACULTY_FUND_REAL_ACCOUNT_TEST = true;
-// Not enabled: this still lacks protected restore and rollout verification.
-const FACULTY_FUND_RELEASE_PREVIEW = false;
+// Opt-in existing-workspace preview. Requires the matching recovery rules.
+const FACULTY_FUND_RELEASE_PREVIEW = true;
 // Demo-only recovery experiment. Never enable this for real fund data.
 const FACULTY_FUND_RESTORE_DEMO = false;
-// Review-only existing-workspace connection; never enable before rules review.
-const FACULTY_FUND_RECOVERY_PREVIEW = false;
+// Limited recovery experiment; matching recovery rules must be published first.
+const FACULTY_FUND_RECOVERY_PREVIEW = true;
 if(FACULTY_FUND_RESTORE_DEMO&&!FACULTY_FUND_SPARK_DEMO)throw Error('Demo recovery requires the demo project');
 if(FACULTY_FUND_RECOVERY_PREVIEW&&!FACULTY_FUND_RELEASE_PREVIEW)throw Error('Recovery preview requires release preview');
 if (FACULTY_FUND_SPARK_DEMO || FACULTY_FUND_REAL_ACCOUNT_TEST || FACULTY_FUND_RELEASE_PREVIEW) {
@@ -13047,13 +13047,28 @@ window.pondoCloudSync = { push: schedulePush };
 
 // Faculty Fund is server-authoritative and separate from the regular snapshot.
 // Only confirmed member and server snapshots may generate best-effort alerts.
-let facultyStateUnsub=null,facultyConfigUnsub=null,facultyRemitUnsub=null,facultyCorrectionUnsub=null,facultyWatchGeneration=0;
+let facultyStateUnsub=null,facultyConfigUnsub=null,facultyRemitUnsub=null,facultyCorrectionUnsub=null,facultyRestoreUnsub=null,facultyWatchGeneration=0,facultyLockGeneration=0;
 // Only server-confirmed config determines who is displayed as President.
 let facultyPresidentUid=null,facultyPresidentKnown=false;
-function stopFacultyWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();if(facultyRemitUnsub)facultyRemitUnsub();if(facultyCorrectionUnsub)facultyCorrectionUnsub();facultyStateUnsub=facultyConfigUnsub=facultyRemitUnsub=facultyCorrectionUnsub=null;facultyPresidentUid=null;facultyPresidentKnown=false;window.clearFacultyNotice?.();}
+function stopFacultyDataWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();if(facultyRemitUnsub)facultyRemitUnsub();if(facultyCorrectionUnsub)facultyCorrectionUnsub();facultyStateUnsub=facultyConfigUnsub=facultyRemitUnsub=facultyCorrectionUnsub=null;facultyPresidentUid=null;facultyPresidentKnown=false;window.clearFacultyNotice?.();}
+function stopFacultyWatch(){facultyLockGeneration++;if(facultyRestoreUnsub)facultyRestoreUnsub();facultyRestoreUnsub=null;stopFacultyDataWatch();}
 function startFacultyWatch(orgId,uid){
- // Experimental restore may temporarily reconstruct records; suppress all watchers.
- if(window.pondoFacultyAPI?.capabilities?.experimentalOwnerRecovery===true)return;
+ if(!orgId||!uid||!pondoTeamState.memberConfirmed)return;
+ if(window.pondoFacultyAPI?.capabilities?.experimentalOwnerRecovery===true){
+  if(facultyRestoreUnsub)return;
+  const generation=++facultyLockGeneration,current=()=>generation===facultyLockGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
+  // Never show partial recovery state: only a confirmed absent lock enables
+  // the ordinary listeners. Keep watching the lock so they resume afterwards.
+  facultyRestoreUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'sparkRestoreProof','current'),{includeMetadataChanges:true},snap=>{
+   if(!current())return;
+   if(snap.metadata.fromCache||snap.metadata.hasPendingWrites||snap.exists()){stopFacultyDataWatch();renderTeamPanel();return;}
+   startFacultyDataWatch(orgId,uid);
+  },err=>{if(!current())return;console.warn('Faculty Fund recovery status unavailable:',err);stopFacultyDataWatch();renderTeamPanel();});
+  return;
+ }
+ startFacultyDataWatch(orgId,uid);
+}
+function startFacultyDataWatch(orgId,uid){
  if(facultyConfigUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
  const mode=window.pondoFacultyAPI?.capabilities?.mode;
  if(mode==='firebase-test-only'&&!/^org~faculty fund test .+/.test(orgId))return;
