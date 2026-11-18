@@ -21,3 +21,8 @@ test('file-size guard retains the capture token instead of producing an unusable
  const flow=createFacultyOwnerRecovery({getContext:()=>ctx,storage,randomId:()=> 'large-token-123456',exportDiagnostic:async()=>({}),capture:async()=>({}),restore:async()=>{},getLock:async()=>null,makeFile:async()=>({data:'x'.repeat(10*1024*1024)}),inspectFile:async()=>{},fileDeps:{}});
  await assert.rejects(flow.download({orgId}),/exceeds the 10 MB limit/);assert.equal(values.size,1);
 });
+test('a competing device starting the same backup leaves a retryable server session token',async()=>{
+ const values=new Map(),storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},ctx={uid:'owner',orgId,role:'owner',memberConfirmed:true,scopeToken:1};let active=null,first=true,seen;
+ const flow=createFacultyOwnerRecovery({getContext:()=>ctx,storage,randomId:()=> 'my-session-1234567',exportDiagnostic:async()=>{},capture:async()=>{},restore:async x=>{seen=x.sessionId;if(first){first=false;active={backupId,sessionId:'other-session-1234',createdBy:'owner'};throw Error('Another restore is already in progress');}return {status:'experiment-restored'};},getLock:async()=>active,makeFile:async()=>{},inspectFile:async()=>({backupId,expected:{}}),fileDeps:{}});
+ await assert.rejects(flow.importFile({orgId,content}),/Another restore/);await flow.importFile({orgId,content});assert.equal(seen,'other-session-1234');assert.equal(values.size,0);
+});

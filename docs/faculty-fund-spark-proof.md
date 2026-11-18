@@ -540,7 +540,9 @@ This does not establish production readiness. File authenticity, complete
 server-enforced source inventory, rules and app deployment, older clients,
 real-project quota/retention, recovery after a project-wide loss, and the
 published-rules comparison remain unresolved. A failed or interrupted restore
-can leave the fund locked; resume requires the matching file and session. No
+can leave the fund locked; resume requires the matching file and session. Any
+protected fund change after a capture makes that capture stale and unusable for
+this restore; it cannot recover later transactions or roll back newer entries. No
 live Firebase data or rules have been changed.
 
 The latest integrated **emulator-only** rules proof denies ordinary member

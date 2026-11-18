@@ -28,7 +28,13 @@
    if(active){if(active.createdBy!==c.uid||active.backupId!==checked.backupId||!valid(active.sessionId))fail('Another restore is already in progress');if(token&&(token.id!==active.sessionId||token.backupId!==active.backupId))fail('A different restore token is saved on this device');if(!token){token={id:active.sessionId,backupId:active.backupId};save(c,'restore',token);}}
    else if(token&&token.backupId!==checked.backupId)fail('Finish the pending restore before choosing another recovery file');
    if(!token){token={id:fresh(),backupId:checked.backupId};save(c,'restore',token);}guard(c);
-   const result=await restore({orgId,backupId:token.backupId,sessionId:token.id,expected:checked.expected});guard(c);clear(c,'restore');return result;
+   let result;try{result=await restore({orgId,backupId:token.backupId,sessionId:token.id,expected:checked.expected});}catch(error){
+    // If another device started the very same owner's restore concurrently,
+    // keep the authoritative active session for a deliberate retry. Never
+    // replace a token for a different owner or a different backup.
+    guard(c);try{const now=await getLock({orgId});guard(c);if(now&&now.createdBy===c.uid&&now.backupId===token.backupId&&valid(now.sessionId)&&now.sessionId!==token.id)save(c,'restore',{id:now.sessionId,backupId:now.backupId});}catch(e){guard(c);}
+    throw error;
+   }guard(c);clear(c,'restore');return result;
   }
   return {download:input=>exclusive(()=>download(input)),importFile:input=>exclusive(()=>importFile(input)),abandonCapture};
  }
