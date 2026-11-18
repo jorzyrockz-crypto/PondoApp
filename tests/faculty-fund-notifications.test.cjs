@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict');const {proc
 function env(uid='president',orgId='school'){const m=new Map(),events=[],state={uid,orgId,role:'reviewer',memberConfirmed:true},io={storage:{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)},push:n=>{events.push(n);return n}};return {m,events,state,io}}
 const pending={id:'r',status:'pending',presidentUid:'president',submittedByUid:'ao'};
 test('pending remittance notifies only its President once without private financial details',()=>{
- const e=env('president','school-a');process({remittances:[pending]},e.state,{presidentUid:'president'},e.io);process({remittances:[pending]},e.state,{presidentUid:'president'},e.io);assert.equal(e.events.length,1);assert.equal(e.events[0].action.tab,'funds');assert.equal(e.events[0].action.facultyFund,true);assert.doesNotMatch(JSON.stringify(e.events),/250|absence|Teacher/);
+ const e=env('president','school-a');process({remittances:[pending]},e.state,{presidentUid:'president'},e.io);process({remittances:[pending]},e.state,{presidentUid:'president'},e.io);assert.equal(e.events.length,1);assert.equal(e.events[0].action.tab,'funds');assert.equal(e.events[0].action.facultyFund,true);assert.equal(e.events[0].action.facultyPage,'handovers');assert.doesNotMatch(JSON.stringify(e.events),/250|absence|Teacher/);
  const other=env('other','school-a');process({remittances:[pending]},other.state,{presidentUid:'president'},other.io);assert.equal(other.events.length,0);
 });
 test('AO receives later acceptance, while first snapshot does not replay old decisions',()=>{
