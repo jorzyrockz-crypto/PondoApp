@@ -125,9 +125,11 @@ allocations stay reserved until resumed or cancelled. A release can still read
 up to 200 selected payments; expense inspection fetches at most 201 allocation
 records and rejects more than 200. These are bounded requests, not
 proof of staying within the free quota. Query indexes and real-project cost are
-unverified. None of these modules is connected to the app. The full reader still
-serves the prototype's balances, reports and existing recovery adapter, so the
-1,000-record limit and high read costs remain for those paths.
+unverified. A disabled demo-project-only app wiring can compose the reader,
+writer, pending inspector and recovery screen; it is not enabled on the real
+project and has not been tested end-to-end in a real browser against Firebase.
+The full reader still serves the demo's main balances, receipts and reports, so
+the 1,000-record limit and high read costs remain for those paths.
 
 ## Release gate
 

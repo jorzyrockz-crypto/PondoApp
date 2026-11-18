@@ -80,6 +80,7 @@
  async function inspectPending(c){
   if(!c||!api()?.inspectPending)throw Error('Server reconciliation is unavailable.');const record=pending(c);if(!record||!['submitRemittance','recordExpense'].includes(record.operation))throw Error('No supported pending request was found.');const {channel:ignored,...payload}=record,result=await api().inspectPending({orgId:c.orgId,...payload});if(!same(c,context()))return;
   if(!result||typeof result.clearable!=='boolean'||!['unconfirmed','draft','pending','accepted','declined','cancelled','voided','recorded','cancelling','voiding'].includes(result.status))throw Error('Unable to confirm the request status.');
+  const clearableStatuses=record.operation==='submitRemittance'?['pending','accepted','declined','cancelled','voided']:['recorded','cancelled','voided'];if(result.clearable&&!clearableStatuses.includes(result.status))throw Error('The pending request is not safe to clear.');
   if(result.clearable){clearPending(c,record);if(pending(c)?.requestId===record.requestId)throw Error('The confirmed request token could not be cleared on this device.');await read();if(same(c,context()))message('Server status: '+result.status+'. The confirmed pending token was cleared.');}
   else{render();message('Server status: '+result.status+'. The pending request is still retained; review unfinished work or retry the same request.');}
  }

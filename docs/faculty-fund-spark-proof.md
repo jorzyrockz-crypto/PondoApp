@@ -128,7 +128,7 @@ still arrive. It distinguishes an already accepted remittance or recorded
 expense from a cancellation, and must finish releasing reserved records before
 reporting cancellation. Acceptance or finalization can race with cancellation;
 a failed cancellation must be retried and reconciled against the server. The
-adapter is not loaded by the app.
+adapter is loaded only by the disabled demo-project app wiring described below.
 
 The isolated `faculty-fund-spark-recovery.js` prototype discovers existing drafts,
 partial cancellations and voids, and cancelled/declined/voided remittances with
@@ -148,8 +148,11 @@ request's parent, revision and (when release must be checked) its selected
 payments; it still depends on matching rules and is not a full-ledger audit.
 The isolated `faculty-fund-spark-history.js` supports bounded payment or expense
 pages and rejects changes between pages, but does not establish a balance or a
-complete report. None of these modules is connected to the existing UI. Only
-records already visible on the server can be found:
+complete report. In the disabled demo wiring, the UI can inspect pending
+remittance and expense tokens against the discovery namespace, and clear them
+only when the inspector confirms a safe status. Other pending operation types
+still rely on their original retry. Only records already visible on the server
+can be found:
 a missing draft does not prove an earlier request cannot still arrive. Nor can
 this discover a completed operation's original browser intent if its local token
 was lost. This remains dependent on the experimental rules, bounded full
@@ -192,8 +195,8 @@ report totals or prove historical completeness against privileged corruption.
 Both readers remain experimental and outside the app; see the quota document
 for growth and read limitations.
 
-These modules cannot be mixed with the older namespace and have no migration or
-app integration. Emulator tests reject attempts to hide linked payments and test
+These modules cannot be mixed with the older namespace and have no migration.
+Emulator tests reject attempts to hide linked payments and test
 concurrent releases; a racing release encountered the rules 1,000-expression
 limit and required explicit retry. Discovery and retry must remain available
 after any ambiguous result, and rules complexity, index needs and real-project
@@ -211,14 +214,24 @@ continuation. A lost response remains unconfirmed; accepted/recorded outcomes
 are distinguished from cancellations. The host must reset it on every
 authentication, membership, role or workspace change. The browser test uses
 in-memory data, while separate emulator tests exercise the bridge against
-fixture rules: neither is a real-account or app integration test. The screen
-is not loaded by the app. The existing read-only adapter still hides unfinished
-records, so connecting it without an accessible recovery path can strand users.
+fixture rules: neither is a real-account end-to-end test.
 
-This is still an isolated experiment, **not app integration or production
-rules**. A complete safe restore procedure, integration of recovery with the
-app and its local pending-token workflow, notifications, print pagination on
-real devices, and integration with existing team rules remain unfinished. Do
-not publish the fixture or enter real fund data based on this experiment.
-Emulator and synthetic-browser tests do not replace actual multi-account tests
-in Firebase.
+`faculty-fund-spark-app.js` now wires the existing app UI to the discovery
+reader, writer, pending inspector and recovery screen **only when the disabled
+`FACULTY_FUND_SPARK_DEMO` switch is explicitly changed in a demo build**. It
+rejects non-`demo-` project IDs, and the real-project rules still deny these
+writes. The demo build also needs a separately configured Firestore emulator;
+the current app has not been connected to one. The test screen warns against
+real data and hides protected backup/restore, which do not exist for Spark.
+A full-ledger read is still used for the main state, receipts and reports and
+is not suitable for unbounded real-world use. The bounded recovery screen is
+accessible even when that state refuses to load because of unfinished work.
+Demo emulator tests exercise the UI-contract API; synthetic browser tests cover
+the UI separately, not the whole browser-to-emulator flow.
+
+This remains **disabled and not production-ready**. Safe restore, efficient
+balances and reports, notification integration, real-device printing, durable
+expense-scan cursors, production rules, quota validation and real-account tests
+remain unfinished. Do not publish the fixture or enter real fund data based on
+this experiment. Emulator and synthetic-browser tests do not replace actual
+multi-account tests in Firebase.
