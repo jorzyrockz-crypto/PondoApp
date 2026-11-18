@@ -87,6 +87,9 @@
   if(!root)return;const c=context();let p=null;try{if(c)p=pending(c)}catch(e){p={storageError:true}}
   const isTest=['emulator-test-only','firebase-test-only'].includes(api()?.capabilities?.mode);
   const hadModalFocus=opened&&!!document.activeElement?.closest?.('#facultyFundModal');
+  // Server refreshes must not erase a form that is still being filled in. A
+  // submitted mutation sets busy before rendering, so confirmed entries clear.
+  const drafts=[];if(opened&&!busy)root.querySelectorAll('#facultyControls form[data-form] input, #facultyControls form[data-form] select').forEach(el=>{drafts.push({form:el.form.dataset.form,name:el.name,value:el.value,checked:el.checked,type:el.type});});
   // Preserve the independent recovery view across redraws.
   if(recoveryRoot?.parentElement===root.querySelector('#facultyRecoverySlot'))recoveryRoot.remove();
   let html=`<div class="faculty-header"><div class="faculty-identity"><span class="register-symbol faculty-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 5l9 5-9 5-9-5Z"/><path d="M7 12.3v4.2c2.7 2 7.3 2 10 0v-4.2M21 10v5"/></svg></span><div><span class="register-label">${isTest?'SEPARATE FUND · TEST ONLY':'SEPARATE FUND'}</span><h3>Faculty Fund</h3><p>Track faculty collections, handovers and expenses separately.</p></div></div><button data-action="toggle" aria-haspopup="dialog" aria-expanded="${opened}">Open Faculty Fund</button></div>`;
@@ -99,7 +102,7 @@
    html+='</div></section></div>';
   }
   root.innerHTML=html;
-  if(opened){root.querySelector('#facultyRecoverySlot')?.append(recoveryRoot);const statusNode=root.querySelector('[data-status]');if(statusNode)statusNode.textContent=status;const container=root.querySelector('#facultyControls');if(container)organizeControls(container);if(hadModalFocus)root.querySelector('.faculty-dialog-header button')?.focus();}
+  if(opened){root.querySelector('#facultyRecoverySlot')?.append(recoveryRoot);const statusNode=root.querySelector('[data-status]');if(statusNode)statusNode.textContent=status;const container=root.querySelector('#facultyControls');if(container){organizeControls(container);for(const draft of drafts){const form=container.querySelector('form[data-form="'+draft.form+'"]');const fields=[...(form?.elements||[])].filter(el=>el.name===draft.name);const el=draft.type==='checkbox'?fields.find(el=>el.value===draft.value):fields[0];if(!el)continue;if(draft.type==='checkbox')el.checked=draft.checked;else if(el.tagName!=='SELECT'||[...el.options].some(option=>option.value===draft.value))el.value=draft.value;}}if(hadModalFocus)root.querySelector('.faculty-dialog-header button')?.focus();}
   else if(recoveryRoot)root.after(recoveryRoot);
   root.querySelectorAll('button,input,select').forEach(el=>{if(busy)el.disabled=true});renderOther();
  }
