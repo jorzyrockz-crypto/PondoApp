@@ -505,3 +505,12 @@ the saved copy. The proof keeps session receipts under unique session IDs and
 records completion, so a lost response can be retried. These are experimental
 client checks, not server-enforced proof of an originally complete manifest;
 the real rule lock, versioning and cross-client read behavior remain unfinished.
+
+A further **in-memory emulator-only** rules combination tests the restore
+mechanism alongside the existing financial workflow and an eight-person
+workspace, with normal financial writes blocked while the proof lock is held.
+It is built by `emulator-tests/faculty-spark-integrated-restore.rules.cjs` and is
+never written as deployable rules. Even if that test passes, the app's readers,
+notifications and older clients have not been integrated with that lock, and
+manifest completeness is still a client assertion. It does not provide a
+self-contained file restore or an approved production rollout.

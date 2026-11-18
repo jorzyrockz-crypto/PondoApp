@@ -47,3 +47,26 @@ test('recovery lock cannot be started or finished without its matching session a
  await assertFails(api.deleteDoc(lock));await assertFails(api.updateDoc(ref(d,'sparkDiscoveryRevision/current'),{revision:7,updatedBy:'owner',updatedAt:api.serverTimestamp()}));await assertFails(api.updateDoc(lock,{remaining:0,lastKind:'sparkDiscoveryConfig',lastId:'current'}));
  await assertFails(api.setDoc(ref(d,`sparkRestoreProof/current/sessions/${sessionId}/collections/sparkDiscoveryConfig/entries/current`),{done:true}));
 });
+
+test('captures and restores a multi-collection ledger without fabricating handovers or changing balances',async()=>{
+ const {createSparkReader}=require('../faculty-fund-spark-read.js'),{projectFacultySpark:project}=require('../faculty-fund-spark-projection.js'),{planFacultySparkCapture:plan,canonicalFacultySparkCapture:canonical}=require('../faculty-fund-spark-capture.js'),{createFacultySparkRestore}=require('../faculty-fund-spark-restore.js');
+ const assigned=api.Timestamp.fromMillis(1767220000000),accepted=api.Timestamp.fromMillis(1767229200000),occurred=api.Timestamp.fromMillis(1767315600000);
+ await env.withSecurityRulesDisabled(async c=>{const d=c.firestore();await api.deleteDoc(ref(d,'sparkDiscoveryPayments/p'));const seed={
+  'sparkDiscoveryConfig/current':{presidentUid:'president',assignmentId:'assignment',assignedBy:'owner',assignedAt:assigned},
+  'sparkDiscoveryPresidentHistory/assignment':{presidentUid:'president',assignedBy:'owner',assignedAt:assigned},
+  'sparkDiscoveryPeople/person':{name:'Ana'},
+  'sparkDiscoveryPayments/p':{slotId:'person~2026-01-01',personId:'person',memberName:'Ana',absenceDate:'2026-01-01',paymentDate:'2026-01-01',amountCents:1000,remittanceId:'r',voidedAt:null},
+  'sparkDiscoveryPaymentSlots/person~2026-01-01':{personId:'person',absenceDate:'2026-01-01',activePaymentId:'p',revision:1},
+  'sparkDiscoveryRemittances/r':{status:'accepted',paymentIds:['p'],count:1,amountCents:1000,acceptedAt:accepted,acceptedBy:'president',presidentUid:'president',correctionId:null},
+  'sparkDiscoveryLines/r~p':{remittanceId:'r',paymentId:'p',amountCents:1000},
+  'sparkDiscoveryWallets/r':{status:'open',amountCents:1000,unspentCents:600,acceptedAt:accepted,revision:1},
+  'sparkDiscoveryExpenseDrafts/e':{status:'recorded',amountCents:400,allocatedCents:400,count:1,description:'Books',payee:'Store',occurredAt:occurred},
+  'sparkDiscoveryAllocations/a':{expenseId:'e',walletId:'r',amountCents:400,releasedAt:null,releasedBy:null}
+ };for(const [p,v] of Object.entries(seed))await api.setDoc(ref(d,p),v);});
+ const d=auth('owner'),context=()=>({orgId:org,uid:'owner',role:'owner',memberConfirmed:true,scopeToken:1}),makeReader=(c,isCurrent)=>createSparkReader({db:d,api,orgId:c.orgId,isCurrent,project,trackRemittanceReleases:true});
+ const before=await makeReader(context(),()=>true).read();assert.equal(before.projection.balanceCents,600);assert.equal(before.projection.spentCents,400);
+ const capture=createFacultySparkCapture({db:d,api,getContext:context,makeReader});assert.equal((await capture.capture({orgId:org,backupId})).count,10);
+ await env.withSecurityRulesDisabled(async c=>{const a=c.firestore();for(const p of ['sparkDiscoveryPayments/p','sparkDiscoveryWallets/r','sparkDiscoveryExpenseDrafts/e','sparkDiscoveryPresidentHistory/assignment'])await api.deleteDoc(ref(a,p));});
+ const restore=createFacultySparkRestore({db:d,api,getContext:context,makeReader,project,plan,canonical});await restore.restore({orgId:org,backupId,sessionId:'ledger-session-001'});
+ const after=await makeReader(context(),()=>true).read();assert.equal(after.projection.balanceCents,600);assert.equal(after.projection.spentCents,400);assert.equal(after.records.remittances[0].acceptedBy,'president');assert.equal(after.records.payments.length,1);assert.equal(after.records.allocations.length,1);
+});
