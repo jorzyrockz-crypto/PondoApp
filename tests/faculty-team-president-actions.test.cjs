@@ -35,11 +35,11 @@ test('uncertain assignment keeps its retry token and never reports success',asyn
 });
 function watchSetup(){
  const start=html.indexOf('let facultyStateUnsub=null'),end=html.indexOf('\nfunction teardownOrgSubscriptions()',start);
- const listeners=[],state={orgId:'org~faculty fund test school',uid:'owner',memberConfirmed:true},ctx={pondoTeamState:state,window:{pondoFacultyAPI:{capabilities:{mode:'firebase-test-only'}},PondoFacultyFundUI:{reset(){}}},firestoreDb:{},doc:(_db,...p)=>p,onSnapshot:(p,opts,next,error)=>{listeners.push({path:p,next,error});return ()=>{}},renderTeamPanel(){},console};
+ const listeners=[],state={orgId:'org~faculty fund test school',uid:'owner',memberConfirmed:true},ctx={pondoTeamState:state,window:{pondoFacultyAPI:{capabilities:{mode:'firebase-test-only'}},PondoFacultyFundUI:{reset(){}}},firestoreDb:{},doc:(_db,...p)=>p,collection:(_db,...p)=>p,query:p=>p,limit:n=>n,onSnapshot:(p,opts,next,error)=>{listeners.push({path:p,next,error});return ()=>{}},renderTeamPanel(){},console};
  vm.runInNewContext(html.slice(start,end)+'\nthis.startFacultyWatch=startFacultyWatch;this.stopFacultyWatch=stopFacultyWatch;this.presidentStatus=()=>({known:facultyPresidentKnown,uid:facultyPresidentUid});',ctx);return {ctx,state,listeners};
 }
 test('President label follows only confirmed config and clears on workspace change or cached snapshots',()=>{
- const t=watchSetup();t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,2);assert.equal(t.listeners[1].path.at(-2),'sparkDiscoveryConfig');const l=t.listeners[1],snap=(id,fromCache=false)=>({metadata:{fromCache,hasPendingWrites:false},exists:()=>!!id,data:()=>({presidentUid:id})});
+ const t=watchSetup();t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig');const l=t.listeners[3],snap=(id,fromCache=false)=>({metadata:{fromCache,hasPendingWrites:false},exists:()=>!!id,data:()=>({presidentUid:id})});
  l.next(snap('viewer',true));assert.equal(t.ctx.presidentStatus().known,false);l.next(snap('viewer'));assert.equal(t.ctx.presidentStatus().uid,'viewer');assert.equal(t.ctx.presidentStatus().known,true);
  l.next(snap('other',true));assert.equal(t.ctx.presidentStatus().known,false);t.ctx.stopFacultyWatch();t.state.orgId='org~faculty fund test other';l.next(snap('viewer'));assert.equal(t.ctx.presidentStatus().uid,null);assert.equal(t.ctx.presidentStatus().known,false);
 });
@@ -49,4 +49,16 @@ test('test-mode revision listener only schedules confirmed updates for the curre
  const t=watchSetup();let count=0;t.ctx.window.PondoFacultyFundUI.scheduleLiveRefresh=()=>count++;t.ctx.startFacultyWatch(t.state.orgId,'owner');const l=t.listeners[0];assert.equal(l.path.at(-2),'sparkDiscoveryRevision');
  l.next({metadata:{fromCache:true,hasPendingWrites:false}});l.next({metadata:{fromCache:false,hasPendingWrites:true}});assert.equal(count,0);l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
  t.ctx.stopFacultyWatch();l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
+});
+test('confirmed Spark listener updates notify only the scoped member and stop on workspace changes',()=>{
+ const t=watchSetup(),events=[],{processSparkFacultyNotifications}=require('../faculty-fund-notifications.js');
+ t.state.uid='president';t.state.role='reviewer';t.ctx.localStorage={getItem:()=>null,setItem:()=>{}};t.ctx.window.pushNotification=n=>{events.push(n);return n};t.ctx.window.processSparkFacultyNotifications=processSparkFacultyNotifications;
+ t.ctx.startFacultyWatch(t.state.orgId,t.state.uid);const [_,remit,correction,config]=t.listeners;
+ assert.equal(remit.path.at(-1),'sparkDiscoveryRemittances');assert.equal(correction.path.at(-1),'sparkDiscoveryCorrections');
+ const meta={fromCache:false,hasPendingWrites:false},col=(rows,metadata=meta)=>({metadata,size:rows.length,forEach:fn=>rows.forEach(([id,data])=>fn({id,data:()=>data}))});
+ config.next({metadata:meta,exists:()=>true,data:()=>({presidentUid:'president'})});correction.next(col([]));
+ const row=[['r',{status:'pending',createdBy:'ao',presidentUid:'president'}]];
+ remit.next(col(row,{fromCache:true,hasPendingWrites:false}));remit.next(col(row,{fromCache:false,hasPendingWrites:true}));assert.equal(events.length,0);
+ remit.next(col(row));assert.equal(events.length,1);assert.equal(events[0].recipientUid,'president');assert.equal(events[0].orgId,t.state.orgId);remit.next(col(row));assert.equal(events.length,1);
+ t.ctx.stopFacultyWatch();remit.next(col([['other',{status:'pending',createdBy:'ao',presidentUid:'president'}]]));assert.equal(events.length,1);
 });
