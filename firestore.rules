@@ -78,6 +78,28 @@ service cloud.firestore {
       match /organizationRequests/{orgId} {
         allow read, write: if signedIn() && uid() == userId;
       }
+
+      // An owner can notify a removed member only in the same atomic write
+      // that actually removes that member. The recipient can read/mark it read
+      // without retaining access to the former workspace.
+      match /teamNotices/{noticeId} {
+        allow read: if signedIn() && uid() == userId;
+        allow create: if signedIn() && uid() != userId
+          && request.resource.data.keys().hasOnly(['kind','orgId','orgName','actorUid','createdAt','read'])
+          && request.resource.data.keys().hasAll(['kind','orgId','orgName','actorUid','createdAt','read'])
+          && request.resource.data.kind == 'removed'
+          && request.resource.data.orgId is string && request.resource.data.orgId.size() > 0 && request.resource.data.orgId.size() <= 150
+          && request.resource.data.orgName is string && request.resource.data.orgName.size() > 0 && request.resource.data.orgName.size() <= 120
+          && request.resource.data.actorUid == uid() && request.resource.data.createdAt == request.time && request.resource.data.read == false
+          && isOwner(request.resource.data.orgId)
+          && exists(memberPath(request.resource.data.orgId,userId))
+          && !existsAfter(memberPath(request.resource.data.orgId,userId))
+          && request.resource.data.orgName == get(orgPath(request.resource.data.orgId)).data.name;
+        allow update: if signedIn() && uid() == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && resource.data.read == false && request.resource.data.read == true;
+        allow delete: if false;
+      }
     }
 
     // ---- organizations ----
@@ -85,7 +107,10 @@ service cloud.firestore {
       // A public exact-name lookup reveals only this small profile. A missing
       // document is readable for lookup; private documents stay member-only.
       allow get: if signedIn() && (resource == null || isMember(orgId) || resource.data.get('discoverable', false) == true);
-      allow list: if false;
+      // Bounded public discovery. Firestore only permits a query when it
+      // can prove that every result is explicitly discoverable.
+      allow list: if signedIn() && request.query.limit != null && request.query.limit <= 10
+                  && resource.data.get('discoverable', false) == true;
       // The document ID is a prefix plus the ASCII-lowercase name. Create-only means
       // two concurrent registrations cannot claim the same name.
       allow create: if signedIn()
@@ -101,6 +126,12 @@ service cloud.firestore {
       allow update: if isOwner(orgId)
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['discoverable'])
                     && request.resource.data.discoverable is bool;
+      // Shared visual identity is separate from the registered workspace name.
+      // Only an owner may update these bounded, non-HTML values.
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamColor','teamIcon'])
+                    && request.resource.data.teamColor in ['emerald','ocean','violet','rose','amber','slate']
+                    && request.resource.data.teamIcon in ['diamond','star','heart','sun','leaf','book'];
       allow delete: if false;
 
       // Approximate recent activity; a member may update only their own

@@ -14,6 +14,6 @@ test('team roles offer AO and direct Faculty President assignment for an existin
 });
 test('preview-only role selector points users to real team settings',()=>{
  const preview=html.match(/<div class="role-preview-settings">[\s\S]*?<\/div>/)?.[0];assert.ok(preview);
- assert.match(preview,/This preview does not assign a person/);assert.match(preview,/onclick="switchSettingsTab\('team'\)"/);
+ assert.match(preview,/This preview does not assign a person/);assert.match(preview,/onclick="closeSettings\(\);openTeamModal\(\)"/);
  assert.match(preview,/choose Faculty President beside a Viewer/);
 });

@@ -37,3 +37,48 @@ test('test workspace permits the intended multi-account handover but denies nonm
  await ao.allocate('expense','remittance','allocation',10000);await ao.finalizeExpense('expense');
  const after=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryWallets/remittance'))).data();assert.equal(after.unspentCents,15000);
 });
+test('test rules preserve ordinary workspace discovery, membership, and snapshot access',async()=>{
+ const user='owner';
+ await env.withSecurityRulesDisabled(async c=>{
+  const admin=c.firestore();
+  await api.setDoc(api.doc(admin,`users/${user}`),{orgMemberships:[normalOrg,testOrg],activeOrganizationId:normalOrg});
+  for(const org of [normalOrg,testOrg]){
+   await api.setDoc(api.doc(admin,`organizations/${org}`),{name:org,createdBy:user});
+   await api.setDoc(api.doc(admin,`organizations/${org}/data/snapshot`),{_syncRevision:1,updatedBy:user});
+  }
+ });
+ const owner=db(user),viewer=db('reviewer'),outsider=db('outsider');
+ const profile=await api.getDoc(api.doc(owner,`users/${user}`));assert.deepEqual(profile.data().orgMemberships,[normalOrg,testOrg]);
+ await api.setDoc(api.doc(owner,`users/${user}`),{activeOrganizationId:testOrg},{merge:true});
+ for(const org of [normalOrg,testOrg]){
+  assert.ok((await api.getDoc(api.doc(owner,`organizations/${org}`))).exists());
+  assert.ok((await api.getDoc(api.doc(owner,`organizations/${org}/members/${user}`))).exists());
+  assert.equal((await api.getDocs(api.collection(owner,`organizations/${org}/members`))).size,4);
+  assert.ok((await api.getDoc(api.doc(owner,`organizations/${org}/data/snapshot`))).exists());
+  assert.ok((await api.getDoc(api.doc(viewer,`organizations/${org}/data/snapshot`))).exists());
+  await assertFails(api.getDoc(api.doc(outsider,`organizations/${org}`)));
+  await assertFails(api.getDoc(api.doc(outsider,`organizations/${org}/data/snapshot`)));
+ }
+});
+test('test rules preserve shared appearance owner restriction outside and inside test workspaces',async()=>{
+ await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();for(const org of [testOrg,normalOrg])await api.setDoc(api.doc(admin,`organizations/${org}`),{name:org,createdBy:'owner'});});
+ for(const org of [testOrg,normalOrg]){
+  await api.updateDoc(api.doc(db('owner'),`organizations/${org}`),{teamColor:'violet',teamIcon:'star'});
+  await assertFails(api.updateDoc(api.doc(db('reviewer'),`organizations/${org}`),{teamColor:'rose',teamIcon:'heart'}));
+  await assertFails(api.updateDoc(api.doc(db('owner'),`organizations/${org}`),{teamColor:'invalid',teamIcon:'star'}));
+ }
+});
+test('test rules allow an atomic private removal notice without granting workspace access',async()=>{
+ await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();await api.setDoc(api.doc(admin,`organizations/${normalOrg}`),{name:'Normal Workspace'});});
+ const owner=db('owner'),reviewer=db('reviewer'),notice='users/reviewer/teamNotices/n1',member=`organizations/${normalOrg}/members/reviewer`;
+ const payload={kind:'removed',orgId:normalOrg,orgName:'Normal Workspace',actorUid:'owner',createdAt:api.serverTimestamp(),read:false};
+ await assertFails(api.setDoc(api.doc(owner,notice),payload));
+ const b=api.writeBatch(owner);b.set(api.doc(owner,notice),payload);b.delete(api.doc(owner,member));await b.commit();
+ assert.equal((await api.getDoc(api.doc(reviewer,notice))).data().kind,'removed');await assertFails(api.getDoc(api.doc(reviewer,`organizations/${normalOrg}`)));
+});
+test('test rules allow only bounded public organization suggestions',async()=>{
+ await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();await api.setDoc(api.doc(admin,`organizations/${testOrg}`),{name:'Faculty Fund Test Example',discoverable:true});await api.setDoc(api.doc(admin,`organizations/${normalOrg}`),{name:'Ordinary Workspace',discoverable:false});});
+ const outsider=db('outsider');const q=api.query(api.collection(outsider,'organizations'),api.where('discoverable','==',true),api.orderBy(api.documentId()),api.startAt('org~'),api.limit(10));
+ const snap=await api.getDocs(q);assert.deepEqual(snap.docs.map(d=>d.id),[testOrg]);
+ await assertFails(api.getDocs(api.query(api.collection(outsider,'organizations'),api.limit(10))));
+});

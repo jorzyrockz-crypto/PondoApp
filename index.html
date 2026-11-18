@@ -3121,6 +3121,20 @@ body{
 .faculty-fund details{margin-top:10px;padding:12px;border:1px solid #d7e1ed;border-radius:10px}.faculty-fund summary{font-weight:700;cursor:pointer}.faculty-form{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-top:10px}.faculty-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;flex:1 1 160px}.faculty-form input,.faculty-form select{width:100%;min-height:40px;padding:8px;border:1px solid #a9bbd1;border-radius:8px;background:#fff;color:#173451}
 .faculty-list{display:grid;gap:8px;margin:10px 0}.faculty-list label,.faculty-item{padding:10px;border:1px solid #dbe4ee;border-radius:9px;overflow-wrap:anywhere}.faculty-item strong,.faculty-item small{display:block}.faculty-item small{font-size:12px;margin-top:4px}.faculty-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.faculty-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.faculty-metrics div{padding:10px;background:#eef5fb;border-radius:9px;font-size:12px;color:#183455}.faculty-metrics strong{display:block;font-size:16px}.faculty-warning{border:1px solid #dcaa38;background:#fff7dc;color:#5c4300;padding:10px;border-radius:9px;margin:8px 0}
 body.dark-mode .faculty-fund{background:#192d46;color:#e1ecf8;border-color:#3a526b}body.dark-mode .faculty-fund details,body.dark-mode .faculty-item,body.dark-mode .faculty-list label{border-color:#3a526b}
+
+/* The tab animation transforms its contents; suspend it while the fixed modal is open. */
+body.faculty-modal-open #tab-funds{animation:none!important;transform:none!important}
+/* Faculty Fund is a focused workspace; forms are grouped by task, not accordions. */
+.faculty-modal{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:24px;color:#183455}
+.faculty-modal-backdrop{position:absolute;inset:0;background:rgba(7,20,29,.66);backdrop-filter:blur(4px)}
+.faculty-dialog{position:relative;width:min(100%,960px);max-height:min(90dvh,850px);display:flex;flex-direction:column;overflow:hidden;background:#f7faf9;border:1px solid #d5e3df;border-radius:22px;box-shadow:0 24px 70px #071d174d}
+.faculty-dialog-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:#103f35;color:white;padding:22px 26px}.faculty-dialog-header span{font-size:10px;letter-spacing:.12em;font-weight:800;color:#a5d6c5}.faculty-dialog-header h2{font-family:'Fraunces',serif;font-size:28px;margin:4px 0}.faculty-dialog-header p{margin:0;color:#d1e9df}.faculty-dialog-header button{font-size:22px;line-height:1;min-width:40px;background:#ffffff18;color:#fff;border-color:#ffffff60}
+.faculty-dialog-body{overflow:auto;overscroll-behavior:contain;padding:20px 26px 28px}.faculty-dialog-body [hidden]{display:none!important}.faculty-dialog-body [data-status]:not(:empty){margin:0 0 12px;padding:10px;border-radius:10px;background:#e8f2ef}
+.faculty-nav{display:flex;gap:8px;overflow:auto;padding:4px 0 12px;margin:12px 0;border-bottom:1px solid #dae7e2}.faculty-nav button{white-space:nowrap;min-height:40px;background:#fff;color:#36564e;border-color:#d8e5df}.faculty-nav button[aria-pressed=true]{background:#087c5c;color:white;border-color:#087c5c}
+.faculty-section{margin:14px 0;padding:18px;border:1px solid #dce8e3;border-radius:15px;background:#fff}.faculty-section h3{font-size:16px;color:#163d32}.faculty-dialog .faculty-metrics{margin:16px 0}.faculty-dialog .faculty-metrics div{background:#e6f2ec;color:#164533}.faculty-dialog .faculty-warning{color:#5c4300}.faculty-dialog .faculty-form{margin-top:14px}.faculty-dialog .faculty-form button{min-height:40px}.faculty-dialog .faculty-list label{display:flex;gap:8px;align-items:center}
+body.dark-mode .faculty-dialog{background:#142521;color:#e6f3ed;border-color:#39564d}body.dark-mode .faculty-section{background:#1c302a;border-color:#3a564c}body.dark-mode .faculty-section h3{color:#e6f3ed}body.dark-mode .faculty-nav{border-color:#3a564c}body.dark-mode .faculty-nav button:not([aria-pressed=true]){background:#263d34;color:#e4f1e9;border-color:#48665b}body.dark-mode .faculty-dialog .faculty-metrics div{background:#28483b;color:#e6f5ed}body.dark-mode .faculty-dialog-body [data-status]:not(:empty){background:#28483b;color:#e6f5ed}
+@media(max-width:700px){.faculty-modal{padding:0;align-items:end}.faculty-dialog{width:100%;height:94dvh;max-height:94dvh;border-radius:22px 22px 0 0}.faculty-dialog-header{padding:18px 20px}.faculty-dialog-body{padding:16px 16px max(24px,env(safe-area-inset-bottom))}.faculty-section{padding:14px}.faculty-dialog .faculty-form label{flex-basis:100%}}
+@media print{.faculty-modal{display:none!important}}
 </style>
 <style>
 :root{
@@ -4600,6 +4614,34 @@ body.dark-mode .auth-manual-fallback{color:#d1d5db;}
 .user-chip span{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* Team / collaboration */
+/* Dedicated, responsive Team workspace */
+.team-modal[hidden], .team-modal [hidden]{display:none!important}
+.team-modal{position:fixed;inset:0;z-index:170;display:grid;place-items:center;padding:24px}
+.team-modal-backdrop{position:absolute;inset:0;background:rgba(10,25,31,.66);backdrop-filter:blur(5px)}
+.team-dialog{position:relative;display:flex;flex-direction:column;width:min(1080px,100%);max-height:min(850px,92dvh);background:#f6f8f6;color:var(--ink);border-radius:24px;box-shadow:0 24px 90px #001d1745;overflow:hidden;outline:none}
+.team-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:26px 32px;background:#103f35;color:#fff}
+.team-modal-header h2{font-family:'Fraunces',serif;font-size:clamp(24px,3vw,34px);line-height:1.1;letter-spacing:-.02em;margin:5px 0 6px}
+.team-modal-header p:not(.team-kicker){margin:0;color:#c4dbd1;font-size:13px;line-height:1.5}
+.team-kicker{font-size:10px!important;font-weight:800;letter-spacing:.14em;color:#168166!important;margin:0 0 7px!important}
+.team-modal-header .team-kicker{color:#91d1bc!important}
+.team-close{border:1px solid #ffffff55;background:#ffffff12;color:#fff;width:40px;height:40px;border-radius:14px;font-size:27px;line-height:1;cursor:pointer;flex:none}
+.team-modal-content{overflow:auto;overscroll-behavior:contain;padding:22px 26px 30px}
+.team-panel{display:flex;flex-direction:column;gap:14px}
+#teamSignedInPanel{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.55fr);align-items:start;gap:14px}
+#teamActiveOrgPanel{display:grid;grid-column:2;grid-row:1 / span 5;gap:14px;min-width:0}
+.team-modal .team-card{background:#fff;border:1px solid #e2eae5;border-radius:18px;box-shadow:0 3px 12px #113d2908;padding:18px;min-width:0}
+.team-modal .team-card-title{font-size:16px;line-height:1.2;margin:0 0 10px;font-weight:800}
+.team-modal .team-copy{font-size:12px;line-height:1.55;color:var(--ink2);margin:8px 0 12px}
+.team-org-identity{display:flex;gap:12px;align-items:center;min-width:0}
+.team-org-icon{display:grid;place-items:center;width:50px;height:50px;flex:none;border-radius:16px;background:var(--team-color,#087d60);color:white;font-size:23px}
+.team-org-name{font-family:'Fraunces',serif;font-size:22px;line-height:1.1;margin:0;overflow-wrap:anywhere}
+.team-appearance-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team-appearance-fields label{font-size:12px;font-weight:700}.team-appearance-fields select{margin-top:6px}
+.team-suggestions:not(:empty){margin:8px 0;padding:8px;background:#f2f7f4;border:1px solid #d7e7de;border-radius:12px}.team-suggestion{display:block;width:100%;text-align:left;border:0;border-radius:8px;background:transparent;color:inherit;padding:10px;font:inherit;cursor:pointer}.team-suggestion:hover,.team-suggestion:focus-visible{background:#dcefe5}.team-suggestion-status{font-size:12px;color:var(--ink2);margin:4px}body.dark-mode .team-suggestions:not(:empty){background:#15211e;border-color:#34453e}body.dark-mode .team-suggestion:hover,body.dark-mode .team-suggestion:focus-visible{background:#274538}
+.team-save-appearance{margin-top:12px;min-height:42px}
+.team-modal .team-member-row{background:#f6f8f7;border:1px solid #e6eee9;min-width:0;flex-wrap:wrap}.team-modal .team-member-row .tm-name{white-space:normal;overflow-wrap:anywhere}
+.team-modal button:focus-visible,.team-modal select:focus-visible,.team-modal input:focus-visible{outline:3px solid #42bfa1;outline-offset:2px}
+body.dark-mode .team-dialog{background:#111b19;color:#e5f2ec}body.dark-mode .team-modal .team-card{background:#1d2926;border-color:#34453e}body.dark-mode .team-modal .team-member-row{background:#15211e;border-color:#34453e}
+@media(max-width:700px){.team-modal{padding:0;align-items:end}.team-dialog{width:100%;height:94dvh;max-height:94dvh;border-radius:22px 22px 0 0}.team-modal-header{padding:22px 20px}.team-modal-content{padding:16px 16px max(24px,env(safe-area-inset-bottom))}#teamSignedInPanel{display:flex;flex-direction:column}#teamSignedInPanel>*{width:100%}#teamActiveOrgPanel{display:flex;flex-direction:column}#teamActiveOrgPanel>*{width:100%}.team-modal .team-member-row>div:last-child{max-width:100%;flex-wrap:wrap}.team-modal .team-member-row select{max-width:100%}}
 .team-card{padding:16px;border-radius:18px;background:#f7f7f5;}
 body.dark-mode .team-card{background:#1c1c1e;}
 .team-sync-badge{font-size:14px;line-height:1;color:#9ca3af;}
@@ -8241,6 +8283,48 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
  .donation-form-group[hidden] {display:none!important}
  body.role-reviewer #recordCashDonation, body.role-reviewer .donation-edit {display:none!important}
  @media(max-width:560px) {.donation-register {padding:14px}.donation-filters label {flex-basis:140px}.donation-entry-actions {width:100%}}
+/* Secondary records sit below the fund-source workspace, not inside its list. */
+#tab-funds .fund-extras{margin-top:28px;padding:22px;border:1px solid #dbe4ef;border-radius:20px;background:#f5f8fc}
+#tab-funds .fund-extras-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+#tab-funds .fund-extras-heading .report-eyebrow{margin:0 0 7px;color:#58709a;font-size:10px;font-weight:800;letter-spacing:.09em}
+#tab-funds .fund-extras-heading h3{margin:0;color:#1d355f;font-size:18px;letter-spacing:-.03em}
+#tab-funds .fund-extras-heading p:last-child{max-width:650px;margin:6px 0 0;color:#647994;font-size:12px;line-height:1.5}
+.fund-extras-badge{flex:none;padding:6px 9px;border:1px solid #d5e1ee;border-radius:999px;background:#fff;color:#637994;font-size:10px;font-weight:800;letter-spacing:.06em}
+.fund-extras-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+#tab-funds .fund-extras-grid > .donation-register,#tab-funds .fund-extras-grid > .faculty-fund{min-width:0;margin:0;padding:18px;border:1px solid #dbe4ef;border-radius:16px;background:#fff;color:#1d355f;box-shadow:0 4px 14px #173d6509}
+#tab-funds .fund-extras-grid > .donation-register[open],#tab-funds .fund-extras-grid > .faculty-fund.is-open,#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{grid-column:1 / -1}
+#facultyFundRecoveryRoot[hidden]{display:none!important}
+#tab-funds .donation-register > summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer}
+#tab-funds .donation-register > summary::-webkit-details-marker{display:none}
+.register-symbol{width:46px;height:46px;display:grid;place-items:center;flex:none;border-radius:14px}
+.register-symbol svg{width:23px;height:23px}
+.donation-symbol{background:#fff1e7;color:#d26e32}.faculty-symbol{background:#e9f3ff;color:#2874bd}
+.register-summary-text{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+#tab-funds .register-label{display:block;color:#7186a1;font-size:10px;font-weight:800;letter-spacing:.08em;line-height:1.2}
+#tab-funds .donation-register > summary strong{display:block;color:#1d355f;font-size:16px;line-height:1.25}
+#tab-funds .donation-register > summary small{color:#697e98;font-size:12px;font-weight:400;line-height:1.4}
+#tab-funds .donation-register > summary #donationCount{font-size:12px;color:#71829b}
+.register-chevron{color:#71829b;font-size:22px;line-height:1;transition:transform .2s}
+.donation-register[open] .register-chevron{transform:rotate(180deg)}
+#tab-funds .donation-register-head{border-top:1px solid #edf1f6;margin-top:16px;padding-top:12px}
+#tab-funds .faculty-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 210px}
+#tab-funds .faculty-header{align-items:center;gap:16px}
+#tab-funds .faculty-header h3{margin:5px 0;color:#1d355f;font-size:16px}
+#tab-funds .faculty-header p{margin:0;color:#697e98;font-size:12px;line-height:1.4}
+#tab-funds .faculty-header button{min-height:40px;flex:none}
+#tab-funds .faculty-fund [data-status]:empty{display:none}
+#tab-funds .faculty-fund [data-status]:not(:empty){margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#f5f8fc;color:#435c7b}
+#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{margin-top:0}
+#tab-funds .fund-extras :focus-visible{outline:3px solid #2a88e5;outline-offset:3px}
+body.dark-mode #tab-funds .fund-extras{background:#101f35;border-color:#2b456b}
+body.dark-mode #tab-funds .fund-extras-heading h3,body.dark-mode #tab-funds .donation-register > summary strong,body.dark-mode #tab-funds .faculty-header h3{color:#f3f7ff}
+body.dark-mode #tab-funds .fund-extras-heading p:last-child,body.dark-mode #tab-funds .donation-register > summary small,body.dark-mode #tab-funds .faculty-header p,body.dark-mode #tab-funds .register-label{color:#b8c9e2}
+body.dark-mode #tab-funds .fund-extras-grid > .donation-register,body.dark-mode #tab-funds .fund-extras-grid > .faculty-fund{background:#172942;color:#e1ecf8;border-color:#2b456b}
+body.dark-mode #tab-funds .faculty-fund [data-status]:not(:empty){background:#223a59;color:#e1ecf8}
+body.dark-mode .fund-extras-badge{background:#172942;color:#b8c9e2;border-color:#385579}
+@media(max-width:700px){#tab-funds .fund-extras{padding:16px;margin-top:20px}.fund-extras-grid{grid-template-columns:minmax(0,1fr)}#tab-funds .fund-extras-grid > .donation-register[open],#tab-funds .fund-extras-grid > .faculty-fund.is-open,#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{grid-column:auto}.fund-extras-badge{display:none}#tab-funds .faculty-header button{width:100%}}
+@media(prefers-reduced-motion:reduce){.register-chevron{transition:none}}
+
 }
 @media screen {
  #tab-transactions #txList[hidden],#tab-transactions .personal-death-transactions[hidden] {display:none!important}
@@ -8396,7 +8480,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
         <div id="teamSwitcherMenu" class="header-more-menu team-switcher-menu" hidden></div>
       </div>
       <div id="userChip" class="user-chip" hidden><img id="userChipAvatar" alt="" hidden><span id="userChipName"></span></div>
-      <button id="headerTeamPresence" class="header-team-presence" type="button" hidden aria-label="Team presence" title="Team presence" onclick="openSettings();switchSettingsTab('team')"></button>
+      <button id="headerTeamPresence" class="header-team-presence" type="button" hidden aria-label="Team presence" title="Team presence" onclick="openTeamModal()"></button>
       <div class="header-avatar-wrap">
         <button id="headerAvatarBtn" type="button" class="header-avatar-btn" hidden aria-haspopup="true" aria-expanded="false" aria-controls="headerAvatarMenu" onclick="toggleHeaderAvatarMenu()" title="Account &amp; workspace">
           <span id="headerAvatarDot" class="header-avatar-dot"></span>
@@ -8413,7 +8497,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
         </button>
         <div id="notifCenterMenu" class="header-more-menu notif-center-menu" hidden></div>
       </div>
-      <div class="header-more-wrap"><button id="headerMoreBtn" class="icon-btn" type="button" aria-label="More options" aria-expanded="false" aria-controls="headerMoreMenu" onclick="toggleHeaderMore()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div id="headerMoreMenu" class="header-more-menu" hidden><button class="header-menu-item" id="aboutMenuItem" type="button" onclick="closeHeaderMore();openPondoAbout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>About &amp; What’s New</span></button><button class="header-menu-item" id="settingsMenuItem" type="button" onclick="closeHeaderMore();openSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/><circle cx="12" cy="12" r="7"/></svg><span>Settings</span></button><button class="header-menu-item" id="keyboardShortcutsMenuItem" type="button" onclick="closeHeaderMore();showKeyboardShortcuts()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg><span>Keyboard shortcuts</span></button><button class="header-menu-item" id="presentBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg><span>Present</span></button><button class="header-menu-item" id="installAppMenuItem" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span>Install app</span></button><button class="header-menu-item" id="signOutMenuItem" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button></div></div>
+      <div class="header-more-wrap"><button id="headerMoreBtn" class="icon-btn" type="button" aria-label="More options" aria-expanded="false" aria-controls="headerMoreMenu" onclick="toggleHeaderMore()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div id="headerMoreMenu" class="header-more-menu" hidden><button class="header-menu-item" id="aboutMenuItem" type="button" onclick="closeHeaderMore();openPondoAbout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>About &amp; What’s New</span></button><button class="header-menu-item" id="teamMenuItem" type="button" onclick="closeHeaderMore();openTeamModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2M17 4a4 4 0 0 1 0 7M19 15a4 4 0 0 1 3 4v2"/></svg><span>Team &amp; workspaces</span></button><button class="header-menu-item" id="settingsMenuItem" type="button" onclick="closeHeaderMore();openSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/><circle cx="12" cy="12" r="7"/></svg><span>Settings</span></button><button class="header-menu-item" id="keyboardShortcutsMenuItem" type="button" onclick="closeHeaderMore();showKeyboardShortcuts()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg><span>Keyboard shortcuts</span></button><button class="header-menu-item" id="presentBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg><span>Present</span></button><button class="header-menu-item" id="installAppMenuItem" type="button" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span>Install app</span></button><button class="header-menu-item" id="signOutMenuItem" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button></div></div>
     </div>
   </div>
 </header>
@@ -8497,16 +8581,22 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
   <section id="tab-funds" class="tab-section" style="display:none">
      <div class="fund-page-head funds-page-head"><div><p class="report-eyebrow">FUND MANAGEMENT</p><h2>Fund sources</h2><p>Track the balance and activity for each source.</p></div><button class="btn btn-emerald" onclick="openFundModal()"><span aria-hidden="true">+</span> Add fund</button></div>
      <div class="fund-page-summary funds-page-summary"><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg><span>Fund sources</span><strong id="fundSourceCount">0</strong><small>Active sources</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M4 19h16"/></svg><span>Total received</span><strong id="fundSourceReceived">—</strong><small>Regular sources only; Faculty Fund shown separately</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><path d="M15 10a6 6 0 1 1-5 5"/></svg><span>Cash balance</span><strong id="fundSourceBalance">—</strong><small>Available to allocate</small></div></div>
-     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">SOURCE WORKSPACE</p><h3>All fund sources</h3><p>Balances include linked transactions.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderAll()"></label></div>
+     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">SOURCE WORKSPACE</p><h3>Fund sources</h3><p>Balances include linked transactions. Search applies to these sources only.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderAll()"></label></div>
+    <div id="fundsList" style="display:flex; flex-direction:column; gap:10px"></div>
+    <section class="fund-extras no-print" aria-labelledby="fundExtrasTitle">
+      <div class="fund-extras-heading"><div><p class="report-eyebrow">MORE WAYS TO TRACK</p><h3 id="fundExtrasTitle">Registers &amp; special funds</h3><p>Cash donations refer to fund-source receipts. Faculty Fund is separate and is not included in the source totals above.</p></div><span class="fund-extras-badge">SEPARATE VIEWS</span></div>
+      <div class="fund-extras-grid">
     <details id="donationRegister" class="donation-register no-print" aria-labelledby="donationRegisterTitle">
-      <summary id="donationRegisterTitle" tabindex="-1">Cash donations <span id="donationCount"></span></summary>
+      <summary id="donationRegisterTitle" tabindex="0"><span class="register-symbol donation-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.5-7.5-10a4.5 4.5 0 0 1 7.5-3.35A4.5 4.5 0 0 1 19.5 11c0 5.5-7.5 10-7.5 10Z"/></svg></span><span class="register-summary-text"><span class="register-label">RECEIPT REGISTER</span><strong>Cash donations <span id="donationCount"></span></strong><small>Review donations recorded in fund sources above.</small></span><span class="register-chevron" aria-hidden="true">⌄</span></summary>
       <div class="donation-register-head"><p>Each new cash donation has its own fund. Search receipts here; open its fund to track spending and project allocations. DPDS and official accounting records remain separate. To correct an amount, void the linked income in Transactions and record a new donation if balance safeguards allow; remove the empty fund if no longer needed.</p><button type="button" class="btn btn-light" onclick="printCashDonations()">Print summary</button></div>
       <div class="donation-filters"><label>Search<input id="donationSearch" class="input" type="search" placeholder="Donor or reference" oninput="renderCashDonations()"></label><label>From<input id="donationFrom" class="input" type="date" onchange="renderCashDonations()"></label><label>To<input id="donationTo" class="input" type="date" onchange="renderCashDonations()"></label><label>Fund<select id="donationFundFilter" class="input" onchange="renderCashDonations()"><option value="">All funds</option></select></label><label>Project<input id="donationProjectFilter" class="input" type="search" placeholder="Project name" oninput="renderCashDonations()"></label></div>
       <p id="donationSummary" aria-live="polite"></p><div id="donationList"></div>
     </details>
     <section id="facultyFundRoot" class="faculty-fund no-print" aria-label="Faculty Fund"></section>
     <section id="facultyFundRecoveryRoot" class="faculty-fund no-print" aria-label="Faculty Fund recovery" hidden></section>
-    <div id="fundsList" style="display:flex; flex-direction:column; gap:10px"></div>
+      </div>
+    </section>
+
   </section>
 
   <!-- TRANSACTIONS -->
@@ -8728,6 +8818,96 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
   </div>
 </div>
 
+<!-- Dedicated Team workspace -->
+<div id="teamModal" class="team-modal no-print" hidden>
+  <div class="team-modal-backdrop" onclick="closeTeamModal()"></div>
+  <section class="team-dialog" role="dialog" aria-modal="true" aria-labelledby="teamModalTitle" tabindex="-1">
+    <header class="team-modal-header"><div><p class="team-kicker">PONDO / COLLABORATION</p><h2 id="teamModalTitle">Your team, together.</h2><p>Manage workspaces, people and access in one place.</p></div><button id="teamModalClose" class="team-close" type="button" aria-label="Close Team" onclick="closeTeamModal()">×</button></header>
+    <div class="team-modal-content">      <div id="teamPanel" class="team-panel">
+        <div id="teamSignedOutNotice" class="team-card" hidden><p style="margin:0;font-size:13px;color:var(--ink2)">Sign in to set up team collaboration.</p></div>
+        <div id="teamLoading" class="team-card"><p style="margin:0;font-size:13px;color:var(--ink2)">Checking your organizations…</p></div>
+        <div id="teamSignedInPanel" hidden>
+          <div class="team-card">
+            <p class="team-kicker">YOUR SPACE</p><h3 class="team-card-title">Your workspaces</h3>
+            <div id="teamWorkspaceList" style="display:flex;flex-direction:column;gap:8px"></div>
+            <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:10px 0 0">Each organization keeps its own separate data. "Personal" is local to this device only and is never shared.</p>
+          </div>
+          <div id="teamActiveOrgPanel" hidden>
+            <div class="team-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <div class="team-org-identity"><span id="teamOrgIcon" class="team-org-icon" aria-hidden="true">◆</span><div><p class="team-kicker">CURRENT WORKSPACE</p><h3 id="teamOrgName" class="team-org-name">—</h3></div></div>
+                <span id="teamSyncBadge" class="team-sync-badge">●</span>
+              </div>
+              <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
+              <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
+              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>An unconfirmed team draft was found on this device. Download and verify it before discarding it. It has not been merged with the team copy.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button></div>
+            </div>
+            <div class="team-card team-customize" id="teamAppearanceOwner" hidden>
+              <p class="team-kicker">MAKE IT YOURS</p><h3 class="team-card-title">Team appearance</h3>
+              <p class="team-copy">Choose a shared color and icon for this workspace. Everyone on the team will see them.</p>
+              <div class="team-appearance-fields"><label>Team color<select id="teamColor" class="input"><option value="emerald">Emerald</option><option value="ocean">Ocean</option><option value="violet">Violet</option><option value="rose">Rose</option><option value="amber">Amber</option><option value="slate">Slate</option></select></label>
+              <label>Team icon<select id="teamIcon" class="input"><option value="diamond">◆ Diamond</option><option value="star">★ Star</option><option value="heart">♥ Heart</option><option value="sun">☀ Sun</option><option value="leaf">✿ Flower</option><option value="book">▣ Book</option></select></label></div>
+              <button type="button" class="btn btn-dark team-save-appearance" onclick="pondoTeam.saveAppearance()">Save team appearance</button><p id="teamAppearanceStatus" role="status" class="team-copy"></p>
+              <p class="team-copy">Registered-name changes and permanent workspace deletion are not yet available. Your records and links remain unchanged.</p>
+            </div>
+            <div class="team-card" id="teamDiscoveryOwner" hidden>
+              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Organization discovery</p>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px"><input id="teamDiscoverable" type="checkbox" onchange="pondoTeam.setDiscovery(this.checked)"> Make this organization searchable</label>
+              <p style="font-size:12px;line-height:1.5;color:var(--ink2)">Only the organization name is listed. Financial records remain private. Verify requesters through a trusted channel before approval. Existing invite links still grant their assigned role immediately.</p>
+              <button type="button" class="btn btn-light" onclick="pondoTeam.loadJoinRequests()">Reconnect requests</button>
+              <div id="teamJoinRequests" aria-live="polite" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>
+            </div>
+            <div class="team-card" id="teamInviteCard" hidden>
+              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
+              <label for="teamInviteRole" style="font-size:12px;font-weight:700;display:block;margin:0 0 6px">Role for this invite</label>
+              <select id="teamInviteRole" class="input" style="margin-bottom:10px" aria-describedby="teamFacultyRoleHelp">
+                <option value="disbursing">Administrative Officer (AO) / Disbursing Officer — full edit access</option>
+                <option value="project-manager">Project Manager — full edit access</option>
+                <option value="reviewer">Viewer / Reviewer — read only</option>
+              </select>
+              <p id="teamFacultyRoleHelp" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">Invite the President as a Viewer. Once they join, choose Faculty President beside their name in Members. For the AO, choose Administrative Officer (AO).</p>
+              <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
+              <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
+                <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
+                <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button><p style="font-size:12px;line-height:1.5;margin:8px 0 0;color:var(--ink2)">Send privately. Ask your teammate to open the link in Chrome or Safari rather than inside Messenger, then sign in with Google.</p>
+              </div>
+            </div>
+            <div class="team-card">
+              <p style="font-weight:700;font-size:14px;margin:0 0 10px">Members</p>
+              <p style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">To assign a Faculty President, choose Faculty President beside a Viewer’s name. They keep Viewer access and can accept Faculty Fund handovers. To change Presidents, assign another Viewer.</p>
+              <p id="teamFacultyPresidentStatus" role="status" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px"></p>
+              <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+            <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
+          </div>
+          <div class="team-card">
+            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Create an organization</p>
+            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Sync this fund tracker's data in real time with a team. The registered team name must be unique and starts private. Names ignore case for A–Z and extra spaces; other letters and Unicode lookalikes can differ. It is separate from the editable name on financial reports. Everyone who joins sees the same live funds, transactions, projects and payables.</p>
+            <input id="teamNewOrgName" class="input" aria-label="Unique organization name" placeholder="Organization name" maxlength="120">
+            <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">Create Organization</button>
+          </div>
+          <div class="team-card">
+            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Find an organization</p>
+            <p style="font-size:12px;color:var(--ink2);line-height:1.5">Start typing a registered name to see searchable organizations. Only teams that opted in appear. An owner must approve your request.</p>
+            <input id="teamSearchOrg" class="input" aria-label="Organization name" aria-describedby="teamSearchSuggestions" placeholder="Start typing an organization name" maxlength="120" autocomplete="off" oninput="pondoTeam.suggestOrganizations()">
+            <div id="teamSearchSuggestions" class="team-suggestions" aria-live="polite"></div>
+            <button type="button" class="btn btn-dark" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.searchOrganization()">Search</button>
+            <div id="teamSearchResults" aria-live="polite" style="margin-top:10px"></div>
+            <button type="button" class="btn btn-light" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.myJoinRequests()">Refresh my requests</button>
+            <div id="teamMyRequests" aria-live="polite" style="margin-top:10px"></div>
+          </div>
+          <div class="team-card">
+            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Have an invite link or code?</p>
+            <input id="teamJoinCode" class="input" placeholder="Paste invite code or link">
+            <button class="btn btn-light" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.joinWithPastedInput()">Join Organization</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Note: receipt attachments and the organization logo are not synced between devices yet — only funds, transactions, projects, payables and contribution records sync in real time.</p>
+      </div>
+</div>
+  </section>
+</div>
+
 <!-- Settings Modal -->
 <div id="settingsModal" class="fixed inset-0" style="position:fixed; inset:0; z-index:150; display:none">
   <div class="sheet-backdrop" onclick="closeSettings()"></div>
@@ -8736,7 +8916,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <div class="sheet-header"><h3 class="sheet-title">App Settings</h3><button class="close-btn" onclick="closeSettings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
     <div style="padding:12px 20px 0">
       <input id="settingsSearch" placeholder="Search settings..." class="input" style="border-radius:999px; margin-bottom:12px" oninput="filterSettings()">
-      <div class="tabs-pill"><button class="tab-pill active settings-tab-btn" data-stab="appearance" onclick="switchSettingsTab('appearance')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.29-.29-.44-.65-.44-1.12a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.55-2.5 5.55-5.55C21.97 6.01 17.46 2 12 2Z"/></svg> Appearance</button><button class="tab-pill settings-tab-btn" data-stab="sound" onclick="switchSettingsTab('sound')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Sound</button><button class="tab-pill settings-tab-btn" data-stab="motion" onclick="switchSettingsTab('motion')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg> Motion</button><button class="tab-pill settings-tab-btn" data-stab="present" onclick="switchSettingsTab('present')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg> Present</button><button class="tab-pill settings-tab-btn" data-stab="data" onclick="switchSettingsTab('data')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg> Data</button><button class="tab-pill settings-tab-btn" data-stab="team" onclick="switchSettingsTab('team')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Team</button><button class="tab-pill settings-tab-btn" data-stab="about" onclick="switchSettingsTab('about')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> About</button></div>
+      <div class="tabs-pill"><button class="tab-pill active settings-tab-btn" data-stab="appearance" onclick="switchSettingsTab('appearance')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.29-.29-.44-.65-.44-1.12a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.55-2.5 5.55-5.55C21.97 6.01 17.46 2 12 2Z"/></svg> Appearance</button><button class="tab-pill settings-tab-btn" data-stab="sound" onclick="switchSettingsTab('sound')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Sound</button><button class="tab-pill settings-tab-btn" data-stab="motion" onclick="switchSettingsTab('motion')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg> Motion</button><button class="tab-pill settings-tab-btn" data-stab="present" onclick="switchSettingsTab('present')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/></svg> Present</button><button class="tab-pill settings-tab-btn" data-stab="data" onclick="switchSettingsTab('data')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg> Data</button><button class="tab-pill settings-tab-btn" data-stab="about" onclick="switchSettingsTab('about')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> About</button></div>
     </div>
     <div class="sheet-content" id="settingsContent">
       <div id="settings-appearance" class="settings-panel" style="display:flex; flex-direction:column; gap:18px">
@@ -8788,79 +8968,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
         <button class="btn" style="width:100%; height:48px; background:#fffbeb; color:#92400e" onclick="clearTransactionsOnly()">Clear Transactions Only</button>
         <button class="btn" style="width:100%; height:48px; background:#fef2f2; color:#dc2626" onclick="clearAllData()">Clear All Data — type DELETE</button>
       </div>
-      <div id="settings-team" class="settings-panel" style="display:none; flex-direction:column; gap:14px">
-        <div id="teamSignedOutNotice" class="team-card" hidden><p style="margin:0;font-size:13px;color:var(--ink2)">Sign in to set up team collaboration.</p></div>
-        <div id="teamLoading" class="team-card"><p style="margin:0;font-size:13px;color:var(--ink2)">Checking your organizations…</p></div>
-        <div id="teamSignedInPanel" hidden style="display:flex;flex-direction:column;gap:14px">
-          <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 10px">Your workspaces</p>
-            <div id="teamWorkspaceList" style="display:flex;flex-direction:column;gap:8px"></div>
-            <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:10px 0 0">Each organization keeps its own separate data. "Personal" is local to this device only and is never shared.</p>
-          </div>
-          <div id="teamActiveOrgPanel" hidden style="display:flex;flex-direction:column;gap:14px">
-            <div class="team-card">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-                <p style="font-weight:700;font-size:15px;margin:0" id="teamOrgName">—</p>
-                <span id="teamSyncBadge" class="team-sync-badge">●</span>
-              </div>
-              <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
-              <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
-              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>An unconfirmed team draft was found on this device. Download and verify it before discarding it. It has not been merged with the team copy.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button></div>
-            </div>
-            <div class="team-card" id="teamDiscoveryOwner" hidden>
-              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Organization discovery</p>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px"><input id="teamDiscoverable" type="checkbox" onchange="pondoTeam.setDiscovery(this.checked)"> Make this organization searchable</label>
-              <p style="font-size:12px;line-height:1.5;color:var(--ink2)">Only the organization name is listed. Financial records remain private. Verify requesters through a trusted channel before approval. Existing invite links still grant their assigned role immediately.</p>
-              <button type="button" class="btn btn-light" onclick="pondoTeam.loadJoinRequests()">Refresh join requests</button>
-              <div id="teamJoinRequests" aria-live="polite" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>
-            </div>
-            <div class="team-card" id="teamInviteCard" hidden>
-              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
-              <label for="teamInviteRole" style="font-size:12px;font-weight:700;display:block;margin:0 0 6px">Role for this invite</label>
-              <select id="teamInviteRole" class="input" style="margin-bottom:10px" aria-describedby="teamFacultyRoleHelp">
-                <option value="disbursing">Administrative Officer (AO) / Disbursing Officer — full edit access</option>
-                <option value="project-manager">Project Manager — full edit access</option>
-                <option value="reviewer">Viewer / Reviewer — read only</option>
-              </select>
-              <p id="teamFacultyRoleHelp" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">Invite the President as a Viewer. Once they join, choose Faculty President beside their name in Members. For the AO, choose Administrative Officer (AO).</p>
-              <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
-              <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
-                <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
-                <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button><p style="font-size:12px;line-height:1.5;margin:8px 0 0;color:var(--ink2)">Send privately. Ask your teammate to open the link in Chrome or Safari rather than inside Messenger, then sign in with Google.</p>
-              </div>
-            </div>
-            <div class="team-card">
-              <p style="font-weight:700;font-size:14px;margin:0 0 10px">Members</p>
-              <p style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">To assign a Faculty President, choose Faculty President beside a Viewer’s name. They keep Viewer access and can accept Faculty Fund handovers. To change Presidents, assign another Viewer.</p>
-              <p id="teamFacultyPresidentStatus" role="status" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px"></p>
-              <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
-            </div>
-            <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
-          </div>
-          <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Create an organization</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Sync this fund tracker's data in real time with a team. The registered team name must be unique and starts private. Names ignore case for A–Z and extra spaces; other letters and Unicode lookalikes can differ. It is separate from the editable name on financial reports. Everyone who joins sees the same live funds, transactions, projects and payables.</p>
-            <input id="teamNewOrgName" class="input" aria-label="Unique organization name" placeholder="Organization name" maxlength="120">
-            <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">Create Organization</button>
-          </div>
-          <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Find an organization</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5">Enter its full registered name. Only organizations that opted in can be found. An owner must approve your request.</p>
-            <input id="teamSearchOrg" class="input" aria-label="Full organization name" placeholder="Full organization name" maxlength="120">
-            <button type="button" class="btn btn-dark" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.searchOrganization()">Search</button>
-            <div id="teamSearchResults" aria-live="polite" style="margin-top:10px"></div>
-            <button type="button" class="btn btn-light" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.myJoinRequests()">Refresh my requests</button>
-            <div id="teamMyRequests" aria-live="polite" style="margin-top:10px"></div>
-          </div>
-          <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Have an invite link or code?</p>
-            <input id="teamJoinCode" class="input" placeholder="Paste invite code or link">
-            <button class="btn btn-light" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.joinWithPastedInput()">Join Organization</button>
-          </div>
-        </div>
-        <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Note: receipt attachments and the organization logo are not synced between devices yet — only funds, transactions, projects, payables and contribution records sync in real time.</p>
-      </div>
-      <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Role ideas · preview only</p><p>This preview does not assign a person or change their permissions. To manage actual team roles, use Settings → Team.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Administrative Officer (AO) / Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><p>To assign a Faculty President, go to Team settings and choose Faculty President beside a Viewer’s name.</p><button class="btn btn-light" type="button" onclick="switchSettingsTab('team')">Go to Team settings</button></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
+      <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Role ideas · preview only</p><p>This preview does not assign a person or change their permissions. To manage actual team roles, use Team.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Administrative Officer (AO) / Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><p>To assign a Faculty President, go to Team settings and choose Faculty President beside a Viewer’s name.</p><button class="btn btn-light" type="button" onclick="closeSettings();openTeamModal()">Open Team</button></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 10px">Organization</p><div style="display:flex; flex-direction:column; gap:8px"><input id="settingsOrgName" class="input" placeholder="Org Name"><input id="settingsOrgLoc" class="input" placeholder="Location"><div style="display:flex; gap:8px"><input id="settingsPeriodFrom" type="date" class="input" style="flex:1"><input id="settingsPeriodTo" type="date" class="input" style="flex:1"></div><button class="btn btn-dark" style="height:44px" onclick="saveOrgFromSettings()">Save Organization</button></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 8px">Signatories</p><div id="settingsSigs" style="display:flex; flex-direction:column; gap:8px"></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5; font-size:12px; color:var(--ink2)"><p style="margin:0">Pondo · Fund tracking</p><p style="margin:6px 0 0">Financial data: transactional browser storage after upgrade; settings remain in browser storage.</p><p style="margin:6px 0 0">Last backup export in this workspace: <span id="lastBackup">Never</span></p></div>
@@ -8934,7 +9042,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 84</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 89</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -8956,7 +9064,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='84', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='89', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9268,7 +9376,7 @@ function renderTeamSwitcherMenu(){
     return rowHtml+((active&&facepileHtml)?'<div class="team-switch-facepile">'+facepileHtml+'</div>':'');
   }).join('')
   +'<div class="team-switch-divider"></div>'
-  +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>';
+  +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openTeamModal()"><span class="tsi-text">Manage team</span></button>';
 }
 function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
 function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();if(window.closeNotifCenter)window.closeNotifCenter();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
@@ -9308,7 +9416,7 @@ function renderHeaderAvatarMenu(){
     +'<div class="team-switch-divider"></div>'
     +rowsHtml
     +'<div class="team-switch-divider"></div>'
-    +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();openSettings();switchSettingsTab(\'team\')"><span class="tsi-text">Manage team settings</span></button>'
+    +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();openTeamModal()"><span class="tsi-text">Manage team</span></button>'
     +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();if(window.pondoSignOut)window.pondoSignOut();"><span class="tsi-text">Sign out</span></button>';
 }
 function closeHeaderAvatarMenu(restoreFocus=false){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
@@ -9322,9 +9430,9 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('headerA
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('headerMoreMenu').hidden){e.preventDefault();e.stopPropagation();closeHeaderMore(true)}});
 
 // --- Notification center --------------------------------------------------
-// A device-local notification feed -- there's no backend push server behind
-// this app (static hosting + Firestore only, see sw.js), so this covers two
-// kinds of events without one:
+// Most notifications are device-local. Workspace-removal notices also use a
+// private account-scoped Firestore inbox. No backend push server is used, so
+// notifications cannot appear while the app is fully closed. Local events:
 //   - "team": built from the live Firestore listeners in subscribeToOrg()
 //     (module script below) when a teammate joins/leaves/changes role, or
 //     edits shared workspace data.
@@ -9347,8 +9455,15 @@ function loadNotifications(){try{const key=notificationStorageKey(),raw=key&&loc
 function saveNotifications(list){try{const key=notificationStorageKey();if(!key)return false;localStorage.setItem(key,JSON.stringify(list.slice(0,NOTIF_MAX)));return true}catch(e){return false}}
 function visibleNotifications(){
   const state=window.pondoTeamState, uid=window.pondoCurrentUser?.uid;
-  return loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
+  const local=loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
+  const account=(window.pondoRemovalNotices||[]).filter(n=>uid&&n.recipientUid===uid);
+  const join=(window.pondoJoinNotices||[]).filter(n=>uid&&n.recipientUid===uid&&state?.orgId===n.orgId&&state.memberConfirmed&&state.role==='owner').map(n=>({...n,read:joinNoticeWasRead(n.id)}));
+  return local.concat(account,join).sort((a,b)=>b.ts-a.ts);
 }
+function joinNoticeKey(){const uid=window.pondoCurrentUser?.uid,orgId=window.pondoTeamState?.orgId;return uid&&orgId?'ft_join_notice_read_v1:'+encodeURIComponent(uid)+':'+encodeURIComponent(orgId):null;}
+function joinNoticeReadIds(){try{const key=joinNoticeKey(),v=key&&JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function joinNoticeWasRead(id){return joinNoticeReadIds().includes(id)}
+function markJoinNoticesRead(ids){try{const key=joinNoticeKey();if(!key)return;localStorage.setItem(key,JSON.stringify([...new Set([...joinNoticeReadIds(),...ids])].slice(-200)));updateNotifBadge();}catch(e){}}
 function unreadNotificationCount(){return visibleNotifications().filter(n=>!n.read).length}
 function pushNotification({type,title,body,action,recipientUid,orgId,approverOnly,actorUid}={}){
   recipientUid=recipientUid||window.pondoCurrentUser?.uid;
@@ -9365,8 +9480,8 @@ function pushNotification({type,title,body,action,recipientUid,orgId,approverOnl
   return entry;
 }
 window.pushNotification=pushNotification;
-function markNotificationRead(id){const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
-function markAllNotificationsRead(){const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
+function markNotificationRead(id){if(id.startsWith('join:')){markJoinNoticesRead([id]);return;}if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
+function markAllNotificationsRead(){markJoinNoticesRead(visibleNotifications().filter(n=>n.kind==='joinRequest').map(n=>n.id));for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
 function updateNotifBadge(){const btn=document.getElementById('notifBellBtn'),badge=document.getElementById('notifBellCount');if(!btn||!badge)return;const count=unreadNotificationCount();badge.hidden=count===0;badge.textContent=count>99?'99+':String(count)}
 window.updateNotifBadge=updateNotifBadge;
@@ -9390,7 +9505,8 @@ function renderNotifCenter(){
   const canAskPermission=('Notification' in window)&&Notification.permission==='default';
   const permissionDenied=('Notification' in window)&&Notification.permission==='denied';
   let html='<div class="notif-center-head"><strong>Notifications</strong>'+(list.some(n=>!n.read)?'<button type="button" class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>':'')+'</div>';
-  html+='<div class="notif-permission-row"><span>Alerts are device-local. Open the team workspace to check for updates. Older unscoped alerts are hidden for privacy.</span></div>';
+  html+='<div class="notif-permission-row"><span>Most alerts are device-local. Workspace removal notices are delivered to your account when you open the app online. Older unscoped alerts are hidden for privacy.</span></div>';
+  if(window.pondoRemovalInboxUnavailable)html+='<div class="notif-permission-row"><span>Workspace removal notices are unavailable. Check your connection and access.</span></div>';
   if(canAskPermission){
     html+='<div class="notif-permission-row"><span>Get alerts here even when this tab isn\u2019t focused.</span><button type="button" onclick="requestNotifPermission()">Enable</button></div>';
   }else if(permissionDenied){
@@ -9411,6 +9527,7 @@ function renderNotifCenter(){
 }
 window.renderNotifCenter=renderNotifCenter;
 function notificationAction(n){
+  if(n.kind==='joinRequest')return {joinRequests:true};
   const allowed=['dashboard','funds','projects','contributions','transactions','refunds','report'];
   if(n.action&&allowed.includes(n.action.tab))return n.action;
   if(n.type!=='team')return null;
@@ -9434,7 +9551,9 @@ function openNotification(id){
   markNotificationRead(id);
   renderNotifCenter();
   if(action){
-    closeNotifCenter();switchTab(action.tab);
+    closeNotifCenter();
+    if(action.joinRequests){openTeamModal();document.getElementById('teamDiscoveryOwner')?.scrollIntoView({block:'start'});return;}
+    switchTab(action.tab);
     if(action.tab==='funds'&&action.facultyFund)window.PondoFacultyFundUI?.open();
     if(action.reviewQueue) document.getElementById('dashboardActionsCard')?.scrollIntoView({block:'start'});
     if(action.audit){const panel=document.querySelector('#tab-transactions .audit-panel');if(panel){panel.open=true;panel.scrollIntoView({block:'start'});}}
@@ -11293,7 +11412,7 @@ function renderAll(){
   if(!txList.children.length) txList.innerHTML='<div class="empty-state"><strong>No transactions found</strong>Try another search or add a transaction.</div>';
   if(!recent.children.length) recent.innerHTML=dashboardActivityEmpty('transactions');
   if(!recentRefund.children.length) recentRefund.innerHTML=dashboardActivityEmpty('refundPayments');
-  if(!fundsList.children.length) fundsList.innerHTML=fundQuery?'<div class="empty-state"><strong>No matching funds</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>';
+  if(!fundsList.children.length) fundsList.innerHTML=fundQuery?'<div class="empty-state"><strong>No matching funds</strong>Try a different search.</div>':'<div class="empty-state">'+emptyArt('fund')+'<strong>No fund sources yet</strong>Add a fund source to get started.</div>';
   if(!funds.length) fundCards.insertAdjacentHTML('beforeend','<div class="empty-state">'+emptyArt('fund')+'<strong>No funds yet</strong>Add a fund source to get started.</div>');
   if(!byFundDiv.children.length) byFundDiv.innerHTML='<p style="font-size:13px;color:var(--ink2)">No spending yet</p>';
   renderProjectCards(); renderProjectReport(); renderPayableReport(); renderSeriesComparison(); renderContributionPage(); renderContributionDashboard(); renderDeathAid(); updateBackupReminder();updateDataSafetyWarnings();updateSetupChecklist();if(window.checkReminderNotifications)window.checkReminderNotifications();
@@ -11538,10 +11657,27 @@ window.applyRemoteAppSettings=function(remote){
     window.__pondoApplyingRemoteSettings=false;
   }
 };
+let teamModalReturnFocus=null;
+function openTeamModal(){
+ const overlay=document.getElementById('teamModal');if(!overlay||!overlay.hidden)return;
+ teamModalReturnFocus=document.activeElement;overlay.hidden=false;document.body.classList.add('modal-open');
+ window.pondoTeam?.refreshPanel();document.getElementById('teamModalClose')?.focus();
+}
+function closeTeamModal(){
+ const overlay=document.getElementById('teamModal');if(!overlay||overlay.hidden)return;
+ overlay.hidden=true;document.body.classList.remove('modal-open');
+ if(teamModalReturnFocus?.isConnected)teamModalReturnFocus.focus();teamModalReturnFocus=null;
+}
+document.addEventListener('keydown',e=>{
+ const overlay=document.getElementById('teamModal');if(!overlay||overlay.hidden||!document.getElementById('appDialogOverlay').hidden)return;
+ if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeTeamModal();return;}
+ if(e.key==='Tab'){const nodes=[...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),a[href]')].filter(n=>n.getClientRects().length);if(!nodes.length)return;
+  if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0].focus()}}
+},true);
 function openSettings(){ document.getElementById('settingsModal').style.display='block'; document.body.classList.add('modal-open'); try{ syncSettingsUI(); }catch(e){} }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; document.body.classList.remove('modal-open'); try{ saveAppSettings(); }catch(e){} }
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented||!document.getElementById('appDialogOverlay').hidden)return;if(document.getElementById('settingsModal').style.display!=='none'){e.preventDefault();closeSettings();(document.getElementById('settingsMenuItem')||document.getElementById('headerMoreBtn'))?.focus()}else if(document.getElementById('presentModal').style.display!=='none'){e.preventDefault();closePresent();document.getElementById('headerMoreBtn').focus()}});
-function switchSettingsTab(tab){ try{ let ss=document.getElementById('settingsSearch'); if(ss) ss.value=''; document.querySelectorAll('.settings-panel').forEach(p=>{p.style.display='none'}); let el=document.getElementById('settings-'+tab); if(el) el.style.display='flex'; document.querySelectorAll('.settings-tab-btn').forEach(b=>{ b.classList.remove('active'); }); let btn=document.querySelector('[data-stab="'+tab+'"]'); if(btn) btn.classList.add('active'); if(tab==='present') renderSlideOrder(); if(tab==='data') updateStorageInfo(); if(tab==='about') syncAboutSettings(); if(tab==='team'&&window.pondoTeam) window.pondoTeam.refreshPanel(); }catch(err){} }
+function switchSettingsTab(tab){ try{ let ss=document.getElementById('settingsSearch'); if(ss) ss.value=''; document.querySelectorAll('.settings-panel').forEach(p=>{p.style.display='none'}); let el=document.getElementById('settings-'+tab); if(el) el.style.display='flex'; document.querySelectorAll('.settings-tab-btn').forEach(b=>{ b.classList.remove('active'); }); let btn=document.querySelector('[data-stab="'+tab+'"]'); if(btn) btn.classList.add('active'); if(tab==='present') renderSlideOrder(); if(tab==='data') updateStorageInfo(); if(tab==='about') syncAboutSettings();  }catch(err){} }
 function filterSettings(){ let q=(document.getElementById('settingsSearch').value||'').toLowerCase(); if(!q){ let active=document.querySelector('.settings-tab-btn.active')?.dataset.stab||'appearance'; document.querySelectorAll('.settings-panel').forEach(p=>{p.style.display='none'}); let el=document.getElementById('settings-'+active); if(el) el.style.display='flex'; return; } document.querySelectorAll('.settings-panel').forEach(p=>{ p.style.display = p.innerText.toLowerCase().includes(q) ? 'flex' : 'none'; }); }
 function toggleSetting(section,key){ try{ if(section==='appearance' && key==='dynamicAccent') appSettings.appearance.dynamicAccent=!appSettings.appearance.dynamicAccent; else if(section==='appearance' && key==='matchChart') appSettings.appearance.matchChart=!appSettings.appearance.matchChart; else if(section==='sound' && key==='enabled') appSettings.sound.enabled=!appSettings.sound.enabled; else if(section==='sound' && key==='haptics') appSettings.sound.haptics=!appSettings.sound.haptics; else if(section==='motion' && key==='reduceMotion') appSettings.motion.reduceMotion=!appSettings.motion.reduceMotion; else if(section==='motion' && key==='parallax') appSettings.motion.parallax=!appSettings.motion.parallax; else if(section==='animation' && key==='countUp') appSettings.animation.countUp=!appSettings.animation.countUp; else if(section==='animation' && key==='confetti') appSettings.animation.confetti=!appSettings.animation.confetti; else if(section==='presentation') appSettings.presentation[key]=!appSettings.presentation[key]; if(appSettings.sound.haptics && navigator.vibrate) navigator.vibrate(10); }catch(err){} saveAppSettings(); }
 function toggleSoundEvent(ev){ appSettings.sound.events[ev]=!appSettings.sound.events[ev]; saveAppSettings(); }
@@ -12351,6 +12487,7 @@ import {
   orderBy,
   documentId,
   startAfter,
+  startAt,
   limit,
   setDoc,
   updateDoc,
@@ -12529,6 +12666,7 @@ const HEAVY_IMAGE_KEYS = ['payables', 'txs', 'contributionPayments'];
 // worth a "X joined/left" notification, or just the very first snapshot
 // after subscribing (which would otherwise look like everyone "just joined").
 const teamActivityMemory = { membersByOrg: {} };
+const pendingTeamRemovals=new Set();
 const notify = (msg) => { if (window.appAlert) window.appAlert(msg); else alert(msg); };
 const confirmAction = (msg) => (window.appConfirm ? window.appConfirm(msg) : Promise.resolve(confirm(msg)));
 
@@ -12538,6 +12676,8 @@ const pondoTeamState = {
   orgId: null,
   orgName: '',
   discoverable: false,
+  teamColor: 'emerald',
+  teamIcon: 'diamond',
   role: null,
   memberConfirmed: false,
   members: [],
@@ -12637,7 +12777,7 @@ function applyRoleUI() {
   const banner = document.getElementById('reviewerBanner');
   if (banner) {
     banner.hidden = !(isReviewer || recoveryLocked);
-    banner.textContent = recoveryLocked ? 'Unconfirmed team draft found. Open Settings → Team to download it before discarding or reloading.' : "Reviewer access — you can view this organization's data but cannot make changes.";
+    banner.textContent = recoveryLocked ? 'Unconfirmed team draft found. Open Team to download it before discarding or reloading.' : "Reviewer access — you can view this organization's data but cannot make changes.";
   }
 }
 
@@ -12701,7 +12841,8 @@ function updateHeaderTeamBadge() {
   } else {
     const roleLabel = facultyPresidentKnown && facultyPresidentUid===pondoTeamState.uid ? 'Faculty President' : (ROLE_LABELS[pondoTeamState.role] || '');
     badge.title = (pondoTeamState.orgName || 'Team') + ' — Network status only, not proof of sync. Tap to switch workspace or manage members.';
-    text.textContent = (pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
+    const teamIcons={diamond:'◆',star:'★',heart:'♥',sun:'☀',leaf:'✿',book:'▣'};
+    text.textContent = (teamIcons[pondoTeamState.teamIcon]||teamIcons.diamond)+' '+(pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
     if (avatarBtn) avatarBtn.classList.add(navigator.onLine ? 'live' : 'offline');
   }
@@ -12911,6 +13052,7 @@ function startFacultyWatch(orgId,uid){
 }
 function teardownOrgSubscriptions() {
   stopFacultyWatch();
+  stopJoinRequestWatch();
   window.PondoFacultyFundUI?.reset();
   stopTeamPresence();
   if (pondoTeamState.unsubMembers) { pondoTeamState.unsubMembers(); pondoTeamState.unsubMembers = null; }
@@ -12923,7 +13065,7 @@ function handleTeamListenerError(orgId, label, err) {
   if (pondoTeamState.orgId !== orgId) return;
   const firstFailure = !pondoTeamState.listenerError;
   pondoTeamState.listenerError = true;
-  if(label==='Members'){pondoTeamState.memberConfirmed=false;stopFacultyWatch();stopTeamPresence();applyRoleUI();window.refreshNotifCenterIfOpen?.();window.PondoFacultyFundUI?.reset();}
+  if(label==='Members'){pondoTeamState.memberConfirmed=false;stopFacultyWatch();stopJoinRequestWatch();stopTeamPresence();applyRoleUI();window.refreshNotifCenterIfOpen?.();window.PondoFacultyFundUI?.reset();}
   setSyncBadge('error');
   if (firstFailure) notify('Team updates are unavailable. Your data may be out of date. Export a backup and check your connection and access.');
 }
@@ -12945,7 +13087,7 @@ function subscribeToOrg(orgId) {
     if (localStorage.getItem(teamDraftKey(pondoTeamState.uid, orgId)) !== null) {
       pondoTeamState.recoveryLocked = true;
       pondoTeamState.dirty = true;
-      flagTeamSaveError('An unconfirmed team draft was found. Download it from Settings → Team.');
+      flagTeamSaveError('An unconfirmed team draft was found. Download it from Team.');
     }
   } catch (e) {
     pondoTeamState.recoveryLocked = true;
@@ -12959,6 +13101,11 @@ function subscribeToOrg(orgId) {
     if (!snap.exists()) { handleRemovedFromOrg(); return; }
     pondoTeamState.orgName = snap.data().name || 'Organization';
     pondoTeamState.discoverable = snap.data().discoverable === true;
+    const colors=['emerald','ocean','violet','rose','amber','slate'],icons=['diamond','star','heart','sun','leaf','book'];
+    pondoTeamState.teamColor=colors.includes(snap.data().teamColor)?snap.data().teamColor:'emerald';
+    pondoTeamState.teamIcon=icons.includes(snap.data().teamIcon)?snap.data().teamIcon:'diamond';
+    const color=document.getElementById('teamColor'),icon=document.getElementById('teamIcon');
+    if(color&&icon&&!document.getElementById('teamAppearanceOwner')?.contains(document.activeElement)){color.value=pondoTeamState.teamColor;icon.value=pondoTeamState.teamIcon;}
     renderTeamPanel();
   }, (err) => handleTeamListenerError(orgId, 'Organization', err));
 
@@ -12966,7 +13113,7 @@ function subscribeToOrg(orgId) {
     const members = [];
     const memberConfirmed = !snap.metadata.fromCache && !snap.metadata.hasPendingWrites;
     pondoTeamState.memberConfirmed = memberConfirmed;
-    if(!memberConfirmed){stopFacultyWatch();window.PondoFacultyFundUI?.reset();}
+    if(!memberConfirmed){stopFacultyWatch();stopJoinRequestWatch();window.PondoFacultyFundUI?.reset();}
     snap.forEach((d) => members.push(d.data()));
     // Notify about teammates joining/leaving/changing role -- but only once
     // we've already seen a members list for this org in this session, so the
@@ -12990,6 +13137,7 @@ function subscribeToOrg(orgId) {
       prevByUid.forEach((m, uid) => {
         if (uid === pondoTeamState.uid) return;
         if (!nextByUid.has(uid)) {
+          const key=orgId+'\0'+uid;if(pendingTeamRemovals.delete(key))return;
           const label = m.displayName || m.email || 'A teammate';
           window.pushNotification({ type: 'team', title: label + ' left ' + orgLabel });
         }
@@ -13003,6 +13151,7 @@ function subscribeToOrg(orgId) {
     else if(presenceUnsubscribe)stopTeamPresence();
     const previousFacultyRole = pondoTeamState.role;
     pondoTeamState.role = mine.role;
+    if(memberConfirmed&&mine.role==='owner')startJoinRequestWatch(orgId,pondoTeamState.uid);else stopJoinRequestWatch();
     if(previousFacultyRole && previousFacultyRole !== mine.role) window.PondoFacultyFundUI?.reset();
     if(memberConfirmed)startFacultyWatch(orgId,pondoTeamState.uid);
     if (window.refreshDescriptionSuggestions && pondoTeamState.baselineReady) window.refreshDescriptionSuggestions();
@@ -13150,6 +13299,8 @@ async function switchActiveWorkspace(key) {
   teardownOrgSubscriptions();
   pondoTeamState.role = null;
   pondoTeamState.discoverable = false;
+  pondoTeamState.teamColor='emerald';pondoTeamState.teamIcon='diamond';
+  const appearanceStatus=document.getElementById('teamAppearanceStatus');if(appearanceStatus)appearanceStatus.textContent='';
   const requestList = document.getElementById('teamJoinRequests'); if (requestList) requestList.replaceChildren();
   pondoTeamState.memberConfirmed = false;
   pondoTeamState.members = [];
@@ -13188,7 +13339,7 @@ async function switchActiveWorkspace(key) {
 }
 
 // Looks up name + role for every org this user belongs to, so the
-// switcher and Settings > Team can list them. Self-heals orgMemberships if
+// switcher and Team can list them. Self-heals orgMemberships if
 // a membership doc was removed (e.g. an owner removed this user) while this
 // device wasn't actively subscribed to that org.
 async function refreshMemberships() {
@@ -13327,7 +13478,7 @@ async function joinWithInviteCode(code) {
   }, { merge: true });
   await switchActiveWorkspace(orgId);
   await refreshMemberships();
-  if(pondoTeamState.orgId!==orgId)throw new Error('Membership may have been created, but the workspace did not open. Check Settings → Team before retrying.');
+  if(pondoTeamState.orgId!==orgId)throw new Error('Membership may have been created, but the workspace did not open. Check Team before retrying.');
 }
 
 async function joinWithPastedInput() {
@@ -13403,12 +13554,33 @@ async function selectMemberRole(uid, role) {
 }
 
 async function removeMember(uid) {
-  if (pondoTeamState.role !== 'owner' || !pondoTeamState.orgId) return;
-  if (!await confirmAction('Remove this member from the organization?')) return;
+  const s=pondoTeamState,orgId=s.orgId,actor=s.uid;
+  const scoped=()=>s.orgId===orgId&&s.uid===actor&&window.pondoCurrentUser?.uid===actor;
+  const current=()=>scoped()&&s.role==='owner'&&s.memberConfirmed;
+  const member=s.members.find(m=>m.uid===uid);
+  if (!orgId || !current() || uid===actor || !member) return;
+  if (facultyPresidentKnown&&facultyPresidentUid===uid) {notify('Assign another Faculty President and resolve any pending handovers before removing this member.');return;}
+  if (!navigator.onLine) {notify('Connect to the internet before removing a member.');return;}
+  if (!await confirmAction('Remove this member from this workspace? They will lose access and receive an in-app notice when they next open Pondo online.')) return;
+  if (!current() || !s.members.some(m=>m.uid===uid)) return;
+  const key=orgId+'\0'+uid;if(pendingTeamRemovals.has(key))return;pendingTeamRemovals.add(key);
   try {
-    await deleteDoc(doc(firestoreDb, 'organizations', pondoTeamState.orgId, 'members', uid));
+    const orgRef=doc(firestoreDb,'organizations',orgId),memberRef=doc(firestoreDb,'organizations',orgId,'members',uid);
+    const noticeRef=doc(collection(firestoreDb,'users',uid,'teamNotices'));
+    await runTransaction(firestoreDb,async tx=>{
+      const [orgSnap,memberSnap]=await Promise.all([tx.get(orgRef),tx.get(memberRef)]);
+      if(!orgSnap.exists()||!memberSnap.exists())throw Error('Workspace or membership no longer exists.');
+      tx.set(noticeRef,{kind:'removed',orgId,orgName:orgSnap.data().name,actorUid:actor,createdAt:serverTimestamp(),read:false});
+      tx.delete(memberRef);
+    });
+    if(scoped()){
+      if(current())window.pushNotification?.({type:'team',title:(member.displayName||member.email||'Member')+' was removed',body:'Access to '+(s.orgName||'the workspace')+' was removed.',action:{tab:'dashboard'}});
+      notify('Member removed. Their account will show a notice when they open Pondo online.');
+    }
+    setTimeout(()=>pendingTeamRemovals.delete(key),60000);
   } catch (err) {
-    notify('Could not remove member: ' + (err && err.message ? err.message : err));
+    pendingTeamRemovals.delete(key);
+    if(scoped())notify('Removal could not be confirmed. Refresh the member list before trying again. The updated notification rules may be required.');
   }
 }
 
@@ -13493,6 +13665,9 @@ function renderTeamPanel() {
   }
 
   document.getElementById('teamOrgName').textContent = pondoTeamState.orgName || 'Organization';
+  const teamIcon=document.getElementById('teamOrgIcon');
+  if(teamIcon){const icons={diamond:'◆',star:'★',heart:'♥',sun:'☀',leaf:'✿',book:'▣'},colors={emerald:'#087d60',ocean:'#2563a8',violet:'#6d43a6',rose:'#ad3e5e',amber:'#a35d0a',slate:'#4b6175'};teamIcon.textContent=icons[pondoTeamState.teamIcon]||icons.diamond;teamIcon.style.setProperty('--team-color',colors[pondoTeamState.teamColor]||colors.emerald);}
+  const appearance=document.getElementById('teamAppearanceOwner');if(appearance)appearance.hidden=pondoTeamState.role!=='owner';
   const roleLabels = { owner: 'Owner', disbursing: 'Administrative Officer (AO) / Disbursing Officer', reviewer: 'Viewer / Reviewer (read-only)', 'project-manager': 'Project Manager' };
   document.getElementById('teamMyRole').textContent = (facultyPresidentKnown&&facultyPresidentUid===pondoTeamState.uid?'Faculty President · ':'') + (roleLabels[pondoTeamState.role] || pondoTeamState.role || '—');
   const presidentStatus=document.getElementById('teamFacultyPresidentStatus');
@@ -13595,7 +13770,7 @@ async function discardTeamDraft() {
 // Organization operations use Firebase Auth and Firestore security rules only.
 const organizationDirectory = createOrganizationDirectory({
   db: firestoreDb,
-  api: {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,limit},
+  api: {doc,collection,getDoc,getDocs,getDocsFromServer,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,orderBy,documentId,startAt,limit},
   getUser: () => window.pondoCurrentUser,
 });
 async function organizationCall(method, data = {}) {
@@ -13609,41 +13784,83 @@ async function setDiscovery(value) {
   catch(e){ notify('Could not change discovery: '+(e.message||e)); }
   finally { checkbox.disabled=false; checkbox.checked=pondoTeamState.discoverable; }
 }
+let teamSuggestTimer=null,teamSuggestGeneration=0,teamSearchGeneration=0;
+function suggestOrganizations(){
+ const input=document.getElementById('teamSearchOrg'),output=document.getElementById('teamSearchSuggestions');
+ const prefix=input.value.trim(),uid=pondoTeamState.uid,generation=++teamSuggestGeneration;teamSearchGeneration++;clearTimeout(teamSuggestTimer);output.replaceChildren();
+ if(!uid||prefix.length<2)return;
+ output.textContent='Looking for public workspaces…';
+ teamSuggestTimer=setTimeout(async()=>{
+  try{
+   const {organizations}=await organizationCall('orgSuggest',{prefix});
+   if(generation!==teamSuggestGeneration||uid!==pondoTeamState.uid||input.value.trim()!==prefix)return;
+   output.replaceChildren();
+   if(!organizations.length){output.textContent='No public matches. You can still search by the full registered name.';return;}
+   for(const org of organizations){
+    const button=document.createElement('button');button.type='button';button.className='team-suggestion';button.textContent=org.name;
+    button.addEventListener('click',()=>{input.value=org.name;teamSuggestGeneration++;output.replaceChildren();searchOrganization();});output.appendChild(button);
+   }
+  }catch(err){if(generation===teamSuggestGeneration&&uid===pondoTeamState.uid)output.textContent='Suggestions are unavailable. Search by the full registered name instead.';}
+ },250);
+}
 async function searchOrganization() {
-  const output=document.getElementById('teamSearchResults'), name=document.getElementById('teamSearchOrg').value, uid=pondoTeamState.uid;
-  output.textContent='Searching…';
+  const output=document.getElementById('teamSearchResults'), name=document.getElementById('teamSearchOrg').value, uid=pondoTeamState.uid,generation=++teamSearchGeneration;
+  if(!uid)return;output.textContent='Searching…';
   try {
     const {organization}=await organizationCall('orgSearch',{name});
-    if(uid!==pondoTeamState.uid)return;
+    if(uid!==pondoTeamState.uid||generation!==teamSearchGeneration)return;
     output.replaceChildren();
     if(!organization){output.textContent='No searchable organization found with that name.';return;}
     const label=document.createElement('p');label.textContent=organization.name;label.style.fontWeight='700';
     const button=document.createElement('button');button.type='button';button.className='btn btn-light';button.textContent='Request to join';
-    button.onclick=async()=>{button.disabled=true;try{await organizationCall('orgRequestJoin',{orgId:organization.id});if(uid===pondoTeamState.uid)output.textContent='Request sent. An owner must approve it before you can access this workspace.';}catch(e){button.disabled=false;notify('Could not send request: '+(e.message||e));}};
+    button.onclick=async()=>{if(uid!==pondoTeamState.uid||generation!==teamSearchGeneration)return;button.disabled=true;try{await organizationCall('orgRequestJoin',{orgId:organization.id});if(uid===pondoTeamState.uid)output.textContent='Request sent. An owner must approve it before you can access this workspace.';}catch(e){button.disabled=false;notify('Could not send request: '+(e.message||e));}};
     output.append(label,button);
-  } catch(e){if(uid===pondoTeamState.uid)output.textContent='Search unavailable. '+(e.message||e);}
+  } catch(e){if(uid===pondoTeamState.uid&&generation===teamSearchGeneration)output.textContent='Search unavailable. '+(e.message||e);}
 }
-async function loadJoinRequests() {
-  const orgId=pondoTeamState.orgId, uid=pondoTeamState.uid, output=document.getElementById('teamJoinRequests');
-  if(!orgId || pondoTeamState.role!=='owner')return;
-  output.textContent='Loading…';
-  try {
-    const {requests}=await organizationCall('orgPendingRequests',{orgId});
-    if(orgId!==pondoTeamState.orgId || uid!==pondoTeamState.uid || pondoTeamState.role!=='owner')return;
-    output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
-    const verifyNote=document.createElement('p');verifyNote.textContent='Verify each requester through a trusted channel; displayed names and emails can be entered by the requester.';output.appendChild(verifyNote);
-    if(requests.length===100){const note=document.createElement('p');note.textContent='Showing up to 100 pending requests. Review these, then refresh for more.';output.appendChild(note);}
-    requests.forEach(request=>{
-      const row=document.createElement('div');row.className='team-member-row';row.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
-      const identity=document.createElement('div');identity.style.cssText='flex:1 1 100%;overflow-wrap:anywhere';identity.textContent=[request.displayName||'Unnamed user',request.email||request.uid].join(' · ');
-      const role=document.createElement('select');role.className='input';role.setAttribute('aria-label','Role for '+(request.displayName||request.email||'requester'));role.style.cssText='flex:1 1 140px;min-width:0';
-      [['reviewer','Reviewer (President assigned separately)'],['project-manager','Project Manager'],['disbursing','Administrative Officer (AO) / Disbursing Officer']].forEach(([value,text])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=text;role.appendChild(opt)});
-      const approve=document.createElement('button'),reject=document.createElement('button');approve.type=reject.type='button';approve.className=reject.className='btn btn-light';approve.textContent='Approve';reject.textContent='Reject';
-      const decide=async decision=>{if(!await confirmAction((decision==='approve'?'Approve':'Reject')+' the request from '+(request.displayName||request.email||request.uid)+'?'))return;approve.disabled=reject.disabled=true;try{await organizationCall('orgDecideRequest',{orgId,uid:request.uid,decision,role:role.value});if(pondoTeamState.orgId===orgId)await loadJoinRequests();}catch(e){approve.disabled=reject.disabled=false;notify('Could not review request: '+(e.message||e));}};
-      approve.onclick=()=>decide('approve');reject.onclick=()=>decide('reject');row.append(identity,role,approve,reject);output.appendChild(row);
-    });
-  }catch(e){if(orgId===pondoTeamState.orgId)output.textContent='Could not load requests. '+(e.message||e);}
+// A pending request remains readable only to the current confirmed owner.
+// The listener also populates the bell, including requests already pending
+// when the owner opens this workspace. It is not background push.
+let joinRequestUnsub=null,joinRequestGeneration=0;
+function stopJoinRequestWatch(){
+ joinRequestGeneration++;if(joinRequestUnsub)joinRequestUnsub();joinRequestUnsub=null;
+ window.pondoJoinNotices=[];const output=document.getElementById('teamJoinRequests');if(output)output.replaceChildren();
+ window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
 }
+function startJoinRequestWatch(orgId,uid){
+ const state=pondoTeamState;if(joinRequestUnsub||!orgId||!uid||state.role!=='owner'||!state.memberConfirmed)return;
+ const generation=++joinRequestGeneration,output=document.getElementById('teamJoinRequests');output.textContent='Loading requests…';
+ const current=()=>generation===joinRequestGeneration&&state.orgId===orgId&&state.uid===uid&&state.role==='owner'&&state.memberConfirmed;
+ joinRequestUnsub=onSnapshot(query(collection(firestoreDb,'organizations',orgId,'joinRequests'),where('status','==','pending'),limit(100)),{includeMetadataChanges:true},snap=>{
+  if(!current())return;
+  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){output.textContent='Waiting for server-confirmed requests…';window.pondoJoinNotices=[];window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();return;}
+  const requests=[];snap.forEach(d=>{const data=d.data();if(data.status==='pending')requests.push({uid:d.id,displayName:data.displayName,email:data.email,requestedAt:data.requestedAt?.toMillis?.()||0});});
+  renderJoinRequests(requests,orgId,uid);
+  window.pondoJoinNotices=requests.map(r=>({id:'join:'+encodeURIComponent(r.uid)+':'+r.requestedAt,kind:'joinRequest',type:'team',title:'Request to join',body:(r.displayName||r.email||'Someone')+' requested to join '+(state.orgName||'your workspace')+'.',ts:r.requestedAt,recipientUid:uid,orgId}));
+  window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
+ },err=>{if(current()){console.warn('Join requests unavailable:',err);output.textContent='Could not load requests. Check your connection and owner permissions, then reconnect.';window.pondoJoinNotices=[];window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();}});
+}
+function loadJoinRequests(){stopJoinRequestWatch();startJoinRequestWatch(pondoTeamState.orgId,pondoTeamState.uid);}
+function renderJoinRequests(requests,orgId,uid){
+ const output=document.getElementById('teamJoinRequests');output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
+ const verifyNote=document.createElement('p');verifyNote.textContent='Verify each requester through a trusted channel; displayed names and emails can be entered by the requester.';output.appendChild(verifyNote);
+ if(requests.length===100){const note=document.createElement('p');note.textContent='Showing up to 100 pending requests. Review these to see more.';output.appendChild(note);}
+ requests.forEach(request=>{
+  const row=document.createElement('div');row.className='team-member-row';row.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
+  const identity=document.createElement('div');identity.style.cssText='flex:1 1 100%;overflow-wrap:anywhere';identity.textContent=[request.displayName||'Unnamed user',request.email||request.uid].join(' · ');
+  const role=document.createElement('select');role.className='input';role.setAttribute('aria-label','Role for '+(request.displayName||request.email||'requester'));role.style.cssText='flex:1 1 140px;min-width:0';
+  [['reviewer','Viewer / Reviewer'],['project-manager','Project Manager'],['disbursing','Administrative Officer (AO) / Disbursing Officer']].forEach(([value,text])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=text;role.appendChild(opt)});
+  const approve=document.createElement('button'),reject=document.createElement('button');approve.type=reject.type='button';approve.className=reject.className='btn btn-light';approve.textContent='Approve';reject.textContent='Decline';
+  const decide=async decision=>{
+   if(!await confirmAction((decision==='approve'?'Approve':'Decline')+' the request from '+(request.displayName||request.email||request.uid)+'?'))return;
+   if(pondoTeamState.orgId!==orgId||pondoTeamState.uid!==uid||pondoTeamState.role!=='owner'||!pondoTeamState.memberConfirmed)return;
+   approve.disabled=reject.disabled=true;
+   try{await organizationCall('orgDecideRequest',{orgId,uid:request.uid,decision,role:role.value});}
+   catch(e){approve.disabled=reject.disabled=false;if(pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid)notify('Could not review request: '+(e.message||e));}
+  };
+  approve.onclick=()=>decide('approve');reject.onclick=()=>decide('reject');row.append(identity,role,approve,reject);output.appendChild(row);
+ });
+}
+
 async function myJoinRequests(){
   const output=document.getElementById('teamMyRequests'),uid=pondoTeamState.uid;output.textContent='Loading…';
   try{
@@ -13661,11 +13878,22 @@ async function myJoinRequests(){
   }catch(e){if(uid===pondoTeamState.uid)output.textContent='Could not load requests. '+(e.message||e);}
 }
 
+async function saveTeamAppearance(){
+ const s=pondoTeamState,orgId=s.orgId,uid=s.uid,color=document.getElementById('teamColor').value,icon=document.getElementById('teamIcon').value,status=document.getElementById('teamAppearanceStatus');
+ if(!orgId||!uid||s.role!=='owner'||!s.memberConfirmed){status.textContent='A confirmed workspace owner is required.';return;}
+ if(!navigator.onLine){status.textContent='Connect to the internet before saving team appearance.';return;}
+ if(!['emerald','ocean','violet','rose','amber','slate'].includes(color)||!['diamond','star','heart','sun','leaf','book'].includes(icon)){status.textContent='Choose a valid color and icon.';return;}
+ status.textContent='Saving…';
+ try{await updateDoc(doc(firestoreDb,'organizations',orgId),{teamColor:color,teamIcon:icon});if(s.orgId===orgId&&s.uid===uid)status.textContent='Saved for everyone in this workspace.';}
+ catch(e){if(s.orgId===orgId&&s.uid===uid)status.textContent='Could not confirm the change. Check your connection and workspace permissions; no rules have been published by this update.';}
+}
+
 window.pondoTeam = {
+  saveAppearance: saveTeamAppearance,
   downloadDraft: downloadTeamDraft,
   discardDraft: discardTeamDraft,
   createOrganization,
-  setDiscovery, searchOrganization, loadJoinRequests, myJoinRequests,
+  setDiscovery, searchOrganization, suggestOrganizations, loadJoinRequests, myJoinRequests,
   joinWithPastedInput,
   generateInvite,
   copyInviteLink,
@@ -13680,8 +13908,8 @@ function maybeShowTeamOnboarding() {
   try { localStorage.setItem('ft_team_onboarding_seen', '1'); } catch (e) { /* ignore */ }
   setTimeout(async () => {
     if (pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // may have joined via an invite link in the meantime
-    const proceed = await confirmAction('Set up team collaboration? Invite others to view or edit this fund tracker together in real time, with roles like Disbursing Officer or read-only Reviewer. You can always do this later from Settings > Team.');
-    if (proceed) { openSettings(); switchSettingsTab('team'); }
+    const proceed = await confirmAction('Set up team collaboration? Invite others to view or edit this fund tracker together in real time, with roles like Disbursing Officer or read-only Reviewer. You can always do this later from Team.');
+    if (proceed) openTeamModal();
   }, 700);
 }
 
@@ -13723,7 +13951,7 @@ async function initCollaboration(user) {
         return;
       } catch (err) {
         console.warn('Could not join via invite link:', err);
-        notify('Could not finish opening the invitation. Membership may already have been created. Check Settings → Team and your connection before trying the original link again.');
+        notify('Could not finish opening the invitation. Membership may already have been created. Check Team and your connection before trying the original link again.');
       }
     }
 
@@ -13754,7 +13982,8 @@ async function initCollaboration(user) {
 }
 
 function teardownCollaboration() {
-  ['teamSearchResults','teamMyRequests','teamJoinRequests'].forEach(id=>document.getElementById(id)?.replaceChildren());
+  clearTimeout(teamSuggestTimer);teamSuggestGeneration++;teamSearchGeneration++;
+  ['teamSearchResults','teamSearchSuggestions','teamMyRequests','teamJoinRequests'].forEach(id=>document.getElementById(id)?.replaceChildren());
   const search=document.getElementById('teamSearchOrg'); if(search)search.value='';
   if (window.clearDescriptionSuggestions) window.clearDescriptionSuggestions();
   teardownOrgSubscriptions();
@@ -13770,6 +13999,32 @@ function teardownCollaboration() {
   applyRoleUI();
   renderTeamPanel();
 }
+
+// Account-scoped notices remain available after workspace access is revoked.
+// This is an in-app inbox, not background push or email.
+let removalInboxUnsub=null,removalInboxGeneration=0;
+function stopRemovalInbox(){
+ removalInboxGeneration++;if(removalInboxUnsub)removalInboxUnsub();removalInboxUnsub=null;
+ window.pondoRemovalNotices=[];window.pondoRemovalInboxUnavailable=false;
+ window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
+}
+function startRemovalInbox(uid){
+ stopRemovalInbox();if(!uid)return;const generation=++removalInboxGeneration;
+ const current=()=>generation===removalInboxGeneration&&window.pondoCurrentUser?.uid===uid;
+ removalInboxUnsub=onSnapshot(query(collection(firestoreDb,'users',uid,'teamNotices'),orderBy('createdAt','desc'),limit(60)),{includeMetadataChanges:true},snap=>{
+  if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;
+  const notices=[];snap.forEach(item=>{const v=item.data(),ts=v.createdAt?.toMillis?.();
+   if(v.kind!=='removed'||typeof v.orgName!=='string'||typeof v.read!=='boolean'||!Number.isFinite(ts))return;
+   notices.push({id:'removed:'+item.id,type:'account',title:'Workspace access removed',body:'Your access to '+v.orgName+' was removed.',ts,read:v.read,action:null,recipientUid:uid,orgId:null});
+  });
+  window.pondoRemovalNotices=notices;window.pondoRemovalInboxUnavailable=false;window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
+ },err=>{if(current()){window.pondoRemovalNotices=[];window.pondoRemovalInboxUnavailable=true;window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();console.warn('Workspace notice inbox unavailable:',err);}});
+}
+window.pondoMarkRemovalNoticeRead=async id=>{
+ const uid=window.pondoCurrentUser?.uid;if(!uid||!id||!window.pondoRemovalNotices?.some(n=>n.id==='removed:'+id&&n.recipientUid===uid&&!n.read))return;
+ try{await updateDoc(doc(firestoreDb,'users',uid,'teamNotices',id),{read:true});}
+ catch(err){if(window.pondoCurrentUser?.uid===uid)notify('Could not mark the notice as read. Check your connection and try again.');}
+};
 
 const authGate = document.getElementById('authGate');
 const pondoApp = document.getElementById('pondoApp');
@@ -13976,6 +14231,7 @@ onAuthStateChanged(auth, (user) => {
       }
     }
     window.pondoCurrentUser = user;
+    startRemovalInbox(user.uid);
     upsertUserProfile(user);
     initCollaboration(user);
     // Local tracker storage (and its single-tab edit lock) is only relevant once someone is
@@ -13991,6 +14247,7 @@ onAuthStateChanged(auth, (user) => {
     if (window.closeNotifCenter) window.closeNotifCenter();
     if(!signInPending) setGateBusy(false, '');
     window.pondoCurrentUser = null;
+    stopRemovalInbox();
     clearTimeout(settingsPushTimer);
     teardownCollaboration();
   }
