@@ -31,5 +31,5 @@ test('rejects malformed manifests, nonowners, scope changes and competing sessio
 });
 test('a lost completion response is safe to retry and later sessions use independent receipts',async()=>{
  const f=fixture();await f.capture.capture(input);f.data.delete(f.root+'sparkDiscoveryPeople/teacher');f.failOnTransaction(3);await assert.rejects(f.restore.restore(input),/response loss/);assert.equal(f.data.has(f.root+'sparkRestoreProof/current'),false);assert.equal((await f.restore.restore(input)).status,'experiment-already-restored');
- f.data.delete(f.root+'sparkDiscoveryPeople/teacher');assert.equal((await f.restore.restore({...input,sessionId:'another-session-123'})).status,'experiment-restored');
+ await f.capture.capture({...input,backupId:'newbackup12345678'});f.data.delete(f.root+'sparkDiscoveryPeople/teacher');assert.equal((await f.restore.restore({...input,backupId:'newbackup12345678',sessionId:'another-session-123'})).status,'experiment-restored');assert.equal(f.data.get(f.root+'sparkDiscoveryRevision/current').revision,9);
 });

@@ -35,15 +35,15 @@ test('full synthetic capture and interrupted missing-record restore uses actual 
  let calls=0;const flaky={...api,runTransaction:async(...args)=>{const result=await api.runTransaction(...args);if(++calls===2)throw Error('Lost response');return result;}};
  const args={orgId:org,backupId,sessionId:'session123456789'},restore=createFacultySparkRestore({db:d,api:flaky,getContext:context,makeReader,project,plan,canonical});
  await assert.rejects(restore.restore(args),/Lost response/);assert.equal((await api.getDocFromServer(ref(d,'sparkRestoreProof/current'))).data().remaining,0);
- assert.equal((await restore.restore(args)).status,'experiment-restored');assert.equal((await api.getDocFromServer(ref(d,'sparkDiscoveryPeople/person'))).data().name,'Ana');assert.equal((await api.getDocFromServer(ref(d,'sparkRestoreProof/current'))).exists(),false);assert.equal((await restore.restore(args)).status,'experiment-already-restored');
+ assert.equal((await restore.restore(args)).status,'experiment-restored');assert.equal((await api.getDocFromServer(ref(d,'sparkDiscoveryPeople/person'))).data().name,'Ana');assert.equal((await api.getDocFromServer(ref(d,'sparkRestoreProof/current'))).exists(),false);assert.equal((await api.getDocFromServer(ref(d,'sparkDiscoveryRevision/current'))).data().revision,7);assert.equal((await restore.restore(args)).status,'experiment-already-restored');
 });
 
 test('recovery lock cannot be started or finished without its matching session and claimed copies',async()=>{
  const d=auth('owner'),header=ref(d,`sparkVerifiedBackups/${backupId}`),lock=ref(d,'sparkRestoreProof/current');
  await api.setDoc(header,{revision:5,createdBy:'owner',createdAt:api.serverTimestamp(),manifest:['sparkDiscoveryConfig/current']});
  await api.setDoc(ref(d,`sparkVerifiedBackups/${backupId}/collections/sparkDiscoveryConfig/entries/current`),{presidentUid:'president'});
- const sessionId='session123456789',state={backupId,sessionId,revision:5,remaining:1,createdBy:'owner',lastKind:null,lastId:null};await assertFails(api.setDoc(lock,state));
- const b=api.writeBatch(d);b.set(lock,state);b.set(ref(d,'sparkRestoreProofSessions/'+sessionId),{backupId,revision:5,createdBy:'owner',state:'active'});await b.commit();
- await assertFails(api.deleteDoc(lock));await assertFails(api.updateDoc(lock,{remaining:0,lastKind:'sparkDiscoveryConfig',lastId:'current'}));
+ const sessionId='session123456789',state={backupId,sessionId,revision:6,remaining:1,createdBy:'owner',lastKind:null,lastId:null};await assertFails(api.setDoc(lock,state));
+ const b=api.writeBatch(d);b.set(lock,state);b.set(ref(d,'sparkRestoreProofSessions/'+sessionId),{backupId,revision:6,createdBy:'owner',state:'active'});b.update(ref(d,'sparkDiscoveryRevision/current'),{revision:6,updatedBy:'owner',updatedAt:api.serverTimestamp()});await b.commit();
+ await assertFails(api.deleteDoc(lock));await assertFails(api.updateDoc(ref(d,'sparkDiscoveryRevision/current'),{revision:7,updatedBy:'owner',updatedAt:api.serverTimestamp()}));await assertFails(api.updateDoc(lock,{remaining:0,lastKind:'sparkDiscoveryConfig',lastId:'current'}));
  await assertFails(api.setDoc(ref(d,`sparkRestoreProof/current/sessions/${sessionId}/collections/sparkDiscoveryConfig/entries/current`),{done:true}));
 });

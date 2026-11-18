@@ -489,8 +489,8 @@ manifest, reconciles them, and resumes a session by claiming each matching
 record exactly once. In the synthetic fixture it refuses differing live records,
 recreates only absent exact copies, reconciles again, and records completion
 before releasing the fixture lock. A persistent session makes a lost response
-retryable. This is still **not an app restore**: the fixture does not lock the
-real financial rules/readers or advance their revision during restore. Its
+retryable. This is still **not an app restore**: the fixture advances its synthetic revision when locking and unlocking, but does
+not lock the real financial rules or readers. Its
 manifest is supplied by a client and Firestore rules cannot prove it lists
 every original source document; the post-restore reconciliation is likewise a
 client check. A privileged administrator can bypass rules. The experiment

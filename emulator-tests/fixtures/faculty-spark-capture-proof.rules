@@ -14,6 +14,14 @@ service cloud.firestore {
   function kind(k) { return k in ['sparkDiscoveryPeople','sparkDiscoveryPayments','sparkDiscoveryPaymentSlots','sparkDiscoveryRemittances','sparkDiscoveryLines','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations','sparkDiscoveryCorrections','sparkDiscoveryPresidentHistory','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryConfig']; }
   match /organizations/{o}/sparkDiscoveryRevision/{id} {
    allow read: if owner(o) && id == 'current';
+   allow update: if owner(o) && id == 'current'
+     && request.resource.data.keys().hasOnly(['revision','updatedBy','updatedAt'])
+     && request.resource.data.revision == resource.data.revision + 1
+     && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time
+     && ((!exists(lock(o)) && !existsAfter(lock(o)))
+       || (!exists(lock(o)) && existsAfter(lock(o)) && getAfter(lock(o)).data.revision == request.resource.data.revision)
+       || (exists(lock(o)) && !existsAfter(lock(o)) && get(lock(o)).data.remaining == 0
+         && getAfter(sessionPath(o,get(lock(o)).data.sessionId)).data.state == 'completed'));
   }
   match /organizations/{o}/{k}/{id} {
    allow read: if owner(o) && kind(k);
@@ -46,8 +54,9 @@ service cloud.firestore {
      && request.resource.data.backupId is string && request.resource.data.sessionId is string && request.resource.data.sessionId.matches('^[A-Za-z0-9_-]{16,128}$') && request.resource.data.createdBy == request.auth.uid
      && request.resource.data.lastKind == null && request.resource.data.lastId == null
      && exists(header(o,request.resource.data.backupId)) && exists(version(o))
-     && request.resource.data.revision == get(version(o)).data.revision
-     && request.resource.data.revision == get(header(o,request.resource.data.backupId)).data.revision
+     && request.resource.data.revision == get(version(o)).data.revision + 1
+     && request.resource.data.revision == getAfter(version(o)).data.revision
+     && get(version(o)).data.revision == get(header(o,request.resource.data.backupId)).data.revision
      && request.resource.data.remaining == get(header(o,request.resource.data.backupId)).data.manifest.size()
      && !exists(sessionPath(o,request.resource.data.sessionId))
      && getAfter(sessionPath(o,request.resource.data.sessionId)).data == {'backupId':request.resource.data.backupId,'revision':request.resource.data.revision,'createdBy':request.auth.uid,'state':'active'};
