@@ -363,3 +363,21 @@ rules, including assignment, payment, handover and expense. That test does not
 activate the real app or publish rules. Existing fictional records created in a
 separate test workspace do not automatically move into the existing workspace;
 no data migration should be implied or attempted without a reviewed plan.
+
+### Disabled same-workspace app connection
+
+The app now includes a **disabled** `FACULTY_FUND_RELEASE_PREVIEW` mode for a
+future same-workspace release. The checked-in setting remains false; the
+current real-account test mode and its test-workspace gate remain unchanged.
+In preview mode, the app checks the workspace's server-confirmed release
+control before reads, writes, pending inspection, diagnostic export and each
+recovery/activity operation. A missing, disabled, wrong-version, cached or
+pending control fails closed, as do changes to the current account, workspace,
+role or scope. Firestore rules remain authoritative; the extra control read
+adds Firestore quota usage. Live refresh and notifications use the existing
+workspace's Spark paths. Preview receipts and UI still carry test-only labels.
+
+The candidate rules and app mode have only been checked in the emulator; they
+are not a release or safe restore. They require the matching rules and an
+administrator-provisioned control, which have **not** been deployed. Do not
+change the disabled flag or provision the control in the live project yet.

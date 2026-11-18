@@ -62,3 +62,7 @@ test('confirmed Spark listener updates notify only the scoped member and stop on
  remit.next(col(row));assert.equal(events.length,1);assert.equal(events[0].recipientUid,'president');assert.equal(events[0].orgId,t.state.orgId);remit.next(col(row));assert.equal(events.length,1);
  t.ctx.stopFacultyWatch();remit.next(col([['other',{status:'pending',createdBy:'ao',presidentUid:'president'}]]));assert.equal(events.length,1);
 });
+
+test('release-preview notifications use the same existing organization without the test-name restriction',()=>{
+ const t=watchSetup();t.state.orgId='org~normal school';t.ctx.window.pondoFacultyAPI.capabilities.mode='release-preview-only';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[0].path.at(-2),'sparkDiscoveryRevision');assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig');
+});

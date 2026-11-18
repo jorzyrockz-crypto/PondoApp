@@ -1,0 +1,30 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const {createSparkApp}=require('../faculty-fund-spark-app.js');
+function fixture(){
+ let ctx={uid:'owner',role:'owner',orgId:'org~existing school',memberConfirmed:true},metadata={fromCache:false,hasPendingWrites:false},marker={enabled:true,schema:1},hook=async()=>{};const calls=[];
+ const api={doc:(_db,p)=>p,getDocFromServer:async p=>{calls.push(p);await hook();return {metadata,exists:()=>marker!==null,data:()=>marker}}};
+ const modules={createClient(){},createReader(){},project(){},createReadAdapter:()=>({read:async input=>input.view==='csv'?{csv:'amount'}:{html:'Faculty Fund · Special Collection'},export:async()=>({format:'diagnostic'})}),createWriteAdapter:()=>({transition:async()=>{calls.push('transition');return {ok:true}}}),createReceipts(){},makeReport(){},reportCsv(){},makeExport(){},createPendingReader(){},createPendingInspector:()=>({inspect:async()=>{calls.push('inspect');return {status:'pending'}}}),createDiscovery(){},createResolver(){},createExpenseResumer(){},createPagedRecovery:()=>({list:async()=>{calls.push('list');return {}},resolve:async()=>{calls.push('resolve');return {}},reset(){calls.push('recovery-reset')}}),createActivityPager:()=>({next:async()=>{calls.push('activity');return {}},reset(){calls.push('activity-reset')}})};
+ const app=createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api,getContext:()=>ctx,modules,releasePreview:true});return {app,api,modules,calls,setCtx:c=>ctx=c,ctx:()=>ctx,setMarker:m=>marker=m,setMetadata:m=>metadata=m,setHook:h=>hook=h};
+}
+test('existing workspaces use a server-confirmed release control without removing test-only warnings',async()=>{
+ const f=fixture(),orgId=f.ctx().orgId;assert.equal(f.app.capabilities.mode,'release-preview-only');assert.equal(f.app.capabilities.durableBackup,false);
+ assert.match((await f.app.read({orgId,view:'memberReceipts'})).html,/TEST ONLY/);assert.match((await f.app.read({orgId,view:'csv'})).csv,/TEST ONLY/);assert.match((await f.app.export({orgId})).notice,/not an authenticated backup/);await f.app.transition({orgId});await f.app.inspectPending({orgId});
+ const activity=f.app.createActivity({orgId,from:'2025-01-01',to:'2025-01-01'});await activity.next('payments');const recovery=f.app.createRecovery();await recovery.list({orgId});await recovery.resolve({orgId});
+ assert.equal(f.calls.filter(x=>x==='organizations/'+orgId+'/facultyFundRelease/current').length,8);assert.ok(f.calls.includes('activity'));assert.ok(f.calls.includes('resolve'));
+});
+test('missing, disabled, wrong-version, cached and pending controls fail closed before actions',async()=>{
+ const f=fixture(),orgId=f.ctx().orgId;for(const bad of [null,{enabled:false,schema:1},{enabled:true,schema:2},{enabled:1,schema:1}]){f.setMarker(bad);await assert.rejects(f.app.transition({orgId}),/not enabled/);}
+ f.setMarker({enabled:true,schema:1});for(const metadata of [{fromCache:true,hasPendingWrites:false},{fromCache:false,hasPendingWrites:true},null]){f.setMetadata(metadata);await assert.rejects(f.app.transition({orgId}),/not enabled/);}
+ assert.equal(f.calls.includes('transition'),false);f.setMetadata({fromCache:false,hasPendingWrites:false});await assert.rejects(f.app.read({orgId:'org~other',view:'state'}),/confirmed team workspace/);assert.equal(f.calls.some(x=>x.includes('org~other')),false);
+});
+test('scope changes and pager resets invalidate checks in flight',async()=>{
+ const f=fixture(),orgId=f.ctx().orgId;let resume,ready;const started=()=>new Promise(r=>ready=r);let begun=started();f.setHook(()=>{ready();return new Promise(r=>resume=r)});const write=f.app.transition({orgId});await begun;f.setCtx({...f.ctx(),uid:'another'});resume();await assert.rejects(write,/Workspace changed/);assert.equal(f.calls.includes('transition'),false);
+ f.setCtx({...f.ctx(),uid:'owner'});begun=started();const activity=f.app.createActivity({orgId,from:'2025-01-01',to:'2025-01-01'}),next=activity.next('payments');await begun;activity.reset();resume();await assert.rejects(next,/Workspace changed/);assert.equal(f.calls.includes('activity'),false);
+ begun=started();const recovery=f.app.createRecovery(),list=recovery.list({orgId});await begun;recovery.reset();resume();await assert.rejects(list,/Workspace changed/);assert.equal(f.calls.includes('list'),false);
+});
+test('preview is disabled in the shipped app and cannot be combined with real-account test mode',()=>{
+ const f=fixture(),html=fs.readFileSync('index.html','utf8');assert.match(html,/const FACULTY_FUND_RELEASE_PREVIEW = false/);assert.match(html,/releasePreview:FACULTY_FUND_RELEASE_PREVIEW/);
+ assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,releasePreview:true}),/mode/);
+ assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'some-other-project'}}},api:f.api,getContext:f.ctx,modules:f.modules,releasePreview:true}),/test mode/);
+});
