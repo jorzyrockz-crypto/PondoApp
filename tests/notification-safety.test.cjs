@@ -50,3 +50,8 @@ test('pending join notices are visible only to the confirmed owner of the active
  assert.equal(t.ctx.visibleNotifications().length,1);t.ctx.markNotificationRead('join:x:42');assert.equal(t.ctx.unreadNotificationCount(),0);
  t.state.orgId='b';assert.equal(t.ctx.visibleNotifications().length,0);t.state.orgId='a';t.state.role='reviewer';assert.equal(t.ctx.visibleNotifications().length,0);t.state.role='owner';t.state.memberConfirmed=false;assert.equal(t.ctx.visibleNotifications().length,0);
 });
+test('approval notices are account scoped and mark-read carries the membership generation',()=>{
+ const t=setupFeed(),calls=[];t.win.pondoWorkspaceApprovalItems=[{orgId:'org~school',name:'School',key:'10:0:owner',ts:10,read:false,recipientUid:'u1'},{orgId:'private',name:'Private',key:'k',ts:11,read:false,recipientUid:'u2'}];
+ t.win.pondoMarkApprovalRead=(...args)=>calls.push(args);assert.equal(t.ctx.visibleNotifications().length,1);t.state.orgId='other';assert.equal(t.ctx.visibleNotifications().length,1);
+ const id=t.ctx.visibleNotifications()[0].id;t.ctx.markNotificationRead(id);assert.deepEqual(calls,[['org~school','10:0:owner']]);t.win.pondoCurrentUser.uid='u2';assert.equal(t.ctx.visibleNotifications()[0].body.includes('Private'),true);
+});
