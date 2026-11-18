@@ -497,3 +497,11 @@ client check. A privileged administrator can bypass rules. The experiment
 limits a capture to 1,000 records total and 500 KB of IDs, stores extra copies
 and receipts, and cannot restore loss of the Firebase project itself. No UI,
 candidate rules, or real deployment use it.
+
+The coordinator also checks all live collections against the saved manifest
+before locking, so ordinary conflicts or unlisted extra records fail without
+starting recovery. After restoring it compares every reconciled live record to
+the saved copy. The proof keeps session receipts under unique session IDs and
+records completion, so a lost response can be retried. These are experimental
+client checks, not server-enforced proof of an originally complete manifest;
+the real rule lock, versioning and cross-client read behavior remain unfinished.
