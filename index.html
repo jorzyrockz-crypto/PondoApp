@@ -9044,7 +9044,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 105</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 106</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9066,7 +9066,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='105', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='106', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -12247,13 +12247,23 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
 (function setupAppUpdates() {
   if (!('serviceWorker' in navigator)) return;
   const sw = navigator.serviceWorker;
+  // A GitHub Pages origin can host many installed apps. Never adopt or
+  // activate a registration owned by a different app, even at our path.
+  const appScope = new URL('./', location.href).href;
+  const appWorker = new URL('./sw.js', location.href).href;
+  const isOwnWorker = worker => !!worker && worker.scriptURL === appWorker;
+  function isOwnRegistration(reg) {
+    if (!reg || reg.scope !== appScope) return false;
+    const workers = [reg.active, reg.waiting, reg.installing].filter(Boolean);
+    return workers.length > 0 && workers.every(isOwnWorker);
+  }
   const overlay = navigator.windowControlsOverlay;
   const titlebarButton = document.getElementById('titlebarUpdateBtn');
   const headerButton = document.getElementById('headerUpdateBtn');
   const authButton = document.getElementById('authUpdateBtn');
   const announcement = document.getElementById('appUpdateAnnouncement');
   let registration = null, available = false, activating = false;
-  let hadController = !!sw.controller, reloadOnChange = false, lastCheck = 0;
+  let hadController = isOwnWorker(sw.controller), reloadOnChange = false, lastCheck = 0;
   const buttons = [titlebarButton, headerButton, authButton].filter(Boolean);
   function render() {
     const rect = overlay && overlay.visible && overlay.getTitlebarAreaRect ? overlay.getTitlebarAreaRect() : null;
@@ -12286,7 +12296,13 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
     if (!confirmed) return;
     reason = unsafeReason();
     if (reason) { if (window.appAlert && canUseAppDialog()) window.appAlert(reason); else alert(reason); return; }
-    if (registration && registration.waiting) {
+    if (!isOwnRegistration(registration)) {
+      available = false; render();
+      const error = 'Pondo could not verify its own update service. No update was applied.';
+      if (window.appAlert && canUseAppDialog()) window.appAlert(error); else alert(error);
+      return;
+    }
+    if (isOwnWorker(registration.waiting)) {
       activating = true; reloadOnChange = true; render();
       try { registration.waiting.postMessage({ type: 'PONDO_ACTIVATE_UPDATE' }); }
       catch (err) {
@@ -12306,14 +12322,15 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
     apply: updateNow,
     async checkNow() {
       if (!navigator.onLine) return 'offline';
-      if (!registration) return 'unavailable';
-      try { await registration.update(); if (registration.waiting && (sw.controller || registration.active)) announce(); return 'checked'; }
+      if (!isOwnRegistration(registration)) return 'unavailable';
+      try { await registration.update(); if (isOwnRegistration(registration) && registration.waiting && (isOwnWorker(sw.controller) || registration.active)) announce(); return 'checked'; }
       catch (err) { console.warn('Update check failed:', err); return 'failed'; }
     }
   };
   buttons.forEach(button => button.addEventListener('click', updateNow));
   if (overlay && overlay.addEventListener) overlay.addEventListener('geometrychange', render);
   sw.addEventListener('controllerchange', () => {
+    if (!isOwnWorker(sw.controller)) { activating = false; reloadOnChange = false; render(); return; }
     if (!hadController && !reloadOnChange) { hadController = true; return; } // first install, not an update
     hadController = true;
     activating = false;
@@ -12326,24 +12343,31 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
     announce(); // another window activated an update: let this user choose when to reload
   });
   function watch(worker) {
-    if (!worker) return;
+    if (!isOwnWorker(worker)) return;
     worker.addEventListener('statechange', () => {
-      if (worker.state === 'installed' && (sw.controller || (registration && registration.active))) announce();
+      if (isOwnRegistration(registration) && worker.state === 'installed' && (isOwnWorker(sw.controller) || registration.active)) announce();
     });
   }
   function check() {
-    if (!registration || !navigator.onLine || Date.now() - lastCheck < 60000) return;
+    if (!isOwnRegistration(registration) || !navigator.onLine || Date.now() - lastCheck < 60000) return;
     lastCheck = Date.now();
     registration.update().catch(err => console.warn('Update check failed:', err));
   }
   window.addEventListener('load', () => {
-    sw.register('./sw.js').then(reg => {
+    (async () => {
+      // A broader sibling/root registration is not ours to alter. A foreign
+      // registration at this exact scope is a conflict: stop instead of
+      // silently replacing it. Only our own script may be updated here.
+      const previous = await sw.getRegistration(appScope);
+      if (previous && previous.scope === appScope && !isOwnRegistration(previous)) throw Error('Pondo service worker scope belongs to another script');
+      const reg = await sw.register('./sw.js', {scope:'./'});
+      if (!isOwnRegistration(reg)) throw Error('Unexpected Pondo service worker registration');
       registration = reg;
-      if (reg.waiting && (sw.controller || reg.active)) announce();
+      if (reg.waiting && (isOwnWorker(sw.controller) || reg.active)) announce();
       watch(reg.installing);
       reg.addEventListener('updatefound', () => watch(reg.installing));
       check();
-    }).catch(err => console.warn('Service worker registration failed:', err));
+    })().catch(err => console.warn('Service worker registration failed:', err));
   });
   window.addEventListener('online', check);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });

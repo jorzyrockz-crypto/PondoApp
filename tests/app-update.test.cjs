@@ -3,17 +3,17 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs'), vm = require('node:vm');
 const html = fs.readFileSync('index.html','utf8');
 const source = html.slice(html.indexOf('(function setupAppUpdates()'), html.indexOf('</script>', html.indexOf('(function setupAppUpdates()')));
-function setup({controller = true, overlayVisible = false, waiting = true} = {}) {
+function setup({controller = true, overlayVisible = false, waiting = true, previous = null} = {}) {
   const listeners = {}, winListeners = {}, docListeners = {}, buttonMap = {}, notices = [], messages = [];
   for (const name of ['titlebarUpdateBtn','headerUpdateBtn','authUpdateBtn']) buttonMap[name] = {hidden:true, disabled:false, addEventListener(type,fn){this[type]=fn;}};
-  const worker = {state:'installed', addEventListener(type,fn){this[type]=fn}, postMessage:data=>messages.push(data)};
-  const reg = {waiting:waiting?worker:null, active:controller?{}:null, installing:null, addEventListener(type,fn){this[type]=fn}, update:async()=>{}};
+  const worker = {scriptURL:'https://example.test/PondoApp/sw.js',state:'installed', addEventListener(type,fn){this[type]=fn}, postMessage:data=>messages.push(data)};
+  const reg = {scope:'https://example.test/PondoApp/',waiting:waiting?worker:null, active:controller?{scriptURL:'https://example.test/PondoApp/sw.js'}:null, installing:!controller&&!waiting?worker:null, addEventListener(type,fn){this[type]=fn}, update:async()=>{}};
   const overlay = {visible:overlayVisible, getTitlebarAreaRect:()=>({width:300,height:32}), addEventListener(type,fn){this[type]=fn}};
-  const sw={controller:controller?{}:null,register:async()=>reg,addEventListener:(type,fn)=>{listeners[type]=fn}};
+  let registrations=0;const sw={controller:controller?{scriptURL:'https://example.test/PondoApp/sw.js'}:null,getRegistration:async()=>previous,register:async()=>{registrations++;return reg},addEventListener:(type,fn)=>{listeners[type]=fn}};
   let reloads=0;
-  const ctx=vm.createContext({window:{trackerReady:true,pondoCurrentUser:{uid:'user'},pondoTeamState:null,appConfirm:async()=>true,appAlert:m=>notices.push(m),addEventListener:(k,f)=>{winListeners[k]=f}}, navigator:{serviceWorker:sw,windowControlsOverlay:overlay,onLine:true},document:{getElementById:id=>buttonMap[id],addEventListener:(k,f)=>{docListeners[k]=f},visibilityState:'visible'}, trackerFatal:false,trackerPending:0,storageWarningOpen:false,location:{reload(){reloads++}},setTimeout(){},setInterval(){},confirm:()=>true,alert:m=>notices.push(m),console,Date});
+  const ctx=vm.createContext({window:{trackerReady:true,pondoCurrentUser:{uid:'user'},pondoTeamState:null,appConfirm:async()=>true,appAlert:m=>notices.push(m),addEventListener:(k,f)=>{winListeners[k]=f}}, navigator:{serviceWorker:sw,windowControlsOverlay:overlay,onLine:true},document:{getElementById:id=>buttonMap[id],addEventListener:(k,f)=>{docListeners[k]=f},visibilityState:'visible'}, trackerFatal:false,trackerPending:0,storageWarningOpen:false,location:{href:'https://example.test/PondoApp/index.html',reload(){reloads++}},URL,setTimeout(){},setInterval(){},confirm:()=>true,alert:m=>notices.push(m),console:{warn(){}},Date});
   vm.runInContext(source,ctx);
-  return {ctx,reg,worker,sw,overlay,buttons:buttonMap,listeners,winListeners,notices,messages,get reloads(){return reloads},async load(){winListeners.load();await new Promise(r=>setImmediate(r));}};
+  return {ctx,reg,worker,sw,overlay,get registrations(){return registrations},buttons:buttonMap,listeners,winListeners,notices,messages,get reloads(){return reloads},async load(){winListeners.load();await new Promise(r=>setImmediate(r));}};
 }
 test('waiting update shows header and login fallback, not titlebar',async()=>{
   const t=setup();await t.load();assert.equal(t.buttons.headerUpdateBtn.hidden,false);assert.equal(t.buttons.authUpdateBtn.hidden,false);assert.equal(t.buttons.titlebarUpdateBtn.hidden,true);
@@ -33,7 +33,7 @@ test('another window activating an update never automatically reloads this one',
   const t=setup({waiting:false});await t.load();t.listeners.controllerchange();assert.equal(t.reloads,0);assert.equal(t.buttons.headerUpdateBtn.hidden,false);
 });
 test('first installation does not announce an update',async()=>{
-  const t=setup({controller:false,waiting:false});await t.load();t.listeners.controllerchange();assert.equal(t.buttons.headerUpdateBtn.hidden,true);assert.equal(t.reloads,0);
+  const t=setup({controller:false,waiting:false});await t.load();t.sw.controller={scriptURL:'https://example.test/PondoApp/sw.js'};t.listeners.controllerchange();assert.equal(t.buttons.headerUpdateBtn.hidden,true);assert.equal(t.reloads,0);
 });
 test('service worker only calls skipWaiting on explicit update message', async()=>{
   const code=fs.readFileSync('sw.js','utf8'), handlers={};let skipped=0;
@@ -61,4 +61,20 @@ test('About check uses the existing registration without bypassing confirmation'
 test('About check reports offline and failures without claiming an update is current',async()=>{
  const t=setup({waiting:false});await t.load();t.ctx.navigator.onLine=false;assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'offline');
  t.ctx.navigator.onLine=true;t.reg.update=async()=>{throw Error('network')};assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'failed');
+});
+
+test('a foreign worker at the exact Pondo scope is never replaced or activated',async()=>{
+ const previous={scope:'https://example.test/PondoApp/',active:{scriptURL:'https://example.test/Portable-School-Inventory/sw.js'}};
+ const t=setup({previous});await t.load();assert.equal(t.registrations,0);assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'unavailable');assert.equal(t.messages.length,0);
+});
+test('a broader sibling worker is not replaced, and an unrelated controller never forces a reload',async()=>{
+ const previous={scope:'https://example.test/',active:{scriptURL:'https://example.test/sw.js'}};
+ const t=setup({previous});await t.load();assert.equal(t.registrations,1);await t.buttons.headerUpdateBtn.click();t.sw.controller={scriptURL:'https://example.test/sw.js'};t.listeners.controllerchange();assert.equal(t.reloads,0);
+});
+test('a wrong-scope registration is never used for updates',async()=>{
+ const t=setup();t.reg.scope='https://example.test/Portable-School-Inventory/';await t.load();assert.equal(await t.ctx.window.pondoAppUpdates.checkNow(),'unavailable');assert.equal(t.messages.length,0);
+});
+
+test('a worker that changes ownership after the prompt is never activated or reloaded',async()=>{
+ const t=setup();await t.load();t.ctx.window.appConfirm=async()=>{t.reg.waiting.scriptURL='https://example.test/Portable-School-Inventory/sw.js';return true};await t.buttons.headerUpdateBtn.click();assert.equal(t.messages.length,0);assert.equal(t.reloads,0);assert.match(t.notices[0],/could not verify/);
 });
