@@ -324,3 +324,32 @@ confirm a consistent snapshot, including revision races. No partial export is
 produced. The loading-limit error now tells users no records were deleted and
 that the financial view is unavailable. This is a preparation step, not the
 protected backup/restore needed for a real-use release.
+
+### Real-use rules candidate (not deployed)
+
+`firestore.faculty-release-candidate.rules` is generated from the repository's
+current test rules by `scripts/generate-faculty-release-candidate.cjs`. It is a
+**review candidate, not the published rules and not approved for deployment**.
+Unlike the test-workspace prefix gate, this candidate requires an explicit
+per-workspace `facultyFundRelease/current` control with `enabled: true` and
+`schema: 1`, in addition to membership. No ordinary client, including an owner,
+can create or change the control under these candidate rules. Only a privileged
+administrator can provision or disable it; admin writes bypass all security
+rules. An opt-in control helps prevent accidental enablement across workspaces,
+but does not itself prove the records or accounting correct.
+
+The emulator checks default-deny, cross-workspace isolation, control tampering,
+roles, membership removal, a payment/handover/expense sequence, and locking and
+reopening the fund while ordinary workspace data remains accessible. This is
+not a production security audit. Member-visible financial records remain
+readable by all confirmed team members, including absence dates; the owner-only
+diagnostic-export button is not a privacy boundary. Rule-dependent reads and
+expression limits can affect free quota and transactions.
+
+**Do not paste or deploy this candidate:** it is not wired to the app, lacks a
+protected backup/restore and approved migration plan, and would also block
+existing Faculty Fund *test* workspaces unless their controls were provisioned.
+The current deployed rules may differ from the repository. Before rollout,
+compare the actual published rules, preserve ordinary workspace permissions,
+validate the full integrated workflow and rule costs, and coordinate app and
+rules deployment with a tested rollback. The 1,000-document guard remains.
