@@ -20,8 +20,13 @@
    const makeResolver=()=>modules.createResolver({getContext:context,makeDb:()=>db,api,makeClient,makeExpenseResumer:()=>modules.createExpenseResumer({getContext:context,makeDb:()=>db,api,makeClient})});
    return modules.createPagedRecovery({getContext:context,makeDb:()=>db,api,makeDiscovery:(c,isCurrent,pageSize)=>modules.createDiscovery({db,api,orgId:c.orgId,isCurrent,pageSize}),makeResolver,supportsExpenseResume:true});
   }
+  function createActivity({orgId,from,to}){
+   const c=context();if(!c||c.memberConfirmed!==true||!c.uid||!c.role||c.orgId!==orgId||typeof modules.createActivityPager!=='function')throw Error('Open an authorized test workspace');
+   const same=()=>{const n=context();return !!n&&n.memberConfirmed===true&&n.uid===c.uid&&n.orgId===c.orgId&&n.role===c.role&&n.scopeToken===c.scopeToken;};
+   return modules.createActivityPager({db,api,orgId:c.orgId,isCurrent:same,from,to,pageSize:25});
+  }
   async function safeRead(input){const result=await read.read(input);if(realAccountTest&&result?.html)result.html=result.html.replaceAll('Faculty Fund · Special Collection','TEST ONLY — NOT A REAL RECEIPT · Faculty Fund');if(realAccountTest&&result?.csv)result.csv='"TEST ONLY — NOT A REAL FINANCIAL REPORT"\r\n'+result.csv.replace(/^\ufeff/,'');return result;}
-  return {read:safeRead,transition:write.transition,inspectPending:pending.inspect,createRecovery,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,mode:realAccountTest?'firebase-test-only':'emulator-test-only'}};
+  return {read:safeRead,transition:write.transition,inspectPending:pending.inspect,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,mode:realAccountTest?'firebase-test-only':'emulator-test-only'}};
  }
  if(typeof module==='object'&&module.exports)module.exports={createSparkApp};else global.createFacultyFundSparkApp=createSparkApp;
 })(typeof window!=='undefined'?window:globalThis);

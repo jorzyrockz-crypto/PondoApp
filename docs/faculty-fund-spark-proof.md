@@ -235,3 +235,9 @@ expense-scan cursors, production rules, quota validation and real-account tests
 remain unfinished. Do not publish the fixture or enter real fund data based on
 this experiment. Emulator and synthetic-browser tests do not replace actual
 multi-account tests in Firebase.
+
+### Incremental dated activity browser (experimental)
+
+The test-only fund now offers a separate read-only dated payment/expense browser, even when the complete state read fails. It reads at most 26 query documents per 25-item page (including lookahead), plus two revision reads; later pages repeat the lookahead. Dates use Philippine time. Its server-confirmed pages must share one protected revision; a changed revision, failed page, or scope reset clears displayed results. The browser never totals pages or supplies spend authority. Query ordering can omit administratively malformed documents missing the date field; privileged writes also bypass the revision rules. This is not an audit or proof that the ledger is complete.
+
+This does **not** remove the full reader's 1,000-document-per-collection safety limit, and opening or refreshing the existing fund still performs its full reconciliation. The regular balance, reports, receipts, write planning and notifications remain subject to their existing limits and read costs. Browse requests add reads, rather than automatically reducing the existing refresh cost. Further work needs a protected, reconciled aggregate and safe migration, concurrency, recovery, quota and security tests before replacing any guarded financial calculation. No production readiness or rule deployment is implied; fictitious data only.
