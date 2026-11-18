@@ -353,3 +353,13 @@ The current deployed rules may differ from the repository. Before rollout,
 compare the actual published rules, preserve ordinary workspace permissions,
 validate the full integrated workflow and rule costs, and coordinate app and
 rules deployment with a tested rollback. The 1,000-document guard remains.
+
+The intended release uses the team's **existing workspace**, not a newly
+created organization. The candidate's activation control and Faculty Fund
+records are separate documents *inside that same organization*: they do not
+replace or write into the regular Pondo snapshot. The demo application contract
+is tested against an ordinary (non-test-prefixed) organization and the candidate
+rules, including assignment, payment, handover and expense. That test does not
+activate the real app or publish rules. Existing fictional records created in a
+separate test workspace do not automatically move into the existing workspace;
+no data migration should be implied or attempted without a reviewed plan.
