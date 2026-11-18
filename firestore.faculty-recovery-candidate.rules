@@ -740,6 +740,8 @@ service cloud.firestore {
      && !exists(claim(o,resource.data.sessionId,request.resource.data.lastKind,request.resource.data.lastId))
      && existsAfter(claim(o,resource.data.sessionId,request.resource.data.lastKind,request.resource.data.lastId));
    allow delete: if recoveryOwner(o) && id == 'current' && resource.data.remaining == 0
+     && get(version(o)).data.revision == resource.data.revision
+     && getAfter(version(o)).data.revision == resource.data.revision + 1
      && getAfter(sessionPath(o,resource.data.sessionId)).data.state == 'completed';
    match /sessions/{session}/collections/{k}/entries/{entryId} {
     allow read: if recoveryOwner(o);

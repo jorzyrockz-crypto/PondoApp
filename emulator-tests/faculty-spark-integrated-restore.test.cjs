@@ -64,3 +64,20 @@ test('changed or extra live records block recovery before the lock even when an 
  await assert.rejects(restore.restore({orgId:org,backupId,sessionId}),/differs from backup/);
  assert.equal((await api.getDocFromServer(ref(d,'sparkDiscoveryPeople/unlisted'))).exists(),true);assert.equal((await api.getDocFromServer(ref(d,'sparkRestoreProof/current'))).exists(),false);
 });
+test('finishing a restore cannot unlock without atomically advancing the revision',async()=>{
+ const makeClient=uid=>createIntegratedClient({db:auth(uid),api,orgId:org,uid,useRevision:true,trackRemittanceReleases:true});
+ await makeClient('owner').assignPresident('president','assignment');await makeClient('ao').createPerson('person','Teacher');
+ const d=auth('owner'),context=()=>({orgId:org,uid:'owner',role:'owner',memberConfirmed:true,scopeToken:1}),makeReader=(c,isCurrent)=>createSparkReader({db:d,api,orgId:c.orgId,isCurrent,project,trackRemittanceReleases:true}),backupId='integrated-backup-4',sessionId='integrated-session-4';
+ const capture=await createFacultySparkCapture({db:d,api,getContext:context,makeReader}).capture({orgId:org,backupId});let calls=0;
+ const interrupted={...api,runTransaction:async(...args)=>{if(++calls===capture.count+2)throw Error('Interrupted before unlock');return api.runTransaction(...args);}};
+ const restore=createFacultySparkRestore({db:d,api:interrupted,getContext:context,makeReader,project,plan,canonical});
+ await assert.rejects(restore.restore({orgId:org,backupId,sessionId}),/Interrupted before unlock/);
+ const lock=ref(d,'sparkRestoreProof/current'),session=ref(d,'sparkRestoreProofSessions/'+sessionId),version=ref(d,'sparkDiscoveryRevision/current');
+ const locked=(await api.getDocFromServer(lock)).data();assert.equal(locked.remaining,0);
+ let batch=api.writeBatch(d);batch.update(session,{state:'completed'});batch.delete(lock);await assertFails(batch.commit());
+ assert.equal((await api.getDocFromServer(lock)).exists(),true);assert.equal((await api.getDocFromServer(session)).data().state,'active');
+ // The normal coordinator can resume, reconcile again, and perform the full
+ // atomic session-complete, revision-advance and unlock transaction.
+ await createFacultySparkRestore({db:d,api,getContext:context,makeReader,project,plan,canonical}).restore({orgId:org,backupId,sessionId});
+ assert.equal((await api.getDocFromServer(lock)).exists(),false);assert.equal((await api.getDocFromServer(session)).data().state,'completed');assert.equal((await api.getDocFromServer(version)).data().revision,locked.revision+1);
+});
