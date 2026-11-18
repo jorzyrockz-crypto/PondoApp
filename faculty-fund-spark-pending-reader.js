@@ -5,9 +5,9 @@
 (function(global){
  'use strict';
  const fail=m=>{throw Error(m)};
- function createPendingReader({db,api,orgId,isCurrent}){
-  if(!db||!api||typeof orgId!=='string'||!orgId||orgId.includes('/')||typeof isCurrent!=='function'||typeof api.doc!=='function'||typeof api.getDocFromServer!=='function')fail('Invalid pending reader setup');
-  const ref=(name,id)=>api.doc(db,`organizations/${orgId}/${name}/${id}`),current=()=>{if(!isCurrent())fail('Workspace changed while reconciling');};
+ function createPendingReader({db,api,orgId,isCurrent,trackRemittanceReleases=false}){
+  if(!db||!api||typeof orgId!=='string'||!orgId||orgId.includes('/')||typeof isCurrent!=='function'||typeof trackRemittanceReleases!=='boolean'||typeof api.doc!=='function'||typeof api.getDocFromServer!=='function')fail('Invalid pending reader setup');
+  const nameOf=name=>trackRemittanceReleases?name.replace(/^spark/,'sparkDiscovery'):name,ref=(name,id)=>api.doc(db,`organizations/${orgId}/${nameOf(name)}/${id}`),current=()=>{if(!isCurrent())fail('Workspace changed while reconciling');};
   function stable(s){if(!s?.metadata||s.metadata.fromCache||s.metadata.hasPendingWrites)fail('Pending data is not server-confirmed');}
   function marker(s){stable(s);if(!s.exists())return 0;const n=s.data().revision;if(!Number.isSafeInteger(n)||n<1)fail('Invalid Faculty Fund revision');return n;}
   async function get(name,id){current();const s=await api.getDocFromServer(ref(name,id));stable(s);current();return s;}
