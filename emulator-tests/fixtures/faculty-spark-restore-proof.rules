@@ -1,0 +1,55 @@
+rules_version = '2';
+// ISOLATED EXPERIMENT ONLY. Not a complete backup, restore, or production rule.
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o) { return /databases/$(database)/documents/organizations/$(o)/members/$(request.auth.uid); }
+  function owner(o) { return request.auth != null && exists(member(o)) && get(member(o)).data.role == 'owner'; }
+  function version(o) { return /databases/$(database)/documents/organizations/$(o)/restoreProofRevision/current; }
+  function lock(o) { return /databases/$(database)/documents/organizations/$(o)/restoreProofLock/current; }
+  function snapshot(o,b) { return /databases/$(database)/documents/organizations/$(o)/restoreProofBackups/$(b); }
+  function copy(o,b,id) { return /databases/$(database)/documents/organizations/$(o)/restoreProofBackups/$(b)/entries/$(id); }
+  function original(o,id) { return /databases/$(database)/documents/organizations/$(o)/restoreProofRecords/$(id); }
+  match /organizations/{o}/restoreProofRevision/{id} {
+   allow read: if owner(o) && id == 'current';
+   // Normal protected changes must be blocked while a restoration is active.
+   allow update: if owner(o) && id == 'current' && !exists(lock(o)) && resource.data.revision is int
+     && request.resource.data == {'revision':resource.data.revision + 1};
+  }
+  match /organizations/{o}/restoreProofBackups/{b} {
+   allow read: if owner(o);
+   allow create: if owner(o) && !exists(lock(o)) && exists(version(o))
+     && request.resource.data.keys().hasOnly(['revision','createdBy','createdAt'])
+     && request.resource.data.revision == get(version(o)).data.revision
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+   allow update, delete: if false;
+   match /entries/{id} {
+    allow read: if owner(o);
+    // The server compares the copy with the source, at the saved revision.
+    allow create: if owner(o) && !exists(lock(o)) && exists(snapshot(o,b)) && exists(version(o))
+      && get(snapshot(o,b)).data.revision == get(version(o)).data.revision
+      && exists(original(o,id)) && request.resource.data == get(original(o,id)).data;
+    allow update, delete: if false;
+   }
+  }
+  match /organizations/{o}/restoreProofLock/{id} {
+   allow read: if owner(o) && id == 'current';
+   allow create: if owner(o) && id == 'current' && request.resource.data.keys().hasOnly(['backup','revision','createdBy'])
+     && request.resource.data.backup is string && request.resource.data.createdBy == request.auth.uid
+     && exists(version(o)) && exists(snapshot(o,request.resource.data.backup))
+     && request.resource.data.revision == get(version(o)).data.revision
+     && request.resource.data.revision == get(snapshot(o,request.resource.data.backup)).data.revision;
+   // Proof deliberately offers no client unlock: completeness cannot be proven
+   // merely by this fixture. Admin bypasses all rules, including these.
+   allow update, delete: if false;
+  }
+  match /organizations/{o}/restoreProofRecords/{id} {
+   allow read: if owner(o);
+   // Only an absent record, exactly matching a server-verified immutable copy.
+   allow create: if owner(o) && exists(lock(o)) && exists(version(o))
+     && get(lock(o)).data.revision == get(version(o)).data.revision
+     && exists(copy(o,get(lock(o)).data.backup,id))
+     && request.resource.data == get(copy(o,get(lock(o)).data.backup,id)).data;
+   allow update, delete: if false;
+  }
+ }
+}

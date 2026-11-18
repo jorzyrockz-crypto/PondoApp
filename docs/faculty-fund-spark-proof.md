@@ -450,3 +450,22 @@ and how access will be verified. Merely reverting rules does not undo data or
 recover lost records. Protected, tested recovery, realistic quota/cap review,
 accounting and privacy/security review are still required. No production flag,
 marker, rules or data are changed by this procedure.
+
+### Owner-operated restore: isolated safeguard experiment
+
+An owner-operated backup/restore is being investigated for the Spark design.
+`emulator-tests/fixtures/faculty-spark-restore-proof.rules` is an **isolated
+synthetic proof**, not app rules and not a backup or restore button. It tests a
+narrow idea: immutable server-side copies must exactly match a source record at
+a saved revision, only an owner can begin recovery, a stale revision is
+rejected, recovery creates only missing records from exact copies, and a lock
+blocks the synthetic revision from advancing. The proof deliberately has no
+client unlock because it cannot prove that a backup is complete or that an
+entire ledger has been reconciled. Firestore administrators bypass these rules.
+
+The real implementation still needs the full 12-collection capture and
+completeness protocol, interrupted/resumable recovery, locking across every
+real operation and reader, verified completion and safe unlocking, quota and
+privacy handling, app buttons, and adversarial tests against the actual rules.
+A local JSON checksum is not evidence that a President accepted a handover.
+No app, candidate or live rules have been enabled by this experiment.
