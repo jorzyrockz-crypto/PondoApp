@@ -35,6 +35,16 @@ async function main(){
   await page.addScriptTag({path:path.join(root,'faculty-fund-spark-recovery-ui.js')});
   await page.evaluate(()=>{window._setFacultyUser('ao','disbursing');switchTab('funds');let scope=0;window._inspectCount=0;const ctx=()=>({...window.pondoTeamState,scopeToken:scope});window.pondoFacultyAPI={capabilities:{mode:'emulator-test-only',durableBackup:false},getRecoveryContext:ctx,resetScope:()=>scope++,read:async()=>{throw Error('unfinished work')},inspectPending:async()=>++window._inspectCount===1?{status:'unconfirmed',clearable:false}:window._inspectCount===2?{status:'draft',clearable:true}:{status:'pending',clearable:true},createRecovery:()=>({list:async()=>({items:[]}),resolve:async()=>{throw Error('unused')}})};localStorage.setItem('ft_faculty_pending_v1:ao:school',JSON.stringify({requestId:'a'.repeat(32),operation:'submitRemittance',paymentIds:['p']}));window.PondoFacultyFundUI.reset();});
   await page.locator('#facultyFundRoot [data-action=toggle]').click();await page.waitForSelector('[data-action=inspectPending]');assert.match(await page.locator('#facultyFundRoot').innerText(),/TEST MODE/);assert.equal(await page.locator('[data-action=restore]').count(),0);await page.locator('[data-action=inspectPending]').click();await page.waitForFunction(()=>document.querySelector('#facultyFundRoot [data-status]')?.textContent.includes('still retained'));assert.ok(await page.evaluate(()=>localStorage.getItem('ft_faculty_pending_v1:ao:school')));await page.locator('[data-action=openRecovery]').click();await page.waitForFunction(()=>document.querySelector('#facultyFundRecoveryRoot [role=status]')?.textContent.includes('No server-visible unfinished'));await page.locator('[data-action=inspectPending]').click();await page.waitForFunction(()=>window._inspectCount===2);assert.ok(await page.evaluate(()=>localStorage.getItem('ft_faculty_pending_v1:ao:school')));await page.locator('[data-action=inspectPending]').click();await page.waitForFunction(()=>!localStorage.getItem('ft_faculty_pending_v1:ao:school'));assert.match(await page.locator('#facultyFundRoot [data-status]').innerText(),/Server status: pending/);
+  // Team lives in a separate responsive dialog, with focus and Escape handling.
+  for(const width of [320,390,1280]){
+   await page.setViewportSize({width,height:844});
+   await page.evaluate(()=>{document.getElementById('teamSignedInPanel').hidden=false;document.getElementById('teamActiveOrgPanel').hidden=false;document.getElementById('teamAppearanceOwner').hidden=false;openTeamModal()});
+   assert.equal(await page.locator('#teamModal').isVisible(),true);
+   assert.equal(await page.locator('#settingsModal #teamPanel').count(),0);
+   const dim=await page.locator('.team-dialog').evaluate(el=>({scroll:el.scrollWidth,width:el.clientWidth}));assert.ok(dim.scroll<=dim.width+1,JSON.stringify({width,...dim}));
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'teamModalClose');
+   await page.keyboard.press('Escape');assert.equal(await page.locator('#teamModal').isHidden(),true);
+  }
   assert.deepEqual(errors,[]);console.log('Faculty Fund browser workflow passed: forms, acceptance, receipts, expense, retry, recovery access and pending reconciliation.');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}
 }

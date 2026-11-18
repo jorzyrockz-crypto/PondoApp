@@ -148,3 +148,17 @@ test('Faculty Fund server transactions enforce membership, idempotency and concu
   await db.doc(`${root}/members/president`).delete();await assert.rejects(invoke('president','approveRemittanceVoid',{remittanceId:remittance.remittanceId}));
  }finally{await deleteApp(admin)}
 });
+test('shared appearance is owner-only and cannot alter the registered name or arbitrary fields',async()=>{
+ const owner=directory('owner'),viewer=directory('viewer'),outsider=directory('outsider');
+ const {orgId}=await owner.service.orgCreate({name:'Appearance Example'});
+ await seed({[`organizations/${orgId}/members/viewer`]:{uid:'viewer',role:'reviewer'}});
+ const org=ref(owner.db,`organizations/${orgId}`);
+ await assertSucceeds(updateDoc(org,{teamColor:'ocean',teamIcon:'star'}));
+ assert.equal((await getDoc(ref(viewer.db,`organizations/${orgId}`))).data().teamColor,'ocean');
+ await assertFails(updateDoc(ref(viewer.db,`organizations/${orgId}`),{teamColor:'rose',teamIcon:'heart'}));
+ await assertFails(updateDoc(ref(outsider.db,`organizations/${orgId}`),{teamColor:'rose',teamIcon:'heart'}));
+ await assertFails(updateDoc(org,{teamColor:'url(evil)',teamIcon:'star'}));
+ await assertFails(updateDoc(org,{teamColor:'rose',teamIcon:'<script>'}));
+ await assertFails(updateDoc(org,{teamColor:'rose',teamIcon:'heart',name:'Different'}));
+ await assertFails(deleteDoc(org));
+});

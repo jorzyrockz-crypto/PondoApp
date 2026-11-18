@@ -101,6 +101,12 @@ service cloud.firestore {
       allow update: if isOwner(orgId)
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['discoverable'])
                     && request.resource.data.discoverable is bool;
+      // Shared visual identity is separate from the registered workspace name.
+      // Only an owner may update these bounded, non-HTML values.
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamColor','teamIcon'])
+                    && request.resource.data.teamColor in ['emerald','ocean','violet','rose','amber','slate']
+                    && request.resource.data.teamIcon in ['diamond','star','heart','sun','leaf','book'];
       allow delete: if false;
 
       // Approximate recent activity; a member may update only their own
