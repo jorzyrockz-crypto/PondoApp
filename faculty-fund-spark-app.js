@@ -49,9 +49,14 @@
    await confirmRelease(input?.orgId);const result=await read.export(input);
    return {...result,notice:'TEST ONLY — diagnostic copy; not an authenticated backup or a restore file.'};
   }
+  async function verifyDiagnostic(input){
+   const c=context();if(!c||c.memberConfirmed!==true||c.role!=='owner'||!c.uid||c.orgId!==input?.orgId||typeof input.content!=='string'||input.content.length>10*1024*1024||typeof modules.verifyDiagnostic!=='function'||typeof modules.verifyExport!=='function')throw Error('Diagnostic verification is unavailable');
+   let envelope;try{envelope=JSON.parse(input.content)}catch(e){throw Error('Choose a valid Faculty Fund diagnostic JSON file');}
+   const result=await modules.verifyDiagnostic({envelope,orgId:c.orgId,verifyChecksum:modules.verifyExport,project:modules.project});if(!sameScope(c))throw Error('Workspace changed while checking the diagnostic copy');return result;
+  }
   async function transition(input){await confirmRelease(input?.orgId);return write.transition(input);}
   async function inspectPending(input){await confirmRelease(input?.orgId);return pending.inspect(input);}
-  return {read:safeRead,export:diagnosticExport,transition,inspectPending,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,diagnosticExport:true,get mode(){return realAccountTest&&testWorkspace(context()?.orgId)?'firebase-test-only':releasePreview?'release-preview-only':realAccountTest?'firebase-test-only':'emulator-test-only';}}};
+  return {read:safeRead,export:diagnosticExport,verifyDiagnostic,transition,inspectPending,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,diagnosticExport:true,diagnosticVerify:typeof modules.verifyDiagnostic==='function'&&typeof modules.verifyExport==='function',get mode(){return realAccountTest&&testWorkspace(context()?.orgId)?'firebase-test-only':releasePreview?'release-preview-only':realAccountTest?'firebase-test-only':'emulator-test-only';}}};
  }
  if(typeof module==='object'&&module.exports)module.exports={createSparkApp};else global.createFacultyFundSparkApp=createSparkApp;
 })(typeof window!=='undefined'?window:globalThis);

@@ -384,3 +384,21 @@ The candidate rules and app mode have only been checked in the emulator; they
 are not a release or safe restore. They require the matching rules and an
 administrator-provisioned control, which have **not** been deployed. Do not
 change the disabled flag or provision the control in the live project yet.
+
+### Local diagnostic check (not restore)
+
+The test-only owner interface can check a previously downloaded diagnostic JSON
+file locally, even when the live ledger does not load. It checks the unkeyed
+checksum, workspace ID, bounded collection shapes, President assignment, and
+selected projection totals and pending work. Files larger than 10 MB are
+rejected. It does not upload the file, write records, or consume Firestore
+reads. This is a local UI restriction, not a privacy boundary; members who can
+read fund data can already copy it. The local check does not require the preview
+release marker because it does not access the server.
+
+Passing these checks is **not** proof of authenticity, completeness, recency,
+financial correctness, or a viable restoration. Anyone with the file can edit
+it and recompute its unkeyed checksum, including changes that reconcile. The
+checker does not validate every field or receipt. Preserve it privately; do not
+import it or rely on it as a protected backup. Tested, authorized recovery
+remains an unresolved release blocker.

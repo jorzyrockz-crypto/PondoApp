@@ -33,3 +33,12 @@ test('existing test workspace and ordinary workspace can coexist with their own 
  f.setCtx({...f.ctx(),orgId:'org~faculty fund test old'});assert.equal(app.capabilities.mode,'firebase-test-only');await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('facultyFundRelease')).length,0);assert.match((await app.read({orgId:f.ctx().orgId,view:'memberReceipts'})).html,/TEST ONLY/);
  f.setCtx({...f.ctx(),orgId:'org~ordinary school'});assert.equal(app.capabilities.mode,'release-preview-only');f.setMarker(null);await assert.rejects(app.transition({orgId:f.ctx().orgId}),/not enabled/);f.setMarker({enabled:true,schema:1});await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('org~ordinary school/facultyFundRelease')).length,2);
 });
+test('local diagnostic checking is scoped to the confirmed owner and cancels on workspace reset',async()=>{
+ const f=fixture(),orgId=f.ctx().orgId;let resume,started;const ready=new Promise(r=>started=r);
+ f.modules.verifyExport=async()=>true;f.modules.verifyDiagnostic=async({orgId:scope})=>{assert.equal(scope,orgId);started();await new Promise(r=>resume=r);return {notice:'not authenticated'}};
+ const app=createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,releasePreview:true});assert.equal(app.capabilities.diagnosticVerify,true);
+ f.setCtx({...f.ctx(),role:'reviewer'});await assert.rejects(app.verifyDiagnostic({orgId,content:'{}'}),/unavailable/);
+ f.setCtx({...f.ctx(),role:'owner',memberConfirmed:false});await assert.rejects(app.verifyDiagnostic({orgId,content:'{}'}),/unavailable/);
+ f.setCtx({...f.ctx(),memberConfirmed:true});await assert.rejects(app.verifyDiagnostic({orgId:'other',content:'{}'}),/unavailable/);await assert.rejects(app.verifyDiagnostic({orgId,content:'{'}),/valid Faculty Fund diagnostic/);
+ const checking=app.verifyDiagnostic({orgId,content:'{}'});await ready;app.resetScope();resume();await assert.rejects(checking,/Workspace changed/);assert.equal(f.calls.length,0);
+});
