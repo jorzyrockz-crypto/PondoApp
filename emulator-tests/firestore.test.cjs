@@ -6,8 +6,13 @@ const api=require('firebase/firestore');
 const {doc,getDoc,getDocs,collection,setDoc,updateDoc,deleteDoc,writeBatch,serverTimestamp}=api;
 const PROJECT='demo-pondo-security';
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Refusing to run: start the local Firestore emulator first.');
+// Exercise the same ordinary-workspace security suite under each checked-in
+// rules variant. Never accept an arbitrary rules path from the environment.
+const variants={configured:'firestore.rules',facultyTest:'firestore.faculty-test.rules',recoveryCandidate:'firestore.faculty-recovery-candidate.rules'};
+const variant=process.env.PONDO_ORGANIZATION_RULES||'configured';
+if(!Object.hasOwn(variants,variant))throw Error('Unknown organization rules variant');
 let env,createDirectory,organizationName;
-test.before(async()=>{({createOrganizationDirectory:createDirectory,organizationName}=await import('../organization-firestore.mjs'));env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8')}})});
+test.before(async()=>{({createOrganizationDirectory:createDirectory,organizationName}=await import('../organization-firestore.mjs'));env=await initializeTestEnvironment({projectId:PROJECT,firestore:{rules:fs.readFileSync(path.join(__dirname,'..',variants[variant]),'utf8')}})});
 test.beforeEach(async()=>env.clearFirestore());test.after(async()=>{if(env)await env.cleanup()});
 const client=uid=>uid?env.authenticatedContext(uid).firestore():env.unauthenticatedContext().firestore();
 const ref=(c,p)=>doc(c,p);
