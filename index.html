@@ -8931,7 +8931,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 81</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 82</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -8953,7 +8953,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='81', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='82', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -12398,13 +12398,14 @@ try {
   firestoreDb = getFirestore(firebaseApp);
 }
 
-// Developer-only wiring. Disabled for Pondo's real Firebase project. Even if
-// explicitly turned on in a demo build, this requires a demo project already
-// connected to a Firestore emulator with the discovery test rules. It must not
-// be used for real fund data, and it has no protected backup/restore.
+// Real-account testing is restricted by both the app and separate test rules
+// to workspaces whose name starts "Faculty Fund Test ". Fictitious data only;
+// it is not a production ledger and has no protected backup or restore.
 const FACULTY_FUND_SPARK_DEMO = false;
-if (FACULTY_FUND_SPARK_DEMO) {
-  if (!/^demo-[a-z0-9-]+$/.test(firebaseConfig.projectId)) throw Error('Faculty Fund test mode requires a demo Firebase project');
+const FACULTY_FUND_REAL_ACCOUNT_TEST = true;
+if (FACULTY_FUND_SPARK_DEMO || FACULTY_FUND_REAL_ACCOUNT_TEST) {
+  if (FACULTY_FUND_SPARK_DEMO && !/^demo-[a-z0-9-]+$/.test(firebaseConfig.projectId)) throw Error('Faculty Fund test mode requires a demo Firebase project');
+  if (FACULTY_FUND_REAL_ACCOUNT_TEST && firebaseConfig.projectId !== 'russapps-pondo') throw Error('Wrong Firebase project for Faculty Fund real-account testing');
   await Promise.all([
     './faculty-fund-spark-client.js','./faculty-fund-spark-read.js','./faculty-fund-spark-projection.js',
     './faculty-fund-spark-read-adapter.js','./faculty-fund-spark-write-adapter.js','./faculty-fund-spark-receipts.js',
@@ -12415,7 +12416,7 @@ if (FACULTY_FUND_SPARK_DEMO) {
   ].map(path=>import(path)));
   const styles=document.createElement('link');styles.rel='stylesheet';styles.href='./faculty-fund-spark-recovery.css';document.head.append(styles);
   const facultyContext=()=>{const s=window.pondoTeamState,u=window.pondoCurrentUser;if(!s?.orgId||!s.uid||s.uid!==u?.uid||!s.role||!s.memberConfirmed)return null;return {orgId:s.orgId,uid:s.uid,role:s.role,memberConfirmed:true,orgName:s.orgName,members:Array.isArray(s.members)?s.members:[]};};
-  window.pondoFacultyAPI=window.createFacultyFundSparkApp({db:firestoreDb,api:{doc,collection,query,where,orderBy,documentId,startAfter,limit,getDocFromServer,getDocsFromServer,runTransaction,serverTimestamp},getContext:facultyContext,modules:{
+  window.pondoFacultyAPI=window.createFacultyFundSparkApp({db:firestoreDb,realAccountTest:FACULTY_FUND_REAL_ACCOUNT_TEST,api:{doc,collection,query,where,orderBy,documentId,startAfter,limit,getDocFromServer,getDocsFromServer,runTransaction,serverTimestamp},getContext:facultyContext,modules:{
     createClient:window.createFacultyFundSparkClient,createReader:window.createFacultyFundSparkReader,project:window.projectFacultySpark,
     createReadAdapter:window.createFacultyFundSparkReadAdapter,createWriteAdapter:window.createFacultyFundSparkWriteAdapter,
     createReceipts:window.createFacultyFundSparkReceiptView,makeReport:window.FacultyFundSparkReport.makeReport,reportCsv:window.FacultyFundSparkReport.csv,makeExport:window.FacultyFundSparkExport.make,
@@ -12884,7 +12885,7 @@ window.pondoCloudSync = { push: schedulePush };
 let facultyStateUnsub=null,facultyConfigUnsub=null,facultyWatchGeneration=0;
 function stopFacultyWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();facultyStateUnsub=facultyConfigUnsub=null;}
 function startFacultyWatch(orgId,uid){
- if(window.pondoFacultyAPI?.capabilities?.mode==='emulator-test-only'||facultyStateUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
+ if(['emulator-test-only','firebase-test-only'].includes(window.pondoFacultyAPI?.capabilities?.mode)||facultyStateUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
  const generation=++facultyWatchGeneration;let facultyState=null,facultyConfig=null,gotState=false,gotConfig=false;
  const current=()=>generation===facultyWatchGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
  const deliver=()=>{if(!current()||!gotState||!gotConfig)return;try{window.processFacultyNotifications?.(facultyState||{remittances:[]},pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};

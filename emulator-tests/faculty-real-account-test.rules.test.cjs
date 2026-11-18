@@ -1,0 +1,33 @@
+'use strict';
+// Local Firestore emulator only. The published test rules are not production
+// financial rules; this checks workspace isolation and a real-account workflow.
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing');
+const api=require('firebase/firestore');
+const {createIntegratedClient}=require('../faculty-fund-spark-client.js');
+const projectId='demo-pondo-security',testOrg='org~faculty fund test example',normalOrg='org~ordinary workspace';
+if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
+let env;
+test.before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.join(__dirname,'../firestore.faculty-test.rules'),'utf8')}})});
+test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{let db=c.firestore();for(const org of [testOrg,normalOrg])for(const [uid,role] of [['owner','owner'],['ao','disbursing'],['president','reviewer'],['reviewer','reviewer']])await api.setDoc(api.doc(db,`organizations/${org}/members/${uid}`),{uid,role});});});
+test.after(async()=>env&&env.cleanup());
+const db=uid=>env.authenticatedContext(uid).firestore();
+const client=(uid,orgId=testOrg)=>createIntegratedClient({db:db(uid),api,orgId,uid,useRevision:true,trackRemittanceReleases:true});
+const ref=(uid,org,p)=>api.doc(db(uid),`organizations/${org}/${p}`);
+test('test workspace permits the intended multi-account handover but denies nonmembers and normal workspaces',async()=>{
+ const owner=client('owner'),ao=client('ao'),president=client('president');
+ await assertFails(client('owner',normalOrg).assignPresident('president','assignment'));
+ await assertFails(api.getDoc(ref('outsider',testOrg,'sparkDiscoveryRevision/current')));
+ await assertFails(api.getDoc(ref('owner',normalOrg,'sparkDiscoveryRevision/current')));
+ await owner.assignPresident('president','assignment');await ao.createPerson('sample','Sample Teacher');
+ await ao.createPayment('payment',{personId:'sample',absenceDate:'2024-01-01',paymentDate:'2024-01-02',amountCents:25000});
+ await ao.createRemittance('remittance',['payment']);await ao.addPayment('remittance','payment');await ao.submitRemittance('remittance');
+ await assertFails(client('reviewer').accept('remittance'));await president.accept('remittance');
+ const remittance=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryRemittances/remittance'))).data();
+ assert.equal(remittance.status,'accepted');assert.equal(remittance.acceptedBy,'president');assert.ok(remittance.acceptedAt);
+ const wallet=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryWallets/remittance'))).data();assert.equal(wallet.unspentCents,25000);
+ await ao.confirmPrint('member','payment','remittance');await ao.confirmPrint('remittance','remittance');
+ await ao.createExpense('expense',{amountCents:10000,description:'Sample expense',payee:'Sample shop',occurredAt:wallet.acceptedAt});
+ await ao.allocate('expense','remittance','allocation',10000);await ao.finalizeExpense('expense');
+ const after=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryWallets/remittance'))).data();assert.equal(after.unspentCents,15000);
+});
