@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v105';
+const CACHE_VERSION = 'pondo-v106';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -101,7 +101,7 @@ self.addEventListener('activate', (event) => {
       const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
       if (obsolete.length) {
         // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
-        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v105', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v106', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
       }
       await Promise.all(obsolete.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())
@@ -118,6 +118,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   const isSameOrigin = url.origin === self.location.origin;
   const isRuntimeCacheable = RUNTIME_CACHEABLE_ORIGINS.includes(url.origin);
+  // Do not intercept or cache a sibling app's files on a shared origin.
+  const appRoot = new URL('./', self.location.href).pathname;
+  if (isSameOrigin && !url.pathname.startsWith(appRoot)) return;
 
   // Auth helper endpoints are dynamic, not offline app assets. If a future
   // host serves them same-origin, let the browser fetch them directly.
@@ -125,7 +128,6 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     // Never cache an embedded report (or any other page) as the main app.
-    const appRoot = new URL('./', self.location.href).pathname;
     const appIndex = new URL('./index.html', self.location.href).pathname;
     if (!isSameOrigin || (url.pathname !== appRoot && url.pathname !== appIndex)) {
       event.respondWith(fetch(request).catch(() => caches.open(CACHE_VERSION).then(cache => cache.match(request))));
