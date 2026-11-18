@@ -65,4 +65,4 @@ async function main(){
   assert.deepEqual(errors,[]);console.log('Faculty Fund browser workflow passed: forms, acceptance, receipts, expense, retry, recovery access and pending reconciliation.');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}
 }
-main().catch(e=>{console.error(e);process.exitCode=1});
+main().catch(e=>{console.error(e);if(process.env.GITHUB_ACTIONS)console.error('::error::'+String(e.stack||e).replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'));process.exitCode=1});
