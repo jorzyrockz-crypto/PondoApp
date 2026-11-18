@@ -179,3 +179,28 @@ test('removal notice is atomic, private, and remains readable after access is re
  await assertSucceeds(updateDoc(ref(member.db,noticePath),{read:true}));await assertFails(updateDoc(ref(member.db,noticePath),{read:false}));
  await assertFails(deleteDoc(ref(member.db,noticePath)));await assertFails(setDoc(ref(owner.db,'users/member/teamNotices/notice2'),payload));
 });
+test('public prefix suggestions are bounded and never expose private workspaces',async()=>{
+ const owner=directory('owner'),other=directory('other'),guest=directory('guest'),anon=client(null);
+ const a=(await owner.service.orgCreate({name:'Alpha Teachers'})).orgId,b=(await other.service.orgCreate({name:'Alpha Secret'})).orgId;
+ await owner.service.orgSetVisibility({orgId:a,discoverable:true});
+ const found=await guest.service.orgSuggest({prefix:'ALP'});assert.deepEqual(found.organizations.map(o=>o.id),[a]);assert.ok(!found.organizations.some(o=>o.id===b));
+ assert.deepEqual((await guest.service.orgSuggest({prefix:'x'})).organizations,[]);
+ await assertFails(getDocs(collection(guest.db,'organizations')));
+ await assertFails(getDocs(api.query(collection(guest.db,'organizations'),api.limit(10))));
+ await assertFails(getDocs(api.query(collection(guest.db,'organizations'),api.where('discoverable','==',true),api.limit(11))));
+ await assertFails(getDocs(api.query(collection(anon,'organizations'),api.where('discoverable','==',true),api.limit(10))));
+});
+test('owner receives pending requester identity in live snapshots and decisions update the list',async()=>{
+ const owner=directory('owner'),guest=directory('guest'),outsider=directory('outsider'),orgId=(await owner.service.orgCreate({name:'Live Requests'})).orgId;
+ await owner.service.orgSetVisibility({orgId,discoverable:true});
+ const reqs=api.query(collection(owner.db,`organizations/${orgId}/joinRequests`),api.where('status','==','pending'),api.limit(100));
+ await assertFails(getDocs(api.query(collection(outsider.db,`organizations/${orgId}/joinRequests`),api.where('status','==','pending'),api.limit(100))));
+ const values=[],waiters=[];let unsubscribe;
+ const next=()=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Timed out waiting for pending request snapshot')),10000);waiters.push(value=>{clearTimeout(timer);resolve(value)});});
+ const first=next();unsubscribe=api.onSnapshot(reqs,snap=>{const rows=snap.docs.map(d=>({uid:d.id,...d.data()}));values.push(rows);waiters.shift()?.(rows)});
+ try{
+  assert.equal((await first).length,0);const appeared=next();await guest.service.orgRequestJoin({orgId});const pending=await appeared;
+  assert.equal(pending.length,1);assert.equal(pending[0].uid,'guest');assert.equal(pending[0].displayName,'guest');assert.equal(pending[0].email,'guest@example.test');
+  const removed=next();await owner.service.orgDecideRequest({orgId,uid:'guest',decision:'approve',role:'reviewer'});assert.equal((await removed).length,0);
+ }finally{unsubscribe();}
+});

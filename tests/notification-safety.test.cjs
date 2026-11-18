@@ -45,3 +45,8 @@ test('account removal notices remain visible across workspaces only to their rec
  const seen=[];t.win.pondoMarkRemovalNoticeRead=id=>seen.push(id);t.ctx.markNotificationRead('removed:id');assert.deepEqual(seen,['id']);
  t.win.pondoCurrentUser.uid='u2';assert.equal(t.ctx.visibleNotifications()[0].id,'removed:other');
 });
+test('pending join notices are visible only to the confirmed owner of the active workspace',()=>{
+ const t=setupFeed();t.win.pondoJoinNotices=[{id:'join:x:42',kind:'joinRequest',orgId:'a',recipientUid:'u1',ts:42}];
+ assert.equal(t.ctx.visibleNotifications().length,1);t.ctx.markNotificationRead('join:x:42');assert.equal(t.ctx.unreadNotificationCount(),0);
+ t.state.orgId='b';assert.equal(t.ctx.visibleNotifications().length,0);t.state.orgId='a';t.state.role='reviewer';assert.equal(t.ctx.visibleNotifications().length,0);t.state.role='owner';t.state.memberConfirmed=false;assert.equal(t.ctx.visibleNotifications().length,0);
+});

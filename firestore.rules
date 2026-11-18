@@ -107,7 +107,10 @@ service cloud.firestore {
       // A public exact-name lookup reveals only this small profile. A missing
       // document is readable for lookup; private documents stay member-only.
       allow get: if signedIn() && (resource == null || isMember(orgId) || resource.data.get('discoverable', false) == true);
-      allow list: if false;
+      // Bounded public discovery. Firestore only permits a query when it
+      // can prove that every result is explicitly discoverable.
+      allow list: if signedIn() && request.query.limit != null && request.query.limit <= 10
+                  && resource.data.get('discoverable', false) == true;
       // The document ID is a prefix plus the ASCII-lowercase name. Create-only means
       // two concurrent registrations cannot claim the same name.
       allow create: if signedIn()

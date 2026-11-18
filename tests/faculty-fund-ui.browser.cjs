@@ -48,6 +48,9 @@ async function main(){
   // Account notices remain visible even outside the former workspace.
   await page.evaluate(()=>{window.pondoRemovalNotices=[{id:'removed:example',type:'account',title:'Workspace access removed',body:'Your access to Former School was removed.',recipientUid:'ao',orgId:null,read:false,ts:Date.now(),action:null}];window._readRemoval='';window.pondoMarkRemovalNoticeRead=id=>window._readRemoval=id;renderNotifCenter()});
   assert.match(await page.locator('#notifCenterMenu').innerText(),/Former School/);await page.evaluate(()=>openNotification('removed:example'));assert.equal(await page.evaluate(()=>window._readRemoval),'example');
+  // Pending requests surface in the bell and open the Team request section.
+  await page.evaluate(()=>{window.pondoTeamState.role='owner';window.pondoTeamState.memberConfirmed=true;window.pondoJoinNotices=[{id:'join:guest:100',kind:'joinRequest',type:'team',title:'Request to join',body:'Guest requested to join School.',recipientUid:'ao',orgId:'school',ts:100}];renderNotifCenter()});
+  assert.match(await page.locator('#notifCenterMenu').innerText(),/Guest requested to join School/);await page.evaluate(()=>openNotification('join:guest:100'));assert.equal(await page.locator('#teamModal').isVisible(),true);await page.evaluate(()=>closeTeamModal());
   assert.deepEqual(errors,[]);console.log('Faculty Fund browser workflow passed: forms, acceptance, receipts, expense, retry, recovery access and pending reconciliation.');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}
 }

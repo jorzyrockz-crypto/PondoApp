@@ -9,7 +9,7 @@ export function organizationName(value) {
   return {name,id:'org~'+name.replace(/[A-Z]/g,c=>c.toLowerCase())};
 }
 export function createOrganizationDirectory({db,api,getUser}) {
-  const {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,limit}=api;
+  const {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,orderBy,documentId,startAt,limit,getDocsFromServer}=api;
   const user=()=>{const u=getUser();if(!u)throw new Error('Sign in first.');return u};
   const org=o=>doc(db,'organizations',o), member=(o,u)=>doc(db,'organizations',o,'members',u), request=(o,u)=>doc(db,'organizations',o,'joinRequests',u), mine=(u,o)=>doc(db,'users',u,'organizationRequests',o);
   const identity=u=>({uid:u.uid,email:typeof u.email==='string'?u.email.slice(0,320):null,displayName:typeof u.displayName==='string'?u.displayName.slice(0,160):null});
@@ -27,6 +27,15 @@ export function createOrganizationDirectory({db,api,getUser}) {
       user();const {id}=organizationName(name);let s;
       try{s=await getDoc(org(id))}catch(e){if(e.code==='permission-denied')return {organization:null};throw e}
       return {organization:s.exists() && s.data().discoverable===true?{id,name:s.data().name}:null};
+    },
+    async orgSuggest({prefix}) {
+      user();const {name,id}=organizationName(prefix);
+      if(name.length<2)return {organizations:[]};
+      // The ID is the canonical, ASCII-folded registered name. Ordering from
+      // the prefix and filtering client-side avoids an artificial Unicode end.
+      const q=query(collection(db,'organizations'),where('discoverable','==',true),orderBy(documentId()),startAt(id),limit(10));
+      const result=await getDocsFromServer(q);
+      return {organizations:result.docs.filter(d=>d.id.startsWith(id)&&d.data().discoverable===true&&typeof d.data().name==='string').map(d=>({id:d.id,name:d.data().name}))};
     },
     async orgRequestJoin({orgId}) {
       const u=user();await runTransaction(db,async tx=>{

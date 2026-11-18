@@ -4622,6 +4622,7 @@ body.dark-mode .auth-manual-fallback{color:#d1d5db;}
 .team-org-icon{display:grid;place-items:center;width:50px;height:50px;flex:none;border-radius:16px;background:var(--team-color,#087d60);color:white;font-size:23px}
 .team-org-name{font-family:'Fraunces',serif;font-size:22px;line-height:1.1;margin:0;overflow-wrap:anywhere}
 .team-appearance-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team-appearance-fields label{font-size:12px;font-weight:700}.team-appearance-fields select{margin-top:6px}
+.team-suggestions:not(:empty){margin:8px 0;padding:8px;background:#f2f7f4;border:1px solid #d7e7de;border-radius:12px}.team-suggestion{display:block;width:100%;text-align:left;border:0;border-radius:8px;background:transparent;color:inherit;padding:10px;font:inherit;cursor:pointer}.team-suggestion:hover,.team-suggestion:focus-visible{background:#dcefe5}.team-suggestion-status{font-size:12px;color:var(--ink2);margin:4px}body.dark-mode .team-suggestions:not(:empty){background:#15211e;border-color:#34453e}body.dark-mode .team-suggestion:hover,body.dark-mode .team-suggestion:focus-visible{background:#274538}
 .team-save-appearance{margin-top:12px;min-height:42px}
 .team-modal .team-member-row{background:#f6f8f7;border:1px solid #e6eee9;min-width:0;flex-wrap:wrap}.team-modal .team-member-row .tm-name{white-space:normal;overflow-wrap:anywhere}
 .team-modal button:focus-visible,.team-modal select:focus-visible,.team-modal input:focus-visible{outline:3px solid #42bfa1;outline-offset:2px}
@@ -8791,7 +8792,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
               <p style="font-weight:700;font-size:14px;margin:0 0 8px">Organization discovery</p>
               <label style="display:flex;align-items:center;gap:10px;font-size:13px"><input id="teamDiscoverable" type="checkbox" onchange="pondoTeam.setDiscovery(this.checked)"> Make this organization searchable</label>
               <p style="font-size:12px;line-height:1.5;color:var(--ink2)">Only the organization name is listed. Financial records remain private. Verify requesters through a trusted channel before approval. Existing invite links still grant their assigned role immediately.</p>
-              <button type="button" class="btn btn-light" onclick="pondoTeam.loadJoinRequests()">Refresh join requests</button>
+              <button type="button" class="btn btn-light" onclick="pondoTeam.loadJoinRequests()">Reconnect requests</button>
               <div id="teamJoinRequests" aria-live="polite" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>
             </div>
             <div class="team-card" id="teamInviteCard" hidden>
@@ -8825,8 +8826,9 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
           </div>
           <div class="team-card">
             <p style="font-weight:700;font-size:14px;margin:0 0 6px">Find an organization</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5">Enter its full registered name. Only organizations that opted in can be found. An owner must approve your request.</p>
-            <input id="teamSearchOrg" class="input" aria-label="Full organization name" placeholder="Full organization name" maxlength="120">
+            <p style="font-size:12px;color:var(--ink2);line-height:1.5">Start typing a registered name to see searchable organizations. Only teams that opted in appear. An owner must approve your request.</p>
+            <input id="teamSearchOrg" class="input" aria-label="Organization name" aria-describedby="teamSearchSuggestions" placeholder="Start typing an organization name" maxlength="120" autocomplete="off" oninput="pondoTeam.suggestOrganizations()">
+            <div id="teamSearchSuggestions" class="team-suggestions" aria-live="polite"></div>
             <button type="button" class="btn btn-dark" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.searchOrganization()">Search</button>
             <div id="teamSearchResults" aria-live="polite" style="margin-top:10px"></div>
             <button type="button" class="btn btn-light" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.myJoinRequests()">Refresh my requests</button>
@@ -8978,7 +8980,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 86</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 87</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9000,7 +9002,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='86', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='87', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9393,8 +9395,13 @@ function visibleNotifications(){
   const state=window.pondoTeamState, uid=window.pondoCurrentUser?.uid;
   const local=loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
   const account=(window.pondoRemovalNotices||[]).filter(n=>uid&&n.recipientUid===uid);
-  return local.concat(account).sort((a,b)=>b.ts-a.ts);
+  const join=(window.pondoJoinNotices||[]).filter(n=>uid&&n.recipientUid===uid&&state?.orgId===n.orgId&&state.memberConfirmed&&state.role==='owner').map(n=>({...n,read:joinNoticeWasRead(n.id)}));
+  return local.concat(account,join).sort((a,b)=>b.ts-a.ts);
 }
+function joinNoticeKey(){const uid=window.pondoCurrentUser?.uid,orgId=window.pondoTeamState?.orgId;return uid&&orgId?'ft_join_notice_read_v1:'+encodeURIComponent(uid)+':'+encodeURIComponent(orgId):null;}
+function joinNoticeReadIds(){try{const key=joinNoticeKey(),v=key&&JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function joinNoticeWasRead(id){return joinNoticeReadIds().includes(id)}
+function markJoinNoticesRead(ids){try{const key=joinNoticeKey();if(!key)return;localStorage.setItem(key,JSON.stringify([...new Set([...joinNoticeReadIds(),...ids])].slice(-200)));updateNotifBadge();}catch(e){}}
 function unreadNotificationCount(){return visibleNotifications().filter(n=>!n.read).length}
 function pushNotification({type,title,body,action,recipientUid,orgId,approverOnly,actorUid}={}){
   recipientUid=recipientUid||window.pondoCurrentUser?.uid;
@@ -9411,8 +9418,8 @@ function pushNotification({type,title,body,action,recipientUid,orgId,approverOnl
   return entry;
 }
 window.pushNotification=pushNotification;
-function markNotificationRead(id){if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
-function markAllNotificationsRead(){for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
+function markNotificationRead(id){if(id.startsWith('join:')){markJoinNoticesRead([id]);return;}if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
+function markAllNotificationsRead(){markJoinNoticesRead(visibleNotifications().filter(n=>n.kind==='joinRequest').map(n=>n.id));for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
 function updateNotifBadge(){const btn=document.getElementById('notifBellBtn'),badge=document.getElementById('notifBellCount');if(!btn||!badge)return;const count=unreadNotificationCount();badge.hidden=count===0;badge.textContent=count>99?'99+':String(count)}
 window.updateNotifBadge=updateNotifBadge;
@@ -9458,6 +9465,7 @@ function renderNotifCenter(){
 }
 window.renderNotifCenter=renderNotifCenter;
 function notificationAction(n){
+  if(n.kind==='joinRequest')return {joinRequests:true};
   const allowed=['dashboard','funds','projects','contributions','transactions','refunds','report'];
   if(n.action&&allowed.includes(n.action.tab))return n.action;
   if(n.type!=='team')return null;
@@ -9481,7 +9489,9 @@ function openNotification(id){
   markNotificationRead(id);
   renderNotifCenter();
   if(action){
-    closeNotifCenter();switchTab(action.tab);
+    closeNotifCenter();
+    if(action.joinRequests){openTeamModal();document.getElementById('teamDiscoveryOwner')?.scrollIntoView({block:'start'});return;}
+    switchTab(action.tab);
     if(action.tab==='funds'&&action.facultyFund)window.PondoFacultyFundUI?.open();
     if(action.reviewQueue) document.getElementById('dashboardActionsCard')?.scrollIntoView({block:'start'});
     if(action.audit){const panel=document.querySelector('#tab-transactions .audit-panel');if(panel){panel.open=true;panel.scrollIntoView({block:'start'});}}
@@ -12415,6 +12425,7 @@ import {
   orderBy,
   documentId,
   startAfter,
+  startAt,
   limit,
   setDoc,
   updateDoc,
@@ -12979,6 +12990,7 @@ function startFacultyWatch(orgId,uid){
 }
 function teardownOrgSubscriptions() {
   stopFacultyWatch();
+  stopJoinRequestWatch();
   window.PondoFacultyFundUI?.reset();
   stopTeamPresence();
   if (pondoTeamState.unsubMembers) { pondoTeamState.unsubMembers(); pondoTeamState.unsubMembers = null; }
@@ -12991,7 +13003,7 @@ function handleTeamListenerError(orgId, label, err) {
   if (pondoTeamState.orgId !== orgId) return;
   const firstFailure = !pondoTeamState.listenerError;
   pondoTeamState.listenerError = true;
-  if(label==='Members'){pondoTeamState.memberConfirmed=false;stopFacultyWatch();stopTeamPresence();applyRoleUI();window.refreshNotifCenterIfOpen?.();window.PondoFacultyFundUI?.reset();}
+  if(label==='Members'){pondoTeamState.memberConfirmed=false;stopFacultyWatch();stopJoinRequestWatch();stopTeamPresence();applyRoleUI();window.refreshNotifCenterIfOpen?.();window.PondoFacultyFundUI?.reset();}
   setSyncBadge('error');
   if (firstFailure) notify('Team updates are unavailable. Your data may be out of date. Export a backup and check your connection and access.');
 }
@@ -13039,7 +13051,7 @@ function subscribeToOrg(orgId) {
     const members = [];
     const memberConfirmed = !snap.metadata.fromCache && !snap.metadata.hasPendingWrites;
     pondoTeamState.memberConfirmed = memberConfirmed;
-    if(!memberConfirmed){stopFacultyWatch();window.PondoFacultyFundUI?.reset();}
+    if(!memberConfirmed){stopFacultyWatch();stopJoinRequestWatch();window.PondoFacultyFundUI?.reset();}
     snap.forEach((d) => members.push(d.data()));
     // Notify about teammates joining/leaving/changing role -- but only once
     // we've already seen a members list for this org in this session, so the
@@ -13077,6 +13089,7 @@ function subscribeToOrg(orgId) {
     else if(presenceUnsubscribe)stopTeamPresence();
     const previousFacultyRole = pondoTeamState.role;
     pondoTeamState.role = mine.role;
+    if(memberConfirmed&&mine.role==='owner')startJoinRequestWatch(orgId,pondoTeamState.uid);else stopJoinRequestWatch();
     if(previousFacultyRole && previousFacultyRole !== mine.role) window.PondoFacultyFundUI?.reset();
     if(memberConfirmed)startFacultyWatch(orgId,pondoTeamState.uid);
     if (window.refreshDescriptionSuggestions && pondoTeamState.baselineReady) window.refreshDescriptionSuggestions();
@@ -13695,7 +13708,7 @@ async function discardTeamDraft() {
 // Organization operations use Firebase Auth and Firestore security rules only.
 const organizationDirectory = createOrganizationDirectory({
   db: firestoreDb,
-  api: {doc,collection,getDoc,getDocs,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,limit},
+  api: {doc,collection,getDoc,getDocs,getDocsFromServer,setDoc,updateDoc,writeBatch,runTransaction,serverTimestamp,query,where,orderBy,documentId,startAt,limit},
   getUser: () => window.pondoCurrentUser,
 });
 async function organizationCall(method, data = {}) {
@@ -13709,41 +13722,83 @@ async function setDiscovery(value) {
   catch(e){ notify('Could not change discovery: '+(e.message||e)); }
   finally { checkbox.disabled=false; checkbox.checked=pondoTeamState.discoverable; }
 }
+let teamSuggestTimer=null,teamSuggestGeneration=0,teamSearchGeneration=0;
+function suggestOrganizations(){
+ const input=document.getElementById('teamSearchOrg'),output=document.getElementById('teamSearchSuggestions');
+ const prefix=input.value.trim(),uid=pondoTeamState.uid,generation=++teamSuggestGeneration;teamSearchGeneration++;clearTimeout(teamSuggestTimer);output.replaceChildren();
+ if(!uid||prefix.length<2)return;
+ output.textContent='Looking for public workspaces…';
+ teamSuggestTimer=setTimeout(async()=>{
+  try{
+   const {organizations}=await organizationCall('orgSuggest',{prefix});
+   if(generation!==teamSuggestGeneration||uid!==pondoTeamState.uid||input.value.trim()!==prefix)return;
+   output.replaceChildren();
+   if(!organizations.length){output.textContent='No public matches. You can still search by the full registered name.';return;}
+   for(const org of organizations){
+    const button=document.createElement('button');button.type='button';button.className='team-suggestion';button.textContent=org.name;
+    button.addEventListener('click',()=>{input.value=org.name;teamSuggestGeneration++;output.replaceChildren();searchOrganization();});output.appendChild(button);
+   }
+  }catch(err){if(generation===teamSuggestGeneration&&uid===pondoTeamState.uid)output.textContent='Suggestions are unavailable. Search by the full registered name instead.';}
+ },250);
+}
 async function searchOrganization() {
-  const output=document.getElementById('teamSearchResults'), name=document.getElementById('teamSearchOrg').value, uid=pondoTeamState.uid;
-  output.textContent='Searching…';
+  const output=document.getElementById('teamSearchResults'), name=document.getElementById('teamSearchOrg').value, uid=pondoTeamState.uid,generation=++teamSearchGeneration;
+  if(!uid)return;output.textContent='Searching…';
   try {
     const {organization}=await organizationCall('orgSearch',{name});
-    if(uid!==pondoTeamState.uid)return;
+    if(uid!==pondoTeamState.uid||generation!==teamSearchGeneration)return;
     output.replaceChildren();
     if(!organization){output.textContent='No searchable organization found with that name.';return;}
     const label=document.createElement('p');label.textContent=organization.name;label.style.fontWeight='700';
     const button=document.createElement('button');button.type='button';button.className='btn btn-light';button.textContent='Request to join';
-    button.onclick=async()=>{button.disabled=true;try{await organizationCall('orgRequestJoin',{orgId:organization.id});if(uid===pondoTeamState.uid)output.textContent='Request sent. An owner must approve it before you can access this workspace.';}catch(e){button.disabled=false;notify('Could not send request: '+(e.message||e));}};
+    button.onclick=async()=>{if(uid!==pondoTeamState.uid||generation!==teamSearchGeneration)return;button.disabled=true;try{await organizationCall('orgRequestJoin',{orgId:organization.id});if(uid===pondoTeamState.uid)output.textContent='Request sent. An owner must approve it before you can access this workspace.';}catch(e){button.disabled=false;notify('Could not send request: '+(e.message||e));}};
     output.append(label,button);
-  } catch(e){if(uid===pondoTeamState.uid)output.textContent='Search unavailable. '+(e.message||e);}
+  } catch(e){if(uid===pondoTeamState.uid&&generation===teamSearchGeneration)output.textContent='Search unavailable. '+(e.message||e);}
 }
-async function loadJoinRequests() {
-  const orgId=pondoTeamState.orgId, uid=pondoTeamState.uid, output=document.getElementById('teamJoinRequests');
-  if(!orgId || pondoTeamState.role!=='owner')return;
-  output.textContent='Loading…';
-  try {
-    const {requests}=await organizationCall('orgPendingRequests',{orgId});
-    if(orgId!==pondoTeamState.orgId || uid!==pondoTeamState.uid || pondoTeamState.role!=='owner')return;
-    output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
-    const verifyNote=document.createElement('p');verifyNote.textContent='Verify each requester through a trusted channel; displayed names and emails can be entered by the requester.';output.appendChild(verifyNote);
-    if(requests.length===100){const note=document.createElement('p');note.textContent='Showing up to 100 pending requests. Review these, then refresh for more.';output.appendChild(note);}
-    requests.forEach(request=>{
-      const row=document.createElement('div');row.className='team-member-row';row.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
-      const identity=document.createElement('div');identity.style.cssText='flex:1 1 100%;overflow-wrap:anywhere';identity.textContent=[request.displayName||'Unnamed user',request.email||request.uid].join(' · ');
-      const role=document.createElement('select');role.className='input';role.setAttribute('aria-label','Role for '+(request.displayName||request.email||'requester'));role.style.cssText='flex:1 1 140px;min-width:0';
-      [['reviewer','Reviewer (President assigned separately)'],['project-manager','Project Manager'],['disbursing','Administrative Officer (AO) / Disbursing Officer']].forEach(([value,text])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=text;role.appendChild(opt)});
-      const approve=document.createElement('button'),reject=document.createElement('button');approve.type=reject.type='button';approve.className=reject.className='btn btn-light';approve.textContent='Approve';reject.textContent='Reject';
-      const decide=async decision=>{if(!await confirmAction((decision==='approve'?'Approve':'Reject')+' the request from '+(request.displayName||request.email||request.uid)+'?'))return;approve.disabled=reject.disabled=true;try{await organizationCall('orgDecideRequest',{orgId,uid:request.uid,decision,role:role.value});if(pondoTeamState.orgId===orgId)await loadJoinRequests();}catch(e){approve.disabled=reject.disabled=false;notify('Could not review request: '+(e.message||e));}};
-      approve.onclick=()=>decide('approve');reject.onclick=()=>decide('reject');row.append(identity,role,approve,reject);output.appendChild(row);
-    });
-  }catch(e){if(orgId===pondoTeamState.orgId)output.textContent='Could not load requests. '+(e.message||e);}
+// A pending request remains readable only to the current confirmed owner.
+// The listener also populates the bell, including requests already pending
+// when the owner opens this workspace. It is not background push.
+let joinRequestUnsub=null,joinRequestGeneration=0;
+function stopJoinRequestWatch(){
+ joinRequestGeneration++;if(joinRequestUnsub)joinRequestUnsub();joinRequestUnsub=null;
+ window.pondoJoinNotices=[];const output=document.getElementById('teamJoinRequests');if(output)output.replaceChildren();
+ window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
 }
+function startJoinRequestWatch(orgId,uid){
+ const state=pondoTeamState;if(joinRequestUnsub||!orgId||!uid||state.role!=='owner'||!state.memberConfirmed)return;
+ const generation=++joinRequestGeneration,output=document.getElementById('teamJoinRequests');output.textContent='Loading requests…';
+ const current=()=>generation===joinRequestGeneration&&state.orgId===orgId&&state.uid===uid&&state.role==='owner'&&state.memberConfirmed;
+ joinRequestUnsub=onSnapshot(query(collection(firestoreDb,'organizations',orgId,'joinRequests'),where('status','==','pending'),limit(100)),{includeMetadataChanges:true},snap=>{
+  if(!current())return;
+  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){output.textContent='Waiting for server-confirmed requests…';window.pondoJoinNotices=[];window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();return;}
+  const requests=[];snap.forEach(d=>{const data=d.data();if(data.status==='pending')requests.push({uid:d.id,displayName:data.displayName,email:data.email,requestedAt:data.requestedAt?.toMillis?.()||0});});
+  renderJoinRequests(requests,orgId,uid);
+  window.pondoJoinNotices=requests.map(r=>({id:'join:'+encodeURIComponent(r.uid)+':'+r.requestedAt,kind:'joinRequest',type:'team',title:'Request to join',body:(r.displayName||r.email||'Someone')+' requested to join '+(state.orgName||'your workspace')+'.',ts:r.requestedAt,recipientUid:uid,orgId}));
+  window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
+ },err=>{if(current()){console.warn('Join requests unavailable:',err);output.textContent='Could not load requests. Check your connection and owner permissions, then reconnect.';window.pondoJoinNotices=[];window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();}});
+}
+function loadJoinRequests(){stopJoinRequestWatch();startJoinRequestWatch(pondoTeamState.orgId,pondoTeamState.uid);}
+function renderJoinRequests(requests,orgId,uid){
+ const output=document.getElementById('teamJoinRequests');output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
+ const verifyNote=document.createElement('p');verifyNote.textContent='Verify each requester through a trusted channel; displayed names and emails can be entered by the requester.';output.appendChild(verifyNote);
+ if(requests.length===100){const note=document.createElement('p');note.textContent='Showing up to 100 pending requests. Review these to see more.';output.appendChild(note);}
+ requests.forEach(request=>{
+  const row=document.createElement('div');row.className='team-member-row';row.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
+  const identity=document.createElement('div');identity.style.cssText='flex:1 1 100%;overflow-wrap:anywhere';identity.textContent=[request.displayName||'Unnamed user',request.email||request.uid].join(' · ');
+  const role=document.createElement('select');role.className='input';role.setAttribute('aria-label','Role for '+(request.displayName||request.email||'requester'));role.style.cssText='flex:1 1 140px;min-width:0';
+  [['reviewer','Viewer / Reviewer'],['project-manager','Project Manager'],['disbursing','Administrative Officer (AO) / Disbursing Officer']].forEach(([value,text])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=text;role.appendChild(opt)});
+  const approve=document.createElement('button'),reject=document.createElement('button');approve.type=reject.type='button';approve.className=reject.className='btn btn-light';approve.textContent='Approve';reject.textContent='Decline';
+  const decide=async decision=>{
+   if(!await confirmAction((decision==='approve'?'Approve':'Decline')+' the request from '+(request.displayName||request.email||request.uid)+'?'))return;
+   if(pondoTeamState.orgId!==orgId||pondoTeamState.uid!==uid||pondoTeamState.role!=='owner'||!pondoTeamState.memberConfirmed)return;
+   approve.disabled=reject.disabled=true;
+   try{await organizationCall('orgDecideRequest',{orgId,uid:request.uid,decision,role:role.value});}
+   catch(e){approve.disabled=reject.disabled=false;if(pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid)notify('Could not review request: '+(e.message||e));}
+  };
+  approve.onclick=()=>decide('approve');reject.onclick=()=>decide('reject');row.append(identity,role,approve,reject);output.appendChild(row);
+ });
+}
+
 async function myJoinRequests(){
   const output=document.getElementById('teamMyRequests'),uid=pondoTeamState.uid;output.textContent='Loading…';
   try{
@@ -13776,7 +13831,7 @@ window.pondoTeam = {
   downloadDraft: downloadTeamDraft,
   discardDraft: discardTeamDraft,
   createOrganization,
-  setDiscovery, searchOrganization, loadJoinRequests, myJoinRequests,
+  setDiscovery, searchOrganization, suggestOrganizations, loadJoinRequests, myJoinRequests,
   joinWithPastedInput,
   generateInvite,
   copyInviteLink,
@@ -13865,7 +13920,8 @@ async function initCollaboration(user) {
 }
 
 function teardownCollaboration() {
-  ['teamSearchResults','teamMyRequests','teamJoinRequests'].forEach(id=>document.getElementById(id)?.replaceChildren());
+  clearTimeout(teamSuggestTimer);teamSuggestGeneration++;teamSearchGeneration++;
+  ['teamSearchResults','teamSearchSuggestions','teamMyRequests','teamJoinRequests'].forEach(id=>document.getElementById(id)?.replaceChildren());
   const search=document.getElementById('teamSearchOrg'); if(search)search.value='';
   if (window.clearDescriptionSuggestions) window.clearDescriptionSuggestions();
   teardownOrgSubscriptions();
