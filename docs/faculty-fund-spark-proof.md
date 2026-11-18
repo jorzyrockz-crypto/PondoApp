@@ -402,3 +402,51 @@ it and recompute its unkeyed checksum, including changes that reconcile. The
 checker does not validate every field or receipt. Preserve it privately; do not
 import it or rely on it as a protected backup. Tested, authorized recovery
 remains an unresolved release blocker.
+
+### Offline published-rules comparison and rollout review
+
+Before any release decision, obtain a fresh **published**, not draft, copy of
+Firestore rules for the intended Firebase project and database from the
+Firebase console. Independently record the project, database, rules version,
+and retrieval time for the review; a copied file alone cannot establish any of
+those facts. Treat rules and review output as private operational material.
+Keep the copy outside this repository and do not commit it. Do not include
+credentials, tokens, or service-account keys.
+
+Run locally, substituting the actual file path (this does not contact Firebase):
+
+```sh
+node scripts/compare-faculty-rules.cjs /path/to/published-firestore.rules
+node scripts/compare-faculty-rules.cjs /path/to/published-firestore.rules --diff
+```
+
+The first command hashes the supplied file and compares exact bytes with the
+rules path configured in `firebase.json`, the repository test rules and the
+candidate; it also checks whether the candidate matches its generator. The
+optional second command prints the entire textual diff from the supplied file
+to the candidate. Output can include the full rules, so handle it privately.
+The script reads local files and invokes local Git for the diff; it never
+fetches rules, writes files, activates the app or deploys anything. A
+successful command means only that the comparison ran. Byte differences can
+also reflect formatting or line endings. Neither matching nor differing text
+establishes which rules are actually published or whether permissions are safe.
+Repeat with a fresh published copy immediately before any later decision,
+because the published version can change after this check.
+
+An authorized reviewer must examine **all** differences, not just Faculty
+Fund additions: existing organization and member access, workspace snapshots,
+invites, discovery, appearance, removal notices, test-workspace compatibility,
+and overlapping wildcard matches. Check that activation-control rules do not
+inadvertently grant access elsewhere, and assess rule expression/read limits,
+indexes, sensitive absence data and the ordinary-workspace workflow. Resolve
+any mismatch rather than replacing published rules blindly. The past report of
+missing workspaces after a rules change remains unexplained.
+
+This comparison is one input, **not** a rollout authorization or tested
+rollback. Before any later deployment, agree on a verified prior published
+rules version and app version, who can restore each, how to stop writes safely,
+how to preserve and reconcile any Faculty Fund records created after cutover,
+and how access will be verified. Merely reverting rules does not undo data or
+recover lost records. Protected, tested recovery, realistic quota/cap review,
+accounting and privacy/security review are still required. No production flag,
+marker, rules or data are changed by this procedure.
