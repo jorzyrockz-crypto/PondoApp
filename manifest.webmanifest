@@ -11,7 +11,7 @@
     "standalone",
     "browser"
   ],
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#f7f7f5",
   "theme_color": "#059669",
   "lang": "en",
