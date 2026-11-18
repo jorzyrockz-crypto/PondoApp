@@ -42,7 +42,7 @@ test('recovery lock cannot be started or finished without its matching session a
  const d=auth('owner'),header=ref(d,`sparkVerifiedBackups/${backupId}`),lock=ref(d,'sparkRestoreProof/current');
  await api.setDoc(header,{revision:5,createdBy:'owner',createdAt:api.serverTimestamp(),manifest:['sparkDiscoveryConfig/current']});
  await api.setDoc(ref(d,`sparkVerifiedBackups/${backupId}/collections/sparkDiscoveryConfig/entries/current`),{presidentUid:'president'});
- const sessionId='session123456789',state={backupId,sessionId,revision:6,remaining:1,createdBy:'owner',lastKind:null,lastId:null};await assertFails(api.setDoc(lock,state));
+ const sessionId='session123456789',state={backupId,sessionId,revision:6,remaining:1,manifest:['sparkDiscoveryConfig/current'],createdBy:'owner',lastKind:null,lastId:null};await assertFails(api.setDoc(lock,state));
  const b=api.writeBatch(d);b.set(lock,state);b.set(ref(d,'sparkRestoreProofSessions/'+sessionId),{backupId,revision:6,createdBy:'owner',state:'active'});b.update(ref(d,'sparkDiscoveryRevision/current'),{revision:6,updatedBy:'owner',updatedAt:api.serverTimestamp()});await b.commit();
  await assertFails(api.deleteDoc(lock));await assertFails(api.updateDoc(ref(d,'sparkDiscoveryRevision/current'),{revision:7,updatedBy:'owner',updatedAt:api.serverTimestamp()}));await assertFails(api.updateDoc(lock,{remaining:0,lastKind:'sparkDiscoveryConfig',lastId:'current'}));
  await assertFails(api.setDoc(ref(d,`sparkRestoreProof/current/sessions/${sessionId}/collections/sparkDiscoveryConfig/entries/current`),{done:true}));
