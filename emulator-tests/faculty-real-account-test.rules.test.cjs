@@ -22,7 +22,13 @@ test('test workspace permits the intended multi-account handover but denies nonm
  await owner.assignPresident('president','assignment');await ao.createPerson('sample','Sample Teacher');
  await ao.createPayment('payment',{personId:'sample',absenceDate:'2024-01-01',paymentDate:'2024-01-02',amountCents:25000});
  await ao.createRemittance('remittance',['payment']);await ao.addPayment('remittance','payment');await ao.submitRemittance('remittance');
- await assertFails(client('reviewer').accept('remittance'));await president.accept('remittance');
+ await assert.rejects(client('reviewer').accept('remittance'),/cannot be accepted/);
+ const reviewer=db('reviewer'),revision=(await api.getDoc(api.doc(reviewer,`organizations/${testOrg}/sparkDiscoveryRevision/current`))).data().revision;
+ const forged=api.writeBatch(reviewer);
+ forged.update(api.doc(reviewer,`organizations/${testOrg}/sparkDiscoveryRemittances/remittance`),{status:'accepted',acceptedBy:'reviewer',acceptedAt:api.serverTimestamp()});
+ forged.set(api.doc(reviewer,`organizations/${testOrg}/sparkDiscoveryWallets/remittance`),{status:'open',amountCents:25000,unspentCents:25000,acceptedAt:api.serverTimestamp(),revision:0,lastAllocation:null,lastRelease:null});
+ forged.set(api.doc(reviewer,`organizations/${testOrg}/sparkDiscoveryRevision/current`),{revision:revision+1,updatedAt:api.serverTimestamp(),updatedBy:'reviewer'});
+ await assertFails(forged.commit());await president.accept('remittance');
  const remittance=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryRemittances/remittance'))).data();
  assert.equal(remittance.status,'accepted');assert.equal(remittance.acceptedBy,'president');assert.ok(remittance.acceptedAt);
  const wallet=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryWallets/remittance'))).data();assert.equal(wallet.unspentCents,25000);
