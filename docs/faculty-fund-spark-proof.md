@@ -542,3 +542,11 @@ real-project quota/retention, recovery after a project-wide loss, and the
 published-rules comparison remain unresolved. A failed or interrupted restore
 can leave the fund locked; resume requires the matching file and session. No
 live Firebase data or rules have been changed.
+
+The latest integrated **emulator-only** rules proof denies ordinary member
+reads and collection lists during recovery. The owner can still fetch the
+specific saved paths needed to resume; the coordinator rechecks those records
+and reconciles them before releasing the lock. The full inventory is checked
+before the lock, and normal writes are blocked while it is held. Privileged
+administrator changes can still bypass that protocol. These generated-in-memory
+rules remain an experiment, not the published or release-candidate rules.

@@ -31,12 +31,18 @@
    if(canonical(plan(proposed).map(x=>x.kind+'/'+x.id).sort())!==canonical([...manifest].sort()))fail('Backup manifest is inconsistent');
    // Compare all currently existing records before taking the lock, so a
    // conflict or unlisted extra cannot strand the workspace in recovery.
-   for(const kind of Object.keys(collections)){
-    const qs=await api.getDocsFromServer(api.query(api.collection(db,`organizations/${orgId}/${kind}`),api.limit(1001)));guard();
-    if(!qs.metadata||qs.metadata.fromCache||qs.metadata.hasPendingWrites||!Array.isArray(qs.docs)||qs.docs.length>1000)fail('Live records cannot be safely checked');
-    for(const item of qs.docs){if(!item.metadata||item.metadata.fromCache||item.metadata.hasPendingWrites)fail('Live records cannot be safely checked');const key=kind+'/'+item.id;if(!copies.has(key)||canonical(item.data())!==canonical(copies.get(key)))fail('Live record differs from backup; no restore started');}
+   if(!existingLock.exists()){
+    for(const kind of Object.keys(collections)){
+     const qs=await api.getDocsFromServer(api.query(api.collection(db,`organizations/${orgId}/${kind}`),api.limit(1001)));guard();
+     if(!qs.metadata||qs.metadata.fromCache||qs.metadata.hasPendingWrites||!Array.isArray(qs.docs)||qs.docs.length>1000)fail('Live records cannot be safely checked');
+     for(const item of qs.docs){if(!item.metadata||item.metadata.fromCache||item.metadata.hasPendingWrites)fail('Live records cannot be safely checked');const key=kind+'/'+item.id;if(!copies.has(key)||canonical(item.data())!==canonical(copies.get(key)))fail('Live record differs from backup; no restore started');}
+    }
+    const liveConfig=await server(doc('sparkDiscoveryConfig/current'));if(liveConfig.exists()&&(!copies.has('sparkDiscoveryConfig/current')||canonical(liveConfig.data())!==canonical(copies.get('sparkDiscoveryConfig/current'))))fail('Live record differs from backup; no restore started');
+   }else{
+    // The first attempt checked the full inventory before locking. On resume,
+    // rules deny collection listings; individually check each saved path.
+    for(const {kind,id} of entries){const live=await server(doc(`${kind}/${id}`));if(live.exists()&&canonical(live.data())!==canonical(copies.get(kind+'/'+id)))fail('Live record differs from backup; no record was overwritten');}
    }
-   const liveConfig=await server(doc('sparkDiscoveryConfig/current'));if(liveConfig.exists()&&(!copies.has('sparkDiscoveryConfig/current')||canonical(liveConfig.data())!==canonical(copies.get('sparkDiscoveryConfig/current'))))fail('Live record differs from backup; no restore started');
    const lastVersion=await server(version);if(!lastVersion.exists()||lastVersion.data().revision!==expectedRevision)fail('Backup is stale; no restore started');
    await api.runTransaction(db,async tx=>{const [v,l,s]=await Promise.all([tx.get(version),tx.get(lock),tx.get(session)]);guard();if(!v.exists())fail('Backup is stale; no restore started');if(l.exists()){const x=l.data();if(x.backupId!==backupId||x.sessionId!==sessionId||x.revision!==meta.revision+1||v.data().revision!==x.revision||x.createdBy!==c.uid||!s.exists()||s.data().state!=='active')fail('Another restore is already in progress');}else{if(v.data().revision!==meta.revision)fail('Backup is stale; no restore started');if(s.exists())fail('Restore session cannot be reused');tx.update(version,{revision:meta.revision+1,updatedBy:c.uid,updatedAt:api.serverTimestamp()});tx.set(session,{backupId,revision:meta.revision+1,createdBy:c.uid,state:'active'});tx.set(lock,{backupId,sessionId,revision:meta.revision+1,remaining:manifest.length,manifest,createdBy:c.uid,lastKind:null,lastId:null});}});guard();
    for(const {kind,id} of entries){
@@ -47,11 +53,13 @@
     // dependent document reads of their own, subject to Firestore limits.
     await api.runTransaction(db,async tx=>{const [l,r]=await Promise.all([tx.get(lock),tx.get(receipt)]);guard();if(!l.exists()||l.data().revision!==meta.revision+1||l.data().sessionId!==sessionId||l.data().backupId!==backupId)fail('Restore lock or revision changed');if(r.exists()){if(!existing.exists()||r.data().done!==true)fail('Restore receipt is inconsistent');return;}if(!Number.isSafeInteger(l.data().remaining)||l.data().remaining<1)fail('Restore counter is invalid');if(!existing.exists())tx.set(original,saved);tx.set(receipt,{done:true});tx.update(lock,{remaining:l.data().remaining-1,lastKind:kind,lastId:id});});guard();
    }
-   // The owner-facing reader must verify the complete current ledger before
-   // unlocking. The isolated rules do not enforce this client-side check.
-   const restored=await makeReader(c,same).read();guard();if(restored.revision!==meta.revision+1||canonical(plan(restored).map(x=>x.kind+'/'+x.id).sort())!==canonical([...manifest].sort()))fail('Restored ledger does not match the backup');
-   for(const [kind,name] of Object.entries(collections))for(const item of restored.records[name]){const {id,...value}=item;if(canonical(value)!==canonical(copies.get(kind+'/'+id)))fail('Restored ledger does not match the backup');}
-   if(restored.config&&canonical(restored.config)!==canonical(copies.get('sparkDiscoveryConfig/current')))fail('Restored ledger does not match the backup');
+   // Re-read every restored record individually and reconcile while locked.
+   // Other clients need not be allowed to list a partially restored ledger.
+   const restoredRecords=Object.fromEntries(Object.values(collections).map(x=>[x,[]]));let restoredConfig=null;
+   for(const {kind,id} of entries){const item=await server(doc(`${kind}/${id}`));if(!item.exists()||canonical(item.data())!==canonical(copies.get(kind+'/'+id)))fail('Restored ledger does not match the backup');if(kind==='sparkDiscoveryConfig')restoredConfig=item.data();else restoredRecords[collections[kind]].push({...item.data(),id});}
+   if(restoredConfig){const a=restoredRecords.presidentHistory.find(x=>x.id===restoredConfig.assignmentId),ms=x=>typeof x?.toMillis==='function'?x.toMillis():NaN;if(!a||a.presidentUid!==restoredConfig.presidentUid||a.assignedBy!==restoredConfig.assignedBy||!Number.isFinite(ms(restoredConfig.assignedAt))||ms(restoredConfig.assignedAt)!==ms(a.assignedAt))fail('Restored President assignment is inconsistent');}else if(restoredRecords.presidentHistory.length)fail('Restored President assignment is missing');
+   const restoredProjection=project({confirmed:true,...restoredRecords}),restored={revision:meta.revision+1,records:restoredRecords,config:restoredConfig,projection:restoredProjection};
+   if(canonical(plan(restored).map(x=>x.kind+'/'+x.id).sort())!==canonical([...manifest].sort()))fail('Restored ledger does not match the backup');
    await api.runTransaction(db,async tx=>{const [v,l,s]=await Promise.all([tx.get(version),tx.get(lock),tx.get(session)]);guard();if(!v.exists()||v.data().revision!==meta.revision+1||!l.exists()||l.data().sessionId!==sessionId||l.data().backupId!==backupId||l.data().remaining!==0||!s.exists()||s.data().state!=='active')fail('Restore cannot be completed safely');tx.update(session,{state:'completed'});tx.update(version,{revision:meta.revision+2,updatedBy:c.uid,updatedAt:api.serverTimestamp()});tx.delete(lock);});guard();
    return {status:'experiment-restored',count:manifest.length,revision:meta.revision+2};
   }
