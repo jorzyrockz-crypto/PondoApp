@@ -523,3 +523,22 @@ notifications and older clients still need coordinated handling before this
 can be enabled. The integrated emulator scenario also covers eight roster
 members, a President-accepted payment and an expense; it is not an assertion
 that the real project's rules or quota have been verified.
+
+A disabled demo-only app connection now provides experimental owner download
+and restore controls, with a stored retry token and a server-confirmed session
+for interrupted work. The file includes a diagnostic copy and recovery-point
+identifier; restore compares the file's records with immutable source-verified
+server copies before use. **This is not a self-contained backup**: if the
+Firebase project or its server copies are lost, the file cannot restore them.
+It contains sensitive information. The flag `FACULTY_FUND_RESTORE_DEMO` is false,
+the adapter refuses non-demo projects, and it cannot be combined with real
+account or release-preview mode. The necessary recovery rules exist only as an
+in-memory emulator proof, not in deployed or candidate rules. Demo mode blocks
+normal operations during the lock and suppresses notifications/watchers.
+
+This does not establish production readiness. File authenticity, complete
+server-enforced source inventory, rules and app deployment, older clients,
+real-project quota/retention, recovery after a project-wide loss, and the
+published-rules comparison remain unresolved. A failed or interrupted restore
+can leave the fund locked; resume requires the matching file and session. No
+live Firebase data or rules have been changed.

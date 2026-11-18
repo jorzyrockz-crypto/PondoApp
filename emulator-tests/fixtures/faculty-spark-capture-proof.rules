@@ -3,7 +3,8 @@ rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   function member(o) { return /databases/$(database)/documents/organizations/$(o)/members/$(request.auth.uid); }
-  function owner(o) { return request.auth != null && exists(member(o)) && get(member(o)).data.role == 'owner'; }
+  function signed(o) { return request.auth != null && exists(member(o)); }
+  function owner(o) { return signed(o) && get(member(o)).data.role == 'owner'; }
   function version(o) { return /databases/$(database)/documents/organizations/$(o)/sparkDiscoveryRevision/current; }
   function header(o,b) { return /databases/$(database)/documents/organizations/$(o)/sparkVerifiedBackups/$(b); }
   function lock(o) { return /databases/$(database)/documents/organizations/$(o)/sparkRestoreProof/current; }
@@ -47,7 +48,7 @@ service cloud.firestore {
    allow delete: if false;
   }
   match /organizations/{o}/sparkRestoreProof/{id} {
-   allow read: if owner(o) && id == 'current';
+   allow read: if signed(o) && id == 'current';
    allow create: if owner(o) && id == 'current'
      && request.resource.data.keys().hasOnly(['backupId','revision','remaining','createdBy','lastKind','lastId','sessionId','manifest'])
      && request.resource.data.backupId is string && request.resource.data.sessionId is string && request.resource.data.sessionId.matches('^[A-Za-z0-9_-]{16,128}$') && request.resource.data.createdBy == request.auth.uid

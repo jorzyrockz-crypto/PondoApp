@@ -35,7 +35,7 @@ test('uncertain assignment keeps its retry token and never reports success',asyn
 });
 function watchSetup(){
  const start=html.indexOf('let facultyStateUnsub=null'),end=html.indexOf('\nfunction teardownOrgSubscriptions()',start);
- const listeners=[],state={orgId:'org~faculty fund test school',uid:'owner',memberConfirmed:true},ctx={pondoTeamState:state,window:{pondoFacultyAPI:{capabilities:{mode:'firebase-test-only'}},PondoFacultyFundUI:{reset(){}}},firestoreDb:{},doc:(_db,...p)=>p,collection:(_db,...p)=>p,query:p=>p,limit:n=>n,onSnapshot:(p,opts,next,error)=>{listeners.push({path:p,next,error});return ()=>{}},renderTeamPanel(){},console};
+ const listeners=[],state={orgId:'org~faculty fund test school',uid:'owner',memberConfirmed:true},ctx={FACULTY_FUND_RESTORE_DEMO:false,pondoTeamState:state,window:{pondoFacultyAPI:{capabilities:{mode:'firebase-test-only'}},PondoFacultyFundUI:{reset(){}}},firestoreDb:{},doc:(_db,...p)=>p,collection:(_db,...p)=>p,query:p=>p,limit:n=>n,onSnapshot:(p,opts,next,error)=>{listeners.push({path:p,next,error});return ()=>{}},renderTeamPanel(){},console};
  vm.runInNewContext(html.slice(start,end)+'\nthis.startFacultyWatch=startFacultyWatch;this.stopFacultyWatch=stopFacultyWatch;this.presidentStatus=()=>({known:facultyPresidentKnown,uid:facultyPresidentUid});',ctx);return {ctx,state,listeners};
 }
 test('President label follows only confirmed config and clears on workspace change or cached snapshots',()=>{
@@ -66,3 +66,5 @@ test('confirmed Spark listener updates notify only the scoped member and stop on
 test('release-preview notifications use the same existing organization without the test-name restriction',()=>{
  const t=watchSetup();t.state.orgId='org~normal school';t.ctx.window.pondoFacultyAPI.capabilities.mode='release-preview-only';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[0].path.at(-2),'sparkDiscoveryRevision');assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig');
 });
+
+test('restore demo suppresses notifications and watchers while recovery is under development',()=>{const t=watchSetup();t.ctx.FACULTY_FUND_RESTORE_DEMO=true;t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,0);});
