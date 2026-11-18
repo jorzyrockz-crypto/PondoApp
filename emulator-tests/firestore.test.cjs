@@ -204,3 +204,21 @@ test('owner receives pending requester identity in live snapshots and decisions 
   const removed=next();await owner.service.orgDecideRequest({orgId,uid:'guest',decision:'approve',role:'reviewer'});assert.equal((await removed).length,0);
  }finally{unsubscribe();}
 });
+
+test('approved requester auto-adds their own workspace and account-private notice state',async()=>{
+ const {createWorkspaceApprovalTracker}=await import('../workspace-approval.mjs');
+ const owner=directory('owner'),guest=directory('guest');const {orgId}=await owner.service.orgCreate({name:'Auto Join Test'});
+ await owner.service.orgSetVisibility({orgId,discoverable:true});await setDoc(ref(guest.db,'users/guest'),{orgMemberships:[],activeOrganizationId:null});await guest.service.orgRequestJoin({orgId});
+ await assertFails(getDoc(ref(owner.db,`users/guest/organizationRequests/${orgId}`)));
+ let done;const received=new Promise(resolve=>done=resolve),events=[];
+ const tracker=createWorkspaceApprovalTracker({db:guest.db,api,isCurrent:uid=>uid==='guest',onChange:items=>{events.push(items);if(items.length)done(items[0]);},onMembership:()=>{},onError:err=>console.error(err)});
+ try{
+  tracker.start('guest');await owner.service.orgDecideRequest({orgId,uid:'guest',decision:'approve',role:'reviewer'});
+  let timer;const item=await Promise.race([received,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Approval listener timeout')),15000)})]).finally(()=>clearTimeout(timer));
+  assert.equal(item.orgId,orgId);assert.equal(item.newSeen,false);assert.equal(item.read,false);
+  const profile=(await getDoc(ref(guest.db,'users/guest'))).data();assert.deepEqual(profile.orgMemberships,[orgId]);assert.equal(profile.activeOrganizationId,null);
+  await tracker.markSeen(orgId,item.key);await tracker.markRead(orgId,item.key);
+  const row=(await getDoc(ref(guest.db,`users/guest/organizationRequests/${orgId}`))).data();assert.equal(row.approvalNewSeen,true);assert.equal(row.approvalNoticeRead,true);
+  await assertFails(updateDoc(ref(owner.db,`users/guest/organizationRequests/${orgId}`),{approvalNoticeRead:false}));
+ }finally{tracker.stop();}
+});

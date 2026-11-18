@@ -39,8 +39,14 @@ function watchSetup(){
  vm.runInNewContext(html.slice(start,end)+'\nthis.startFacultyWatch=startFacultyWatch;this.stopFacultyWatch=stopFacultyWatch;this.presidentStatus=()=>({known:facultyPresidentKnown,uid:facultyPresidentUid});',ctx);return {ctx,state,listeners};
 }
 test('President label follows only confirmed config and clears on workspace change or cached snapshots',()=>{
- const t=watchSetup();t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,1);assert.equal(t.listeners[0].path.at(-2),'sparkDiscoveryConfig');const l=t.listeners[0],snap=(id,fromCache=false)=>({metadata:{fromCache,hasPendingWrites:false},exists:()=>!!id,data:()=>({presidentUid:id})});
+ const t=watchSetup();t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,2);assert.equal(t.listeners[1].path.at(-2),'sparkDiscoveryConfig');const l=t.listeners[1],snap=(id,fromCache=false)=>({metadata:{fromCache,hasPendingWrites:false},exists:()=>!!id,data:()=>({presidentUid:id})});
  l.next(snap('viewer',true));assert.equal(t.ctx.presidentStatus().known,false);l.next(snap('viewer'));assert.equal(t.ctx.presidentStatus().uid,'viewer');assert.equal(t.ctx.presidentStatus().known,true);
  l.next(snap('other',true));assert.equal(t.ctx.presidentStatus().known,false);t.ctx.stopFacultyWatch();t.state.orgId='org~faculty fund test other';l.next(snap('viewer'));assert.equal(t.ctx.presidentStatus().uid,null);assert.equal(t.ctx.presidentStatus().known,false);
 });
 test('normal workspaces never start the test-only President config listener',()=>{const t=watchSetup();t.state.orgId='org~normal school';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,0)});
+
+test('test-mode revision listener only schedules confirmed updates for the current workspace',()=>{
+ const t=watchSetup();let count=0;t.ctx.window.PondoFacultyFundUI.scheduleLiveRefresh=()=>count++;t.ctx.startFacultyWatch(t.state.orgId,'owner');const l=t.listeners[0];assert.equal(l.path.at(-2),'sparkDiscoveryRevision');
+ l.next({metadata:{fromCache:true,hasPendingWrites:false}});l.next({metadata:{fromCache:false,hasPendingWrites:true}});assert.equal(count,0);l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
+ t.ctx.stopFacultyWatch();l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
+});

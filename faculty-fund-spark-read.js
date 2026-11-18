@@ -14,14 +14,17 @@
   const marker=s=>{stable(s);if(!s.exists())return 0;const n=s.data().revision;if(!Number.isSafeInteger(n)||n<1)fail('Faculty Fund revision is invalid');return n;};
   async function read(){
    current();const first=await getDocFromServer(ref('sparkRevision','current')),revision=marker(first);current();
-   const configSnapshot=await getDocFromServer(ref('sparkConfig','current'));stable(configSnapshot);current();
    const paths={people:'sparkPeople',payments:'sparkPayments',slots:'sparkPaymentSlots',remittances:'sparkRemittances',lines:'sparkLines',wallets:'sparkWallets',expenses:'sparkExpenseDrafts',allocations:'sparkAllocations',corrections:'sparkCorrections',presidentHistory:'sparkPresidentHistory',memberReceipts:'sparkMemberReceipts',remittanceReceipts:'sparkRemittanceReceipts'};
-   const records={};
-   for(const [name,path] of Object.entries(paths)){
-    const snapshot=await getDocsFromServer(query(collection(db,`${root}/${nameOf(path)}`),limit(maxDocuments+1)));stable(snapshot);current();
-    if(snapshot.size>maxDocuments)fail('Faculty Fund exceeds the safe loading limit; archival is required');
-    records[name]=snapshot.docs.map(item=>{stable(item);return {...item.data(),id:item.id};});
-   }
+   // These independent server reads can run together. The revision read after
+   // all of them still rejects a mixed snapshot if any write raced the load.
+   const [configSnapshot,entries]=await Promise.all([
+    getDocFromServer(ref('sparkConfig','current')),
+    Promise.all(Object.entries(paths).map(async ([name,path])=>{
+     const snapshot=await getDocsFromServer(query(collection(db,`${root}/${nameOf(path)}`),limit(maxDocuments+1)));stable(snapshot);current();
+     if(snapshot.size>maxDocuments)fail('Faculty Fund exceeds the safe loading limit; archival is required');
+     return [name,snapshot.docs.map(item=>{stable(item);return {...item.data(),id:item.id};})];
+    }))
+   ]);stable(configSnapshot);current();const records=Object.fromEntries(entries);
    const last=await getDocFromServer(ref('sparkRevision','current')),end=marker(last);current();
    if(end!==revision)fail('Faculty Fund changed while loading; refresh and try again');
    if(revision===0&&(configSnapshot.exists()||Object.values(records).some(items=>items.length)))fail('Faculty Fund revision is missing; recovery is required');

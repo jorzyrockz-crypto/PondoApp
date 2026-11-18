@@ -4678,6 +4678,8 @@ body.dark-mode .team-collab-avatar,body.dark-mode .team-collab-more{border-color
 .team-switch-item .tsi-check{width:16px;flex-shrink:0;color:var(--accent,#059669);font-weight:800;}
 .team-switch-item .tsi-text{display:flex;flex-direction:column;gap:1px;min-width:0;}
 .team-switch-item .tsi-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.workspace-new-tag{margin-left:auto;padding:3px 7px;border-radius:999px;background:#d6f5e5;color:#076443;font-size:10px;font-weight:800;letter-spacing:.04em}
+body.dark-mode .workspace-new-tag{background:#195b43;color:#d4fbe7}
 .team-switch-item .tsi-role{font-size:11px;font-weight:600;color:var(--ink2);}
 .team-switch-item.active{background:var(--surface2,#f4f4f2);}
 .header-avatar-wrap{position:relative;}
@@ -9042,7 +9044,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 89</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 91</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9064,7 +9066,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='89', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='91', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9372,14 +9374,14 @@ function renderTeamSwitcherMenu(){
   menu.innerHTML=rows.map(r=>{
     const active=r.key===activeKey;
     const keyAttr=escapeTeamText(r.key).replace(/"/g,'&quot;');
-    const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span></button>';
+    const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span>'+(window.pondoWorkspaceApprovalItems?.some(item=>item.recipientUid===window.pondoCurrentUser?.uid&&item.orgId===r.key&&!item.newSeen)?'<span class="workspace-new-tag">New</span>':'')+'</button>';
     return rowHtml+((active&&facepileHtml)?'<div class="team-switch-facepile">'+facepileHtml+'</div>':'');
   }).join('')
   +'<div class="team-switch-divider"></div>'
   +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openTeamModal()"><span class="tsi-text">Manage team</span></button>';
 }
-function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(open){renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();if(window.closeNotifCenter)window.closeNotifCenter();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;if(wasOpen)window.pondoMarkVisibleWorkspaceNewsSeen?.(menu);menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
+function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(!open){closeTeamSwitcher();return;}renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();if(window.closeNotifCenter)window.closeNotifCenter();menu.hidden=false;button.setAttribute('aria-expanded','true')}
 function refreshTeamSwitcherMenuIfOpen(){const menu=document.getElementById('teamSwitcherMenu');if(menu&&!menu.hidden)renderTeamSwitcherMenu();if(window.refreshHeaderAvatarMenuIfOpen)window.refreshHeaderAvatarMenuIfOpen();}
 window.closeTeamSwitcher=closeTeamSwitcher;
 window.renderTeamSwitcherMenu=renderTeamSwitcherMenu;
@@ -9404,7 +9406,7 @@ function renderHeaderAvatarMenu(){
   const rowsHtml=rows.map(r=>{
     const active=r.key===activeKey;
     const keyAttr=escapeTeamText(r.key).replace(/"/g,'&quot;');
-    const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span></button>';
+    const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span>'+(window.pondoWorkspaceApprovalItems?.some(item=>item.recipientUid===window.pondoCurrentUser?.uid&&item.orgId===r.key&&!item.newSeen)?'<span class="workspace-new-tag">New</span>':'')+'</button>';
     return rowHtml+((active&&facepileHtml)?'<div class="team-switch-facepile">'+facepileHtml+'</div>':'');
   }).join('');
   const user=window.pondoCurrentUser;
@@ -9419,8 +9421,8 @@ function renderHeaderAvatarMenu(){
     +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();openTeamModal()"><span class="tsi-text">Manage team</span></button>'
     +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();if(window.pondoSignOut)window.pondoSignOut();"><span class="tsi-text">Sign out</span></button>';
 }
-function closeHeaderAvatarMenu(restoreFocus=false){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
-function toggleHeaderAvatarMenu(){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let open=menu.hidden;if(open){renderHeaderAvatarMenu();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeNotifCenter)window.closeNotifCenter();}menu.hidden=!open;button.setAttribute('aria-expanded',String(open))}
+function closeHeaderAvatarMenu(restoreFocus=false){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;if(wasOpen)window.pondoMarkVisibleWorkspaceNewsSeen?.(menu);menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
+function toggleHeaderAvatarMenu(){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let open=menu.hidden;if(!open){closeHeaderAvatarMenu();return;}renderHeaderAvatarMenu();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeNotifCenter)window.closeNotifCenter();menu.hidden=false;button.setAttribute('aria-expanded','true')}
 function refreshHeaderAvatarMenuIfOpen(){const menu=document.getElementById('headerAvatarMenu');if(menu&&!menu.hidden)renderHeaderAvatarMenu();}
 window.closeHeaderAvatarMenu=closeHeaderAvatarMenu;
 window.renderHeaderAvatarMenu=renderHeaderAvatarMenu;
@@ -9457,8 +9459,9 @@ function visibleNotifications(){
   const state=window.pondoTeamState, uid=window.pondoCurrentUser?.uid;
   const local=loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
   const account=(window.pondoRemovalNotices||[]).filter(n=>uid&&n.recipientUid===uid);
+  const approvals=(window.pondoWorkspaceApprovalItems||[]).filter(n=>uid&&n.recipientUid===uid).map(n=>({id:'approved:'+encodeURIComponent(n.orgId),kind:'workspaceApproval',type:'account',title:'Workspace request approved',body:'You joined '+n.name+'. Find it in your workspace menu.',ts:n.ts,read:n.read,recipientUid:uid,orgId:n.orgId,approvalKey:n.key}));
   const join=(window.pondoJoinNotices||[]).filter(n=>uid&&n.recipientUid===uid&&state?.orgId===n.orgId&&state.memberConfirmed&&state.role==='owner').map(n=>({...n,read:joinNoticeWasRead(n.id)}));
-  return local.concat(account,join).sort((a,b)=>b.ts-a.ts);
+  return local.concat(account,join,approvals).sort((a,b)=>b.ts-a.ts);
 }
 function joinNoticeKey(){const uid=window.pondoCurrentUser?.uid,orgId=window.pondoTeamState?.orgId;return uid&&orgId?'ft_join_notice_read_v1:'+encodeURIComponent(uid)+':'+encodeURIComponent(orgId):null;}
 function joinNoticeReadIds(){try{const key=joinNoticeKey(),v=key&&JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
@@ -9480,8 +9483,8 @@ function pushNotification({type,title,body,action,recipientUid,orgId,approverOnl
   return entry;
 }
 window.pushNotification=pushNotification;
-function markNotificationRead(id){if(id.startsWith('join:')){markJoinNoticesRead([id]);return;}if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
-function markAllNotificationsRead(){markJoinNoticesRead(visibleNotifications().filter(n=>n.kind==='joinRequest').map(n=>n.id));for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
+function markNotificationRead(id){if(id.startsWith('approved:')){const n=visibleNotifications().find(n=>n.id===id&&n.kind==='workspaceApproval');if(n)window.pondoMarkApprovalRead?.(n.orgId,n.approvalKey);return;}if(id.startsWith('join:')){markJoinNoticesRead([id]);return;}if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
+function markAllNotificationsRead(){for(const n of visibleNotifications().filter(n=>n.kind==='workspaceApproval'&&!n.read))window.pondoMarkApprovalRead?.(n.orgId,n.approvalKey);markJoinNoticesRead(visibleNotifications().filter(n=>n.kind==='joinRequest').map(n=>n.id));for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
 function updateNotifBadge(){const btn=document.getElementById('notifBellBtn'),badge=document.getElementById('notifBellCount');if(!btn||!badge)return;const count=unreadNotificationCount();badge.hidden=count===0;badge.textContent=count>99?'99+':String(count)}
 window.updateNotifBadge=updateNotifBadge;
@@ -9505,7 +9508,7 @@ function renderNotifCenter(){
   const canAskPermission=('Notification' in window)&&Notification.permission==='default';
   const permissionDenied=('Notification' in window)&&Notification.permission==='denied';
   let html='<div class="notif-center-head"><strong>Notifications</strong>'+(list.some(n=>!n.read)?'<button type="button" class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>':'')+'</div>';
-  html+='<div class="notif-permission-row"><span>Most alerts are device-local. Workspace removal notices are delivered to your account when you open the app online. Older unscoped alerts are hidden for privacy.</span></div>';
+  html+='<div class="notif-permission-row"><span>Most alerts are device-local. Workspace approvals and removal notices are delivered to your account when you open the app online. Older unscoped alerts are hidden for privacy.</span></div>';
   if(window.pondoRemovalInboxUnavailable)html+='<div class="notif-permission-row"><span>Workspace removal notices are unavailable. Check your connection and access.</span></div>';
   if(canAskPermission){
     html+='<div class="notif-permission-row"><span>Get alerts here even when this tab isn\u2019t focused.</span><button type="button" onclick="requestNotifPermission()">Enable</button></div>';
@@ -9528,6 +9531,7 @@ function renderNotifCenter(){
 window.renderNotifCenter=renderNotifCenter;
 function notificationAction(n){
   if(n.kind==='joinRequest')return {joinRequests:true};
+  if(n.kind==='workspaceApproval')return {workspaceMenu:true};
   const allowed=['dashboard','funds','projects','contributions','transactions','refunds','report'];
   if(n.action&&allowed.includes(n.action.tab))return n.action;
   if(n.type!=='team')return null;
@@ -9552,6 +9556,7 @@ function openNotification(id){
   renderNotifCenter();
   if(action){
     closeNotifCenter();
+    if(action.workspaceMenu){if(window.matchMedia('(max-width:480px)').matches)toggleHeaderAvatarMenu();else toggleTeamSwitcher();return;}
     if(action.joinRequests){openTeamModal();document.getElementById('teamDiscoveryOwner')?.scrollIntoView({block:'start'});return;}
     switchTab(action.tab);
     if(action.tab==='funds'&&action.facultyFund)window.PondoFacultyFundUI?.open();
@@ -12459,6 +12464,7 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
 <script>window.PondoFacultyFundUI?.mount();</script>
 <script type="module">
 import { createOrganizationDirectory } from "./organization-firestore.mjs";
+import { createWorkspaceApprovalTracker } from "./workspace-approval.mjs";
 // Firebase Authentication — gates access to the Pondo fund tracker.
 // Loaded via the official CDN ES-module build (no bundler/build step required).
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -12496,7 +12502,8 @@ import {
   serverTimestamp,
   writeBatch,
   runTransaction,
-  arrayUnion
+  arrayUnion,
+  arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -13040,6 +13047,9 @@ function startFacultyWatch(orgId,uid){
  const deliver=()=>{if(!current()||!gotState||!gotConfig)return;try{window.processFacultyNotifications?.(facultyState||{remittances:[]},pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
  const failed=err=>{if(!current())return;console.warn('Faculty Fund updates unavailable:',err);stopFacultyWatch();renderTeamPanel();window.PondoFacultyFundUI?.reset();};
  if(!isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'facultyFund','state'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;facultyState=snap.exists()?snap.data():null;gotState=true;deliver();window.PondoFacultyFundUI?.refresh();},failed);
+ // Test-mode writes atomically advance this marker. Only use confirmed changes
+ // as an invalidation signal; the UI still performs its guarded server read.
+ if(isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'sparkDiscoveryRevision','current'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;window.PondoFacultyFundUI?.scheduleLiveRefresh?.();},failed);
  const configPath=isTest?['sparkDiscoveryConfig','current']:['facultyFund','config'];
  facultyConfigUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,...configPath),{includeMetadataChanges:true},snap=>{
   if(!current())return;
@@ -13342,19 +13352,19 @@ async function switchActiveWorkspace(key) {
 // switcher and Team can list them. Self-heals orgMemberships if
 // a membership doc was removed (e.g. an owner removed this user) while this
 // device wasn't actively subscribed to that org.
+let membershipRefreshGeneration=0;
 async function refreshMemberships() {
+  const generation=++membershipRefreshGeneration;
   const uid = pondoTeamState.uid;
   if (!uid) { pondoTeamState.memberships = []; return; }
   const ids = pondoTeamState.orgMemberships.slice();
   const results = [];
-  let changed = false;
+  const missing = [];
   for (const orgId of ids) {
     try {
-      const [orgSnap, memberSnap] = await Promise.all([
-        getDoc(doc(firestoreDb, 'organizations', orgId)),
-        getDoc(doc(firestoreDb, 'organizations', orgId, 'members', uid)),
-      ]);
-      if (!memberSnap.exists()) { changed = true; continue; }
+      const memberSnap = await getDocFromServer(doc(firestoreDb, 'organizations', orgId, 'members', uid));
+      if (!memberSnap.exists()) { missing.push(orgId); continue; }
+      const orgSnap = await getDoc(doc(firestoreDb, 'organizations', orgId));
       results.push({
         orgId,
         name: orgSnap.exists() ? (orgSnap.data().name || 'Organization') : 'Organization',
@@ -13365,11 +13375,20 @@ async function refreshMemberships() {
       results.push({ orgId, name: pondoTeamState.orgId === orgId ? (pondoTeamState.orgName || 'Organization') : 'Organization', role: pondoTeamState.orgId === orgId ? pondoTeamState.role : '' });
     }
   }
-  pondoTeamState.memberships = results;
-  if (changed) {
-    pondoTeamState.orgMemberships = results.map((m) => m.orgId);
-    try { await setDoc(doc(firestoreDb, 'users', uid), { orgMemberships: pondoTeamState.orgMemberships }, { merge: true }); } catch (e) { /* non-fatal */ }
-  }
+  if(uid!==pondoTeamState.uid||uid!==window.pondoCurrentUser?.uid||generation!==membershipRefreshGeneration)return;
+  // Recheck removals transactionally: a concurrent re-approval must not be
+  // erased, and arrayRemove avoids overwriting another device's new entries.
+  let removed=[];
+  if(missing.length)try{removed=await runTransaction(firestoreDb,async tx=>{
+    const profile=doc(firestoreDb,'users',uid), checks=await Promise.all(missing.map(id=>tx.get(doc(firestoreDb,'organizations',id,'members',uid))));
+    const absent=missing.filter((id,i)=>!checks[i].exists());
+    if(uid!==pondoTeamState.uid||uid!==window.pondoCurrentUser?.uid||generation!==membershipRefreshGeneration)return [];
+    if(absent.length)tx.set(profile,{orgMemberships:arrayRemove(...absent)},{merge:true});return absent;
+  });}catch(e){/* Keep uncertain memberships instead of silently losing them. */}
+  if(uid!==pondoTeamState.uid||uid!==window.pondoCurrentUser?.uid||generation!==membershipRefreshGeneration)return;
+  const removedSet=new Set(removed), currentIds=pondoTeamState.orgMemberships.filter(id=>!removedSet.has(id));
+  pondoTeamState.orgMemberships=currentIds;
+  pondoTeamState.memberships=currentIds.map(id=>results.find(m=>m.orgId===id)||pondoTeamState.memberships.find(m=>m.orgId===id)||{orgId:id,name:'Organization',role:''});
   if (window.renderTeamSwitcherMenu) window.renderTeamSwitcherMenu();
   if (window.refreshHeaderAvatarMenuIfOpen) window.refreshHeaderAvatarMenuIfOpen();
   renderTeamPanel();
@@ -13381,7 +13400,7 @@ async function handleRemovedFromOrg() {
   const fallback = pondoTeamState.orgMemberships[0] || 'personal';
   try {
     await setDoc(doc(firestoreDb, 'users', pondoTeamState.uid), {
-      orgMemberships: pondoTeamState.orgMemberships,
+      orgMemberships: arrayRemove(removedOrgId),
       activeOrganizationId: fallback === 'personal' ? null : fallback,
     }, { merge: true });
   } catch (e) { /* non-fatal */ }
@@ -13474,7 +13493,7 @@ async function joinWithInviteCode(code) {
   });
   pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, orgId]));
   await setDoc(doc(firestoreDb, 'users', user.uid), {
-    orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgId,
+    orgMemberships: arrayUnion(orgId), activeOrganizationId: orgId,
   }, { merge: true });
   await switchActiveWorkspace(orgId);
   await refreshMemberships();
@@ -13929,18 +13948,36 @@ function legacyMigrateUserDoc(userSnap) {
   return { orgMemberships, activeOrganizationId };
 }
 
+const approvalTracker=createWorkspaceApprovalTracker({db:firestoreDb,api:{doc,collection,query,limit,onSnapshot,runTransaction,arrayUnion,serverTimestamp},
+ isCurrent:uid=>window.pondoCurrentUser?.uid===uid&&pondoTeamState.uid===uid,
+ onChange:items=>{window.pondoWorkspaceApprovalItems=items.map(item=>({...item,recipientUid:pondoTeamState.uid}));window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();window.refreshTeamSwitcherMenuIfOpen?.();},
+ onMembership:orgId=>{if(!pondoTeamState.orgMemberships.includes(orgId)){pondoTeamState.orgMemberships=[...pondoTeamState.orgMemberships,orgId];void refreshMemberships();}},
+ onMissing:orgId=>{if(pondoTeamState.orgMemberships.includes(orgId))void refreshMemberships();},
+ onError:err=>{console.warn('Workspace approval sync unavailable:',err);}});
+window.addEventListener('online',()=>{const uid=pondoTeamState.uid;if(uid&&window.pondoCurrentUser?.uid===uid)approvalTracker.start(uid);});
+window.pondoMarkApprovalRead=(orgId,key)=>approvalTracker.markRead(orgId,key);
+window.pondoMarkVisibleWorkspaceNewsSeen=menu=>{const visible=new Set([...menu.querySelectorAll('.team-switch-item')].filter(el=>el.querySelector('.workspace-new-tag')).map(el=>el.dataset.wsKey));for(const item of window.pondoWorkspaceApprovalItems||[])if(item.recipientUid===window.pondoCurrentUser?.uid&&visible.has(item.orgId)&&!item.newSeen)void approvalTracker.markSeen(item.orgId,item.key);};
+
 async function initCollaboration(user) {
   pondoTeamState.uid = user.uid;
   renderTeamPanel();
   try {
     const userRef = doc(firestoreDb, 'users', user.uid);
     const userSnap = await getDoc(userRef);
-    const migrated = legacyMigrateUserDoc(userSnap);
+    let migrated = legacyMigrateUserDoc(userSnap);
+    const initial=userSnap.exists()?userSnap.data():{};
+    if(!Array.isArray(initial.orgMemberships)||!Object.prototype.hasOwnProperty.call(initial,'activeOrganizationId'))try{
+      // Only migrate missing fields, against the latest server version. Never
+      // overwrite a workspace added concurrently by another device.
+      migrated=await runTransaction(firestoreDb,async tx=>{const latest=await tx.get(userRef),data=latest.exists()?latest.data():{},next=legacyMigrateUserDoc(latest),patch={};
+        if(window.pondoCurrentUser?.uid!==user.uid||pondoTeamState.uid!==user.uid)return next;
+        if(!Array.isArray(data.orgMemberships))patch.orgMemberships=next.orgMemberships;
+        if(!Object.prototype.hasOwnProperty.call(data,'activeOrganizationId'))patch.activeOrganizationId=next.activeOrganizationId||null;
+        if(Object.keys(patch).length)tx.set(userRef,patch,{merge:true});return next;});
+    }catch(e){/* offline: use the cached view without overwriting the server */}
+    if(window.pondoCurrentUser?.uid!==user.uid||pondoTeamState.uid!==user.uid)return;
     pondoTeamState.orgMemberships = migrated.orgMemberships;
     let orgId = migrated.activeOrganizationId;
-    try {
-      await setDoc(userRef, { orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgId || null }, { merge: true });
-    } catch (e) { /* non-fatal */ }
 
     const pendingInvite = getPendingInviteCode();
     if (pendingInvite) {
@@ -13948,6 +13985,7 @@ async function initCollaboration(user) {
         await joinWithInviteCode(pendingInvite);
         clearInviteFromUrl();
         await refreshMemberships();
+        if(window.pondoCurrentUser?.uid===user.uid&&pondoTeamState.uid===user.uid)approvalTracker.start(user.uid);
         return;
       } catch (err) {
         console.warn('Could not join via invite link:', err);
@@ -13958,10 +13996,10 @@ async function initCollaboration(user) {
     if (orgId) {
       try {
         const memberSnap = await getDoc(doc(firestoreDb, 'organizations', orgId, 'members', user.uid));
-        if (!memberSnap.exists()) {
+        if (!memberSnap.exists() && !memberSnap.metadata.fromCache) {
           pondoTeamState.orgMemberships = pondoTeamState.orgMemberships.filter((id) => id !== orgId);
           orgId = pondoTeamState.orgMemberships[0] || null;
-          try { await setDoc(userRef, { orgMemberships: pondoTeamState.orgMemberships, activeOrganizationId: orgId }, { merge: true }); } catch (e) { /* non-fatal */ }
+          try { await setDoc(userRef, { orgMemberships: arrayRemove(migrated.activeOrganizationId), activeOrganizationId: orgId }, { merge: true }); } catch (e) { /* non-fatal */ }
         }
       } catch (e) {
         orgId = null;
@@ -13975,6 +14013,7 @@ async function initCollaboration(user) {
       maybeShowTeamOnboarding();
     }
     await refreshMemberships();
+    if(window.pondoCurrentUser?.uid===user.uid&&pondoTeamState.uid===user.uid)approvalTracker.start(user.uid);
   } catch (err) {
     console.warn('Could not initialize collaboration:', err);
     renderTeamPanel();
@@ -13982,6 +14021,7 @@ async function initCollaboration(user) {
 }
 
 function teardownCollaboration() {
+  approvalTracker.stop();membershipRefreshGeneration++;
   clearTimeout(teamSuggestTimer);teamSuggestGeneration++;teamSearchGeneration++;
   ['teamSearchResults','teamSearchSuggestions','teamMyRequests','teamJoinRequests'].forEach(id=>document.getElementById(id)?.replaceChildren());
   const search=document.getElementById('teamSearchOrg'); if(search)search.value='';

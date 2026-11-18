@@ -29,7 +29,7 @@
   busy=record.requestId;render();
   try{const {channel:ignored,...payload}=record;const result=await api()[channel]({orgId:c.orgId,...payload});clearPending(c,record);if(same(c,context())){await read();message(result?.backupId&&record.operation==='saveBackup'?'Recovery point saved. Keep this ID securely: '+result.backupId:result?.status?'Server status: '+String(result.status)+'.':'Saved and confirmed by the server.')}return result;}
   catch(e){if(definitive(e))clearPending(c,record);if(same(c,context())){render();message(definitive(e)?(e.message||'The change was not accepted.'):'The result is unconfirmed. Retry the same request before making another change.');}throw e}
-  finally{if(busy===record.requestId)busy=false;if(same(c,context()))render();}
+  finally{if(busy===record.requestId)busy=false;if(livePending)scheduleLiveRefresh();if(same(c,context()))render();}
  }
  async function mutate(operation,fields,channel='transition',expected=null){const c=context();if(expected&&!same(expected,c))throw Error('Workspace changed; review the action again.');if(!c)throw Error('A confirmed team workspace is required.');if(pending(c))throw Error('Retry the unconfirmed request before making another change.');const record={channel,operation,...fields,requestId:token()};persist(c,record);return await send(c,record);}
  const field=(form,name)=>form.elements.namedItem(name)?.value?.trim()||'';
@@ -86,7 +86,10 @@
  function render(){
   if(!root)return;const c=context();let p=null;try{if(c)p=pending(c)}catch(e){p={storageError:true}}
   const isTest=['emulator-test-only','firebase-test-only'].includes(api()?.capabilities?.mode);
-  const hadModalFocus=opened&&!!document.activeElement?.closest?.('#facultyFundModal');
+  const focused=document.activeElement,hadModalFocus=opened&&!!focused?.closest?.('#facultyFundModal');
+  const focusedForm=focused?.form?.dataset?.form,focusedName=focused?.name,focusedValue=focused?.value,focusedType=focused?.type;
+  let selection=null;try{if(focusedForm&&typeof focused.selectionStart==='number')selection=[focused.selectionStart,focused.selectionEnd,focused.selectionDirection];}catch(e){}
+  const scrollTop=root.querySelector('#facultyFundModal .faculty-dialog-body')?.scrollTop||0;
   // Server refreshes must not erase a form that is still being filled in. A
   // submitted mutation sets busy before rendering, so confirmed entries clear.
   const drafts=[];if(opened&&!busy)root.querySelectorAll('#facultyControls form[data-form] input, #facultyControls form[data-form] select').forEach(el=>{drafts.push({form:el.form.dataset.form,name:el.name,value:el.value,checked:el.checked,type:el.type});});
@@ -102,7 +105,7 @@
    html+='</div></section></div>';
   }
   root.innerHTML=html;
-  if(opened){root.querySelector('#facultyRecoverySlot')?.append(recoveryRoot);const statusNode=root.querySelector('[data-status]');if(statusNode)statusNode.textContent=status;const container=root.querySelector('#facultyControls');if(container){organizeControls(container);for(const draft of drafts){const form=container.querySelector('form[data-form="'+draft.form+'"]');const fields=[...(form?.elements||[])].filter(el=>el.name===draft.name);const el=draft.type==='checkbox'?fields.find(el=>el.value===draft.value):fields[0];if(!el)continue;if(draft.type==='checkbox')el.checked=draft.checked;else if(el.tagName!=='SELECT'||[...el.options].some(option=>option.value===draft.value))el.value=draft.value;}}if(hadModalFocus)root.querySelector('.faculty-dialog-header button')?.focus();}
+  if(opened){root.querySelector('#facultyRecoverySlot')?.append(recoveryRoot);const statusNode=root.querySelector('[data-status]');if(statusNode)statusNode.textContent=status;const container=root.querySelector('#facultyControls');if(container){organizeControls(container);for(const draft of drafts){const form=container.querySelector('form[data-form="'+draft.form+'"]');const fields=[...(form?.elements||[])].filter(el=>el.name===draft.name);const el=draft.type==='checkbox'?fields.find(el=>el.value===draft.value):fields[0];if(!el)continue;if(draft.type==='checkbox')el.checked=draft.checked;else if(el.tagName!=='SELECT'||[...el.options].some(option=>option.value===draft.value))el.value=draft.value;}}if(hadModalFocus){const form=focusedForm&&container?.querySelector('form[data-form="'+focusedForm+'"]'),fields=[...(form?.elements||[])].filter(el=>el.name===focusedName),target=focusedType==='checkbox'?fields.find(el=>el.value===focusedValue):fields[0];(target||root.querySelector('.faculty-dialog-header button'))?.focus({preventScroll:true});if(target&&selection)try{target.setSelectionRange(...selection);}catch(e){}}const body=root.querySelector('#facultyFundModal .faculty-dialog-body');if(body)body.scrollTop=scrollTop;}
   else if(recoveryRoot)root.after(recoveryRoot);
   root.querySelectorAll('button,input,select').forEach(el=>{if(busy)el.disabled=true});renderOther();
  }
@@ -133,8 +136,20 @@
   if(action==='saveBackup')return change('saveBackup',{},'recovery');
  }
  function mount(){root=document.getElementById('facultyFundRoot');txRoot=document.getElementById('facultyTransactions');reportRoot=document.getElementById('facultyReportNote');recoveryRoot=document.getElementById('facultyFundRecoveryRoot');if(!root)return;reportRoot?.addEventListener('click',e=>{if(!e.target.closest('[data-open-faculty]'))return;if(typeof window.switchTab==='function')window.switchTab('funds');open();});root.addEventListener('submit',e=>{const form=e.target.closest('form[data-form]');if(!form)return;e.preventDefault();Promise.resolve(handleForm(form)).catch(err=>{let c=context(),p;try{p=c&&pending(c)}catch(e){}message(p?'The result is unconfirmed. Retry the same request before making another change.':(err.message||'Unable to complete the request.'));});});root.addEventListener('click',e=>{const nav=e.target.closest('[data-faculty-nav]');if(nav){selectPage(nav.dataset.facultyNav);return;}if(e.target.matches('[data-close-faculty]')){close();return;}const el=e.target.closest('button[data-action]');if(!el)return;Promise.resolve(handleAction(el)).catch(err=>{let c=context(),p;try{p=c&&pending(c)}catch(e){}message(p?'The result is unconfirmed. Retry the same request before making another change.':(err.message||'Unable to complete the request.'));});});document.addEventListener('keydown',e=>{const modal=root.querySelector('#facultyFundModal');if(!opened||!modal||!document.getElementById('appDialogOverlay')?.hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();return;}if(e.key==='Tab'){const nodes=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]')].filter(n=>n.getClientRects().length);if(!nodes.length){e.preventDefault();return;}if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0].focus();}}},true);render();}
- function close(){if(!opened)return;opened=false;generation++;recoveryScreen?.reset();if(recoveryRoot)recoveryRoot.hidden=true;document.body.classList.remove('modal-open','faculty-modal-open');render();if(returnFocus?.isConnected)returnFocus.focus();else root?.querySelector('[data-action=toggle]')?.focus();returnFocus=null;}
- function reset(){generation++;recoveryScreen?.reset();recoveryScreen=null;if(recoveryRoot)recoveryRoot.hidden=true;api()?.resetScope?.();loaded=null;if(opened)document.body.classList.remove('modal-open','faculty-modal-open');opened=false;busy=false;status='';lastBatchPreview=null;activePage='overview';returnFocus=null;render();}
+ // Refresh only while the modal is open. Multi-step writes can emit many
+ // revisions; coalesce them and finish a running read before starting another.
+ let liveTimer=null,liveRunning=false,livePending=false,liveEpoch=0;
+ function cancelLiveRefresh(){liveEpoch++;clearTimeout(liveTimer);liveTimer=null;liveRunning=false;livePending=false;}
+ function scheduleLiveRefresh(){
+  if(!opened)return;livePending=true;if(liveTimer||liveRunning||busy)return;
+  const epoch=liveEpoch;liveTimer=setTimeout(async()=>{
+   liveTimer=null;if(epoch!==liveEpoch||!opened)return;
+   if(busy)return;livePending=false;liveRunning=true;
+   try{await read();}finally{if(epoch===liveEpoch){liveRunning=false;if(livePending)scheduleLiveRefresh();}}
+  },300);
+ }
+ function close(){if(!opened)return;opened=false;cancelLiveRefresh();generation++;recoveryScreen?.reset();if(recoveryRoot)recoveryRoot.hidden=true;document.body.classList.remove('modal-open','faculty-modal-open');render();if(returnFocus?.isConnected)returnFocus.focus();else root?.querySelector('[data-action=toggle]')?.focus();returnFocus=null;}
+ function reset(){cancelLiveRefresh();generation++;recoveryScreen?.reset();recoveryScreen=null;if(recoveryRoot)recoveryRoot.hidden=true;api()?.resetScope?.();loaded=null;if(opened)document.body.classList.remove('modal-open','faculty-modal-open');opened=false;busy=false;status='';lastBatchPreview=null;activePage='overview';returnFocus=null;render();}
  async function open(){if(opened)return;returnFocus=document.activeElement;opened=true;activePage='overview';status='';document.body.classList.add('modal-open','faculty-modal-open');render();root.querySelector('.faculty-dialog-header button')?.focus();await read();}
  // Team settings uses the same protected, retry-safe assignment as the Fund
  // screen. It must never store a President flag on an editable member record.
@@ -152,5 +167,5 @@
    throw e;
   }
  }
- window.PondoFacultyFundUI={mount,reset,refresh:read,open,assignPresident};
+ window.PondoFacultyFundUI={mount,reset,refresh:read,scheduleLiveRefresh,open,assignPresident};
 })();
