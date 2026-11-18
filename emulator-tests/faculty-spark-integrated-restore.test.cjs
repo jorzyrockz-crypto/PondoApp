@@ -50,3 +50,17 @@ test('disabled existing-workspace preview adapter can back up and restore in the
 test('recovery candidate keeps an unmarked ordinary workspace closed and existing test namespace available',async()=>{
  const normal='org~normal closed',testOrg='org~faculty fund test existing';await env.withSecurityRulesDisabled(async c=>{const d=c.firestore();for(const o of [normal,testOrg])await api.setDoc(api.doc(d,`organizations/${o}/members/owner`),{uid:'owner',role:'owner'});});const d=auth('owner');await assertFails(api.getDoc(api.doc(d,`organizations/${normal}/sparkDiscoveryRevision/current`)));assert.equal((await api.getDoc(api.doc(d,`organizations/${testOrg}/sparkDiscoveryRevision/current`))).exists(),false);
 });
+test('changed or extra live records block recovery before the lock even when an administrator bypassed revision rules',async()=>{
+ const makeClient=uid=>createIntegratedClient({db:auth(uid),api,orgId:org,uid,useRevision:true,trackRemittanceReleases:true});
+ await makeClient('owner').assignPresident('president','assignment');await makeClient('ao').createPerson('person','Teacher');
+ const d=auth('owner'),context=()=>({orgId:org,uid:'owner',role:'owner',memberConfirmed:true,scopeToken:1}),makeReader=(c,isCurrent)=>createSparkReader({db:d,api,orgId:c.orgId,isCurrent,project,trackRemittanceReleases:true});
+ const backupId='integrated-backup-3',sessionId='integrated-session-3',restore=createFacultySparkRestore({db:d,api,getContext:context,makeReader,project,plan,canonical});
+ await createFacultySparkCapture({db:d,api,getContext:context,makeReader}).capture({orgId:org,backupId});
+ const person=ref(d,'sparkDiscoveryPeople/person'),original=(await api.getDocFromServer(person)).data();
+ await env.withSecurityRulesDisabled(async c=>api.updateDoc(ref(c.firestore(),'sparkDiscoveryPeople/person'),{name:'Changed outside rules'}));
+ await assert.rejects(restore.restore({orgId:org,backupId,sessionId}),/differs from backup/);
+ assert.equal((await api.getDocFromServer(person)).data().name,'Changed outside rules');assert.equal((await api.getDocFromServer(ref(d,'sparkRestoreProof/current'))).exists(),false);
+ await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();await api.setDoc(ref(admin,'sparkDiscoveryPeople/person'),original);await api.setDoc(ref(admin,'sparkDiscoveryPeople/unlisted'),original);});
+ await assert.rejects(restore.restore({orgId:org,backupId,sessionId}),/differs from backup/);
+ assert.equal((await api.getDocFromServer(ref(d,'sparkDiscoveryPeople/unlisted'))).exists(),true);assert.equal((await api.getDocFromServer(ref(d,'sparkRestoreProof/current'))).exists(),false);
+});
