@@ -37,3 +37,26 @@ test('test workspace permits the intended multi-account handover but denies nonm
  await ao.allocate('expense','remittance','allocation',10000);await ao.finalizeExpense('expense');
  const after=(await api.getDoc(ref('ao',testOrg,'sparkDiscoveryWallets/remittance'))).data();assert.equal(after.unspentCents,15000);
 });
+test('test rules preserve ordinary workspace discovery, membership, and snapshot access',async()=>{
+ const user='owner';
+ await env.withSecurityRulesDisabled(async c=>{
+  const admin=c.firestore();
+  await api.setDoc(api.doc(admin,`users/${user}`),{orgMemberships:[normalOrg,testOrg],activeOrganizationId:normalOrg});
+  for(const org of [normalOrg,testOrg]){
+   await api.setDoc(api.doc(admin,`organizations/${org}`),{name:org,createdBy:user});
+   await api.setDoc(api.doc(admin,`organizations/${org}/data/snapshot`),{_syncRevision:1,updatedBy:user});
+  }
+ });
+ const owner=db(user),viewer=db('reviewer'),outsider=db('outsider');
+ const profile=await api.getDoc(api.doc(owner,`users/${user}`));assert.deepEqual(profile.data().orgMemberships,[normalOrg,testOrg]);
+ await api.setDoc(api.doc(owner,`users/${user}`),{activeOrganizationId:testOrg},{merge:true});
+ for(const org of [normalOrg,testOrg]){
+  assert.ok((await api.getDoc(api.doc(owner,`organizations/${org}`))).exists());
+  assert.ok((await api.getDoc(api.doc(owner,`organizations/${org}/members/${user}`))).exists());
+  assert.equal((await api.getDocs(api.collection(owner,`organizations/${org}/members`))).size,4);
+  assert.ok((await api.getDoc(api.doc(owner,`organizations/${org}/data/snapshot`))).exists());
+  assert.ok((await api.getDoc(api.doc(viewer,`organizations/${org}/data/snapshot`))).exists());
+  await assertFails(api.getDoc(api.doc(outsider,`organizations/${org}`)));
+  await assertFails(api.getDoc(api.doc(outsider,`organizations/${org}/data/snapshot`)));
+ }
+});
