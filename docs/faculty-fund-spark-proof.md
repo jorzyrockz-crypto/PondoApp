@@ -421,10 +421,10 @@ node scripts/compare-faculty-rules.cjs /path/to/published-firestore.rules --diff
 ```
 
 The first command hashes the supplied file and compares exact bytes with the
-rules path configured in `firebase.json`, the repository test rules and the
-candidate; it also checks whether the candidate matches its generator. The
+rules path configured in `firebase.json`, the repository test rules, the
+release candidate and the recovery candidate; it also checks whether the candidate matches its generator. The
 optional second command prints the entire textual diff from the supplied file
-to the candidate. Output can include the full rules, so handle it privately.
+to the recovery candidate. Output can include the full rules, so handle it privately.
 The script reads local files and invokes local Git for the diff; it never
 fetches rules, writes files, activates the app or deploys anything. A
 successful command means only that the comparison ran. Byte differences can
@@ -451,104 +451,48 @@ recover lost records. Protected, tested recovery, realistic quota/cap review,
 accounting and privacy/security review are still required. No production flag,
 marker, rules or data are changed by this procedure.
 
-### Owner-operated restore: isolated safeguard experiment
+### Owner-operated limited recovery: disabled review candidate
 
-An owner-operated backup/restore is being investigated for the Spark design.
-`emulator-tests/fixtures/faculty-spark-restore-proof.rules` is an **isolated
-synthetic proof**, not app rules and not a backup or restore button. It tests a
-narrow idea: immutable server-side copies must exactly match a source record at
-a saved revision, only an owner can begin recovery, a stale revision is
-rejected, recovery creates only missing records from exact copies, and a lock
-blocks the synthetic revision from advancing. The proof deliberately has no
-client unlock because it cannot prove that a backup is complete or that an
-entire ledger has been reconciled. Firestore administrators bypass these rules.
+The owner-selected approach is intentionally limited: the downloaded recovery
+file **requires matching immutable server copies**, cannot recover a deleted
+Firebase project, and is rejected if the fund has changed since the copy was
+made. It cannot roll back newer records or recover later transactions. Both the
+file and server copies contain sensitive names and absence data. This is not a
+standalone backup; users must understand the limitation before actual use.
 
-The real implementation still needs the full 12-collection capture and
-completeness protocol, interrupted/resumable recovery, locking across every
-real operation and reader, verified completion and safe unlocking, quota and
-privacy handling, app buttons, and adversarial tests against the actual rules.
-A local JSON checksum is not evidence that a President accepted a handover.
-No app, candidate or live rules have been enabled by this experiment.
+The capture reads and reconciles the current twelve collections and config,
+records the revision and manifest, and saves immutable copies which the rules
+compare to their sources. The owner workflow persists a retry token, checks the
+file against server copies, refuses stale or different live records, and
+restores only missing exact copies. Recovery uses a lock, per-record receipts,
+a revision advance at each boundary, and a final client reconciliation. An
+interrupted operation can be resumed with the same file and session; while
+locked, regular reads and financial writes are denied. The owner can fetch
+specific paths needed to resume. The regular Pondo snapshot stays separate.
 
-The experimental `faculty-fund-spark-capture.js` now exercises the capture
-side against the real twelve collection names plus configuration, using a
-reconciled reader, a revision-pinned immutable copy per source document, an
-owner-scoped backup ID, retry checks and a final confirmed revision read. Its
-matching rules are **only** `emulator-tests/fixtures/faculty-spark-capture-proof.rules`;
-they are not the candidate or live rules. The module is not loaded by the app.
-The capture deliberately returns `copies-created-not-restorable`: copies alone
-are not an authenticated completeness proof, a self-contained file, a safe
-unlock protocol or a restore. An interrupted attempt can leave immutable
-partial copies. Privileged writes bypass the revision, and a second Firestore
-copy does not protect against loss of the whole project. Each document costs
-additional reads, writes and storage; quota, retention, resumability and
-recovery from partial captures need explicit treatment before integration.
+The manifest comes from a client-side full read: rules cannot prove it lists
+every original document. Privileged administrators bypass all rules and can
+invalidate the revision assumptions. A failed or interrupted recovery can leave
+the fund locked. The current prototype permits at most 1,000 copied documents
+total and 500 KB of IDs, and rejects files over 10 MB. It consumes additional
+reads, writes and storage; partial captures and receipt documents are not
+cleaned up automatically. The existing 1,000-per-collection full-reader limit
+and broader project quota remain in effect.
 
-An isolated restore coordinator now preflights immutable copies from a
-manifest, reconciles them, and resumes a session by claiming each matching
-record exactly once. In the synthetic fixture it refuses differing live records,
-recreates only absent exact copies, reconciles again, and records completion
-before releasing the fixture lock. A persistent session makes a lost response
-retryable. This is still **not an app restore**: the fixture advances its synthetic revision when locking and unlocking, but does
-not lock the real financial rules or readers. Its
-manifest is supplied by a client and Firestore rules cannot prove it lists
-every original source document; the post-restore reconciliation is likewise a
-client check. A privileged administrator can bypass rules. The experiment
-limits a capture to 1,000 records total and 500 KB of IDs, stores extra copies
-and receipts, and cannot restore loss of the Firebase project itself. No UI,
-candidate rules, or real deployment use it.
+`firestore.faculty-recovery-candidate.rules` is generated by
+`scripts/generate-faculty-recovery-candidate.cjs` from the earlier release
+candidate and recovery proof. It is an **undeployed review candidate**, not
+the configured `firestore.rules`. Emulator tests exercise an eight-person
+workspace, accepted payment, expense, interruptions, lock access and the
+existing-workspace app contract, but not the actual Firebase project. Both
+`FACULTY_FUND_RELEASE_PREVIEW` and `FACULTY_FUND_RECOVERY_PREVIEW` remain false.
+The controls retain **test-only** labels; while this preview is enabled,
+Faculty Fund notification watchers are suppressed. No rules, markers or live
+data were deployed or changed.
 
-The coordinator also checks all live collections against the saved manifest
-before locking, so ordinary conflicts or unlisted extra records fail without
-starting recovery. After restoring it compares every reconciled live record to
-the saved copy. The proof keeps session receipts under unique session IDs and
-records completion, so a lost response can be retried. These are experimental
-client checks, not server-enforced proof of an originally complete manifest;
-the real rule lock, versioning and cross-client read behavior remain unfinished.
-
-A further **in-memory emulator-only** rules combination tests the restore
-mechanism alongside the existing financial workflow and an eight-person
-workspace, with normal financial writes blocked while the proof lock is held.
-It is built by `emulator-tests/faculty-spark-integrated-restore.rules.cjs` and is
-never written as deployable rules. Even if that test passes, the app's readers,
-notifications and older clients have not been integrated with that lock, and
-manifest completeness is still a client assertion. It does not provide a
-self-contained file restore or an approved production rollout.
-
-The full-ledger reader has an optional, off-by-default restore-lock check: when
-used with matching rules, it requires a server-confirmed absent lock both before
-and after the read, alongside its revision checks. Recovery itself must use a
-separate controlled reader while the lock is held. Activity, pending inspection,
-notifications and older clients still need coordinated handling before this
-can be enabled. The integrated emulator scenario also covers eight roster
-members, a President-accepted payment and an expense; it is not an assertion
-that the real project's rules or quota have been verified.
-
-A disabled demo-only app connection now provides experimental owner download
-and restore controls, with a stored retry token and a server-confirmed session
-for interrupted work. The file includes a diagnostic copy and recovery-point
-identifier; restore compares the file's records with immutable source-verified
-server copies before use. **This is not a self-contained backup**: if the
-Firebase project or its server copies are lost, the file cannot restore them.
-It contains sensitive information. The flag `FACULTY_FUND_RESTORE_DEMO` is false,
-the adapter refuses non-demo projects, and it cannot be combined with real
-account or release-preview mode. The necessary recovery rules exist only as an
-in-memory emulator proof, not in deployed or candidate rules. Demo mode blocks
-normal operations during the lock and suppresses notifications/watchers.
-
-This does not establish production readiness. File authenticity, complete
-server-enforced source inventory, rules and app deployment, older clients,
-real-project quota/retention, recovery after a project-wide loss, and the
-published-rules comparison remain unresolved. A failed or interrupted restore
-can leave the fund locked; resume requires the matching file and session. Any
-protected fund change after a capture makes that capture stale and unusable for
-this restore; it cannot recover later transactions or roll back newer entries. No
-live Firebase data or rules have been changed.
-
-The latest integrated **emulator-only** rules proof denies ordinary member
-reads and collection lists during recovery. The owner can still fetch the
-specific saved paths needed to resume; the coordinator rechecks those records
-and reconciles them before releasing the lock. The full inventory is checked
-before the lock, and normal writes are blocked while it is held. Privileged
-administrator changes can still bypass that protocol. These generated-in-memory
-rules remain an experiment, not the published or release-candidate rules.
+Before release, compare a fresh copy of the actual published rules with the
+recovery candidate, review all ordinary workspace permissions, quotas, privacy,
+older clients, accounting, incomplete-capture/locked-recovery procedures and
+rollout/rollback. A rules comparison and emulator success are not proof of
+production safety. Never assume the downloaded file independently protects
+against project-wide loss.

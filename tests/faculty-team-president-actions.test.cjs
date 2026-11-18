@@ -67,4 +67,4 @@ test('release-preview notifications use the same existing organization without t
  const t=watchSetup();t.state.orgId='org~normal school';t.ctx.window.pondoFacultyAPI.capabilities.mode='release-preview-only';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[0].path.at(-2),'sparkDiscoveryRevision');assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig');
 });
 
-test('restore demo suppresses notifications and watchers while recovery is under development',()=>{const t=watchSetup();t.ctx.FACULTY_FUND_RESTORE_DEMO=true;t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,0);});
+test('restore demo suppresses notifications and watchers while recovery is under development',()=>{const t=watchSetup();t.ctx.window.pondoFacultyAPI.capabilities.experimentalOwnerRecovery=true;t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,0);});

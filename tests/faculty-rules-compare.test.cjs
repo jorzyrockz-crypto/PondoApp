@@ -11,7 +11,7 @@ test('full local diff shows ordinary workspace differences as well as the candid
  const file=path.join(dir,'--published.rules');fs.writeFileSync(file,"rules_version = '2';\n// changed existing workspace rule\n");const r=run(file,'--diff');assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/-\/\/ changed existing workspace rule/);assert.match(r.stdout,/facultyFundRelease/);assert.match(r.stdout,/may contain full rules/);assert.equal(fs.readFileSync(file,'utf8'),"rules_version = '2';\n// changed existing workspace rule\n");
 }));
 test('a match to the candidate does not imply remote state or approval',()=>fixture(dir=>{
- const file=path.join(dir,'candidate.rules');fs.copyFileSync('firestore.faculty-release-candidate.rules',file);const r=run(file,'--diff');assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/Undeployed release candidate .*EXACT BYTE MATCH/);assert.match(r.stdout,/no byte differences/);assert.match(r.stdout,/Do not deploy/);
+ const file=path.join(dir,'candidate.rules');fs.copyFileSync('firestore.faculty-recovery-candidate.rules',file);const r=run(file,'--diff');assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/Undeployed recovery candidate .*EXACT BYTE MATCH/);assert.match(r.stdout,/no byte differences/);assert.match(r.stdout,/Do not deploy/);
 }));
 test('missing, malformed, oversized or unknown arguments fail without a comparison report',()=>fixture(dir=>{
  for(const args of [[],[path.join(dir,'missing')],['--diff'],['firestore.rules','--bad']]){const r=run(...args);assert.equal(r.status,2);assert.match(r.stderr,/Comparison failed/);assert.equal(r.stdout,'');}
