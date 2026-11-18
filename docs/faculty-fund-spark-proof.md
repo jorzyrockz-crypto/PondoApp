@@ -241,3 +241,48 @@ multi-account tests in Firebase.
 The test-only fund now offers a separate read-only dated payment/expense browser, even when the complete state read fails. It reads at most 26 query documents per 25-item page (including lookahead), plus two revision reads; later pages repeat the lookahead. Dates use Philippine time. Its server-confirmed pages must share one protected revision; a changed revision, failed page, or scope reset clears displayed results. The browser never totals pages or supplies spend authority. Query ordering can omit administratively malformed documents missing the date field; privileged writes also bypass the revision rules. This is not an audit or proof that the ledger is complete.
 
 This does **not** remove the full reader's 1,000-document-per-collection safety limit, and opening or refreshing the existing fund still performs its full reconciliation. The regular balance, reports, receipts, write planning and notifications remain subject to their existing limits and read costs. Browse requests add reads, rather than automatically reducing the existing refresh cost. Further work needs a protected, reconciled aggregate and safe migration, concurrency, recovery, quota and security tests before replacing any guarded financial calculation. No production readiness or rule deployment is implied; fictitious data only.
+
+### Offline aggregate arithmetic experiment (not enabled)
+
+`faculty-fund-spark-aggregate-proof.cjs` is a **Node-only accounting model**;
+it has no Firestore access, is not loaded by the app, and does not authorize or
+present a balance. Given a prior total and complete before/after contributions
+for each changed payment, expense and handover/wallet, it checks a single
+revision advance, safe integers, and the same cash equation as the full
+projection. Tests run the existing client's transactions in a memory fixture
+and compare every intermediate result against full reconciliation, including
+multi-wallet reservations, cancellation, void releases, frozen funds,
+correction decisions, replacement payments and idempotent retries. This is
+arithmetic evidence for those scenarios, not a proof of all transitions.
+
+Crucially, a malicious or old client can omit or forge the changes supplied to
+this model; a balanced result alone proves nothing about the underlying records.
+The current rules do not maintain an aggregate and do not bind a revision
+advance to one specific financial transition (a revision-only write is also
+permitted). It must **not** be wired into the UI or used for spending.
+
+Before a bounded balance is usable, a separate rules-enforced protocol must
+atomically bind every relevant transaction to exactly its complete before/after
+record set and a single aggregate delta. It must prevent aggregate-only and
+revision-only changes from manufacturing balances; handle replays and every
+multi-step recovery state; reject old clients that skip the aggregate; and stay
+within Firestore transaction, rule access and expression limits. Emulator
+adversarial tests, contention/retry tests, and real-device tests are required.
+
+Migration is not solved by simply totaling the first 1,000 records or trusting
+an owner-supplied checkpoint. A complete, consistent reconciliation and an
+atomic cutover preventing old-client writes are needed, together with a tested
+backup, validation, restart and rollback plan. A busy ledger may repeatedly
+invalidate a streaming reconciliation. Admin writes bypass rules and remain a
+separate risk. No live rule deployment or migration is performed here.
+
+### Duplicate-revision refresh optimization
+
+The test UI now suppresses a queued refresh only when a server-confirmed
+revision notification exactly matches a successfully loaded full reconciliation
+for the current workspace and role. Unrecognized signals, changed revisions,
+missing/failed loads, forced refreshes and unexpected backwards queued signals
+still cause a full read. This can eliminate redundant refreshes, including some
+post-write duplicates, but does not bound reads when the revision genuinely
+changes and does not lift the 1,000-record guard. Listener and write costs still
+apply; savings depend on actual usage and are not guaranteed.

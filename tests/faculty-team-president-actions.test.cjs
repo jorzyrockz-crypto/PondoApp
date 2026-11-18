@@ -47,8 +47,8 @@ test('normal workspaces never start the test-only President config listener',()=
 
 test('test-mode revision listener only schedules confirmed updates for the current workspace',()=>{
  const t=watchSetup();let count=0;t.ctx.window.PondoFacultyFundUI.scheduleLiveRefresh=()=>count++;t.ctx.startFacultyWatch(t.state.orgId,'owner');const l=t.listeners[0];assert.equal(l.path.at(-2),'sparkDiscoveryRevision');
- l.next({metadata:{fromCache:true,hasPendingWrites:false}});l.next({metadata:{fromCache:false,hasPendingWrites:true}});assert.equal(count,0);l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
- t.ctx.stopFacultyWatch();l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
+ l.next({metadata:{fromCache:true,hasPendingWrites:false}});l.next({metadata:{fromCache:false,hasPendingWrites:true}});assert.equal(count,0);l.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({revision:3})});assert.equal(count,1);
+ t.ctx.stopFacultyWatch();l.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({revision:3})});assert.equal(count,1);
 });
 test('confirmed Spark listener updates notify only the scoped member and stop on workspace changes',()=>{
  const t=watchSetup(),events=[],{processSparkFacultyNotifications}=require('../faculty-fund-notifications.js');

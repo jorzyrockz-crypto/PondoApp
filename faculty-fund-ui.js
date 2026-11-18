@@ -29,7 +29,7 @@
   busy=record.requestId;render();
   try{const {channel:ignored,...payload}=record;const result=await api()[channel]({orgId:c.orgId,...payload});clearPending(c,record);if(same(c,context())){await read();message(result?.backupId&&record.operation==='saveBackup'?'Recovery point saved. Keep this ID securely: '+result.backupId:result?.status?'Server status: '+String(result.status)+'.':'Saved and confirmed by the server.')}return result;}
   catch(e){if(definitive(e))clearPending(c,record);if(same(c,context())){render();message(definitive(e)?(e.message||'The change was not accepted.'):'The result is unconfirmed. Retry the same request before making another change.');}throw e}
-  finally{if(busy===record.requestId)busy=false;if(livePending)scheduleLiveRefresh();if(same(c,context()))render();}
+  finally{if(busy===record.requestId)busy=false;if(livePending)queueLiveRefresh();if(same(c,context()))render();}
  }
  async function mutate(operation,fields,channel='transition',expected=null){const c=context();if(expected&&!same(expected,c))throw Error('Workspace changed; review the action again.');if(!c)throw Error('A confirmed team workspace is required.');if(pending(c))throw Error('Retry the unconfirmed request before making another change.');const record={channel,operation,...fields,requestId:token()};persist(c,record);return await send(c,record);}
  const field=(form,name)=>form.elements.namedItem(name)?.value?.trim()||'';
@@ -159,14 +159,26 @@
  function mount(){root=document.getElementById('facultyFundRoot');txRoot=document.getElementById('facultyTransactions');reportRoot=document.getElementById('facultyReportNote');recoveryRoot=document.getElementById('facultyFundRecoveryRoot');if(!root)return;reportRoot?.addEventListener('click',e=>{if(!e.target.closest('[data-open-faculty]'))return;if(typeof window.switchTab==='function')window.switchTab('funds');open();});root.addEventListener('submit',e=>{const form=e.target.closest('form[data-form]');if(!form)return;e.preventDefault();Promise.resolve(handleForm(form)).catch(err=>{let c=context(),p;try{p=c&&pending(c)}catch(e){}message(p?'The result is unconfirmed. Retry the same request before making another change.':(err.message||'Unable to complete the request.'));});});root.addEventListener('click',e=>{const nav=e.target.closest('[data-faculty-nav]');if(nav){selectPage(nav.dataset.facultyNav);return;}if(e.target.matches('[data-close-faculty]')){close();return;}const el=e.target.closest('button[data-action]');if(!el)return;Promise.resolve(handleAction(el)).catch(err=>{let c=context(),p;try{p=c&&pending(c)}catch(e){}message(p?'The result is unconfirmed. Retry the same request before making another change.':(err.message||'Unable to complete the request.'));});});document.addEventListener('keydown',e=>{const modal=root.querySelector('#facultyFundModal');if(!opened||!modal||!document.getElementById('appDialogOverlay')?.hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();return;}if(e.key==='Tab'){const nodes=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]')].filter(n=>n.getClientRects().length);if(!nodes.length){e.preventDefault();return;}if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0].focus();}}},true);render();}
  // Refresh only while the modal is open. Multi-step writes can emit many
  // revisions; coalesce them and finish a running read before starting another.
- let liveTimer=null,liveRunning=false,livePending=false,liveEpoch=0;
- function cancelLiveRefresh(){liveEpoch++;clearTimeout(liveTimer);liveTimer=null;liveRunning=false;livePending=false;}
- function scheduleLiveRefresh(){
-  if(!opened)return;livePending=true;if(liveTimer||liveRunning||busy)return;
+ let liveTimer=null,liveRunning=false,livePending=false,liveEpoch=0,liveRevision=null,liveForce=false;
+ function cancelLiveRefresh(){liveEpoch++;clearTimeout(liveTimer);liveTimer=null;liveRunning=false;livePending=false;liveRevision=null;liveForce=false;}
+ function scheduleLiveRefresh(revision){
+  if(!opened)return;
+  // A known revision is only a hint. Unknown/malformed signals force a full
+  // server read. Never use a local or incomplete snapshot as a substitute.
+  if(Number.isSafeInteger(revision)&&revision>=0){if(liveRevision!==null&&revision<liveRevision)liveForce=true;liveRevision=revision;}else liveForce=true;
+  livePending=true;queueLiveRefresh();
+ }
+ function queueLiveRefresh(){
+  if(!opened||!livePending||liveTimer||liveRunning||busy)return;
   const epoch=liveEpoch;liveTimer=setTimeout(async()=>{
    liveTimer=null;if(epoch!==liveEpoch||!opened)return;
-   if(busy)return;livePending=false;liveRunning=true;
-   try{await read();}finally{if(epoch===liveEpoch){liveRunning=false;if(livePending)scheduleLiveRefresh();}}
+   if(busy)return;
+   const revision=liveRevision,force=liveForce;livePending=false;liveRevision=null;liveForce=false;
+   // This only suppresses a redundant invalidation; `loaded` came from the
+   // full, server-confirmed, revision-checked reconciliation in this scope.
+   if(!force&&revision!==null&&loaded&&same(loaded.ctx,context())&&loaded.revision===revision)return;
+   liveRunning=true;
+   try{await read();}finally{if(epoch===liveEpoch){liveRunning=false;if(livePending)queueLiveRefresh();}}
   },300);
  }
  function close(){if(!opened)return;opened=false;cancelLiveRefresh();generation++;activityScreen?.reset();activityScreen=null;activityRoot=null;recoveryScreen?.reset();if(recoveryRoot)recoveryRoot.hidden=true;document.body.classList.remove('modal-open','faculty-modal-open');render();if(returnFocus?.isConnected)returnFocus.focus();else root?.querySelector('[data-action=toggle]')?.focus();returnFocus=null;}

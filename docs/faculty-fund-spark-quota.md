@@ -141,3 +141,10 @@ include all project traffic in the free-plan budget. Keep an explicit response
 for quota exhaustion and preserve uncertain tokens. Do not enable billing or
 use Firestore paid backups/PITR as an implied free recovery mechanism. Firebase
 lists those features as requiring billing in the usage-and-limits reference.
+
+The experimental app can skip a duplicate live refresh when the confirmed
+revision equals its already reconciled full snapshot. This saves a full read
+only in that specific case; changed revisions and explicit refreshes still
+reload the entire ledger. It is not a fixed quota guarantee or a scalable
+replacement for reconciliation. The offline aggregate arithmetic experiment in
+`faculty-fund-spark-aggregate-proof.cjs` is not enabled or protected by rules.
