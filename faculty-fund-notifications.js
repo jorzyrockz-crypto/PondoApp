@@ -10,7 +10,7 @@
   const next=new Set(seen);
   function deliver(event,title,actorUid){
    if(seen.has(event))return true;
-   const result=io.push({type:'team',title,body:'Open the Faculty Fund in this workspace to review.',actorUid,recipientUid:state.uid,orgId:state.orgId,action:{tab:'funds',facultyFund:true}});
+   const result=io.push({type:'team',title,body:'Open the Faculty Fund in this workspace to review.',actorUid,recipientUid:state.uid,orgId:state.orgId,action:{tab:'funds',facultyFund:true,facultyPage:'handovers'}});
    if(result){next.add(event);try{io.toast?.(title);}catch(e){/* Bell remains available. */}}return !!result;
   }
   for(const r of snapshot.remittances){

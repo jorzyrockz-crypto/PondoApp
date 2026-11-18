@@ -22,5 +22,5 @@
   return {format:'pondo-faculty-spark-diagnostic-v1',payload,checksum:await checksum(payload)};
  }
  async function verify(envelope){try{if(envelope?.format!=='pondo-faculty-spark-diagnostic-v1'||typeof envelope.checksum!=='string'||!/^[a-f0-9]{64}$/.test(envelope.checksum)||!envelope.payload)return false;return await checksum(clean(envelope.payload))===envelope.checksum}catch{return false}}
- if(typeof module==='object'&&module.exports)module.exports={makeSparkDiagnosticExport:makeExport,verifySparkDiagnosticExport:verify};else global.FacultyFundSparkExport={make:makeExport,verify};
+ if(typeof module==='object'&&module.exports)module.exports={makeSparkDiagnosticExport:makeExport,verifySparkDiagnosticExport:verify,cleanSparkDiagnosticValue:clean};else global.FacultyFundSparkExport={make:makeExport,verify,clean};
 })(typeof window!=='undefined'?window:globalThis);

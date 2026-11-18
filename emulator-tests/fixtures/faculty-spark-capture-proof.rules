@@ -1,0 +1,105 @@
+rules_version = '2';
+// Isolated capture proof only; not the real app rules or a restore facility.
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o) { return /databases/$(database)/documents/organizations/$(o)/members/$(request.auth.uid); }
+  function signed(o) { return request.auth != null && exists(member(o)); }
+  function owner(o) { return signed(o) && get(member(o)).data.role == 'owner'; }
+  function version(o) { return /databases/$(database)/documents/organizations/$(o)/sparkDiscoveryRevision/current; }
+  function header(o,b) { return /databases/$(database)/documents/organizations/$(o)/sparkVerifiedBackups/$(b); }
+  function lock(o) { return /databases/$(database)/documents/organizations/$(o)/sparkRestoreProof/current; }
+  function entry(o,b,k,id) { return /databases/$(database)/documents/organizations/$(o)/sparkVerifiedBackups/$(b)/collections/$(k)/entries/$(id); }
+  function claim(o,session,k,id) { return /databases/$(database)/documents/organizations/$(o)/sparkRestoreProof/current/sessions/$(session)/collections/$(k)/entries/$(id); }
+  function sessionPath(o,s) { return /databases/$(database)/documents/organizations/$(o)/sparkRestoreProofSessions/$(s); }
+  function source(o,k,id) { return /databases/$(database)/documents/organizations/$(o)/$(k)/$(id); }
+  function kind(k) { return k in ['sparkDiscoveryPeople','sparkDiscoveryPayments','sparkDiscoveryPaymentSlots','sparkDiscoveryRemittances','sparkDiscoveryLines','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations','sparkDiscoveryCorrections','sparkDiscoveryPresidentHistory','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryConfig']; }
+  match /organizations/{o}/sparkDiscoveryRevision/{id} {
+   allow read: if owner(o) && id == 'current';
+   allow update: if owner(o) && id == 'current'
+     && request.resource.data.keys().hasOnly(['revision','updatedBy','updatedAt'])
+     && request.resource.data.revision == resource.data.revision + 1
+     && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time
+     && ((!exists(lock(o)) && !existsAfter(lock(o)))
+       || (!exists(lock(o)) && existsAfter(lock(o)) && getAfter(lock(o)).data.revision == request.resource.data.revision)
+       || (exists(lock(o)) && !existsAfter(lock(o)) && get(lock(o)).data.remaining == 0
+         && getAfter(sessionPath(o,get(lock(o)).data.sessionId)).data.state == 'completed'));
+  }
+  match /organizations/{o}/{k}/{id} {
+   allow read: if owner(o) && kind(k);
+   allow create: if owner(o) && kind(k) && exists(lock(o))
+     && exists(entry(o,get(lock(o)).data.backupId,k,id))
+     && (k + '/' + id) in get(lock(o)).data.manifest
+     && request.resource.data == get(entry(o,get(lock(o)).data.backupId,k,id)).data
+     && existsAfter(claim(o,get(lock(o)).data.sessionId,k,id));
+   allow update, delete: if false;
+  }
+  match /organizations/{o}/sparkRestoreProofSessions/{session} {
+   allow read: if owner(o);
+   allow create: if owner(o) && session.matches('^[A-Za-z0-9_-]{16,128}$')
+     && request.resource.data.keys().hasOnly(['backupId','revision','createdBy','state'])
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.state == 'active'
+     && !exists(lock(o)) && getAfter(lock(o)).data.sessionId == session
+     && getAfter(lock(o)).data.backupId == request.resource.data.backupId
+     && getAfter(lock(o)).data.revision == request.resource.data.revision;
+   allow update: if owner(o) && resource.data.state == 'active' && resource.data.createdBy == request.auth.uid
+     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state'])
+     && request.resource.data.state == 'completed' && exists(lock(o))
+     && get(lock(o)).data.sessionId == session && get(lock(o)).data.remaining == 0 && !existsAfter(lock(o));
+   allow delete: if false;
+  }
+  match /organizations/{o}/sparkRestoreProof/{id} {
+   allow read: if signed(o) && id == 'current';
+   allow create: if owner(o) && id == 'current'
+     && request.resource.data.keys().hasOnly(['backupId','revision','remaining','createdBy','lastKind','lastId','sessionId','manifest'])
+     && request.resource.data.backupId is string && request.resource.data.sessionId is string && request.resource.data.sessionId.matches('^[A-Za-z0-9_-]{16,128}$') && request.resource.data.createdBy == request.auth.uid
+     && request.resource.data.lastKind == null && request.resource.data.lastId == null
+     && exists(header(o,request.resource.data.backupId)) && exists(version(o))
+     && request.resource.data.revision == get(version(o)).data.revision + 1
+     && request.resource.data.revision == getAfter(version(o)).data.revision
+     && get(version(o)).data.revision == get(header(o,request.resource.data.backupId)).data.revision
+     && request.resource.data.manifest == get(header(o,request.resource.data.backupId)).data.manifest
+     && request.resource.data.remaining == request.resource.data.manifest.size()
+     && !exists(sessionPath(o,request.resource.data.sessionId))
+     && getAfter(sessionPath(o,request.resource.data.sessionId)).data == {'backupId':request.resource.data.backupId,'revision':request.resource.data.revision,'createdBy':request.auth.uid,'state':'active'};
+   allow update: if owner(o) && id == 'current' && resource.data.remaining > 0
+     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['remaining','lastKind','lastId'])
+     && request.resource.data.remaining == resource.data.remaining - 1
+     && kind(request.resource.data.lastKind) && request.resource.data.lastId is string
+     && (request.resource.data.lastKind + '/' + request.resource.data.lastId) in resource.data.manifest
+     && !exists(claim(o,resource.data.sessionId,request.resource.data.lastKind,request.resource.data.lastId))
+     && existsAfter(claim(o,resource.data.sessionId,request.resource.data.lastKind,request.resource.data.lastId));
+   allow delete: if owner(o) && id == 'current' && resource.data.remaining == 0
+     && get(version(o)).data.revision == resource.data.revision
+     && getAfter(version(o)).data.revision == resource.data.revision + 1
+     && getAfter(sessionPath(o,resource.data.sessionId)).data.state == 'completed';
+   match /sessions/{session}/collections/{k}/entries/{entryId} {
+    allow read: if owner(o);
+    allow create: if owner(o) && kind(k) && exists(lock(o)) && get(lock(o)).data.sessionId == session
+      && request.resource.data == {'done':true}
+      && (k + '/' + entryId) in get(lock(o)).data.manifest
+      && exists(entry(o,get(lock(o)).data.backupId,k,entryId))
+      && getAfter(source(o,k,entryId)).data == get(entry(o,get(lock(o)).data.backupId,k,entryId)).data
+      && getAfter(lock(o)).data.remaining == get(lock(o)).data.remaining - 1
+      && getAfter(lock(o)).data.lastKind == k && getAfter(lock(o)).data.lastId == entryId;
+    allow update, delete: if false;
+   }
+  }
+  match /organizations/{o}/sparkVerifiedBackups/{b} {
+   allow read: if owner(o);
+   allow create: if owner(o) && !exists(lock(o)) && b.matches('^[A-Za-z0-9_-]{16,128}$') && exists(version(o))
+     && request.resource.data.keys().hasOnly(['revision','createdBy','createdAt','manifest'])
+     && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time
+     && request.resource.data.manifest is list && request.resource.data.manifest.size() <= 1000
+     && request.resource.data.revision == get(version(o)).data.revision;
+   allow update, delete: if false;
+   match /collections/{k}/entries/{id} {
+    allow read: if owner(o);
+    allow create: if owner(o) && !exists(lock(o)) && kind(k) && (k != 'sparkDiscoveryConfig' || id == 'current')
+      && exists(header(o,b)) && get(header(o,b)).data.revision == get(version(o)).data.revision
+      && (k + '/' + id) in get(header(o,b)).data.manifest
+      && exists(source(o,k,id)) && request.resource.data == get(source(o,k,id)).data;
+    allow update, delete: if false;
+   }
+  }
+ }
+}

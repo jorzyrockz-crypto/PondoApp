@@ -1,8 +1,10 @@
 # Faculty Fund on the free Firebase plan: security proof
 
-**Experiment only: not enabled, not deployed, and not a complete workflow.**
-The production app still uses the disabled callable backend and the existing
-production rules still deny direct Faculty Fund writes. Never paste or publish
+**Experimental preview: not a complete or standalone backup.**
+This branch enables the limited recovery preview in the app. The matching
+recovery rules and any ordinary-workspace release marker have not been deployed
+by this branch. The currently published faculty-test rules do not support
+recovery; publishing the app before matching rules can break Faculty Fund access. Never paste or publish
 `emulator-tests/fixtures/faculty-spark-proof.rules` as production rules; it is
 an isolated test fixture, not a replacement for the application's rules.
 
@@ -235,3 +237,264 @@ expense-scan cursors, production rules, quota validation and real-account tests
 remain unfinished. Do not publish the fixture or enter real fund data based on
 this experiment. Emulator and synthetic-browser tests do not replace actual
 multi-account tests in Firebase.
+
+### Incremental dated activity browser (experimental)
+
+The test-only fund now offers a separate read-only dated payment/expense browser, even when the complete state read fails. It reads at most 26 query documents per 25-item page (including lookahead), plus two revision reads; later pages repeat the lookahead. Dates use Philippine time. Its server-confirmed pages must share one protected revision; a changed revision, failed page, or scope reset clears displayed results. The browser never totals pages or supplies spend authority. Query ordering can omit administratively malformed documents missing the date field; privileged writes also bypass the revision rules. This is not an audit or proof that the ledger is complete.
+
+This does **not** remove the full reader's 1,000-document-per-collection safety limit, and opening or refreshing the existing fund still performs its full reconciliation. The regular balance, reports, receipts, write planning and notifications remain subject to their existing limits and read costs. Browse requests add reads, rather than automatically reducing the existing refresh cost. Further work needs a protected, reconciled aggregate and safe migration, concurrency, recovery, quota and security tests before replacing any guarded financial calculation. No production readiness or rule deployment is implied; fictitious data only.
+
+### Offline aggregate arithmetic experiment (not enabled)
+
+`faculty-fund-spark-aggregate-proof.cjs` is a **Node-only accounting model**;
+it has no Firestore access, is not loaded by the app, and does not authorize or
+present a balance. Given a prior total and complete before/after contributions
+for each changed payment, expense and handover/wallet, it checks a single
+revision advance, safe integers, and the same cash equation as the full
+projection. Tests run the existing client's transactions in a memory fixture
+and compare every intermediate result against full reconciliation, including
+multi-wallet reservations, cancellation, void releases, frozen funds,
+correction decisions, replacement payments and idempotent retries. This is
+arithmetic evidence for those scenarios, not a proof of all transitions.
+
+Crucially, a malicious or old client can omit or forge the changes supplied to
+this model; a balanced result alone proves nothing about the underlying records.
+The current rules do not maintain an aggregate and do not bind a revision
+advance to one specific financial transition (a revision-only write is also
+permitted). It must **not** be wired into the UI or used for spending.
+
+Before a bounded balance is usable, a separate rules-enforced protocol must
+atomically bind every relevant transaction to exactly its complete before/after
+record set and a single aggregate delta. It must prevent aggregate-only and
+revision-only changes from manufacturing balances; handle replays and every
+multi-step recovery state; reject old clients that skip the aggregate; and stay
+within Firestore transaction, rule access and expression limits. Emulator
+adversarial tests, contention/retry tests, and real-device tests are required.
+
+Migration is not solved by simply totaling the first 1,000 records or trusting
+an owner-supplied checkpoint. A complete, consistent reconciliation and an
+atomic cutover preventing old-client writes are needed, together with a tested
+backup, validation, restart and rollback plan. A busy ledger may repeatedly
+invalidate a streaming reconciliation. Admin writes bypass rules and remain a
+separate risk. No live rule deployment or migration is performed here.
+
+### Duplicate-revision refresh optimization
+
+The test UI now suppresses a queued refresh only when a server-confirmed
+revision notification exactly matches a successfully loaded full reconciliation
+for the current workspace and role. Unrecognized signals, changed revisions,
+missing/failed loads, forced refreshes and unexpected backwards queued signals
+still cause a full read. This can eliminate redundant refreshes, including some
+post-write duplicates, but does not bound reads when the revision genuinely
+changes and does not lift the 1,000-record guard. Listener and write costs still
+apply; savings depend on actual usage and are not guaranteed.
+
+### Isolated payment-aggregate security experiment
+
+`emulator-tests/fixtures/faculty-spark-aggregate-proof.rules` and its companion
+client/test define a **new, synthetic emulator-only namespace**. This is not a
+rules patch for the existing app. The only financial transitions are creating
+or voiding one simplified payment and changing its slot. A summary's revision,
+last operation, payment, slot and exact integer delta must be written together;
+each payment and slot independently points back to that same revision. Only
+an owner can initialize the synthetic summary at zero, and only a collector
+can create or void. Tests attempt direct/partial writes, forged totals, omitted
+slot/payment writes, two payments in one revision, impersonation, unauthorized
+roles, deletion, retries and concurrent writes. Admin writes bypass the rules.
+
+Even a passing test does **not** prove a Faculty Fund balance is protected.
+The fixture does not enforce real faculty/person/absence semantics, handle
+handovers, allocations, expenses, frozen/corrected cash or existing records,
+and cannot establish a valid opening balance for an existing fund. No app
+module imports it and no live rules or data are changed. It is an incremental
+proof of a possible atomic binding pattern only. Each additional operation
+needs equivalent cross-document rules and adversarial tests, including rules
+access/expression limits, before any integration or migration is considered.
+
+### Diagnostic copies during release preparation
+
+The test-only app now exposes its existing revision-checked diagnostic export
+to a workspace owner. It re-reads and reconciles the full ledger, then downloads
+a clearly marked test diagnostic file. It is separate from regular Pondo
+backups, includes sensitive member and absence data, and must be stored
+privately. Its checksum detects accidental changes only; it proves neither
+authenticity nor authority and **cannot restore** the fund. All confirmed
+workspace members can already read these records under the current test rules,
+so the owner-only export control is not a confidentiality boundary. The copy
+is unavailable when the full reader exceeds its 1,000-document cap or cannot
+confirm a consistent snapshot, including revision races. No partial export is
+produced. The loading-limit error now tells users no records were deleted and
+that the financial view is unavailable. This is a preparation step, not the
+protected backup/restore needed for a real-use release.
+
+### Real-use rules candidate (not deployed)
+
+`firestore.faculty-release-candidate.rules` is generated from the repository's
+current test rules by `scripts/generate-faculty-release-candidate.cjs`. It is a
+**review candidate, not the published rules and not approved for deployment**.
+For ordinary existing workspaces, this candidate requires an explicit
+per-workspace `facultyFundRelease/current` control with `enabled: true` and
+`schema: 1`, in addition to membership. No ordinary client, including an owner,
+can create or change the control under these candidate rules. Only a privileged
+administrator can provision or disable it; admin writes bypass all security
+rules. An opt-in control helps prevent accidental enablement across workspaces,
+but does not itself prove the records or accounting correct.
+
+The emulator checks default-deny, cross-workspace isolation, control tampering,
+roles, membership removal, a payment/handover/expense sequence, and locking and
+reopening the fund while ordinary workspace data remains accessible. This is
+not a production security audit. Member-visible financial records remain
+readable by all confirmed team members, including absence dates; the owner-only
+diagnostic-export button is not a privacy boundary. Rule-dependent reads and
+expression limits can affect free quota and transactions.
+
+**Review before deployment:** this earlier release candidate lacks the
+recovery rules and an approved migration plan, and it has
+not been reviewed against the actual published Firebase rules. Existing
+Faculty Fund *test* workspaces retain their original prefix-based access.
+The current deployed rules may differ from the repository. Before rollout,
+compare the actual published rules, preserve ordinary workspace permissions,
+validate the full integrated workflow and rule costs, and coordinate app and
+rules deployment with a tested rollback. The 1,000-document guard remains.
+
+The intended release uses the team's **existing workspace**, not a newly
+created organization. The candidate's activation control and Faculty Fund
+records are separate documents *inside that same organization*: they do not
+replace or write into the regular Pondo snapshot. The demo application contract
+is tested against an ordinary (non-test-prefixed) organization and the candidate
+rules, including assignment, payment, handover and expense. That test does not
+activate the real app or publish rules. Existing fictional records created in a
+separate test workspace do not automatically move into the existing workspace;
+no data migration should be implied or attempted without a reviewed plan.
+
+### Same-workspace experimental app connection
+
+This branch enables `FACULTY_FUND_RELEASE_PREVIEW` and
+`FACULTY_FUND_RECOVERY_PREVIEW` at the owner’s request for testing. It requires
+the matching recovery rules; existing faculty-test rules will deny recovery
+lock reads and break the preview. A test-named workspace retains its
+existing test path while an ordinary workspace requires the release control.
+In preview mode, the app checks the workspace's server-confirmed release
+control before reads, writes, pending inspection, diagnostic export and each
+recovery/activity operation. A missing, disabled, wrong-version, cached or
+pending control fails closed, as do changes to the current account, workspace,
+role or scope. Firestore rules remain authoritative; the extra control read
+adds Firestore quota usage. Live refresh and notifications use the existing
+workspace's Spark paths. Preview receipts and UI still carry test-only labels.
+
+The candidate rules and app mode have only been checked in the emulator; they
+are not a production security review. Ordinary workspaces require the matching
+rules and an administrator-provisioned control, neither of which has been
+deployed by this branch. Coordinate rules and app versions carefully.
+
+### Local diagnostic check (not restore)
+
+The test-only owner interface can check a previously downloaded diagnostic JSON
+file locally, even when the live ledger does not load. It checks the unkeyed
+checksum, workspace ID, bounded collection shapes, President assignment, and
+selected projection totals and pending work. Files larger than 10 MB are
+rejected. It does not upload the file, write records, or consume Firestore
+reads. This is a local UI restriction, not a privacy boundary; members who can
+read fund data can already copy it. The local check does not require the preview
+release marker because it does not access the server.
+
+Passing these checks is **not** proof of authenticity, completeness, recency,
+financial correctness, or a viable restoration. Anyone with the file can edit
+it and recompute its unkeyed checksum, including changes that reconcile. The
+checker does not validate every field or receipt. Preserve it privately; do not
+import it or rely on it as a protected backup. Tested, authorized recovery
+remains an unresolved release blocker.
+
+### Offline published-rules comparison and rollout review
+
+Before any release decision, obtain a fresh **published**, not draft, copy of
+Firestore rules for the intended Firebase project and database from the
+Firebase console. Independently record the project, database, rules version,
+and retrieval time for the review; a copied file alone cannot establish any of
+those facts. Treat rules and review output as private operational material.
+Keep the copy outside this repository and do not commit it. Do not include
+credentials, tokens, or service-account keys.
+
+Run locally, substituting the actual file path (this does not contact Firebase):
+
+```sh
+node scripts/compare-faculty-rules.cjs /path/to/published-firestore.rules
+node scripts/compare-faculty-rules.cjs /path/to/published-firestore.rules --diff
+```
+
+The first command hashes the supplied file and compares exact bytes with the
+rules path configured in `firebase.json`, the repository test rules, the
+release candidate and the recovery candidate; it also checks whether the candidate matches its generator. The
+optional second command prints the entire textual diff from the supplied file
+to the recovery candidate. Output can include the full rules, so handle it privately.
+The script reads local files and invokes local Git for the diff; it never
+fetches rules, writes files, activates the app or deploys anything. A
+successful command means only that the comparison ran. Byte differences can
+also reflect formatting or line endings. Neither matching nor differing text
+establishes which rules are actually published or whether permissions are safe.
+Repeat with a fresh published copy immediately before any later decision,
+because the published version can change after this check.
+
+An authorized reviewer must examine **all** differences, not just Faculty
+Fund additions: existing organization and member access, workspace snapshots,
+invites, discovery, appearance, removal notices, test-workspace compatibility,
+and overlapping wildcard matches. Check that activation-control rules do not
+inadvertently grant access elsewhere, and assess rule expression/read limits,
+indexes, sensitive absence data and the ordinary-workspace workflow. Resolve
+any mismatch rather than replacing published rules blindly. The past report of
+missing workspaces after a rules change remains unexplained.
+
+This comparison is one input, **not** a rollout authorization or tested
+rollback. Before any later deployment, agree on a verified prior published
+rules version and app version, who can restore each, how to stop writes safely,
+how to preserve and reconcile any Faculty Fund records created after cutover,
+and how access will be verified. Merely reverting rules does not undo data or
+recover lost records. Protected, tested recovery, realistic quota/cap review,
+accounting and privacy/security review are still required. No production flag,
+marker, rules or data are changed by this procedure.
+
+### Owner-operated limited recovery: enabled experimental preview
+
+The owner-selected approach is intentionally limited: the downloaded recovery
+file **requires matching immutable server copies**, cannot recover a deleted
+Firebase project, and is rejected if the fund has changed since the copy was
+made. It cannot roll back newer records or recover later transactions. Both the
+file and server copies contain sensitive names and absence data. This is not a
+standalone backup; users must understand the limitation before actual use.
+
+The capture reads and reconciles the current twelve collections and config,
+records the revision and manifest, and saves immutable copies which the rules
+compare to their sources. The owner workflow persists a retry token, checks the
+file against server copies, refuses stale or different live records, and
+restores only missing exact copies. Recovery uses a lock, per-record receipts,
+a revision advance at each boundary, and a final client reconciliation. An
+interrupted operation can be resumed with the same file and session; while
+locked, regular reads and financial writes are denied. The owner can fetch
+specific paths needed to resume. The regular Pondo snapshot stays separate.
+
+The manifest comes from a client-side full read: rules cannot prove it lists
+every original document. Privileged administrators bypass all rules and can
+invalidate the revision assumptions. A failed or interrupted recovery can leave
+the fund locked. The current prototype permits at most 1,000 copied documents
+total and 500 KB of IDs, and rejects files over 10 MB. It consumes additional
+reads, writes and storage; partial captures and receipt documents are not
+cleaned up automatically. The existing 1,000-per-collection full-reader limit
+and broader project quota remain in effect.
+
+`firestore.faculty-recovery-candidate.rules` is generated by
+`scripts/generate-faculty-recovery-candidate.cjs` from the earlier release
+candidate and recovery proof. It is an **undeployed review candidate**, not
+the configured `firestore.rules`. Emulator tests exercise an eight-person
+workspace, accepted payment, expense, interruptions, lock access and the
+existing-workspace app contract, but not the actual Firebase project. Both
+preview flags are enabled on this branch for owner testing. Faculty Fund
+watchers start only after the server confirms that no restore lock exists;
+they pause during recovery and restart when the lock is cleared. No rules,
+markers or live data were deployed or changed by this branch.
+
+Before release, compare a fresh copy of the actual published rules with the
+recovery candidate, review all ordinary workspace permissions, quotas, privacy,
+older clients, accounting, incomplete-capture/locked-recovery procedures and
+rollout/rollback. A rules comparison and emulator success are not proof of
+production safety. Never assume the downloaded file independently protects
+against project-wide loss.

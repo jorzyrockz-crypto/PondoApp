@@ -35,7 +35,7 @@ test('uncertain assignment keeps its retry token and never reports success',asyn
 });
 function watchSetup(){
  const start=html.indexOf('let facultyStateUnsub=null'),end=html.indexOf('\nfunction teardownOrgSubscriptions()',start);
- const listeners=[],state={orgId:'org~faculty fund test school',uid:'owner',memberConfirmed:true},ctx={pondoTeamState:state,window:{pondoFacultyAPI:{capabilities:{mode:'firebase-test-only'}},PondoFacultyFundUI:{reset(){}}},firestoreDb:{},doc:(_db,...p)=>p,collection:(_db,...p)=>p,query:p=>p,limit:n=>n,onSnapshot:(p,opts,next,error)=>{listeners.push({path:p,next,error});return ()=>{}},renderTeamPanel(){},console};
+ const listeners=[],state={orgId:'org~faculty fund test school',uid:'owner',memberConfirmed:true},ctx={FACULTY_FUND_RESTORE_DEMO:false,pondoTeamState:state,window:{pondoFacultyAPI:{capabilities:{mode:'firebase-test-only'}},PondoFacultyFundUI:{reset(){}}},firestoreDb:{},doc:(_db,...p)=>p,collection:(_db,...p)=>p,query:p=>p,limit:n=>n,onSnapshot:(p,opts,next,error)=>{listeners.push({path:p,next,error});return ()=>{}},renderTeamPanel(){},console};
  vm.runInNewContext(html.slice(start,end)+'\nthis.startFacultyWatch=startFacultyWatch;this.stopFacultyWatch=stopFacultyWatch;this.presidentStatus=()=>({known:facultyPresidentKnown,uid:facultyPresidentUid});',ctx);return {ctx,state,listeners};
 }
 test('President label follows only confirmed config and clears on workspace change or cached snapshots',()=>{
@@ -47,8 +47,8 @@ test('normal workspaces never start the test-only President config listener',()=
 
 test('test-mode revision listener only schedules confirmed updates for the current workspace',()=>{
  const t=watchSetup();let count=0;t.ctx.window.PondoFacultyFundUI.scheduleLiveRefresh=()=>count++;t.ctx.startFacultyWatch(t.state.orgId,'owner');const l=t.listeners[0];assert.equal(l.path.at(-2),'sparkDiscoveryRevision');
- l.next({metadata:{fromCache:true,hasPendingWrites:false}});l.next({metadata:{fromCache:false,hasPendingWrites:true}});assert.equal(count,0);l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
- t.ctx.stopFacultyWatch();l.next({metadata:{fromCache:false,hasPendingWrites:false}});assert.equal(count,1);
+ l.next({metadata:{fromCache:true,hasPendingWrites:false}});l.next({metadata:{fromCache:false,hasPendingWrites:true}});assert.equal(count,0);l.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({revision:3})});assert.equal(count,1);
+ t.ctx.stopFacultyWatch();l.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({revision:3})});assert.equal(count,1);
 });
 test('confirmed Spark listener updates notify only the scoped member and stop on workspace changes',()=>{
  const t=watchSetup(),events=[],{processSparkFacultyNotifications}=require('../faculty-fund-notifications.js');
@@ -61,4 +61,17 @@ test('confirmed Spark listener updates notify only the scoped member and stop on
  remit.next(col(row,{fromCache:true,hasPendingWrites:false}));remit.next(col(row,{fromCache:false,hasPendingWrites:true}));assert.equal(events.length,0);
  remit.next(col(row));assert.equal(events.length,1);assert.equal(events[0].recipientUid,'president');assert.equal(events[0].orgId,t.state.orgId);remit.next(col(row));assert.equal(events.length,1);
  t.ctx.stopFacultyWatch();remit.next(col([['other',{status:'pending',createdBy:'ao',presidentUid:'president'}]]));assert.equal(events.length,1);
+});
+
+test('release-preview notifications use the same existing organization without the test-name restriction',()=>{
+ const t=watchSetup();t.state.orgId='org~normal school';t.ctx.window.pondoFacultyAPI.capabilities.mode='release-preview-only';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[0].path.at(-2),'sparkDiscoveryRevision');assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig');
+});
+
+test('recovery-aware watchers run only after the server confirms no lock, and resume after recovery',()=>{
+ const t=watchSetup();t.ctx.window.pondoFacultyAPI.capabilities.experimentalOwnerRecovery=true;t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,1);const lock=t.listeners[0];assert.equal(lock.path.at(-2),'sparkRestoreProof');
+ const snap=(exists,metadata={fromCache:false,hasPendingWrites:false})=>({metadata,exists:()=>exists});
+ lock.next(snap(false,{fromCache:true,hasPendingWrites:false}));assert.equal(t.listeners.length,1);lock.next(snap(false));assert.equal(t.listeners.length,5);
+ const config=t.listeners[4];config.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({presidentUid:'viewer'})});assert.equal(t.ctx.presidentStatus().known,true);
+ lock.next(snap(true));assert.equal(t.ctx.presidentStatus().known,false);config.next({metadata:{fromCache:false,hasPendingWrites:false},exists:()=>true,data:()=>({presidentUid:'stale'})});assert.equal(t.ctx.presidentStatus().known,false);
+ lock.next(snap(false));assert.equal(t.listeners.length,9);t.ctx.stopFacultyWatch();lock.next(snap(false));assert.equal(t.listeners.length,9);
 });

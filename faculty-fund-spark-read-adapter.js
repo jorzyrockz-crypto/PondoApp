@@ -18,14 +18,14 @@
    const payments=r.payments.map(x=>({...x,receivedByUid:x.createdBy,receivedByName:name(x.createdBy),createdAt:timestamp(x.createdAt),voidedAt:timestamp(x.voidedAt),memberReceiptPrintedAt:timestamp(marks.get(x.remittanceId+'~'+x.id)?.printedAt)}));
    const remittances=r.remittances.map(x=>{const correction=x.correctionId?corrections.get(x.correctionId):null;return {...x,submittedByUid:x.createdBy,submittedByName:name(x.createdBy),submittedAt:timestamp(x.submittedAt||x.createdAt),acceptedByUid:x.acceptedBy||null,acceptedByName:x.acceptedBy?name(x.acceptedBy):null,acceptedAt:timestamp(x.acceptedAt),declinedAt:timestamp(x.declinedAt),declineReason:x.status==='declined'?x.reason:null,voidedAt:timestamp(x.voidedAt),receiptPrintedAt:timestamp(remitMarks.get(x.id)?.printedAt),voidRequest:correction?.status==='pending'?{requestedByUid:correction.requestedBy,requestedAt:timestamp(correction.requestedAt),reason:correction.reason}:null};});
    const expenses=r.expenses.filter(x=>['recorded','voided'].includes(x.status)).map(x=>({...x,date:manilaDay(x.occurredAt),occurredAt:timestamp(x.occurredAt),createdAt:timestamp(x.createdAt),voidedAt:timestamp(x.voidedAt),recordedByUid:x.createdBy,recordedByName:name(x.createdBy)}));
-   const audit=[];function event(kind,id,actorUid,at,reason){if(at)audit.push({kind,id,actorUid,at:timestamp(at),...(reason?{reason}:{})});}
-   for(const x of r.presidentHistory)event('president-assigned',x.id,x.assignedBy,x.assignedAt);
+   const audit=[];function event(kind,id,actorUid,at,reason,details={}){if(at)audit.push({kind,id,actorUid,at:timestamp(at),...(reason?{reason}:{}),...details});}
+   for(const x of r.presidentHistory)event('president-assigned',x.id,x.assignedBy,x.assignedAt,null,{entityId:x.id,presidentUid:x.presidentUid});
    for(const x of r.people)event('faculty-person-added',x.id,x.createdBy,x.createdAt);
    for(const x of r.payments){event('payment-recorded',x.id,x.createdBy,x.createdAt);event('payment-voided',x.id,x.voidedBy,x.voidedAt,x.voidReason)}
    for(const x of r.remittances){event('remittance-submitted',x.id,x.createdBy,x.submittedAt);event('remittance-accepted',x.id,x.acceptedBy,x.acceptedAt);event('remittance-declined',x.id,x.declinedBy,x.declinedAt,x.reason);event('remittance-cancelled',x.id,x.cancelledBy,x.cancelledAt,x.reason)}
-   for(const x of r.corrections){event('remittance-void-requested',x.id,x.requestedBy,x.requestedAt,x.reason);event('remittance-void-'+x.status,x.id,x.decidedBy,x.decidedAt,x.decisionReason)}
+   for(const x of r.corrections){event('remittance-void-requested',x.id,x.requestedBy,x.requestedAt,x.reason,{entityId:x.remittanceId});event('remittance-void-'+x.status,x.id,x.decidedBy,x.decidedAt,x.decisionReason,{entityId:x.remittanceId})}
    for(const x of r.expenses){event('expense-recorded',x.id,x.createdBy,x.recordedAt);event('expense-void-requested',x.id,x.voidRequestedBy,x.voidRequestedAt,x.voidReason);event('expense-voided',x.id,x.voidRequestedBy,x.voidedAt,x.voidReason)}
-   for(const x of r.memberReceipts)event('member-receipt-marked-printed',x.id,x.printedBy,x.printedAt);
+   for(const x of r.memberReceipts)event('member-receipt-marked-printed',x.id,x.printedBy,x.printedAt,null,{entityId:x.paymentId});
    for(const x of r.remittanceReceipts)event('remittance-receipt-marked-printed',x.id,x.printedBy,x.printedAt);
    audit.sort((a,b)=>a.at.localeCompare(b.at)||a.id.localeCompare(b.id));
    const rows=p.rows.map(x=>({...x,date:x.type==='OUT'?manilaDay(x.occurredAt):x.date,description:x.type==='IN'?'Absence payment':x.description})).sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
