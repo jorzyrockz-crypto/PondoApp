@@ -1,0 +1,89 @@
+// ISOLATED EMULATOR EXPERIMENT ONLY. Not application or deployable rules.
+// A fresh synthetic namespace containing ONLY payment create/void operations.
+// It does not support real Pondo records, handovers, expenses or migration.
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function member(o,u) { return /databases/$(database)/documents/organizations/$(o)/members/$(u); }
+  function total(o) { return /databases/$(database)/documents/organizations/$(o)/aggregateProofTotals/current; }
+  function payment(o,p) { return /databases/$(database)/documents/organizations/$(o)/aggregateProofPayments/$(p); }
+  function slot(o,s) { return /databases/$(database)/documents/organizations/$(o)/aggregateProofSlots/$(s); }
+  function signed(o) { return request.auth != null && exists(member(o,request.auth.uid)); }
+  function collector(o) { return signed(o) && get(member(o,request.auth.uid)).data.role in ['owner','disbursing']; }
+  function owner(o) { return signed(o) && get(member(o,request.auth.uid)).data.role == 'owner'; }
+  function ident(s) { return s is string && s.matches('^[A-Za-z0-9_-]{1,80}$'); }
+  function summaryShape() {
+   return request.resource.data.keys().hasAll(['revision','receivedCents','lastAction','lastPaymentId','lastSlotId','updatedAt','updatedBy'])
+    && request.resource.data.keys().hasOnly(['revision','receivedCents','lastAction','lastPaymentId','lastSlotId','updatedAt','updatedBy'])
+    && request.resource.data.revision is int && request.resource.data.revision >= 0 && request.resource.data.revision <= 9007199254740991
+    && request.resource.data.receivedCents is int && request.resource.data.receivedCents >= 0 && request.resource.data.receivedCents <= 9007199254740991
+    && request.resource.data.updatedAt == request.time && request.resource.data.updatedBy == request.auth.uid;
+  }
+  function changedTotal(o,p,s,action) {
+   return exists(total(o)) && getAfter(total(o)).data.revision == get(total(o)).data.revision + 1
+    && getAfter(total(o)).data.lastPaymentId == p && getAfter(total(o)).data.lastSlotId == s
+    && getAfter(total(o)).data.lastAction == action && getAfter(total(o)).data.updatedAt == request.time
+    && getAfter(total(o)).data.updatedBy == request.auth.uid;
+  }
+  match /organizations/{o}/aggregateProofTotals/{id} {
+   allow read: if id == 'current' && signed(o);
+   // This initializes only this fresh, isolated namespace. It is not migration.
+   allow create: if id == 'current' && owner(o) && summaryShape()
+    && request.resource.data.revision == 0 && request.resource.data.receivedCents == 0
+    && request.resource.data.lastAction == 'init' && request.resource.data.lastPaymentId == '' && request.resource.data.lastSlotId == '';
+   allow update: if id == 'current' && collector(o) && summaryShape()
+    && resource.data.revision < 9007199254740991 && request.resource.data.revision == resource.data.revision + 1
+    && ident(request.resource.data.lastPaymentId) && ident(request.resource.data.lastSlotId)
+    && ((
+     request.resource.data.lastAction == 'create'
+     && !exists(payment(o,request.resource.data.lastPaymentId))
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.slotId == request.resource.data.lastSlotId
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.createdAt == request.time
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.createdBy == request.auth.uid
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.voidedAt == null
+     && (!exists(slot(o,request.resource.data.lastSlotId)) || get(slot(o,request.resource.data.lastSlotId)).data.activePaymentId == null)
+     && getAfter(slot(o,request.resource.data.lastSlotId)).data.activePaymentId == request.resource.data.lastPaymentId
+     && request.resource.data.receivedCents == resource.data.receivedCents + getAfter(payment(o,request.resource.data.lastPaymentId)).data.amountCents
+    ) || (
+     request.resource.data.lastAction == 'void'
+     && exists(payment(o,request.resource.data.lastPaymentId))
+     && get(payment(o,request.resource.data.lastPaymentId)).data.slotId == request.resource.data.lastSlotId
+     && get(payment(o,request.resource.data.lastPaymentId)).data.voidedAt == null
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.voidedAt == request.time
+     && getAfter(payment(o,request.resource.data.lastPaymentId)).data.voidedBy == request.auth.uid
+     && get(slot(o,request.resource.data.lastSlotId)).data.activePaymentId == request.resource.data.lastPaymentId
+     && getAfter(slot(o,request.resource.data.lastSlotId)).data.activePaymentId == null
+     && request.resource.data.receivedCents == resource.data.receivedCents - get(payment(o,request.resource.data.lastPaymentId)).data.amountCents
+    ));
+   allow delete: if false;
+  }
+  match /organizations/{o}/aggregateProofPayments/{p} {
+   allow read: if signed(o);
+   allow create: if collector(o) && ident(p)
+    && request.resource.data.keys().hasAll(['slotId','amountCents','createdAt','createdBy','voidedAt','voidedBy','voidReason'])
+    && request.resource.data.keys().hasOnly(['slotId','amountCents','createdAt','createdBy','voidedAt','voidedBy','voidReason'])
+    && ident(request.resource.data.slotId) && request.resource.data.amountCents is int && request.resource.data.amountCents > 0 && request.resource.data.amountCents <= 100000000
+    && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid
+    && request.resource.data.voidedAt == null && request.resource.data.voidedBy == null && request.resource.data.voidReason == null
+    && changedTotal(o,p,request.resource.data.slotId,'create');
+   allow update: if collector(o) && resource.data.voidedAt == null
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['voidedAt','voidedBy','voidReason'])
+    && request.resource.data.voidedAt == request.time && request.resource.data.voidedBy == request.auth.uid
+    && request.resource.data.voidReason is string && request.resource.data.voidReason.size() > 0 && request.resource.data.voidReason.size() <= 500
+    && changedTotal(o,p,resource.data.slotId,'void');
+   allow delete: if false;
+  }
+  match /organizations/{o}/aggregateProofSlots/{s} {
+   allow read: if signed(o);
+   allow create: if collector(o) && ident(s)
+    && request.resource.data.keys().hasOnly(['activePaymentId']) && ident(request.resource.data.activePaymentId)
+    && changedTotal(o,request.resource.data.activePaymentId,s,'create');
+   allow update: if collector(o) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['activePaymentId'])
+    && ((resource.data.activePaymentId == null && ident(request.resource.data.activePaymentId)
+      && changedTotal(o,request.resource.data.activePaymentId,s,'create'))
+     || (ident(resource.data.activePaymentId) && request.resource.data.activePaymentId == null
+      && changedTotal(o,resource.data.activePaymentId,s,'void')));
+   allow delete: if false;
+  }
+ }
+}

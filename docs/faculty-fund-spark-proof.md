@@ -286,3 +286,25 @@ still cause a full read. This can eliminate redundant refreshes, including some
 post-write duplicates, but does not bound reads when the revision genuinely
 changes and does not lift the 1,000-record guard. Listener and write costs still
 apply; savings depend on actual usage and are not guaranteed.
+
+### Isolated payment-aggregate security experiment
+
+`emulator-tests/fixtures/faculty-spark-aggregate-proof.rules` and its companion
+client/test define a **new, synthetic emulator-only namespace**. This is not a
+rules patch for the existing app. The only financial transitions are creating
+or voiding one simplified payment and changing its slot. A summary's revision,
+last operation, payment, slot and exact integer delta must be written together;
+each payment and slot independently points back to that same revision. Only
+an owner can initialize the synthetic summary at zero, and only a collector
+can create or void. Tests attempt direct/partial writes, forged totals, omitted
+slot/payment writes, two payments in one revision, impersonation, unauthorized
+roles, deletion, retries and concurrent writes. Admin writes bypass the rules.
+
+Even a passing test does **not** prove a Faculty Fund balance is protected.
+The fixture does not enforce real faculty/person/absence semantics, handle
+handovers, allocations, expenses, frozen/corrected cash or existing records,
+and cannot establish a valid opening balance for an existing fund. No app
+module imports it and no live rules or data are changed. It is an incremental
+proof of a possible atomic binding pattern only. Each additional operation
+needs equivalent cross-document rules and adversarial tests, including rules
+access/expression limits, before any integration or migration is considered.
