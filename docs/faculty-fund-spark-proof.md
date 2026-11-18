@@ -330,7 +330,7 @@ protected backup/restore needed for a real-use release.
 `firestore.faculty-release-candidate.rules` is generated from the repository's
 current test rules by `scripts/generate-faculty-release-candidate.cjs`. It is a
 **review candidate, not the published rules and not approved for deployment**.
-Unlike the test-workspace prefix gate, this candidate requires an explicit
+For ordinary existing workspaces, this candidate requires an explicit
 per-workspace `facultyFundRelease/current` control with `enabled: true` and
 `schema: 1`, in addition to membership. No ordinary client, including an owner,
 can create or change the control under these candidate rules. Only a privileged
@@ -346,9 +346,10 @@ readable by all confirmed team members, including absence dates; the owner-only
 diagnostic-export button is not a privacy boundary. Rule-dependent reads and
 expression limits can affect free quota and transactions.
 
-**Do not paste or deploy this candidate:** it is not wired to the app, lacks a
-protected backup/restore and approved migration plan, and would also block
-existing Faculty Fund *test* workspaces unless their controls were provisioned.
+**Do not paste or deploy this candidate:** its app connection is disabled,
+it lacks a protected backup/restore and approved migration plan, and it has
+not been reviewed against the actual published Firebase rules. Existing
+Faculty Fund *test* workspaces retain their original prefix-based access.
 The current deployed rules may differ from the repository. Before rollout,
 compare the actual published rules, preserve ordinary workspace permissions,
 validate the full integrated workflow and rule costs, and coordinate app and
@@ -369,6 +370,8 @@ no data migration should be implied or attempted without a reviewed plan.
 The app now includes a **disabled** `FACULTY_FUND_RELEASE_PREVIEW` mode for a
 future same-workspace release. The checked-in setting remains false; the
 current real-account test mode and its test-workspace gate remain unchanged.
+If both modes are eventually enabled, a test-named workspace retains its
+existing test path while an ordinary workspace requires the release control.
 In preview mode, the app checks the workspace's server-confirmed release
 control before reads, writes, pending inspection, diagnostic export and each
 recovery/activity operation. A missing, disabled, wrong-version, cached or

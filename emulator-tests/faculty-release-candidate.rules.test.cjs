@@ -12,7 +12,7 @@ async function marker(o,values){await env.withSecurityRulesDisabled(async c=>api
 async function data(uid,o,p){return (await api.getDocFromServer(ref(db(uid),o,p))).data();}
 
 test('no workspace is enabled by default; members cannot enable or forge the control',async()=>{
- const owner=db('owner'),outsider=db('outsider');for(const o of [org,other,testOrg]){
+ const owner=db('owner'),outsider=db('outsider');for(const o of [org,other]){
   await assertFails(api.getDoc(ref(owner,o,'sparkDiscoveryRevision/current')));await assertFails(client('owner',o).assignPresident('president','assignment'));
   await assertFails(api.setDoc(ref(owner,o,'facultyFundRelease/current'),{enabled:true,schema:1}));await assertFails(api.getDoc(ref(outsider,o,'facultyFundRelease/current')));
   assert.ok((await api.getDoc(ref(owner,o,'data/snapshot'))).exists());
@@ -23,7 +23,7 @@ test('only a privileged enabled, versioned marker opens its own workspace to mem
  await marker(org,{enabled:true,schema:1});await marker(other,{enabled:true,schema:2});await marker(testOrg,{enabled:false,schema:1});const owner=db('owner');
  assert.equal((await api.getDoc(ref(owner,org,'facultyFundRelease/current'))).data().enabled,true);await assertFails(api.updateDoc(ref(owner,org,'facultyFundRelease/current'),{schema:2}));await assertFails(api.deleteDoc(ref(owner,org,'facultyFundRelease/current')));
  assert.equal((await api.getDoc(ref(owner,org,'sparkDiscoveryRevision/current'))).exists(),false);await assertFails(api.getDoc(ref(db('outsider'),org,'sparkDiscoveryRevision/current')));
- await assertFails(api.getDoc(ref(owner,other,'sparkDiscoveryRevision/current')));await assertFails(api.getDoc(ref(owner,testOrg,'sparkDiscoveryRevision/current')));
+ await assertFails(api.getDoc(ref(owner,other,'sparkDiscoveryRevision/current')));assert.equal((await api.getDoc(ref(owner,testOrg,'sparkDiscoveryRevision/current'))).exists(),false);
 });
 
 test('enabled workspace supports integrated handover and expense rules without relaxing role checks',async()=>{
@@ -54,4 +54,8 @@ test('app contract uses the existing ordinary workspace without changing its reg
  // Regular Pondo data continues to live in the same workspace, unchanged;
  // Faculty Fund financial documents remain separate from that editable data.
  assert.deepEqual(await data('owner',org,'data/snapshot'),{_syncRevision:1,updatedBy:'owner'});assert.equal((await data('owner',org,'facultyFundRelease/current')).enabled,true);
+});
+
+test('the existing test workspace remains accessible without a release marker',async()=>{
+ const owner=client('owner',testOrg),ao=client('ao',testOrg);await owner.assignPresident('president','assignment');await ao.createPerson('teacher','Existing test record');assert.equal((await data('ao',testOrg,'sparkDiscoveryPeople/teacher')).name,'Existing test record');await assertFails(api.getDoc(ref(db('outsider'),testOrg,'sparkDiscoveryPeople/teacher')));await assertFails(api.setDoc(ref(db('owner'),testOrg,'facultyFundRelease/current'),{enabled:true,schema:1}));
 });

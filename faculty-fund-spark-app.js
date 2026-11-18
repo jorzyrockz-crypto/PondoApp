@@ -7,16 +7,20 @@
  function createSparkApp({db,api,getContext,modules,realAccountTest=false,releasePreview=false}){
   const required=['createClient','createReader','project','createReadAdapter','createWriteAdapter','createReceipts','makeReport','reportCsv','makeExport','createPendingReader','createPendingInspector','createDiscovery','createResolver','createExpenseResumer','createPagedRecovery'];
   if(!db||!api||typeof getContext!=='function'||!modules||required.some(k=>typeof modules[k]!=='function'))throw Error('Faculty Fund test setup is incomplete');
-  if(typeof realAccountTest!=='boolean'||typeof releasePreview!=='boolean'||realAccountTest&&releasePreview)throw Error('Invalid Faculty Fund mode');
+  if(typeof realAccountTest!=='boolean'||typeof releasePreview!=='boolean')throw Error('Invalid Faculty Fund mode');
   const project=db.app?.options?.projectId,demo=typeof project==='string'&&/^demo-[a-z0-9-]+$/.test(project);
   if(realAccountTest ? project!=='russapps-pondo' : releasePreview ? !(demo||project==='russapps-pondo') : !demo)throw Error('Faculty Fund test mode requires a demo Firebase project or the explicitly configured real-account test project');
   if(releasePreview&&(typeof api.doc!=='function'||typeof api.getDocFromServer!=='function'))throw Error('Faculty Fund release preview requires server-only access');
   let scope=0;
-  function context(){const c=getContext();if(realAccountTest&&(!c||typeof c.orgId!=='string'||!/^org~faculty fund test .+/.test(c.orgId)))return null;return c?{...c,scopeToken:scope}:null;}
+  const testWorkspace=orgId=>typeof orgId==='string'&&/^org~faculty fund test .+/.test(orgId);
+  function context(){const c=getContext();if(realAccountTest&&!releasePreview&&!testWorkspace(c?.orgId))return null;return c?{...c,scopeToken:scope}:null;}
   function sameScope(c){const n=context();return !!n&&n.memberConfirmed===true&&n.orgId===c.orgId&&n.uid===c.uid&&n.role===c.role&&n.scopeToken===c.scopeToken;}
   async function confirmRelease(orgId,expected){
    if(!releasePreview)return;
    const c=expected||context();if(!c||c.memberConfirmed!==true||typeof c.uid!=='string'||!c.uid||typeof c.orgId!=='string'||!c.orgId||c.orgId.includes('/')||c.orgId!==orgId||!['owner','disbursing','project-manager','reviewer'].includes(c.role)||!sameScope(c))throw Error('Open a confirmed team workspace');
+   // Preserve access to the earlier test workspace; ordinary workspaces
+   // still require an explicit server-confirmed release control.
+   if(realAccountTest&&testWorkspace(c.orgId))return;
    const snap=await api.getDocFromServer(api.doc(db,`organizations/${c.orgId}/facultyFundRelease/current`));
    if(!sameScope(c))throw Error('Workspace changed while checking Faculty Fund access');
    if(!snap?.metadata||snap.metadata.fromCache||snap.metadata.hasPendingWrites||!snap.exists()||snap.data()?.enabled!==true||snap.data()?.schema!==1)throw Error('Faculty Fund is not enabled for this workspace');
@@ -47,7 +51,7 @@
   }
   async function transition(input){await confirmRelease(input?.orgId);return write.transition(input);}
   async function inspectPending(input){await confirmRelease(input?.orgId);return pending.inspect(input);}
-  return {read:safeRead,export:diagnosticExport,transition,inspectPending,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,diagnosticExport:true,mode:releasePreview?'release-preview-only':realAccountTest?'firebase-test-only':'emulator-test-only'}};
+  return {read:safeRead,export:diagnosticExport,transition,inspectPending,createRecovery,createActivity,getRecoveryContext:context,resetScope:()=>{scope++;},capabilities:{durableBackup:false,diagnosticExport:true,get mode(){return realAccountTest&&testWorkspace(context()?.orgId)?'firebase-test-only':releasePreview?'release-preview-only':realAccountTest?'firebase-test-only':'emulator-test-only';}}};
  }
  if(typeof module==='object'&&module.exports)module.exports={createSparkApp};else global.createFacultyFundSparkApp=createSparkApp;
 })(typeof window!=='undefined'?window:globalThis);

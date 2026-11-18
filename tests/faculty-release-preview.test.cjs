@@ -23,8 +23,13 @@ test('scope changes and pager resets invalidate checks in flight',async()=>{
  f.setCtx({...f.ctx(),uid:'owner'});begun=started();const activity=f.app.createActivity({orgId,from:'2025-01-01',to:'2025-01-01'}),next=activity.next('payments');await begun;activity.reset();resume();await assert.rejects(next,/Workspace changed/);assert.equal(f.calls.includes('activity'),false);
  begun=started();const recovery=f.app.createRecovery(),list=recovery.list({orgId});await begun;recovery.reset();resume();await assert.rejects(list,/Workspace changed/);assert.equal(f.calls.includes('list'),false);
 });
-test('preview is disabled in the shipped app and cannot be combined with real-account test mode',()=>{
+test('preview is disabled in the shipped app and restricts projects',()=>{
  const f=fixture(),html=fs.readFileSync('index.html','utf8');assert.match(html,/const FACULTY_FUND_RELEASE_PREVIEW = false/);assert.match(html,/releasePreview:FACULTY_FUND_RELEASE_PREVIEW/);
- assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,releasePreview:true}),/mode/);
  assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'some-other-project'}}},api:f.api,getContext:f.ctx,modules:f.modules,releasePreview:true}),/test mode/);
+});
+
+test('existing test workspace and ordinary workspace can coexist with their own scoped gates',async()=>{
+ const f=fixture();const app=createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,releasePreview:true});
+ f.setCtx({...f.ctx(),orgId:'org~faculty fund test old'});assert.equal(app.capabilities.mode,'firebase-test-only');await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('facultyFundRelease')).length,0);assert.match((await app.read({orgId:f.ctx().orgId,view:'memberReceipts'})).html,/TEST ONLY/);
+ f.setCtx({...f.ctx(),orgId:'org~ordinary school'});assert.equal(app.capabilities.mode,'release-preview-only');f.setMarker(null);await assert.rejects(app.transition({orgId:f.ctx().orgId}),/not enabled/);f.setMarker({enabled:true,schema:1});await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('org~ordinary school/facultyFundRelease')).length,2);
 });
