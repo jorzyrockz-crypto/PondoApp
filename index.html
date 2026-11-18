@@ -9044,7 +9044,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 103</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 104</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9066,7 +9066,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='103', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='104', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');

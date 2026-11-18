@@ -16,7 +16,7 @@
   let running=false;async function exclusive(task){if(running)fail('A recovery operation is already running');running=true;try{return await task();}finally{running=false;}}
   async function download({orgId}={}){
    const c=context(orgId);let token=get(c,'capture');if(!token){token={id:fresh()};save(c,'capture',token);}guard(c);
-   const diagnostic=await exportDiagnostic({orgId});guard(c);const result=await capture({orgId,backupId:token.id});guard(c);
+   const diagnostic=await exportDiagnostic({orgId});guard(c);const result=await capture({orgId,backupId:token.id,diagnostic,encode:fileDeps.encode});guard(c);
    const file=await makeFile({...fileDeps,orgId,diagnostic,capture:result});guard(c);if(new TextEncoder().encode(JSON.stringify(file)).length>10*1024*1024)fail('Recovery file exceeds the 10 MB limit; no usable file was created');clear(c,'capture');return file;
   }
   // Abandoning only forgets an unfinished capture token; immutable partial

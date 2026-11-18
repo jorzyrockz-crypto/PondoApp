@@ -24,3 +24,17 @@ test('rejects missing collections, oversized collections, duplicate or invalid I
  let s=snapshot();delete s.records.lines;assert.throws(()=>planFacultySparkCapture(s),/Incomplete/);s=snapshot();s.records.people=Array.from({length:1001},(_,i)=>({id:String(i)}));assert.throws(()=>planFacultySparkCapture(s),/limit/);for(const ids of [['x','x'],['x/y'],['..']]){s=snapshot();s.records.people=ids.map(id=>({id}));assert.throws(()=>planFacultySparkCapture(s),/record ID/);}
 });
 test('final marker must be server-confirmed and unchanged',async()=>{const f=fixture();f.api.getDocFromServer=async()=>({metadata:{fromCache:true,hasPendingWrites:false},exists:()=>true,data:()=>({revision:5})});await assert.rejects(f.capture.capture({orgId:'school',backupId:'abcdefghijklmnop'}),/changed during capture/);});
+test('a recovery file must match source copies, not just the same revision and count',async()=>{
+ const {cleanSparkDiagnosticValue:encode}=require('../faculty-fund-spark-export.js'),f=fixture();
+ const diagnostic={payload:{orgId:'school',revision:5,config:encode(f.snap.config),records:encode(f.snap.records),summary:encode(f.snap.projection)}};
+ const input={orgId:'school',backupId:'abcdefghijklmnop',diagnostic,encode};
+ f.data.set(f.root+'sparkDiscoveryPayments/p',{amountCents:200,acceptedBy:'president'});
+ await assert.rejects(f.capture.capture(input),/changed while preparing/);
+ const path=f.root+'sparkVerifiedBackups/'+input.backupId+'/collections/sparkDiscoveryPayments/entries/p';assert.equal(f.data.has(path),false);
+ f.data.set(f.root+'sparkDiscoveryPayments/p',{amountCents:100,acceptedBy:'president'});await f.capture.capture(input);assert.deepEqual(f.data.get(path),{amountCents:100,acceptedBy:'president'});
+});
+test('a recovery file with a different same-sized inventory is rejected before capture',async()=>{
+ const {cleanSparkDiagnosticValue:encode}=require('../faculty-fund-spark-export.js'),f=fixture();
+ const diagnostic={payload:{orgId:'school',revision:5,config:encode(f.snap.config),records:encode(f.snap.records),summary:encode(f.snap.projection)}};diagnostic.payload.records.payments[0].id='other';
+ await assert.rejects(f.capture.capture({orgId:'school',backupId:'abcdefghijklmnop',diagnostic,encode}),/changed while preparing/);assert.equal([...f.data.keys()].some(p=>p.includes('sparkVerifiedBackups')),false);
+});
