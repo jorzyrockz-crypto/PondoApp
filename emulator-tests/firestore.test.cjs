@@ -246,6 +246,9 @@ test('member refund inbox permits bounded member submissions but not reviewer le
  await assertFails(setDoc(ref(v,linked),{...request,reimburseToUid:'viewer/other'}));
  await assertFails(setDoc(ref(v,linked),{...request,reimburseToUid:123}));
  await assertSucceeds(setDoc(ref(v,linked),{...request,reimburseToUid:'viewer'}));
+ const itemized=root+'/memberRefundRequests/member-refund-items-12345';
+ await assertFails(setDoc(ref(v,itemized),{...request,itemsJSON:123}));await assertFails(setDoc(ref(v,itemized),{...request,itemsJSON:'x'.repeat(10001)}));
+ await assertSucceeds(setDoc(ref(v,itemized),{...request,itemsJSON:JSON.stringify([{name:'Paper',qtyMilli:2000,unitCents:2500}])}));await assertFails(updateDoc(ref(v,itemized),{itemsJSON:'[]'}));
  await assertFails(updateDoc(ref(v,linked),{reimburseToUid:'owner'}));
  await assertFails(updateDoc(ref(ao,linked),{status:'approved',decidedBy:'ao',decidedAt:serverTimestamp(),decisionReason:'',reimburseToUid:'owner'}));
  await assertFails(updateDoc(ref(v,path),{description:'tampered'}));await assertFails(updateDoc(ref(v,path),{status:'approved',decidedBy:'viewer',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(v,root+'/data/snapshot'),{_syncRevision:2,updatedBy:'viewer'}));
@@ -272,4 +275,28 @@ test('login repair restores only confirmed memberships referenced in the signed-
  const {recoverWorkspaceMemberships}=await import('../workspace-membership-recovery.mjs');const uid='viewer',db=client(uid),team='org~confirmed',removed='org~removed';
  await seed({[`organizations/${team}`]:{name:'Confirmed',createdBy:'owner'},[`organizations/${team}/members/${uid}`]:{uid,role:'reviewer'},[`organizations/${team}/data/snapshot`]:{_syncRevision:1,updatedBy:'owner',payables:[],auditLog:[]},[`organizations/${removed}`]:{name:'Removed',createdBy:'owner'},[`users/${uid}`]:{orgMemberships:[],activeOrganizationId:null},[`users/${uid}/organizationRequests/${team}`]:{orgId:team,name:'Confirmed',created:false},[`users/${uid}/organizationRequests/${removed}`]:{orgId:removed,name:'Removed',created:false}});
  const result=await recoverWorkspaceMemberships({db,api,uid,isCurrent:()=>true,knownIds:[]});assert.deepEqual(result,{ids:[team],partial:false});const profile=(await getDoc(ref(db,`users/${uid}`))).data();assert.deepEqual(profile.orgMemberships,[team]);assert.equal(profile.activeOrganizationId,null);assert.equal((await getDoc(ref(db,`organizations/${team}/data/snapshot`))).data()._syncRevision,1);await assertFails(getDoc(ref(db,`organizations/${removed}`)));
+});
+
+test('only an owner can change the bounded workspace display name without changing its search key',async()=>{
+ const owner=directory('owner'),viewer=directory('viewer'),other=directory('other');const {orgId}=await owner.service.orgCreate({name:'Registered School'});const root=`organizations/${orgId}`;
+ await seed({[`${root}/members/viewer`]:{uid:'viewer',role:'reviewer'}});
+ await assertFails(updateDoc(ref(viewer.db,root),{displayName:'Another name'}));await assertFails(updateDoc(ref(other.db,root),{displayName:'Another name'}));
+ for(const displayName of ['', ' bad', 'a/b','x'.repeat(121)])await assertFails(updateDoc(ref(owner.db,root),{displayName}));
+ await assertSucceeds(updateDoc(ref(owner.db,root),{displayName:'School Team'}));const org=await getDoc(ref(viewer.db,root));assert.equal(org.data().name,'Registered School');assert.equal(org.data().displayName,'School Team');
+ await owner.service.orgSetVisibility({orgId,discoverable:true});assert.equal((await other.service.orgSearch({name:'Registered School'})).organization.id,orgId);assert.equal((await other.service.orgSearch({name:'School Team'})).organization,null);
+});
+
+test('shared refund receipts are bounded, immutable and limited to workspace members',async()=>{
+ const root='organizations/receipt-test',id='member-refund-receipt-12345',requestPath=root+'/memberRefundRequests/'+id,receiptPath=root+'/refundReceipts/'+id,editorPath=root+'/editorRefundReceipts/editor-123';
+ await seed({[root]:{name:'Receipts'},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/members/viewer']:{uid:'viewer',role:'reviewer'}});
+ const viewer=client('viewer'),owner=client('owner'),outsider=client('outsider'),digest='a'.repeat(64),image='data:image/jpeg;base64,YWJj';
+ const request={uid:'viewer',description:'Paper',reimburseTo:'Viewer',amountCents:100,expenseDate:'2026-01-01',supplier:'',category:'',reference:'',status:'pending',createdAt:serverTimestamp(),receiptDigest:digest};
+ const receipt={uid:'viewer',digest,image,createdAt:serverTimestamp()};
+ await assertFails(setDoc(ref(viewer,requestPath),request));await assertFails(setDoc(ref(viewer,receiptPath),receipt));
+ let batch=writeBatch(viewer);batch.set(ref(viewer,requestPath),request);batch.set(ref(viewer,receiptPath),{...receipt,digest:'b'.repeat(64)});await assertFails(batch.commit());
+ batch=writeBatch(viewer);batch.set(ref(viewer,requestPath),request);batch.set(ref(viewer,receiptPath),{...receipt,image:'data:image/jpeg;base64,'+'A'.repeat(600000)});await assertFails(batch.commit());
+ batch=writeBatch(viewer);batch.set(ref(viewer,requestPath),request);batch.set(ref(viewer,receiptPath),receipt);await assertSucceeds(batch.commit());
+ await assertSucceeds(getDoc(ref(owner,receiptPath)));await assertFails(getDoc(ref(outsider,receiptPath)));await assertFails(getDocs(collection(owner,root+'/refundReceipts')));await assertFails(updateDoc(ref(owner,receiptPath),{image}));await assertFails(deleteDoc(ref(owner,receiptPath)));
+ const editor={uid:'owner',digest,image,createdAt:serverTimestamp()};await assertFails(setDoc(ref(viewer,editorPath),{...editor,uid:'viewer'}));await assertSucceeds(setDoc(ref(owner,editorPath),editor));await assertSucceeds(getDoc(ref(viewer,editorPath)));await assertFails(getDoc(ref(outsider,editorPath)));await assertFails(updateDoc(ref(owner,editorPath),{image}));await assertFails(deleteDoc(ref(owner,editorPath)));await assertFails(getDocs(collection(owner,root+'/editorRefundReceipts')));
+ await assertSucceeds(deleteDoc(ref(owner,root+'/members/viewer')));await assertFails(getDoc(ref(viewer,receiptPath)));await assertFails(getDoc(ref(viewer,editorPath)));
 });

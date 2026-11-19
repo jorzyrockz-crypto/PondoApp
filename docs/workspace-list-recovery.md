@@ -27,3 +27,11 @@ workspace as a recovery shortcut.
 Mock tests do not replace emulator testing with deployed-equivalent rules, nor
 real two-device/account verification. No Firestore rules are changed by this
 client-only recovery.
+
+## Workspace preloading
+
+The Team list and both header switchers show a checking status during the initial profile and workspace lookup rather than presenting the list as complete. Workspace reads run in parallel and publish together; later refreshes retain the last known labels if a read fails. These labels are session-only display hints, not evidence of access. A missing membership is removed from the profile index only after a transactional recheck; the active pointer is cleared in that transaction if it still points to a removed membership. A failed check keeps the entry, and the user can reconnect to retry. Cached missing organization snapshots do not by themselves cause a removal. Account changes invalidate in-flight initialization and listeners so old results cannot populate the next account's list.
+
+## Workspace display names
+
+An online, confirmed owner can set a shared workspace display name after the updated Firestore rules are deployed. The original registered name and ID stay unchanged: exact search and suggestions continue to use the registered name, and invitations, memberships, financial records, and links are not migrated. This avoids collisions and accidental orphaning, but is not a registered-name change. Permanent deletion remains unavailable; removing only the root document would leave subcollections, member indexes and invites behind.

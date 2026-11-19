@@ -129,6 +129,12 @@ service cloud.firestore {
       allow update: if isOwner(orgId)
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['discoverable'])
                     && request.resource.data.discoverable is bool;
+      // Display name does not change the immutable registration/search key.
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+                    && request.resource.data.displayName is string
+                    && request.resource.data.displayName.size() > 0 && request.resource.data.displayName.size() <= 120
+                    && request.resource.data.displayName.matches('^[^/\\s]+( [^/\\s]+)*$');
       // Shared visual identity is separate from the registered workspace name.
       // Only an owner may update these bounded, non-HTML values.
       allow update: if isOwner(orgId)
@@ -233,7 +239,7 @@ service cloud.firestore {
         allow read: if isMember(orgId);
         allow create: if isMember(orgId)
           && requestId.size() >= 12 && requestId.size() <= 150
-          && request.resource.data.keys().hasOnly(['uid','description','reimburseTo','reimburseToUid','amountCents','expenseDate','supplier','category','reference','status','createdAt'])
+          && request.resource.data.keys().hasOnly(['uid','description','reimburseTo','reimburseToUid','amountCents','expenseDate','supplier','category','reference','itemsJSON','receiptDigest','status','createdAt'])
           && request.resource.data.keys().hasAll(['uid','description','reimburseTo','amountCents','expenseDate','supplier','category','reference','status','createdAt'])
           && request.resource.data.uid == uid()
           && request.resource.data.description is string && request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 300
@@ -244,6 +250,12 @@ service cloud.firestore {
           && request.resource.data.supplier is string && request.resource.data.supplier.size() <= 160
           && request.resource.data.category is string && request.resource.data.category.size() <= 160
           && request.resource.data.reference is string && request.resource.data.reference.size() <= 160
+          && (!('itemsJSON' in request.resource.data) || (request.resource.data.itemsJSON is string && request.resource.data.itemsJSON.size() > 0 && request.resource.data.itemsJSON.size() <= 10000))
+          && (!('receiptDigest' in request.resource.data) || (request.resource.data.receiptDigest is string
+              && request.resource.data.receiptDigest.matches('^[a-f0-9]{64}$')
+              && existsAfter(/databases/$(database)/documents/organizations/$(orgId)/refundReceipts/$(requestId))
+              && getAfter(/databases/$(database)/documents/organizations/$(orgId)/refundReceipts/$(requestId)).data.uid == uid()
+              && getAfter(/databases/$(database)/documents/organizations/$(orgId)/refundReceipts/$(requestId)).data.digest == request.resource.data.receiptDigest))
           && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time;
         allow update: if isMember(orgId) && roleIn(orgId) in ['owner','disbursing']
           && resource.data.status == 'pending'
@@ -254,6 +266,39 @@ service cloud.firestore {
           && request.resource.data.decisionReason is string && request.resource.data.decisionReason.size() <= 300
           && (request.resource.data.status != 'rejected' || request.resource.data.decisionReason.size() > 0);
         allow delete: if false;
+      }
+
+      // Separate immutable, bounded receipt. The request and receipt must be
+      // created together, so a failed submit cannot leave a dangling reference.
+      match /refundReceipts/{requestId} {
+        allow get: if isMember(orgId);
+        allow list, update, delete: if false;
+        allow create: if isMember(orgId) && roleIn(orgId) == 'reviewer'
+          && request.resource.data.keys().hasOnly(['uid','digest','image','createdAt'])
+          && request.resource.data.keys().hasAll(['uid','digest','image','createdAt'])
+          && request.resource.data.uid == uid() && request.resource.data.createdAt == request.time
+          && request.resource.data.digest is string && request.resource.data.digest.matches('^[a-f0-9]{64}$')
+          && request.resource.data.image is string && request.resource.data.image.size() <= 600000
+          && request.resource.data.image.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$')
+          && !exists(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId))
+          && existsAfter(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId))
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId)).data.uid == uid()
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId)).data.receiptDigest == request.resource.data.digest;
+      }
+
+      // Editors may create an immutable receipt while writing their own
+      // shared ledger snapshot. Clients commit both together; rules cannot
+      // enumerate payables to enforce the cross-document link.
+      match /editorRefundReceipts/{requestId} {
+        allow get: if isMember(orgId);
+        allow list, update, delete: if false;
+        allow create: if canEditData(orgId)
+          && request.resource.data.keys().hasOnly(['uid','digest','image','createdAt'])
+          && request.resource.data.keys().hasAll(['uid','digest','image','createdAt'])
+          && request.resource.data.uid == uid() && request.resource.data.createdAt == request.time
+          && request.resource.data.digest is string && request.resource.data.digest.matches('^[a-f0-9]{64}$')
+          && request.resource.data.image is string && request.resource.data.image.size() <= 600000
+          && request.resource.data.image.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$');
       }
 
       match /data/{docId} {

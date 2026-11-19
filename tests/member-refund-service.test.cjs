@@ -35,3 +35,28 @@ test('optional explicit recipient identity survives approval and retries cannot 
 test('recipient identity rejects malformed IDs and preserves old unlinked submissions',async()=>{
  const {service:s,payload,id}=setup();for(const uid of ['',123,'a/b','x'.repeat(129)])await assert.rejects(s.submit('org','member',id,{...payload,reimburseToUid:uid}),/changed/);assert.equal(await s.submit('org','member',id,payload),'pending');assert.equal(await s.check('org','member',id,payload),'pending');
 });
+test('itemized request is one payable, validates total, and retry compares all item details',async()=>{
+ const {service:s,state,records,payload,id}=setup();const itemsJSON=JSON.stringify([{name:'Paper',qtyMilli:2000,unitCents:250000}]);const itemized={...payload,itemsJSON};
+ await assert.rejects(s.submit('org','member',id,{...itemized,amountCents:1}),/changed/);await s.submit('org','member',id,itemized);
+ await assert.rejects(s.submit('org','member',id,{...itemized,itemsJSON:JSON.stringify([{name:'Other',qtyMilli:2000,unitCents:250000}])}),/different/);
+ state.uid='owner';state.role='owner';await s.decide('org','owner',id,'approved','','Owner');const b=records.get('organizations/org/data/snapshot').payables[0];assert.equal(b.itemsJSON,itemsJSON);assert.equal(b.amount,5000);assert.equal(records.get('organizations/org/data/snapshot').txs.length,0);
+});
+test('approver refuses malformed or mismatched item details before writing the ledger',async()=>{
+ const {service:s,state,records,payload,id}=setup();await s.submit('org','member',id,payload);records.get('organizations/org/memberRefundRequests/'+id).itemsJSON='[]';state.uid='owner';state.role='owner';await assert.rejects(s.decide('org','owner',id,'approved','','Owner'),/invalid details/);assert.equal(records.get('organizations/org/data/snapshot').payables.length,0);
+});
+
+test('shared reviewer receipt is atomic, bounded, immutable on retry and survives approval',async()=>{
+ const {refundReceiptDigest}=await import('../member-refund-service.mjs');const t=setup(),{service:s,state,records,payload,id}=t,image='data:image/jpeg;base64,/9j/AA==',digest=await refundReceiptDigest(image),withReceipt={...payload,receiptDigest:digest};
+ await assert.rejects(s.submit('org','member',id,withReceipt,'data:image/jpeg;base64,/9j/BB=='),/does not match/);assert.equal(records.has('organizations/org/memberRefundRequests/'+id),false);
+ await s.submit('org','member',id,withReceipt,image);assert.equal(records.get('organizations/org/refundReceipts/'+id).image,image);assert.equal(await s.receipt('org','member',id,digest),image);assert.equal(await s.check('org','member',id,withReceipt),'pending');assert.equal(await s.submit('org','member',id,withReceipt,image),'pending');
+ state.uid='owner';state.role='owner';await s.decide('org','owner',id,'approved','','Owner');assert.equal(records.get('organizations/org/data/snapshot').payables[0].sharedReceiptDigest,digest);assert.equal(records.get('organizations/org/data/snapshot').txs.length,0);
+ state.memberConfirmed=false;await assert.rejects(s.receipt('org','owner',id,digest),/access changed/);
+});
+test('a corrupted or missing receipt blocks both viewing and approval, including after a lost response',async()=>{
+ const {refundReceiptDigest}=await import('../member-refund-service.mjs');const {service:s,state,records,payload,id}=setup(),image='data:image/jpeg;base64,/9j/AA==',digest=await refundReceiptDigest(image),request={...payload,receiptDigest:digest};await s.submit('org','member',id,request,image);
+ records.get('organizations/org/refundReceipts/'+id).image='data:image/jpeg;base64,/9j/BB==';await assert.rejects(s.receipt('org','member',id,digest),/verified/);await assert.rejects(s.check('org','member',id,request),/verified/);await assert.rejects(s.submit('org','member',id,request,image),/verified/);
+ state.uid='owner';state.role='owner';await assert.rejects(s.decide('org','owner',id,'approved','','Owner'),/verified/);assert.equal(records.get('organizations/org/data/snapshot').payables.length,0);
+});
+test('receipt hashes reject unsupported types and oversized data',async()=>{
+ const {refundReceiptDigest}=await import('../member-refund-service.mjs');for(const image of ['data:image/svg+xml;base64,AAAA','data:image/jpeg;base64,?bad','data:image/jpeg;base64,'+'A'.repeat(600001)])await assert.rejects(refundReceiptDigest(image),/Invalid/);
+});

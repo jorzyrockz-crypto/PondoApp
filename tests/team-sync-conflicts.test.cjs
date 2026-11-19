@@ -7,7 +7,7 @@ function setup(server) {
   const db = { data: server, writes: 0 };
   const storage = new Map(), notices = [];
   const state = { orgId:'org', uid:'user', role:'owner', baselineReady:true, dirty:false, recoveryLocked:false, syncError:false, pushesInFlight:0, pendingSnapshot:null, pushTimer:null, lastSyncedJSON:null, lastSyncedRevision: server && server._syncRevision || 0 };
-  const ctx = vm.createContext({ pondoTeamState:state, window:{}, navigator:{onLine:true}, CLIENT_ID:'client', firestoreDb:{},
+  const ctx = vm.createContext({ pondoTeamState:state, window:{pondoCurrentUser:{uid:'user'}}, planEditorRefundReceipts:async()=>[], writeEditorRefundReceipts:async()=>()=>{}, navigator:{onLine:true}, CLIENT_ID:'client', firestoreDb:{},
     canWriteOrgData:()=>true, stripHeavyFields:x=>JSON.parse(JSON.stringify(x)), setSyncBadge(){}, notify:m=>notices.push(m),
     localStorage:{setItem:(k,v)=>storage.set(k,v),getItem:k=>storage.get(k)??null,removeItem:k=>storage.delete(k)},
     clearTimeout(){}, setTimeout:()=>1, doc:()=>({}), serverTimestamp:()=>null, console:{warn(){}},
