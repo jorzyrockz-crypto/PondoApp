@@ -8,7 +8,7 @@ function setup(){
  const view={org:'team',uid:'viewer',status:'ready',items:[]};return {ctx,state,window,entries,store,view,item,setFail:v=>fail=v};
 }
 test('notifies the requester once for a recent rejection, without private details',()=>{
- const t=setup();t.ctx.processMemberRefundRejections(t.view);t.view.items=[t.item('r')];t.ctx.processMemberRefundRejections(t.view);assert.equal(t.entries.length,1);const n=t.entries[0];assert.equal(n.title,'Refund request rejected');assert.equal(n.recipientUid,'viewer');assert.equal(n.orgId,'team');assert.equal(n.visualKind,'refund');assert.equal(n.action.tab,'refunds');assert.equal(n.action.memberRefundHistory,true);assert.doesNotMatch(JSON.stringify(n),/Sensitive|Private reason|30000/);t.ctx.processMemberRefundRejections(t.view);assert.equal(t.entries.length,1);
+ const t=setup();t.ctx.processMemberRefundRejections(t.view);t.view.items=[t.item('r')];t.ctx.processMemberRefundRejections(t.view);assert.equal(t.entries.length,1);const n=t.entries[0];assert.equal(n.title,'Refund request rejected');assert.equal(n.recipientUid,'viewer');assert.equal(n.orgId,'team');assert.equal(n.visualKind,'refund');assert.equal(n.action.tab,'refunds');assert.equal(n.action.myRefundId,'r');assert.doesNotMatch(JSON.stringify(n),/Sensitive|Private reason|30000/);t.ctx.processMemberRefundRejections(t.view);assert.equal(t.entries.length,1);
 });
 test('recent outcomes catch up on first open or return; old outcomes are not replayed',()=>{
  const t=setup();t.view.items=[t.item('recent',-86400000),t.item('old',-8*86400000),t.item('future',86400000)];t.ctx.processMemberRefundRejections(t.view);assert.equal(t.entries.length,1);t.ctx.processMemberRefundRejections(t.view);assert.equal(t.entries.length,1);

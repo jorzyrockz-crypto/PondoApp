@@ -5,9 +5,9 @@ export function createMemberRefundService({db,api,getState,getSnapshot,stableJSO
  const requestRef=(org,id)=>doc(db,'organizations',org,'memberRefundRequests',id);
  const current=(org,uid)=>{const s=getState();return !!s&&s.orgId===org&&s.uid===uid&&s.memberConfirmed&&s.baselineReady&&!s.recoveryLocked&&!s.listenerError&&s.online!==false&&globalThis.navigator?.onLine!==false;};
  const approver=(org,uid)=>{const s=getState();return current(org,uid)&&['owner','disbursing'].includes(s.role)&&!s.dirty&&!s.syncError&&!s.pushTimer&&!s.pushesInFlight;};
- const fields=['uid','description','reimburseTo','amountCents','expenseDate','supplier','category','reference'];
+ const fields=['uid','description','reimburseTo','amountCents','expenseDate','supplier','category','reference','reimburseToUid'];
  const same=(a,b)=>fields.every(k=>a[k]===b[k]);
- const valid=r=>{if(!r||typeof r.uid!=='string'||!r.uid||typeof r.description!=='string'||!r.description.trim()||r.description.length>300||typeof r.reimburseTo!=='string'||!r.reimburseTo.trim()||r.reimburseTo.length>160||!Number.isSafeInteger(r.amountCents)||r.amountCents<=0||r.amountCents>1000000000||typeof r.expenseDate!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(r.expenseDate))return false;const date=new Date(r.expenseDate+'T00:00:00Z');if(Number.isNaN(date.valueOf())||date.toISOString().slice(0,10)!==r.expenseDate)return false;return ['supplier','category','reference'].every(k=>typeof r[k]==='string'&&r[k].length<=160);};
+ const valid=r=>{if(r?.reimburseToUid!==undefined&&(typeof r.reimburseToUid!=='string'||!r.reimburseToUid||r.reimburseToUid.length>128||r.reimburseToUid.includes('/')))return false;if(!r||typeof r.uid!=='string'||!r.uid||typeof r.description!=='string'||!r.description.trim()||r.description.length>300||typeof r.reimburseTo!=='string'||!r.reimburseTo.trim()||r.reimburseTo.length>160||!Number.isSafeInteger(r.amountCents)||r.amountCents<=0||r.amountCents>1000000000||typeof r.expenseDate!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(r.expenseDate))return false;const date=new Date(r.expenseDate+'T00:00:00Z');if(Number.isNaN(date.valueOf())||date.toISOString().slice(0,10)!==r.expenseDate)return false;return ['supplier','category','reference'].every(k=>typeof r[k]==='string'&&r[k].length<=160);};
  function watch(org,uid,notify){
   const q=query(collection(db,'organizations',org,'memberRefundRequests'),orderBy('createdAt','desc'),limit(101));
   return onSnapshot(q,{includeMetadataChanges:true},snap=>{
@@ -64,7 +64,7 @@ export function createMemberRefundService({db,api,getState,getSnapshot,stableJSO
    if(decision==='approved'){
     if(!Array.isArray(data.payables)||!Array.isArray(data.auditLog)||data.payables.some(x=>x.id===id)||data.auditLog.some(x=>x.id==='member-refund-approval-'+id))throw Error('The request or team snapshot conflicts with an existing record.');
     const member=getState().members?.find(m=>m.uid===r.uid);const requestedBy={uid:r.uid,name:member?.displayName||member?.email||r.uid},actor={uid,name:actorName||'Approver'},timestamp=new Date().toISOString();
-    const bill={id,projectId:null,kind:'advance',description:r.description,supplier:r.supplier,reimburseTo:r.reimburseTo,receiptNo:r.reference,amount:r.amountCents/100,invoiceDate:r.expenseDate,dueDate:'',category:r.category||'Project expense',createdBy:requestedBy};
+    const bill={id,projectId:null,kind:'advance',description:r.description,supplier:r.supplier,reimburseTo:r.reimburseTo,receiptNo:r.reference,...(r.reimburseToUid?{reimburseToUid:r.reimburseToUid}:{}),amount:r.amountCents/100,invoiceDate:r.expenseDate,dueDate:'',category:r.category||'Project expense',createdBy:requestedBy};
     const entry={id:'member-refund-approval-'+id,action:'approve refund request',timestamp,reason:'Approved member submission',projectName:'',record:{id,description:r.description,amount:r.amountCents/100,reimburseTo:r.reimburseTo,requestedBy},by:actor};
     tx.set(snapshot,{...data,payables:[...data.payables,bill],auditLog:[...data.auditLog,entry],_syncRevision:revision+1,updatedAt:serverTimestamp(),updatedBy:uid,writerClientId:clientId+'-member-refund'});
    }

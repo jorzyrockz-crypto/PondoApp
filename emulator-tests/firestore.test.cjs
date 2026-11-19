@@ -238,6 +238,16 @@ test('member refund inbox permits bounded member submissions but not reviewer le
  const pending=db=>api.query(collection(db,root+'/memberRefundRequests'),api.where('status','==','pending'),api.limit(101));
  for(const member of [v,owner,ao])assert.equal((await assertSucceeds(getDocs(pending(member)))).size,1);
  await assertFails(getDocs(pending(outsider)));await assertFails(getDocs(pending(anon)));
+ // An optional recipient link must name a current team member; legacy unlinked
+ // requests remain valid and neither the reviewer nor approver can edit it later.
+ const linked=root+'/memberRefundRequests/member-refund-linked-12345';
+ await assertFails(setDoc(ref(v,linked),{...request,reimburseToUid:'outsider'}));
+ await assertFails(setDoc(ref(v,linked),{...request,reimburseToUid:''}));
+ await assertFails(setDoc(ref(v,linked),{...request,reimburseToUid:'viewer/other'}));
+ await assertFails(setDoc(ref(v,linked),{...request,reimburseToUid:123}));
+ await assertSucceeds(setDoc(ref(v,linked),{...request,reimburseToUid:'viewer'}));
+ await assertFails(updateDoc(ref(v,linked),{reimburseToUid:'owner'}));
+ await assertFails(updateDoc(ref(ao,linked),{status:'approved',decidedBy:'ao',decidedAt:serverTimestamp(),decisionReason:'',reimburseToUid:'owner'}));
  await assertFails(updateDoc(ref(v,path),{description:'tampered'}));await assertFails(updateDoc(ref(v,path),{status:'approved',decidedBy:'viewer',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(v,root+'/data/snapshot'),{_syncRevision:2,updatedBy:'viewer'}));
  await assertFails(updateDoc(ref(ao,path),{status:'approved',decidedBy:'owner',decidedAt:serverTimestamp(),decisionReason:''}));await assertSucceeds(updateDoc(ref(ao,path),{status:'approved',decidedBy:'ao',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(owner,path),{status:'rejected',decidedBy:'owner',decidedAt:serverTimestamp(),decisionReason:'duplicate'}));await assertFails(deleteDoc(ref(owner,path)));
  await assertSucceeds(deleteDoc(ref(owner,root+'/members/viewer')));await assertFails(getDoc(ref(v,path)));await assertFails(setDoc(ref(v,root+'/memberRefundRequests/member-refund-987654'),request));
@@ -251,11 +261,11 @@ test('member request approval transaction creates exactly one unpaid payable and
  const sort=v=>Array.isArray(v)?v.map(sort):v&&typeof v==='object'?Object.keys(v).sort().reduce((a,k)=>(a[k]=sort(v[k]),a),{}):v,stable=v=>JSON.stringify(sort(v));
  const createService=(uid,role)=>{const state={orgId:org,uid,role,memberConfirmed:true,baselineReady:true,online:true,lastSyncedRevision:1,lastSyncedJSON:stable(ledger),members:[{uid:'viewer',displayName:'Viewer'}]};return createMemberRefundService({db:client(uid),api,getState:()=>state,getSnapshot:()=>ledger,stripSnapshot:x=>x,stableJSON:stable,clientId:uid});};
  const viewer=createService('viewer','reviewer'),owner=createService('owner','owner'),ao=createService('ao','disbursing'),id='member-refund-atomic-123';
- const payload={uid:'viewer',description:'Supplies',reimburseTo:'Viewer',amountCents:25000,expenseDate:'2026-01-01',supplier:'',category:'',reference:''};
+ const payload={uid:'viewer',description:'Supplies',reimburseTo:'Viewer',reimburseToUid:'viewer',amountCents:25000,expenseDate:'2026-01-01',supplier:'',category:'',reference:''};
  await viewer.submit(org,'viewer',id,payload);await viewer.submit(org,'viewer',id,payload);
  const attempts=await Promise.allSettled([owner.decide(org,'owner',id,'approved','','Owner'),ao.decide(org,'ao',id,'approved','','AO')]);assert.equal(attempts.filter(x=>x.status==='fulfilled').length,1);
  const snapshot=(await getDoc(ref(client('owner'),root+'/data/snapshot'))).data(),request=(await getDoc(ref(client('owner'),root+'/memberRefundRequests/'+id))).data();
- assert.equal(snapshot.payables.length,1);assert.equal(snapshot.auditLog.length,1);assert.equal(snapshot.txs.length,0);assert.equal(snapshot.payables[0].amount,250);assert.equal(snapshot.payables[0].projectId,null);assert.equal(request.status,'approved');
+ assert.equal(snapshot.payables.length,1);assert.equal(snapshot.auditLog.length,1);assert.equal(snapshot.txs.length,0);assert.equal(snapshot.payables[0].amount,250);assert.equal(snapshot.payables[0].projectId,null);assert.equal(snapshot.payables[0].reimburseToUid,'viewer');assert.equal(request.status,'approved');
 });
 
 test('login repair restores only confirmed memberships referenced in the signed-in profile',async()=>{

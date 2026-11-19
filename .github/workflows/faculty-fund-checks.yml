@@ -37,4 +37,6 @@ jobs:
           node tests/sample-data.browser.cjs
           node tests/refund-impact.browser.cjs
           node tests/member-refund.browser.cjs
+          node tests/my-refunds.browser.cjs
+          node tests/refund-transparency.browser.cjs
           node tests/notification-mobile.browser.cjs

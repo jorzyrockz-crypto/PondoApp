@@ -62,10 +62,10 @@ test('refund submitter sees new recorded payments and voids, including catch-up 
  snap.payables.push({id:'r',kind:'advance',description:'Taxi',createdBy:{uid:'requester'},reimburseTo:'Somebody else'});snap.txs=[];
  e.context.processReviewNotifications(snap,s);
  snap.txs.push({id:'p1',type:'OUT',payableId:'r',amount:25,createdBy:{uid:'owner'}});
- const next=environment(e.store);next.context.fmt=n=>'₱'+n;next.context.processReviewNotifications(snap,s);assert.equal(next.notifications.length,1);assert.equal(next.notifications[0].title,'Refund payment recorded');assert.equal(next.notifications[0].visualKind,'refund');assert.match(next.notifications[0].body,/₱25 recorded/);
+ const next=environment(e.store);next.context.fmt=n=>'₱'+n;next.context.processReviewNotifications(snap,s);assert.equal(next.notifications.length,1);assert.equal(next.notifications[0].title,'Refund payment recorded');assert.equal(next.notifications[0].visualKind,'refund');assert.match(next.notifications[0].body,/₱25 recorded/);assert.equal(next.notifications[0].action.myRefundId,'r');
  next.context.processReviewNotifications(snap,s);assert.equal(next.notifications.length,1);
  snap.txs=[];snap.auditLog.push({id:'void',action:'void transaction',by:{uid:'owner'},reason:'Wrong amount',record:{type:'OUT',payableId:'r'}});next.context.processReviewNotifications(snap,s);
- assert.equal(next.notifications[1].title,'Refund payment voided');assert.equal(next.notifications[1].visualKind,'refund');assert.equal(next.notifications[1].action.audit,true);assert.match(next.notifications[1].body,/Wrong amount/);
+ assert.equal(next.notifications[1].title,'Refund payment voided');assert.equal(next.notifications[1].visualKind,'refund');assert.equal(next.notifications[1].action.tab,'refunds');assert.equal(next.notifications[1].action.myRefundId,'r');assert.match(next.notifications[1].body,/Wrong amount/);
 });
 test('cancellation targets only the identified submitter; void context survives missing payable',()=>{
  const e=environment(),snap=snapshot(),s=state('requester','project-manager');e.context.fmt=String;e.context.processReviewNotifications(snap,s);
@@ -123,4 +123,9 @@ test('fund-funded Death Aid reversals notify financial officers without exposing
  const e=environment(),snap=snapshot(),s=state('officer','disbursing');snap.txs=[];e.context.processReviewNotifications(snap,s);
  snap.auditLog.push({id:'personal',action:'void death aid payment',by:{uid:'other'},record:{name:'Private person'}},{id:'funded',action:'void death aid payment',by:{uid:'other'},linkedTransaction:{type:'OUT',amount:100},record:{name:'Private person'}});
  e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,1);assert.equal(e.notifications[0].title,'Cash transaction voided');assert.doesNotMatch(JSON.stringify(e.notifications),/Private person|100/);
+});
+test('bulk-cleared refund payments notify the requester and link to their refund',()=>{
+ const e=environment(),snap=snapshot(),s=state('requester','reviewer');e.context.fmt=String;snap.txs=[];snap.payables.push({id:'r',kind:'advance',createdBy:{uid:'requester'}});e.context.processReviewNotifications(snap,s);
+ snap.auditLog.push({id:'cleared',action:'bulk clear transaction',record:{id:'t',type:'OUT',payableId:'r'},by:{uid:'owner'},reason:'Bulk clear confirmed'});e.context.processReviewNotifications(snap,s);
+ assert.equal(e.notifications.length,1);assert.equal(e.notifications[0].title,'Refund payment voided');assert.equal(e.notifications[0].action.myRefundId,'r');
 });
