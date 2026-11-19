@@ -16,8 +16,22 @@ available, or their initials. Photos are loaded only from approved Google
 profile-image hosts; missing, removed, unavailable or untrusted profiles use a
 neutral fallback. The stored feed contains the member UID, not a copy of the
 photo; the profile is resolved from the current workspace’s confirmed members.
-Older alerts without an actor UID use the neutral fallback. OS alerts still use
-the app icon.
+Older alerts without an actor UID use the neutral fallback.
+
+Browser/OS alerts use local category icons for due and overdue contribution
+reminders, backup reminders, refund requests and related payments, and reliably
+identified contribution, income, expense, donation and Death Aid activity.
+Generic attributed team updates may use the confirmed member's approved Google
+profile photo instead. Photos are loaded from that host (without a referrer)
+when an alert is generated; this can disclose the request to the photo host.
+A failed or slow preload uses the local category or Pondo icon. The current
+recipient, membership, role, workspace and photo are checked again before
+asynchronous delivery. Unknown or ambiguous events without a safely resolved actor use the Pondo icon;
+older alerts are not reclassified by their editable title. Images are not stored in the
+notification feed. The browser or OS may fetch a photo again, crop, replace or
+ignore an icon, and a successful preload cannot guarantee later OS rendering.
+Local icons are included in the offline app shell. Permission and an open app
+window are still required; this feature does not add background push.
 
 Click or keyboard-activate an alert to open its destination in the **currently
 active** workspace. When a newly observed contribution payment can be matched
@@ -31,8 +45,10 @@ again; the alert is not marked read until navigation can proceed.
 
 ## Covered events
 
-- Existing pending refund and linked-record deletion requests are surfaced to
-  owners and disbursing officers; new requests appear after confirmed sync.
+- Existing pending refund and linked-record deletion requests in the shared
+  snapshot are surfaced to owners and disbursing officers after confirmed sync.
+  The separate member refund request inbox is not a notification source; check
+  Member requests in Refund History for those submissions.
 - The identified requester is notified when a request is approved or rejected.
   They are also notified when another teammate records or voids a payment for
   their refund, or cancels/voids their refund. Notifications identify the

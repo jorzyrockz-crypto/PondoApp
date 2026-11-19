@@ -9266,8 +9266,8 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 108</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Team updates and complete printed reports</h4><ul><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 109</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Clearer notification icons</h4><ul><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -9288,7 +9288,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='108', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='109', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9670,6 +9670,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElemen
 // Old unscoped notifications are deliberately not shown: their owner and
 // workspace cannot be established safely on a shared browser profile.
 const NOTIF_MAX=60;
+// Closed allowlist: notification records cannot supply arbitrary image URLs.
+const NOTIFICATION_ICONS=Object.freeze({due:'assets/notification-icons/due.png',overdue:'assets/notification-icons/overdue.png',refund:'assets/notification-icons/refund.png',income:'assets/notification-icons/income.png',expense:'assets/notification-icons/expense.png',donation:'assets/notification-icons/donation.png',contribution:'assets/notification-icons/contribution.png','death-aid':'assets/notification-icons/death-aid.png',backup:'assets/notification-icons/backup.png'});
 function notificationStorageKey(){
   const uid=window.pondoCurrentUser?.uid;
   if(!uid)return null;
@@ -9690,12 +9692,12 @@ function joinNoticeReadIds(){try{const key=joinNoticeKey(),v=key&&JSON.parse(loc
 function joinNoticeWasRead(id){return joinNoticeReadIds().includes(id)}
 function markJoinNoticesRead(ids){try{const key=joinNoticeKey();if(!key)return;localStorage.setItem(key,JSON.stringify([...new Set([...joinNoticeReadIds(),...ids])].slice(-200)));updateNotifBadge();}catch(e){}}
 function unreadNotificationCount(){return visibleNotifications().filter(n=>!n.read).length}
-function pushNotification({type,title,body,action,recipientUid,orgId,approverOnly,actorUid}={}){
+function pushNotification({type,title,body,action,recipientUid,orgId,approverOnly,actorUid,visualKind}={}){
   recipientUid=recipientUid||window.pondoCurrentUser?.uid;
   if(!title||!recipientUid||recipientUid!==window.pondoCurrentUser?.uid)return null;
   if(orgId===undefined)orgId=window.pondoTeamState?.orgId||null;
   if((orgId||null)!==(window.pondoTeamState?.orgId||null) || (orgId&&!window.pondoTeamState?.memberConfirmed))return null;
-  const entry={id:'n_'+Math.random().toString(36).slice(2)+Date.now().toString(36),type:type||'system',title,body:body||'',ts:Date.now(),read:false,action:action||null,recipientUid,orgId,approverOnly:!!approverOnly,...(type==='team'&&orgId&&typeof actorUid==='string'&&actorUid.length>0&&actorUid.length<=128?{actorUid}:{})};
+  const entry={id:'n_'+Math.random().toString(36).slice(2)+Date.now().toString(36),type:type||'system',title,body:body||'',ts:Date.now(),read:false,action:action||null,recipientUid,orgId,approverOnly:!!approverOnly,...(typeof visualKind==='string'&&Object.prototype.hasOwnProperty.call(NOTIFICATION_ICONS,visualKind)?{visualKind}:{}),...(type==='team'&&orgId&&typeof actorUid==='string'&&actorUid.length>0&&actorUid.length<=128?{actorUid}:{})};
   const list=loadNotifications();
   list.unshift(entry);
   if(!saveNotifications(list))return null;
@@ -9722,10 +9724,19 @@ function notifActorAvatar(n){
   const member=n.type==='team'&&n.orgId&&state?.orgId===n.orgId&&state.memberConfirmed&&typeof n.actorUid==='string'?(Array.isArray(state.members)?state.members:[]).find(m=>m?.uid===n.actorUid):null;
   const name=typeof member?.displayName==='string'&&member.displayName.trim()?member.displayName:(typeof member?.email==='string'?member.email:'');
   const initial=name.trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x.charAt(0).toUpperCase()).join('');
-  let photo='';
-  try{const url=new URL(member?.photoURL||'');if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&/(^|\.)(googleusercontent\.com|ggpht\.com)$/i.test(url.hostname))photo=url.href;}catch(e){}
+  const photo=notificationActorPhotoURL(n);
   const fallback=initial?escapeTeamText(initial):'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/></svg>';
   return '<span class="notif-avatar" aria-hidden="true">'+fallback+(photo?'<img src="'+escapeTeamText(photo)+'" alt="" referrerpolicy="no-referrer">':'')+'</span>';
+}
+
+// A photo is resolved only from the current confirmed workspace, never from
+// a URL in a notification record. The same allowlist is used by OS alerts.
+function notificationActorPhotoURL(n){
+  const state=window.pondoTeamState;
+  if(n?.type!=='team'||!n.orgId||state?.orgId!==n.orgId||!state.memberConfirmed||typeof n.actorUid!=='string')return '';
+  const member=(Array.isArray(state.members)?state.members:[]).find(m=>m?.uid===n.actorUid);
+  try{const url=new URL(member?.photoURL||'');if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&/(^|\.)(googleusercontent\.com|ggpht\.com)$/i.test(url.hostname))return url.href;}catch(e){}
+  return '';
 }
 
 function renderNotifCenter(){
@@ -9837,12 +9848,32 @@ document.addEventListener('click',e=>{if(!e.target.closest('.header-bell-wrap'))
 document.addEventListener('keydown',e=>{const m=document.getElementById('notifCenterMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeNotifCenter(true)}});
 function requestNotifPermission(){if(!('Notification' in window))return;Notification.requestPermission().then(()=>{renderNotifCenter()})}
 window.requestNotifPermission=requestNotifPermission;
+function notificationDeliveryAllowed(entry){
+  const uid=window.pondoCurrentUser?.uid,state=window.pondoTeamState;
+  return !!uid&&entry?.recipientUid===uid&&(entry.orgId||null)===(state?.orgId||null)&&(!entry.orgId||(!!state?.memberConfirmed&&!!state?.role&&(!state.uid||state.uid===uid)))&&(!entry.approverOnly||['owner','disbursing'].includes(state?.role));
+}
+function notificationIconPath(entry){
+  return typeof entry?.visualKind==='string'&&Object.prototype.hasOwnProperty.call(NOTIFICATION_ICONS,entry.visualKind)?NOTIFICATION_ICONS[entry.visualKind]:'icons/icon-192.png';
+}
 function maybeFireOSNotification(entry){
-  try{
-    if(!('Notification' in window)||Notification.permission!=='granted')return;
-    const n=new Notification(entry.title,{body:entry.body||'',icon:'icons/icon-192.png',tag:entry.id});
-    n.onclick=()=>{try{window.focus()}catch(e){}openNotification(entry.id);n.close()};
-  }catch(e){/* Notification constructor can throw on some mobile browsers; fail silently */}
+  if(!('Notification' in window)||Notification.permission!=='granted'||!notificationDeliveryAllowed(entry))return;
+  const fallback=notificationIconPath(entry);
+  // Financial and reminder types use their category icon. A confirmed actor's
+  // profile is only used for generic, unambiguously attributed team activity.
+  const photo=!entry.visualKind?notificationActorPhotoURL(entry):'';
+  const deliver=icon=>{
+    if(Notification.permission!=='granted'||!notificationDeliveryAllowed(entry))return;
+    try{const n=new Notification(entry.title,{body:entry.body||'',icon,tag:entry.id});
+      n.onclick=()=>{if(notificationDeliveryAllowed(entry)){try{window.focus()}catch(e){}openNotification(entry.id)}n.close()};
+    }catch(e){/* Some mobile browsers do not support the constructor. */}
+  };
+  if(!photo||typeof Image==='undefined'){deliver(fallback);return;}
+  // Images can fail or hang offline. Recheck scope and the current member's
+  // photo when the load resolves; a workspace switch must not leak an alert.
+  let img,timer,finished=false;
+  const done=ok=>{if(finished)return;finished=true;clearTimeout(timer);if(img)img.onload=img.onerror=null;deliver(ok&&notificationActorPhotoURL(entry)===photo?photo:fallback);};
+  try{img=new Image();img.referrerPolicy='no-referrer';img.onload=()=>done(true);img.onerror=()=>done(false);timer=setTimeout(()=>done(false),1500);img.src=photo;
+  }catch(e){done(false)}
 }
 // Per-account, per-workspace cursors are device-local. They detect confirmed
 // requests and decisions while this workspace is open, and catch up on return.
@@ -9866,7 +9897,7 @@ function processReviewNotifications(snapshot,state){
       if(item.request.requestedBy?.uid===state.uid){seenPending.add(requestKey);continue;}
       const label=({refund:'Refund request',fund:'Fund deletion request',project:'Project deletion request',contributionActivity:'Contribution activity deletion request',contributor:'Contributor deletion request'})[item.type];
       const name=item.type==='refund'?item.record.description:(item.record.name||item.record.title);
-      if(notifyEntry({type:'team',title:label+' needs your review',body:(name||'Untitled')+' · '+(state.orgName||'Team workspace'),action:{tab:'dashboard',reviewQueue:true},approverOnly:true,actorUid:item.request.requestedBy?.uid}))seenPending.add(requestKey);
+      if(notifyEntry({type:'team',visualKind:item.type==='refund'?'refund':undefined,title:label+' needs your review',body:(name||'Untitled')+' · '+(state.orgName||'Team workspace'),action:{tab:'dashboard',reviewQueue:true},approverOnly:true,actorUid:item.request.requestedBy?.uid}))seenPending.add(requestKey);
     }
   }
   // The first confirmed snapshot seeds historical decisions rather than
@@ -9883,7 +9914,7 @@ function processReviewNotifications(snapshot,state){
       let body=(name||'Untitled')+' · '+(state.orgName||'Team workspace');
       if(refund && approved) body+=' · Approval is not payment.';
       if(refund && !approved && event.reason) body+=' · Reason: '+event.reason;
-      if(!notifyEntry({type:'team',title:(refund?'Refund request':'Deletion request')+(approved?' approved':' rejected'),body,action:refund?{tab:'refunds'}:{tab:'transactions',audit:true},actorUid:event.by?.uid}))failedDecisions.add(event.id);
+      if(!notifyEntry({type:'team',visualKind:refund?'refund':undefined,title:(refund?'Refund request':'Deletion request')+(approved?' approved':' rejected'),body,action:refund?{tab:'refunds'}:{tab:'transactions',audit:true},actorUid:event.by?.uid}))failedDecisions.add(event.id);
     }
   }
   const next={auditIds:decisions.filter(e=>!failedDecisions.has(e.id)).map(e=>e.id),pendingKeys:currentKeys.filter(k=>seenPending.has(k))};
@@ -9904,6 +9935,17 @@ function newTypedTeamActivity(previous,current){
  return {donations,deathPayments};
 }
 window.newTypedTeamActivity=newTypedTeamActivity;
+function teamActivityVisualKind(previous,current,typed,parts){
+ if(!Array.isArray(parts)||parts.length!==1)return undefined;
+ if(typed.donations)return 'donation';if(typed.deathPayments)return 'death-aid';
+ const oldTx=(previous.txs||[]).filter(t=>t&&!t.cashDonation&&!t.deathAidPaymentId),newTx=(current.txs||[]).filter(t=>t&&!t.cashDonation&&!t.deathAidPaymentId);
+ if(newTx.length>oldTx.length){const before=new Set(oldTx.map(t=>t.id)),added=newTx.filter(t=>t.id&&!before.has(t.id));
+  const kinds=new Set(added.map(t=>t.contributionPaymentId?'contribution':t.type==='IN'?'income':t.type==='OUT'?'expense':null));return kinds.size===1?([...kinds][0]||undefined):undefined;}
+ const oldPayments=previous.contributionPayments||[],newPayments=current.contributionPayments||[];
+ if(newPayments.length>oldPayments.length)return 'contribution';
+ return undefined;
+}
+window.teamActivityVisualKind=teamActivityVisualKind;
 // Infer a safe destination from newly added record identities, not names.
 // Several updates may arrive together; only open a specific activity when
 // every new payment resolves to the same activity and, for monthly records,
@@ -9952,7 +9994,7 @@ function processRefundActivityNotifications(snapshot,state){
     for(const payment of payments){
       const bill=bills.get(payment.payableId);
       if(seenTx.has(payment.id)||submitter(bill)!==state.uid||payment.createdBy?.uid===state.uid)continue;
-      if(!pushNotification({type:'team',title:'Refund payment recorded',body:(bill.description||'Refund')+' · '+fmt(payment.amount)+' recorded in '+(state.orgName||'your workspace')+'. Check Refund History for details.',action:{tab:'refunds'},recipientUid:state.uid,orgId:state.orgId,actorUid:payment.createdBy?.uid}))failedTx.add(payment.id);
+      if(!pushNotification({type:'team',visualKind:'refund',title:'Refund payment recorded',body:(bill.description||'Refund')+' · '+fmt(payment.amount)+' recorded in '+(state.orgName||'your workspace')+'. Check Refund History for details.',action:{tab:'refunds'},recipientUid:state.uid,orgId:state.orgId,actorUid:payment.createdBy?.uid}))failedTx.add(payment.id);
     }
     for(const e of reversals){
       if(seenAudit.has(e.id)||e.by?.uid===state.uid)continue;
@@ -9960,7 +10002,7 @@ function processRefundActivityNotifications(snapshot,state){
       if(!bill||bill.kind!=='advance'||submitter(bill)!==state.uid)continue;
       if(e.action==='void transaction' && (record.type!=='OUT'||!record.payableId))continue;
       const title=e.action==='void transaction'?'Refund payment voided':(bill.pendingApproval?'Refund request cancelled':'Refund request voided');
-      if(!pushNotification({type:'team',title,body:(bill.description||'Refund')+' · '+(state.orgName||'Team workspace')+(e.reason?' · Reason: '+e.reason:''),action:e.action==='void transaction'?{tab:'transactions',audit:true}:{tab:'refunds'},recipientUid:state.uid,orgId:state.orgId,actorUid:e.by?.uid}))failedAudit.add(e.id);
+      if(!pushNotification({type:'team',visualKind:'refund',title,body:(bill.description||'Refund')+' · '+(state.orgName||'Team workspace')+(e.reason?' · Reason: '+e.reason:''),action:e.action==='void transaction'?{tab:'transactions',audit:true}:{tab:'refunds'},recipientUid:state.uid,orgId:state.orgId,actorUid:e.by?.uid}))failedAudit.add(e.id);
     }
   }
   const next={txIds:payments.filter(t=>!failedTx.has(t.id)).map(t=>t.id),auditIds:reversals.filter(e=>!failedAudit.has(e.id)).map(e=>e.id)};
@@ -9989,7 +10031,7 @@ function processFinancialSafetyNotifications(snapshot,state){
     if(e.action==='void transaction'&&bill?.kind==='advance'&&e.record?.type==='OUT'&&e.record?.payableId&&(bill.pendingApproval?.requestedBy?.uid||bill.createdBy?.uid)===state.uid)continue;
     const title=credit?(e.action==='grant absence credit'?'Refund non-cash credit granted':'Refund non-cash credit voided'):(e.action==='void contribution payment'?'Contribution payment voided':'Cash transaction voided');
     const body=credit?'A non-cash refund settlement was '+(e.action==='grant absence credit'?'recorded':'reversed')+'. Open Refund History for details.':'A financial record was voided. Open the audit history for details.';
-    if(!pushNotification({type:'team',title,body,action:credit?{tab:'refunds'}:{tab:'transactions',audit:true},recipientUid:state.uid,orgId:state.orgId,approverOnly:!requester,actorUid:e.by?.uid}))failed.add(e.id);
+    if(!pushNotification({type:'team',visualKind:credit?'refund':(e.action==='void contribution payment'?'contribution':e.action==='void death aid payment'?'death-aid':e.record?.type==='IN'?'income':e.record?.type==='OUT'?'expense':undefined),title,body,action:credit?{tab:'refunds'}:{tab:'transactions',audit:true},recipientUid:state.uid,orgId:state.orgId,approverOnly:!requester,actorUid:e.by?.uid}))failed.add(e.id);
   }
   const next={auditIds:events.filter(e=>!failed.has(e.id)).map(e=>e.id)};
   financialSafetyNotificationMemory.set(key,next);try{localStorage.setItem(key,JSON.stringify(next))}catch(e){}
@@ -11514,7 +11556,7 @@ function checkReminderNotifications(){
     if(hasData){
       let now=Date.now(),last=Number(localStorage.getItem(reminderStorageKey('ft_last_backup_ts'))||0),until=Number(localStorage.getItem(reminderStorageKey('ft_backup_reminder_until'))||0),week=7*86400000;
       if(!(until>now||(last>0&&now-last<week)) && localStorage.getItem(backupKey)!=='1'){
-        if(pushNotification({type:'reminder',title:'Back up your records',body:last?'Your last backup export was over 7 days ago.':'No dated backup export found yet.'})) localStorage.setItem(backupKey,'1');
+        if(pushNotification({type:'reminder',visualKind:'backup',title:'Back up your records',body:last?'Your last backup export was over 7 days ago.':'No dated backup export found yet.'})) localStorage.setItem(backupKey,'1');
       }
     }
   }catch(e){}
@@ -11525,7 +11567,7 @@ function checkReminderNotifications(){
       const due=contributionDueInfo(a,contributionTotals(a.id));
       if(!due.label||due.label==='Paid')return;
       const key=JSON.stringify([a.id,a.dueDate,due.label]);
-      if(previous.has(key) || pushNotification({type:'reminder',title:a.title+' — '+due.label,body:a.dueDate?('Due '+a.dueDate):'',action:{tab:'contributions'}}))active.push(key);
+      if(previous.has(key) || pushNotification({type:'reminder',visualKind:due.label==='Overdue'?'overdue':'due',title:a.title+' — '+due.label,body:a.dueDate?('Due '+a.dueDate):'',action:{tab:'contributions'}}))active.push(key);
     });
     localStorage.setItem(dueKey,JSON.stringify(active));
   }catch(e){}
@@ -13843,6 +13885,7 @@ function subscribeToOrg(orgId) {
             title: writerName + ' updated ' + (pondoTeamState.orgName || 'your workspace'),
             body: parts.length ? parts.join(', ') : 'Shared records were updated.',
             actorUid:typeof updatedBy==='string'?updatedBy:null,
+            visualKind:window.teamActivityVisualKind(prev,rest,typed,parts),
             action:window.teamActivityAction(prev,rest,typed),
           });
         } catch (e) { /* non-fatal: skip the notification if diffing failed */ }

@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v108';
+const CACHE_VERSION = 'pondo-v109';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -39,6 +39,15 @@ const APP_SHELL = [
   './icons/icon-144.png',
   './icons/icon-152.png',
   './icons/icon-192.png',
+  './assets/notification-icons/due.png',
+  './assets/notification-icons/overdue.png',
+  './assets/notification-icons/refund.png',
+  './assets/notification-icons/income.png',
+  './assets/notification-icons/expense.png',
+  './assets/notification-icons/donation.png',
+  './assets/notification-icons/contribution.png',
+  './assets/notification-icons/death-aid.png',
+  './assets/notification-icons/backup.png',
   './icons/icon-256.png',
   './icons/icon-384.png',
   './icons/icon-512.png',
@@ -102,7 +111,7 @@ self.addEventListener('activate', (event) => {
       const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
       if (obsolete.length) {
         // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
-        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v108', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v109', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
       }
       await Promise.all(obsolete.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())
