@@ -16,7 +16,7 @@ function setup(){
   const ids={}; for(const id of ['dashboardActionsCard','dashboardActionsCount','dashboardActionsEmpty','dashboardActionsStatus','dashboardActionsList']) ids[id]=new Element();
   const state={orgId:'team',role:'owner',memberConfirmed:true,online:true,baselineReady:true};
   const calls=[];
-  const ctx=vm.createContext({window:{pondoTeamState:state},navigator:{onLine:true},document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null},
+  const ctx=vm.createContext({window:{pondoTeamState:state,memberRefundPendingSummary:()=>({items:[],more:false})},navigator:{onLine:true},document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null},
     payables:[],projects:[],funds:[],contributionActivities:[],contributors:[],fmt:n=>'₱'+n,
     approveRefundRequest:(...args)=>calls.push(['approveRefund',...args]),rejectRefundRequest:(...args)=>calls.push(['rejectRefund',...args]),approveDeletionRequest:(...args)=>calls.push(['approveDelete',...args]),rejectDeletionRequest:(...args)=>calls.push(['rejectDelete',...args]),appAlert:m=>calls.push(['alert',m]),switchTab:t=>calls.push(['tab',t]),openFundDetails:id=>calls.push(['fund',id]),openProjectDetails:id=>calls.push(['project',id]),openContributionDetails:id=>calls.push(['activity',id]),contributionSelectedPeriod:{},contributionSearch:'',contributionStatus:''});
   vm.runInContext(source,ctx);return {ctx,state,ids,calls};
@@ -56,4 +56,11 @@ test('review handlers recheck request, role, workspace and dashboard sync guard 
 });
 test('queue refreshes with sync and role updates and refund review exposes local receipts',()=>{
  assert.match(html,/function renderAll\(\)\{\s*renderDashboardActions\(\)/);assert.match(html,/function applyRoleUI\(\) \{\s*if \(window\.renderDashboardActions\)/);assert.match(html,/function setSyncBadge\(mode\) \{\s*if \(window\.renderDashboardActions\)/);assert.match(html,/Receipt attachments are not synced between devices/);
+});
+
+test('confirmed member requests appear in the approver queue and use their own decision flow',()=>{
+ const t=setup(),c=t.ctx,items=[{id:'member-r',uid:'other',status:'pending',description:'Transport',reimburseTo:'Ana',amountCents:12345}];
+ t.state.members=[{uid:'other',displayName:'Ana'}];c.window.memberRefundPendingSummary=()=>({items,more:false});c.window.decideMemberRefund=(id,decision)=>t.calls.push([id,decision]);
+ c.renderDashboardActions();assert.equal(t.ids.dashboardActionsCount.textContent,'1');const row=t.ids.dashboardActionsList.children[0];assert.match(row.children[0].children[0].textContent,/Member refund request/);assert.match(row.children[0].children[1].textContent,/123.45/);row.children[1].children[1].click();assert.deepEqual(t.calls,[['member-r','approved']]);
+ t.state.role='reviewer';c.renderDashboardActions();assert.equal(t.ids.dashboardActionsCard.hidden,true);t.state.role='owner';c.window.memberRefundPendingSummary=()=>null;c.renderDashboardActions();assert.equal(t.ids.dashboardActionsCount.textContent,'—');assert.equal(t.ids.dashboardActionsEmpty.hidden,true);assert.match(t.ids.dashboardActionsStatus.textContent,/confirmation/);
 });

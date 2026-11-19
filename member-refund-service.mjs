@@ -1,7 +1,7 @@
 // Reviewer requests are separate immutable submissions, not writes to the shared ledger.
 // All writes require server transactions; callers must keep an uncertain submission ID for retry.
 export function createMemberRefundService({db,api,getState,getSnapshot,stableJSON,stripSnapshot,clientId}) {
- const {doc,collection,query,orderBy,limit,onSnapshot,runTransaction,serverTimestamp,getDocFromServer,getDocsFromServer,startAfter}=api;
+ const {doc,collection,query,where,orderBy,limit,onSnapshot,runTransaction,serverTimestamp,getDocFromServer,getDocsFromServer,startAfter}=api;
  const requestRef=(org,id)=>doc(db,'organizations',org,'memberRefundRequests',id);
  const current=(org,uid)=>{const s=getState();return !!s&&s.orgId===org&&s.uid===uid&&s.memberConfirmed&&s.baselineReady&&!s.recoveryLocked&&!s.listenerError&&s.online!==false&&globalThis.navigator?.onLine!==false;};
  const approver=(org,uid)=>{const s=getState();return current(org,uid)&&['owner','disbursing'].includes(s.role)&&!s.dirty&&!s.syncError&&!s.pushTimer&&!s.pushesInFlight;};
@@ -14,6 +14,15 @@ export function createMemberRefundService({db,api,getState,getSnapshot,stableJSO
    if(!current(org,uid)){notify({status:'unconfirmed',items:[]});return;}
    if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){notify({status:'unconfirmed',items:[]});return;}
    const docs=snap.docs,items=docs.slice(0,100).map(d=>({id:d.id,...d.data()}));notify({status:'ready',items,more:docs.length>100,cursor:docs[99]||null});
+  },()=>{if(current(org,uid))notify({status:'error',items:[]});});
+ }
+ // Pending-only query ensures old pending items are not hidden behind the
+ // latest 100 decided requests. Cap results and disclose overflow to the UI.
+ function watchPending(org,uid,notify){
+  const q=query(collection(db,'organizations',org,'memberRefundRequests'),where('status','==','pending'),limit(101));
+  return onSnapshot(q,{includeMetadataChanges:true},snap=>{
+   if(!current(org,uid)||snap.metadata.fromCache||snap.metadata.hasPendingWrites){notify({status:'unconfirmed',items:[]});return;}
+   const docs=snap.docs;notify({status:'ready',items:docs.slice(0,100).map(d=>({id:d.id,...d.data()})),more:docs.length>100});
   },()=>{if(current(org,uid))notify({status:'error',items:[]});});
  }
  async function older(org,uid,cursor){
@@ -63,5 +72,5 @@ export function createMemberRefundService({db,api,getState,getSnapshot,stableJSO
    return decision;
   });
  }
- return {watch,older,submit,check,decide};
+ return {watch,watchPending,older,submit,check,decide};
 }

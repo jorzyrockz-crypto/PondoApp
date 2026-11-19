@@ -47,10 +47,19 @@ again; the alert is not marked read until navigation can proceed.
 
 - Existing pending refund and linked-record deletion requests in the shared
   snapshot are surfaced to owners and disbursing officers after confirmed sync.
-  The separate member refund request inbox is not a notification source; check
-  Member requests in Refund History for those submissions.
+  Confirmed pending submissions in the separate member refund inbox also notify
+  owners and disbursing officers once per account, workspace and browser profile.
+  Existing pending items can notify on first confirmed load; open Refund History
+  → Active refund requests or the dashboard review queue to act. The pending listener
+  is capped at 100 items and shows a lower-bound count if more exist.
 - The identified requester is notified when a request is approved or rejected.
-  They are also notified when another teammate records or voids a payment for
+  For Viewer-submitted member requests, rejections are detected from the separate
+  server-confirmed inbox and alert only the submitting UID. The client catches
+  up on rejections from the last seven days, including on first use of this
+  feature; only the latest 100 inbox entries are watched, so older entries may
+  be missed. Alerts are device-local and can be repeated after storage loss.
+  Approvals continue to use the shared audit notification. The requester is
+  also notified when another teammate records or voids a payment for
   their refund, or cancels/voids their refund. Notifications identify the
   submitter by recorded UID, not by the free-text reimbursement name. A different
   payee, or an older record without a requester UID, cannot be safely targeted.
