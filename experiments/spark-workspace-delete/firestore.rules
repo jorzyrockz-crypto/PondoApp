@@ -1,0 +1,379 @@
+rules_version = '2';
+// EXPERIMENT ONLY: never deploy. Cleanup is incomplete; unknown descendants,
+// account indexes, other rule variants and finalization are not covered.
+
+// Firestore Security Rules for Pondo.
+//
+// These rules are NOT required for Firebase Authentication / Google sign-in
+// to work — Authentication and Firestore are separate products. Enable the
+// Google provider under Firebase Console > Authentication > Sign-in method
+// instead; that is what fixes an "auth/operation-not-allowed" error.
+//
+// Data model:
+//   /users/{uid}                                   — profile + orgMemberships (every org this
+//                                                     user belongs to) + activeOrganizationId
+//                                                     (which one is currently loaded on this
+//                                                     device, or null for the local-only
+//                                                     "Personal" workspace) + appSettings (the
+//                                                     signed-in user's app preferences —
+//                                                     appearance/sound/motion/animation/
+//                                                     presentation — synced across their
+//                                                     devices/browsers); self-access only.
+//                                                     Legacy accounts may only have a single
+//                                                     "organizationId" field — the client
+//                                                     migrates that into the fields above.
+//   /organizations/{orgId}                         — org profile (name, createdBy, createdAt)
+//   /organizations/{orgId}/members/{uid}           — membership + role for that org. A uid can
+//                                                     have a members/{uid} doc under any number
+//                                                     of organizations — that's what makes
+//                                                     belonging to several orgs possible, each
+//                                                     with its own fully isolated data below.
+//   /organizations/{orgId}/data/{docId}            — shared fund-tracker data (e.g. "snapshot")
+//   /invites/{code}                                — single-use-ish invite link/code -> org + role
+//
+// Roles: "owner" (manage members, full data edit), "disbursing" and
+// "project-manager" (full data edit), "reviewer" (no financial snapshot
+// writes; may create a bounded member refund request for approval).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    function memberDoc(orgId) {
+      return get(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()));
+    }
+    function orgActive(orgId) {
+      return exists(/databases/$(database)/documents/organizations/$(orgId))
+        && get(/databases/$(database)/documents/organizations/$(orgId)).data.get('deletionState', 'active') == 'active';
+    }
+    function isMember(orgId) {
+      return signedIn() && orgActive(orgId) && exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()));
+    }
+    // The initiating owner retains narrow cleanup access while everyone else
+    // loses ordinary workspace access. This is not a completed deletion.
+    function deletingOwner(orgId) {
+      return signedIn() && exists(/databases/$(database)/documents/organizations/$(orgId))
+        && get(/databases/$(database)/documents/organizations/$(orgId)).data.get('deletionState', '') == 'deleting'
+        && get(/databases/$(database)/documents/organizations/$(orgId)).data.get('deletingBy', '') == uid()
+        && exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid()))
+        && get(/databases/$(database)/documents/organizations/$(orgId)/members/$(uid())).data.role == 'owner';
+    }
+    function roleIn(orgId) {
+      return memberDoc(orgId).data.role;
+    }
+    function isOwner(orgId) {
+      return isMember(orgId) && roleIn(orgId) == 'owner';
+    }
+    function canEditData(orgId) {
+      return isMember(orgId) && roleIn(orgId) != 'reviewer';
+    }
+
+    function orgPath(orgId) { return /databases/$(database)/documents/organizations/$(orgId); }
+    function memberPath(orgId, userId) { return /databases/$(database)/documents/organizations/$(orgId)/members/$(userId); }
+    function joinPath(orgId, userId) { return /databases/$(database)/documents/organizations/$(orgId)/joinRequests/$(userId); }
+    function validOrgName(name, orgId) {
+      return name is string && name.size() > 0 && name.size() <= 120
+             && name.matches('^[^/\\s]+( [^/\\s]+)*$')
+             && orgId == 'org~' + name.lower();
+    }
+    function joinDetailsValid(data, userId) {
+      return data.keys().hasOnly(['uid','email','displayName','status','requestedAt'])
+             && data.keys().hasAll(['uid','email','displayName','status','requestedAt'])
+             && data.uid == userId && data.status == 'pending'
+             && (data.email == null || (data.email is string && data.email.size() <= 320))
+             && (data.displayName == null || (data.displayName is string && data.displayName.size() <= 160))
+             && data.requestedAt == request.time;
+    }
+
+    // ---- user profiles: each user owns their own /users/{uid} subtree ----
+    match /users/{userId} {
+      allow read, write: if signedIn() && uid() == userId;
+      match /organizationRequests/{orgId} {
+        allow read, write: if signedIn() && uid() == userId;
+      }
+
+      // An owner can notify a removed member only in the same atomic write
+      // that actually removes that member. The recipient can read/mark it read
+      // without retaining access to the former workspace.
+      match /teamNotices/{noticeId} {
+        allow read: if signedIn() && uid() == userId;
+        allow create: if signedIn() && uid() != userId
+          && request.resource.data.keys().hasOnly(['kind','orgId','orgName','actorUid','createdAt','read'])
+          && request.resource.data.keys().hasAll(['kind','orgId','orgName','actorUid','createdAt','read'])
+          && request.resource.data.kind == 'removed'
+          && request.resource.data.orgId is string && request.resource.data.orgId.size() > 0 && request.resource.data.orgId.size() <= 150
+          && request.resource.data.orgName is string && request.resource.data.orgName.size() > 0 && request.resource.data.orgName.size() <= 120
+          && request.resource.data.actorUid == uid() && request.resource.data.createdAt == request.time && request.resource.data.read == false
+          && isOwner(request.resource.data.orgId)
+          && exists(memberPath(request.resource.data.orgId,userId))
+          && !existsAfter(memberPath(request.resource.data.orgId,userId))
+          && request.resource.data.orgName == get(orgPath(request.resource.data.orgId)).data.name;
+        allow update: if signedIn() && uid() == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && resource.data.read == false && request.resource.data.read == true;
+        allow delete: if false;
+      }
+    }
+
+    // ---- organizations ----
+    match /organizations/{orgId} {
+      // A public exact-name lookup reveals only this small profile. A missing
+      // document is readable for lookup; private documents stay member-only.
+      allow get: if signedIn() && (resource == null || isMember(orgId) || deletingOwner(orgId) || resource.data.get('discoverable', false) == true);
+      // Bounded public discovery. Firestore only permits a query when it
+      // can prove that every result is explicitly discoverable.
+      allow list: if signedIn() && request.query.limit != null && request.query.limit <= 10
+                  && resource.data.get('discoverable', false) == true;
+      // The document ID is a prefix plus the ASCII-lowercase name. Create-only means
+      // two concurrent registrations cannot claim the same name.
+      allow create: if signedIn()
+                    && request.resource.data.keys().hasOnly(['name','createdBy','createdAt','discoverable'])
+                    && request.resource.data.keys().hasAll(['name','createdBy','createdAt','discoverable'])
+                    && validOrgName(request.resource.data.name, orgId)
+                    && request.resource.data.createdBy == uid()
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.discoverable == false
+                    && !exists(memberPath(orgId, uid()))
+                    && getAfter(memberPath(orgId, uid())).data.uid == uid()
+                    && getAfter(memberPath(orgId, uid())).data.role == 'owner';
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['discoverable'])
+                    && request.resource.data.discoverable is bool;
+      // Display name does not change the immutable registration/search key.
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+                    && request.resource.data.displayName is string
+                    && request.resource.data.displayName.size() > 0 && request.resource.data.displayName.size() <= 120
+                    && request.resource.data.displayName.matches('^[^/\\s]+( [^/\\s]+)*$');
+      // Shared visual identity is separate from the registered workspace name.
+      // Only an owner may update these bounded, non-HTML values.
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamColor','teamIcon'])
+                    && request.resource.data.teamColor in ['emerald','ocean','violet','rose','amber','slate']
+                    && request.resource.data.teamIcon in ['diamond','star','heart','sun','leaf','book'];
+      // Irreversible freeze only; the candidate intentionally has no finalize
+      // or parent delete rule until completeness can be established.
+      allow update: if isOwner(orgId)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletionState','deletingBy','deletingAt','discoverable'])
+                    && request.resource.data.deletionState == 'deleting'
+                    && request.resource.data.deletingBy == uid()
+                    && request.resource.data.deletingAt == request.time
+                    && request.resource.data.discoverable == false;
+      allow delete: if false;
+
+      // Approximate recent activity; a member may update only their own
+      // timestamp, never another member's or an arbitrary client-supplied time.
+      match /presence/{memberId} {
+        allow read: if isMember(orgId);
+        allow create, update: if isMember(orgId) && uid() == memberId
+                              && request.resource.data.keys().hasOnly(['lastSeen'])
+                              && request.resource.data.keys().hasAll(['lastSeen'])
+                              && request.resource.data.lastSeen == request.time;
+        allow delete: if signedIn() && (uid() == memberId || isOwner(orgId));
+      }
+
+      match /members/{memberId} {
+        // Members can list each other; a user can always check their own
+        // membership doc (even if it doesn't exist, e.g. after being removed).
+        allow read: if isMember(orgId) || (signedIn() && memberId == uid());
+
+        // Redeeming an invite must atomically consume one use. getAfter ties
+        // membership creation to the counter update in the same transaction.
+        // Initial owner is created atomically with a brand-new organization.
+        // An approved request and member creation must also be atomic.
+        allow create: if signedIn() && (
+          (memberId == uid() && !exists(orgPath(orgId))
+           && getAfter(orgPath(orgId)).data.createdBy == uid()
+           && request.resource.data.uid == uid() && request.resource.data.role == 'owner')
+          || (isOwner(orgId) && memberId != uid()
+              && exists(joinPath(orgId, memberId))
+              && get(joinPath(orgId, memberId)).data.status == 'pending'
+              && getAfter(joinPath(orgId, memberId)).data.status == 'approved'
+              && getAfter(joinPath(orgId, memberId)).data.decidedBy == uid()
+              && request.resource.data.uid == memberId
+              && request.resource.data.role in ['reviewer','disbursing','project-manager']
+              && request.resource.data.approvedBy == uid()
+              && request.resource.data.email == get(joinPath(orgId, memberId)).data.email
+              && request.resource.data.displayName == get(joinPath(orgId, memberId)).data.displayName)
+          || (memberId == uid() && orgActive(orgId)
+                       && request.resource.data.uid == uid()
+                       && request.resource.data.inviteCode is string
+                       && request.resource.data.role in ['reviewer', 'disbursing', 'project-manager']
+                       && request.resource.data.role == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.role
+                       && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.orgId == orgId
+                       && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.revoked == false
+                       && (get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt == null
+                           || request.time < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt)
+                       && (get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses == null
+                           || get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
+                              < get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.maxUses)
+                       && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
+                          == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount + 1));
+
+        allow update: if isOwner(orgId);
+        allow delete: if isOwner(orgId) || (signedIn() && memberId == uid() && orgActive(orgId));
+      }
+
+      match /joinRequests/{requester} {
+        allow get: if signedIn() && (uid() == requester || isOwner(orgId));
+        allow list: if isOwner(orgId);
+        allow create: if signedIn() && uid() == requester && joinDetailsValid(request.resource.data, requester)
+                      && get(orgPath(orgId)).data.discoverable == true && !exists(memberPath(orgId, requester));
+        allow update: if signedIn() && (
+          (uid() == requester && resource.data.status == 'rejected'
+           && joinDetailsValid(request.resource.data, requester)
+           && get(orgPath(orgId)).data.discoverable == true && !exists(memberPath(orgId, requester)))
+          || (isOwner(orgId) && resource.data.status == 'pending'
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedBy','decidedAt'])
+              && request.resource.data.decidedBy == uid() && request.resource.data.decidedAt == request.time
+              && ((request.resource.data.status == 'rejected' && !exists(memberPath(orgId, requester)))
+                  || (request.resource.data.status == 'approved' && !exists(memberPath(orgId, requester))
+                      && getAfter(memberPath(orgId, requester)).data.uid == requester
+                      && getAfter(memberPath(orgId, requester)).data.approvedBy == uid()
+                      && getAfter(memberPath(orgId, requester)).data.role in ['reviewer','disbursing','project-manager']))));
+        allow delete: if false;
+      }
+
+      // Reserved for a future server-authoritative Faculty Fund service. The
+      // client cannot create, modify, or erase these records. Acceptance and
+      // assignment must never rely on the editable shared snapshot below.
+      match /facultyFund/{docId} {
+        allow read: if docId in ['config', 'state'] && isMember(orgId);
+        allow write: if false;
+      }
+      // Backup snapshots and operation receipts are server-only. An uploaded
+      // JSON file must never be treated as a President's authorization.
+      match /facultyFundBackups/{backupId} {
+        allow read, write: if false;
+      }
+      // Idempotency records are internal to the trusted service.
+      match /facultyFundOperations/{operationId} {
+        allow read, write: if false;
+      }
+
+      // Narrow member-created inbox: never grants reviewers snapshot writes.
+      // Request content is immutable; only an approver may record one decision.
+      match /memberRefundRequests/{requestId} {
+        allow read: if isMember(orgId);
+        allow create: if isMember(orgId)
+          && requestId.size() >= 12 && requestId.size() <= 150
+          && request.resource.data.keys().hasOnly(['uid','description','reimburseTo','reimburseToUid','amountCents','expenseDate','supplier','category','reference','itemsJSON','receiptDigest','status','createdAt'])
+          && request.resource.data.keys().hasAll(['uid','description','reimburseTo','amountCents','expenseDate','supplier','category','reference','status','createdAt'])
+          && request.resource.data.uid == uid()
+          && request.resource.data.description is string && request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 300
+          && request.resource.data.reimburseTo is string && request.resource.data.reimburseTo.size() > 0 && request.resource.data.reimburseTo.size() <= 160
+          && (!('reimburseToUid' in request.resource.data) || (request.resource.data.reimburseToUid is string && request.resource.data.reimburseToUid.size() > 0 && request.resource.data.reimburseToUid.size() <= 128 && request.resource.data.reimburseToUid.matches('^[^/]+$') && exists(memberPath(orgId, request.resource.data.reimburseToUid))))
+          && request.resource.data.amountCents is int && request.resource.data.amountCents > 0 && request.resource.data.amountCents <= 1000000000
+          && request.resource.data.expenseDate is string && request.resource.data.expenseDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && request.resource.data.supplier is string && request.resource.data.supplier.size() <= 160
+          && request.resource.data.category is string && request.resource.data.category.size() <= 160
+          && request.resource.data.reference is string && request.resource.data.reference.size() <= 160
+          && (!('itemsJSON' in request.resource.data) || (request.resource.data.itemsJSON is string && request.resource.data.itemsJSON.size() > 0 && request.resource.data.itemsJSON.size() <= 10000))
+          && (!('receiptDigest' in request.resource.data) || (request.resource.data.receiptDigest is string
+              && request.resource.data.receiptDigest.matches('^[a-f0-9]{64}$')
+              && existsAfter(/databases/$(database)/documents/organizations/$(orgId)/refundReceipts/$(requestId))
+              && getAfter(/databases/$(database)/documents/organizations/$(orgId)/refundReceipts/$(requestId)).data.uid == uid()
+              && getAfter(/databases/$(database)/documents/organizations/$(orgId)/refundReceipts/$(requestId)).data.digest == request.resource.data.receiptDigest))
+          && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time;
+        allow update: if isMember(orgId) && roleIn(orgId) in ['owner','disbursing']
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedBy','decidedAt','decisionReason'])
+          && request.resource.data.keys().hasAll(['status','decidedBy','decidedAt','decisionReason'])
+          && request.resource.data.status in ['approved','rejected']
+          && request.resource.data.decidedBy == uid() && request.resource.data.decidedAt == request.time
+          && request.resource.data.decisionReason is string && request.resource.data.decisionReason.size() <= 300
+          && (request.resource.data.status != 'rejected' || request.resource.data.decisionReason.size() > 0);
+        allow delete: if false;
+      }
+
+      // Separate immutable, bounded receipt. The request and receipt must be
+      // created together, so a failed submit cannot leave a dangling reference.
+      match /refundReceipts/{requestId} {
+        allow get: if isMember(orgId);
+        allow list, update, delete: if false;
+        allow create: if isMember(orgId) && roleIn(orgId) == 'reviewer'
+          && request.resource.data.keys().hasOnly(['uid','digest','image','createdAt'])
+          && request.resource.data.keys().hasAll(['uid','digest','image','createdAt'])
+          && request.resource.data.uid == uid() && request.resource.data.createdAt == request.time
+          && request.resource.data.digest is string && request.resource.data.digest.matches('^[a-f0-9]{64}$')
+          && request.resource.data.image is string && request.resource.data.image.size() <= 600000
+          && request.resource.data.image.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$')
+          && !exists(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId))
+          && existsAfter(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId))
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId)).data.uid == uid()
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/memberRefundRequests/$(requestId)).data.receiptDigest == request.resource.data.digest;
+      }
+
+      // Editors may create an immutable receipt while writing their own
+      // shared ledger snapshot. Clients commit both together; rules cannot
+      // enumerate payables to enforce the cross-document link.
+      match /editorRefundReceipts/{requestId} {
+        allow get: if isMember(orgId);
+        allow list, update, delete: if false;
+        allow create: if canEditData(orgId)
+          && request.resource.data.keys().hasOnly(['uid','digest','image','createdAt'])
+          && request.resource.data.keys().hasAll(['uid','digest','image','createdAt'])
+          && request.resource.data.uid == uid() && request.resource.data.createdAt == request.time
+          && request.resource.data.digest is string && request.resource.data.digest.matches('^[a-f0-9]{64}$')
+          && request.resource.data.image is string && request.resource.data.image.size() <= 600000
+          && request.resource.data.image.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$');
+      }
+
+      // Temporary cleanup authority, only for enumerated direct collections.
+      // Owner membership stays until a future audited finalization protocol.
+      match /{group}/{entryId} {
+        allow get, list: if group in ['data','presence','members','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts'] && deletingOwner(orgId);
+        allow delete: if group in ['data','presence','members','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts']
+          && !(group == 'members' && entryId == uid()) && deletingOwner(orgId);
+      }
+
+      match /data/{docId} {
+        allow read: if isMember(orgId);
+        // Old clients performed unconditional snapshot writes. Reject them and
+        // require a monotonic revision, including on the first legacy upgrade.
+        // Clients must still use a transaction: rules cannot prove they did.
+        allow create: if docId == 'snapshot' && canEditData(orgId)
+                      && request.resource.data._syncRevision is int
+                      && request.resource.data._syncRevision == 1
+                      && request.resource.data.updatedBy == uid();
+        allow update: if docId == 'snapshot' && canEditData(orgId)
+                      && resource.data.get('_syncRevision', 0) is int
+                      && resource.data.get('_syncRevision', 0) >= 0
+                      && request.resource.data._syncRevision is int
+                      && request.resource.data._syncRevision == resource.data.get('_syncRevision', 0) + 1
+                      && request.resource.data.updatedBy == uid();
+        allow delete: if false;
+      }
+    }
+
+    // ---- invites ----
+    match /invites/{code} {
+      // Needs to be readable by a signed-in user who is redeeming it (before
+      // they are a member of the target org).
+      allow get: if signedIn() && (resource == null || orgActive(resource.data.orgId) || deletingOwner(resource.data.orgId));
+      allow list: if deletingOwner(resource.data.orgId);
+      allow create: if signedIn() && request.resource.data.createdBy == uid() && isOwner(request.resource.data.orgId)
+                    && request.resource.data.role in ['reviewer', 'disbursing', 'project-manager']
+                    && request.resource.data.usedCount == 0 && request.resource.data.revoked == false
+                    && (request.resource.data.maxUses == null || (request.resource.data.maxUses is int && request.resource.data.maxUses > 0))
+                    && (request.resource.data.expiresAt == null || request.resource.data.expiresAt is timestamp);
+      // The same transaction must create the caller's matching membership.
+      allow update: if signedIn() && orgActive(resource.data.orgId)
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount'])
+                     && request.resource.data.usedCount == resource.data.usedCount + 1
+                     && resource.data.revoked == false
+                     && (resource.data.expiresAt == null || request.time < resource.data.expiresAt)
+                     && (resource.data.maxUses == null || resource.data.usedCount < resource.data.maxUses)
+                     && !exists(/databases/$(database)/documents/organizations/$(resource.data.orgId)/members/$(uid()))
+                     && getAfter(/databases/$(database)/documents/organizations/$(resource.data.orgId)/members/$(uid())).data.inviteCode == code
+                     && getAfter(/databases/$(database)/documents/organizations/$(resource.data.orgId)/members/$(uid())).data.role == resource.data.role;
+      allow delete: if signedIn() && (isOwner(resource.data.orgId) || deletingOwner(resource.data.orgId));
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
