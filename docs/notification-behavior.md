@@ -9,6 +9,33 @@ local to this account, workspace, and browser profile; they do not sync between
 devices. A notification that a refund payment was *recorded* is not proof that
 the recipient received funds.
 
+## Alerts while Pondo is open
+
+New eligible bell entries show a temporary, dismissible in-app banner while the
+page is visible. The Faculty Fund retains its own notice. The banner opens the
+existing bell destination and does not independently approve or pay anything.
+When several alerts arrive together, the newest banner replaces the previous
+one; all remain in the bell. A best-effort sound uses the app's configured
+sound pack and volume; sound can be disabled in Settings and is rate-limited.
+Mobile autoplay restrictions may require a prior tap, and silent mode, device
+volume and audio focus can still prevent sound. The banner does not require OS
+notification permission.
+
+Account approval, join-request and removal inbox entries are announced once per
+account and browser profile, including unread entries seen on initial load.
+A bounded local cursor suppresses repeats, but storage clearing or eviction can
+cause catch-up alerts again. Already read entries do not alert.
+
+The app first tries a regular browser notification; if the constructor is not
+supported (as on many Android browsers), it asks the Pondo service worker to
+show one. An active Pondo worker and notification permission are required.
+Tapping it targets only the originating open window and rechecks the account,
+workspace, role and notification before navigation; if that window has closed,
+the alert is simply dismissed. Phone settings, browser notification channels,
+Do Not Disturb, battery optimizations, and browser lifecycle can suppress OS
+alerts or sound. This is still not server push: an open tab can be suspended,
+and events in unopened workspaces may not be detected until opened again.
+
 ## Team profiles and navigation
 
 Team activity alerts show the relevant confirmed member’s profile photo when

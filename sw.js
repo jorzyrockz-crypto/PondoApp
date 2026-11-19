@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v110';
+const CACHE_VERSION = 'pondo-v111';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -102,8 +102,29 @@ self.addEventListener('install', (event) => {
 
 // A waiting update is activated only when a client requests it. Other open
 // windows must choose when to reload; do not force-refresh unsaved forms.
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'PONDO_ACTIVATE_UPDATE') event.waitUntil(self.skipWaiting());
+// Android browsers may reject new Notification in a page. The requesting
+// open client is the only destination for a click; this is not push delivery.
+self.addEventListener('message', event => {
+  if(event.data && event.data.type === 'PONDO_ACTIVATE_UPDATE'){event.waitUntil(self.skipWaiting());return;}
+  const d=event.data,source=event.source;
+  if(!d||d.type!=='PONDO_SHOW_NOTIFICATION'||!source||typeof source.id!=='string'||typeof source.url!=='string')return;
+  let clientUrl,scope;try{clientUrl=new URL(source.url);scope=new URL(self.registration.scope);}catch(e){return;}
+  if(clientUrl.origin!==scope.origin||![scope.pathname,scope.pathname+'index.html'].includes(clientUrl.pathname))return;
+  if(typeof d.title!=='string'||!d.title||d.title.length>500||typeof d.body!=='string'||d.body.length>2000||typeof d.id!=='string'||d.id.length>500||typeof d.recipientUid!=='string'||!d.recipientUid||d.recipientUid.length>128)return;
+  if(d.orgId!==null&&(typeof d.orgId!=='string'||d.orgId.length>150))return;
+  if(d.approvalKey!==null&&(typeof d.approvalKey!=='string'||d.approvalKey.length>500))return;
+  let icon;try{const u=new URL(d.icon,scope);const assetNames=['due','overdue','refund','income','expense','donation','contribution','death-aid','backup'];
+    const local=u.origin===scope.origin&&([scope.pathname+'icons/icon-192.png',...assetNames.map(x=>scope.pathname+'assets/notification-icons/'+x+'.png')].includes(u.pathname))&&!u.search&&!u.hash;
+    const google=u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&/(^|\.)(googleusercontent\.com|ggpht\.com)$/i.test(u.hostname);
+    if(!local&&!google)return;icon=u.href;
+  }catch(e){return;}
+  const data={type:'PONDO_NOTIFICATION_CLICK',clientId:source.id,id:d.id,recipientUid:d.recipientUid,orgId:d.orgId,approvalKey:d.approvalKey};
+  event.waitUntil(self.registration.showNotification(d.title,{body:d.body,icon,tag:d.id,data}).catch(()=>{}));
+});
+self.addEventListener('notificationclick', event => {
+  const d=event.notification?.data;event.notification?.close();
+  if(!d||d.type!=='PONDO_NOTIFICATION_CLICK'||typeof d.clientId!=='string')return;
+  event.waitUntil(self.clients.get(d.clientId).then(async client=>{if(!client)return;try{await client.focus();}catch(e){}client.postMessage(d);}).catch(()=>{}));
 });
 
 self.addEventListener('activate', (event) => {
@@ -112,7 +133,7 @@ self.addEventListener('activate', (event) => {
       const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
       if (obsolete.length) {
         // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
-        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v110', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v111', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
       }
       await Promise.all(obsolete.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())
