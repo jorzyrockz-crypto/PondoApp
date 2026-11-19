@@ -235,6 +235,9 @@ test('member refund inbox permits bounded member submissions but not reviewer le
  const request={uid:'viewer',description:'Supplies',reimburseTo:'Viewer',amountCents:5000,expenseDate:'2026-01-01',supplier:'',category:'',reference:'',status:'pending',createdAt:serverTimestamp()};
  await assertFails(setDoc(ref(outsider,path),request));await assertFails(setDoc(ref(anon,path),request));await assertFails(setDoc(ref(v,path),{...request,uid:'owner'}));await assertFails(setDoc(ref(v,path),{...request,amountCents:-1}));await assertFails(setDoc(ref(v,path),{...request,receiptImage:'unsafe'}));
  await assertSucceeds(setDoc(ref(v,path),request));await assertSucceeds(getDoc(ref(owner,path)));await assertFails(getDoc(ref(outsider,path)));
+ const pending=db=>api.query(collection(db,root+'/memberRefundRequests'),api.where('status','==','pending'),api.limit(101));
+ for(const member of [v,owner,ao])assert.equal((await assertSucceeds(getDocs(pending(member)))).size,1);
+ await assertFails(getDocs(pending(outsider)));await assertFails(getDocs(pending(anon)));
  await assertFails(updateDoc(ref(v,path),{description:'tampered'}));await assertFails(updateDoc(ref(v,path),{status:'approved',decidedBy:'viewer',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(v,root+'/data/snapshot'),{_syncRevision:2,updatedBy:'viewer'}));
  await assertFails(updateDoc(ref(ao,path),{status:'approved',decidedBy:'owner',decidedAt:serverTimestamp(),decisionReason:''}));await assertSucceeds(updateDoc(ref(ao,path),{status:'approved',decidedBy:'ao',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(owner,path),{status:'rejected',decidedBy:'owner',decidedAt:serverTimestamp(),decisionReason:'duplicate'}));await assertFails(deleteDoc(ref(owner,path)));
  await assertSucceeds(deleteDoc(ref(owner,root+'/members/viewer')));await assertFails(getDoc(ref(v,path)));await assertFails(setDoc(ref(v,root+'/memberRefundRequests/member-refund-987654'),request));
@@ -253,4 +256,10 @@ test('member request approval transaction creates exactly one unpaid payable and
  const attempts=await Promise.allSettled([owner.decide(org,'owner',id,'approved','','Owner'),ao.decide(org,'ao',id,'approved','','AO')]);assert.equal(attempts.filter(x=>x.status==='fulfilled').length,1);
  const snapshot=(await getDoc(ref(client('owner'),root+'/data/snapshot'))).data(),request=(await getDoc(ref(client('owner'),root+'/memberRefundRequests/'+id))).data();
  assert.equal(snapshot.payables.length,1);assert.equal(snapshot.auditLog.length,1);assert.equal(snapshot.txs.length,0);assert.equal(snapshot.payables[0].amount,250);assert.equal(snapshot.payables[0].projectId,null);assert.equal(request.status,'approved');
+});
+
+test('login repair restores only confirmed memberships referenced in the signed-in profile',async()=>{
+ const {recoverWorkspaceMemberships}=await import('../workspace-membership-recovery.mjs');const uid='viewer',db=client(uid),team='org~confirmed',removed='org~removed';
+ await seed({[`organizations/${team}`]:{name:'Confirmed',createdBy:'owner'},[`organizations/${team}/members/${uid}`]:{uid,role:'reviewer'},[`organizations/${team}/data/snapshot`]:{_syncRevision:1,updatedBy:'owner',payables:[],auditLog:[]},[`organizations/${removed}`]:{name:'Removed',createdBy:'owner'},[`users/${uid}`]:{orgMemberships:[],activeOrganizationId:null},[`users/${uid}/organizationRequests/${team}`]:{orgId:team,name:'Confirmed',created:false},[`users/${uid}/organizationRequests/${removed}`]:{orgId:removed,name:'Removed',created:false}});
+ const result=await recoverWorkspaceMemberships({db,api,uid,isCurrent:()=>true,knownIds:[]});assert.deepEqual(result,{ids:[team],partial:false});const profile=(await getDoc(ref(db,`users/${uid}`))).data();assert.deepEqual(profile.orgMemberships,[team]);assert.equal(profile.activeOrganizationId,null);assert.equal((await getDoc(ref(db,`organizations/${team}/data/snapshot`))).data()._syncRevision,1);await assertFails(getDoc(ref(db,`organizations/${removed}`)));
 });

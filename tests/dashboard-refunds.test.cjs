@@ -52,3 +52,13 @@ test('amber styling is available in both modes for outstanding requests',()=>{
  assert.match(html,/\.dashboard-refund-alert\.has-outstanding\{background:#fff8ed;border-color:#f3c888\}/);
  assert.match(html,/body\.dark-mode \.dashboard-refund-alert\.has-outstanding\{background:#302819;border-color:#78542c/);
 });
+
+test('member pending requests count separately without adding an approved payable or payment',()=>{
+ const {c,state,ids}=setup();Object.assign(state,{orgId:'team',memberConfirmed:true,baselineReady:true,online:true});c.window.memberRefundPendingSummary=()=>({items:[{id:'r',description:'Supplies',amountCents:40000}],more:false});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'1');assert.equal(ids.dashboardRefundEmpty.hidden,true);assert.match(ids.dashboardRefundList.children[0].children[1].textContent,/Pending approval.*400/);assert.equal(c.payables.length,0);
+ c.window.memberRefundPendingSummary=()=>null;c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'—');assert.equal(ids.dashboardRefundEmpty.hidden,true);
+});
+
+test('approvers see pending refunds only in the review queue; approved refunds remain in the summary',()=>{
+ for(const role of ['owner','disbursing']){const {c,state,ids}=setup();Object.assign(state,{orgId:'team',role,memberConfirmed:true,baselineReady:true,online:true});c.window.memberRefundPendingSummary=()=>({items:[{id:'member',amountCents:800}],more:false});c.payables.push({id:'pending',kind:'advance',description:'Pending ledger',amount:10,pendingApproval:{}},{id:'approved',kind:'advance',description:'Approved ledger',amount:20});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'1');assert.equal(ids.dashboardRefundList.children.length,1);assert.equal(ids.dashboardRefundList.children[0].children[0].textContent,'Approved ledger');}
+ const {c,state,ids}=setup();Object.assign(state,{orgId:'team',role:'reviewer',memberConfirmed:true,baselineReady:true,online:true});c.window.memberRefundPendingSummary=()=>({items:[{id:'member',description:'Pending member',amountCents:800}],more:false});c.payables.push({id:'pending',kind:'advance',description:'Pending ledger',amount:10,pendingApproval:{}});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'2');assert.equal(ids.dashboardRefundList.children.length,2);
+});

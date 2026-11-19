@@ -17,7 +17,7 @@ test('request empty state is accessible, hidden when needed and supported in dar
  assert.match(html,/id="dashboardRefundEmpty" class="dashboard-empty-state dashboard-empty-state--refund"/);
  assert.match(html,/No outstanding requests/);assert.match(html,/Requests awaiting approval or payment will appear here/);
  assert.match(html,/\.dashboard-empty-state\[hidden\]\{display:none!important\}/);
- assert.match(html,/empty\.hidden=items\.length>0 \|\| stale/);
+ assert.match(html,/empty\.hidden=total>0 \|\| stale \|\| \(team&&!approver&&!memberPending\)/);
  assert.match(html,/if\(unconfirmed\)\{empty\.hidden=true/);
  assert.match(html,/body\.dark-mode \.dashboard-empty-title/);assert.match(html,/body\.dark-mode \.dashboard-empty-copy/);
  assert.match(html,/class="dashboard-history-link" type="button" onclick="switchTab\('refunds'\)"/);
