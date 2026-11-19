@@ -1,0 +1,5 @@
+# Refund impact on Overview
+
+The combined Refunds card on Overview shows cash balance, approved outstanding refunds, and a comparison of cash minus those refunds, alongside recent outstanding requests and the request and history actions. The last figure can be negative: this means approved refund obligations exceed total recorded cash, not that a negative cash transaction was recorded. It is not a spending limit or available budget; fund restrictions and project allocations still control which payments can be made. Supplier payables are not included in this refund-only comparison.
+
+Outstanding amounts are the recorded refund less cash payments and any non-cash settlement credits. Cash payments already reduce the cash balance and are not subtracted a second time. Requests awaiting approval appear separately and do not enter the comparison until approved. The values are derived from the current workspace and are not separately stored; team loading or sync uncertainty is indicated. Follow **View refunds** to review the individual requests.

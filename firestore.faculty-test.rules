@@ -30,8 +30,8 @@ rules_version = '2';
 //   /invites/{code}                                — single-use-ish invite link/code -> org + role
 //
 // Roles: "owner" (manage members, full data edit), "disbursing" and
-// "project-manager" (full data edit), "reviewer" (read-only — enforced
-// here, not just hidden in the UI).
+// "project-manager" (full data edit), "reviewer" (no financial snapshot
+// writes; may create a bounded member refund request for approval).
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -222,6 +222,34 @@ service cloud.firestore {
       // Idempotency records are internal to the trusted service.
       match /facultyFundOperations/{operationId} {
         allow read, write: if false;
+      }
+
+      // Narrow member-created inbox: never grants reviewers snapshot writes.
+      // Request content is immutable; only an approver may record one decision.
+      match /memberRefundRequests/{requestId} {
+        allow read: if isMember(orgId);
+        allow create: if isMember(orgId)
+          && requestId.size() >= 12 && requestId.size() <= 150
+          && request.resource.data.keys().hasOnly(['uid','description','reimburseTo','amountCents','expenseDate','supplier','category','reference','status','createdAt'])
+          && request.resource.data.keys().hasAll(['uid','description','reimburseTo','amountCents','expenseDate','supplier','category','reference','status','createdAt'])
+          && request.resource.data.uid == uid()
+          && request.resource.data.description is string && request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 300
+          && request.resource.data.reimburseTo is string && request.resource.data.reimburseTo.size() > 0 && request.resource.data.reimburseTo.size() <= 160
+          && request.resource.data.amountCents is int && request.resource.data.amountCents > 0 && request.resource.data.amountCents <= 1000000000
+          && request.resource.data.expenseDate is string && request.resource.data.expenseDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && request.resource.data.supplier is string && request.resource.data.supplier.size() <= 160
+          && request.resource.data.category is string && request.resource.data.category.size() <= 160
+          && request.resource.data.reference is string && request.resource.data.reference.size() <= 160
+          && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time;
+        allow update: if isMember(orgId) && roleIn(orgId) in ['owner','disbursing']
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedBy','decidedAt','decisionReason'])
+          && request.resource.data.keys().hasAll(['status','decidedBy','decidedAt','decisionReason'])
+          && request.resource.data.status in ['approved','rejected']
+          && request.resource.data.decidedBy == uid() && request.resource.data.decidedAt == request.time
+          && request.resource.data.decisionReason is string && request.resource.data.decisionReason.size() <= 300
+          && (request.resource.data.status != 'rejected' || request.resource.data.decisionReason.size() > 0);
+        allow delete: if false;
       }
 
       match /data/{docId} {

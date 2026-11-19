@@ -4,6 +4,7 @@ const css=html.slice(html.indexOf('/* Refund workspace:'),html.indexOf('/* Finan
 const renderer=html.slice(html.indexOf('function renderRefundHistory(){'),html.indexOf('function renderSeriesComparison()'));
 test('refund workspace has responsive, scoped request cards and a dark theme',()=>{
  assert.match(css,/#tab-refunds \.refund-card-amounts \{ display:grid/);
+ assert.match(css,/#tab-refunds \.refund-workspace \{ display:grid; row-gap:16px;/);
  assert.match(css,/@media screen and \(max-width:700px\)/);
  assert.match(css,/@media screen and \(max-width:360px\)/);
  assert.match(css,/body\.dark-mode #tab-refunds \.refund-workspace \{ background:transparent!important/);
