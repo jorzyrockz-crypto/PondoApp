@@ -27,3 +27,11 @@ test('pending query is bounded, status-filtered, server-confirmed and scope guar
  const service=create({db:{},api,getState:()=>t.state,getSnapshot:()=>t.ledger,stableJSON:stable,stripSnapshot:x=>x,clientId:'test'}),seen=[];service.watchPending('org','member',x=>seen.push(x));assert.deepEqual(parts[1],['status','==','pending']);assert.equal(parts[2],101);
  next({metadata:{fromCache:true,hasPendingWrites:false},docs});assert.equal(seen.at(-1).status,'unconfirmed');next({metadata:{fromCache:false,hasPendingWrites:true},docs});assert.equal(seen.at(-1).status,'unconfirmed');next({metadata:{fromCache:false,hasPendingWrites:false},docs});assert.equal(seen.at(-1).items.length,100);assert.equal(seen.at(-1).more,true);failed();assert.equal(seen.at(-1).status,'error');t.state.orgId='other';next({metadata:{fromCache:false,hasPendingWrites:false},docs});assert.equal(seen.at(-1).status,'unconfirmed');
 });
+test('optional explicit recipient identity survives approval and retries cannot change it',async()=>{
+ const {service:s,state,records,payload,id}=setup();const linked={...payload,reimburseToUid:'member'};
+ assert.equal(await s.submit('org','member',id,linked),'pending');await assert.rejects(s.submit('org','member',id,payload),/different or invalid request/);await assert.rejects(s.check('org','member',id,{...linked,reimburseToUid:'other'}),/different or invalid request/);
+ state.uid='owner';state.role='owner';await s.decide('org','owner',id,'approved','','Owner');assert.equal(records.get('organizations/org/data/snapshot').payables[0].reimburseToUid,'member');assert.equal(records.get('organizations/org/data/snapshot').txs.length,0);
+});
+test('recipient identity rejects malformed IDs and preserves old unlinked submissions',async()=>{
+ const {service:s,payload,id}=setup();for(const uid of ['',123,'a/b','x'.repeat(129)])await assert.rejects(s.submit('org','member',id,{...payload,reimburseToUid:uid}),/changed/);assert.equal(await s.submit('org','member',id,payload),'pending');assert.equal(await s.check('org','member',id,payload),'pending');
+});

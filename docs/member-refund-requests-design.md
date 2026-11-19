@@ -5,6 +5,66 @@
 Confirmed online Viewer / Reviewer team members can submit a request from Overview or Refund History. Their request uses a separate Firestore inbox; it does not edit cash, project allocations, or the shared financial snapshot. Owner and Disbursing Officer can review member requests in the dashboard review queue or under Active refund requests in Refund History. Approval atomically marks the request approved and adds an unpaid, unassigned refund plus an audit entry to the current server snapshot, checking the snapshot baseline and revision. Rejection records a reason in the inbox without creating a payable. Payment can use uncommitted cash without a project, or an assigned project’s unspent fund allocation. Existing Project Manager and approver refund workflows remain separate.
 
 
+## Requester payment history
+
+Refund History includes a read-only **My refund requests** section for confirmed
+team members. It matches the current account UID to member inbox submissions or
+ledger requester/creator IDs, never a free-text payee. A requester can submit for
+another person; the recorded person to reimburse is displayed separately. Older
+entries without a reliable UID are not attributed by name.
+
+The view joins by request/payable ID to the existing snapshot transactions and
+non-cash credits; it does not create a second expense or modify financial data.
+It shows partial and complete cash payments, non-cash settlements, and audited
+payment or credit reversals, including bulk-cleared transactions. Removed or
+rejected obligations are derived from their inbox decision or void/rejection
+audit record. An approved inbox item whose matching ledger record is missing or
+conflicting shows payment details unavailable, not an assumed unpaid balance.
+Confirmation of receipt is not collected; a recorded payment does not prove that
+money reached the payee.
+
+The section clears while the current team/account, financial snapshot or local
+changes are unconfirmed, offline, dirty, or in a sync error. The independently
+loaded inbox may still be incomplete; the interface warns about this and lets
+members load older workspace inbox pages. Those pages contain all members'
+requests and are filtered locally by requester UID, so several pages may be
+needed. Entries lacking identity or missing from the existing data cannot be
+recovered by this view. Requester notifications link to the matching item when
+available, but remain best-effort local alerts; initial snapshots seed existing
+payment events and do not guarantee notifications for activity missed before
+first use. No rules changes or new private-profile reads are required.
+
+## Recipient identity and transparency review
+
+A team refund form can optionally link the reimbursed person to a current team
+member. The link is an explicit user selection; editing the name clears it.
+Unlinked free-text recipients remain supported and are never matched to an
+account by name. The member ID and payment-recorder IDs are user-entered or
+client-recorded metadata, not independent verification of the recipient,
+payment, or review. The selector does not transfer money or grant permissions.
+
+Refund History has a read-only **Refund transparency** filter: requester is the
+linked recipient, payment recorded by the linked recipient (including a later
+void), or recipient not linked. It displays payment and reversal details from
+the existing transaction/audit records, with a warning for unconfirmed or
+incomplete data. It does not store a review decision or imply independent
+approval, and an absent flag does not prove a refund was independently reviewed.
+Historical unlinked refunds remain visible under the unlinked filter. All current
+workspace members can already read these records. Shared-snapshot editors can
+modify the financial data, so this is not a tamper-proof control.
+
+Viewer/Reviewer requests use a separate immutable inbox. An optional recipient
+UID is validated against current workspace membership by the updated Firestore
+rules and retained during approval; older submissions without it still work.
+Rules must be reviewed, emulator-tested and deployed to the intended project
+**before** app clients submit linked Viewer/Reviewer requests. Otherwise those
+submissions will fail and their local uncertain drafts must be kept for safe
+retry. No rules are deployed by the app or by these changes. Upgrade approvers
+too: an older approver may omit the new recipient link when converting an inbox
+request to a payable; the review view treats differing inbox/ledger links as
+unconfirmed, not as a verified flag. Existing project allocations, roles,
+manual payment, receipt and backup safeguards remain unchanged.
+
 ## Funding and payment
 
 Approval records an unpaid obligation even if there is no funding. It neither
