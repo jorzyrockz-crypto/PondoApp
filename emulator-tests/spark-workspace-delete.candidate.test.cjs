@@ -31,3 +31,14 @@ test('only the initiating owner can list and delete supported records; finalizat
  await assertFails(deleteDoc(doc(owner,root+'/hidden/private')));await assertFails(updateDoc(doc(owner,root),{deletionState:'deleted'}));await assertFails(deleteDoc(doc(owner,root)));
  const lock=await assertSucceeds(getDoc(doc(owner,root)));assert.equal(lock.data().deletionState,'deleting');
 });
+
+test('experimental client resumes bounded cleanup against the candidate rules without claiming completion',async()=>{
+ const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs');
+ const api=require('firebase/firestore'),owner=db('owner'),context={orgId:'org~cleanup',uid:'owner',currentUid:'owner',online:true};
+ const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>context});
+ assert.equal(await cleanup.freeze('org~cleanup','owner'),'frozen');
+ let last;for(let i=0;i<20;i++){last=await cleanup.clearNext('org~cleanup','owner');if(last.state==='awaiting-verification')break;}
+ assert.equal(last.state,'awaiting-verification');assert.equal(last.finalized,false);
+ assert.equal((await assertSucceeds(getDoc(doc(owner,root)))).data().deletionState,'deleting');
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,root+'/hidden/private'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/members/owner'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/data/snapshot'))).exists(),false)});
+});
