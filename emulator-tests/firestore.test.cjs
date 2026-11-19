@@ -303,3 +303,15 @@ test('shared refund receipts are bounded, immutable and limited to workspace mem
  const editor={uid:'owner',digest,image,createdAt:serverTimestamp()};await assertFails(setDoc(ref(viewer,editorPath),{...editor,uid:'viewer'}));await assertSucceeds(setDoc(ref(owner,editorPath),editor));await assertSucceeds(getDoc(ref(viewer,editorPath)));await assertFails(getDoc(ref(outsider,editorPath)));await assertFails(updateDoc(ref(owner,editorPath),{image}));await assertFails(deleteDoc(ref(owner,editorPath)));await assertFails(getDocs(collection(owner,root+'/editorRefundReceipts')));
  await assertSucceeds(deleteDoc(ref(owner,root+'/members/viewer')));await assertFails(getDoc(ref(viewer,receiptPath)));await assertFails(getDoc(ref(viewer,editorPath)));
 });
+
+test('editor receipt and shared snapshot commit together or both fail on a stale baseline',async()=>{
+ const {planEditorRefundReceipts,writeEditorRefundReceipts}=await import('../refund-receipt-sync.mjs');
+ const {refundReceiptDigest}=await import('../member-refund-service.mjs');
+ const org='editor-receipt-atomic',root='organizations/'+org,db=client('owner');
+ const old={payables:[],_syncRevision:1,updatedBy:'owner'};await seed({[root]:{name:'Receipts'},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/data/snapshot']:old});
+ const image='data:image/jpeg;base64,YWJj',digest=await refundReceiptDigest(image),bill={id:'editor-refund-123',kind:'advance',receiptImage:image,sharedReceiptKind:'editor',sharedReceiptDigest:digest};
+ const items=await planEditorRefundReceipts({payables:[bill]},JSON.stringify({payables:[]})),snapshotRef=ref(db,root+'/data/snapshot');
+ async function push(expected){return api.runTransaction(db,async tx=>{const prev=await tx.get(snapshotRef);if(prev.data()._syncRevision!==expected)throw Error('stale');const commit=await writeEditorRefundReceipts({transaction:tx,db,doc,serverTimestamp,orgId:org,uid:'owner',items});commit();tx.set(snapshotRef,{payables:[{...bill,receiptImage:null}],_syncRevision:expected+1,updatedBy:'owner'});});}
+ await assert.rejects(push(2),/stale/);assert.equal((await getDoc(ref(db,root+'/editorRefundReceipts/'+bill.id))).exists(),false);
+ await assertSucceeds(push(1));assert.equal((await getDoc(ref(db,root+'/editorRefundReceipts/'+bill.id))).data().digest,digest);assert.equal((await getDoc(snapshotRef)).data().payables[0].sharedReceiptDigest,digest);
+});
