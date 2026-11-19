@@ -315,3 +315,15 @@ test('editor receipt and shared snapshot commit together or both fail on a stale
  await assert.rejects(push(2),/stale/);assert.equal((await getDoc(ref(db,root+'/editorRefundReceipts/'+bill.id))).exists(),false);
  await assertSucceeds(push(1));assert.equal((await getDoc(ref(db,root+'/editorRefundReceipts/'+bill.id))).data().digest,digest);assert.equal((await getDoc(snapshotRef)).data().payables[0].sharedReceiptDigest,digest);
 });
+
+test('administrative inventory discovers an orphan nested document without changing Firestore',async()=>{
+ const {initializeApp,deleteApp}=require('firebase-admin/app'),{getFirestore}=require('firebase-admin/firestore');
+ const {inventoryWorkspace}=require('../scripts/workspace-firestore-inventory.cjs');
+ const org='org~inventory-test',root='organizations/'+org,orphan=root+'/unexpected/missing-parent/nested/kept';
+ await seed({[root]:{name:'Inventory'},[root+'/members/alice']:{uid:'alice',role:'owner'},[orphan]:{secret:'still here'},'users/alice':{orgMemberships:[org],activeOrganizationId:org},['users/alice/organizationRequests/'+org]:{orgId:org},'invites/inventory-code':{orgId:org}});
+ const app=initializeApp({projectId:PROJECT},'inventory-test');try{
+  const result=await inventoryWorkspace({db:getFirestore(app),orgId:org});
+  assert.equal(result.workspaceCollections['unexpected/*/nested'],1);assert.equal(result.missingParentReferences,1);assert.equal(result.accountIndexes.profileMemberships,1);assert.equal(result.accountIndexes.requestIndexes,1);assert.equal(result.externalRecords.invites,1);
+  await env.withSecurityRulesDisabled(async context=>assert.equal((await getDoc(ref(context.firestore(),orphan))).data().secret,'still here'));
+ }finally{await deleteApp(app)}
+});

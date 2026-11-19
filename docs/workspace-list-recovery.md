@@ -35,3 +35,6 @@ The Team list and both header switchers show a checking status during the initia
 ## Workspace display names
 
 An online, confirmed owner can set a shared workspace display name after the updated Firestore rules are deployed. The original registered name and ID stay unchanged: exact search and suggestions continue to use the registered name, and invitations, memberships, financial records, and links are not migrated. This avoids collisions and accidental orphaning, but is not a registered-name change. Permanent deletion remains unavailable; removing only the root document would leave subcollections, member indexes and invites behind.
+
+
+A read-only administrative [workspace inventory](workspace-deletion-inventory.md) is available to identify nested Firestore data before designing a Spark-compatible deletion. It performs no deletion and does not establish that all external references or offline copies have been found.

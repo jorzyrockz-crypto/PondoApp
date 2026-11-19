@@ -1,0 +1,14 @@
+# Read-only workspace inventory (Spark compatible)
+
+This is a preparation tool, **not workspace deletion**. It runs on an administrator's own computer using the Firebase Admin SDK; it does not deploy Cloud Functions or change the Firebase plan. Do not run it against production without deciding that its read usage and access are appropriate. It reads data and may consume Firestore free quota; large projects can incur charges on a billable plan. No write or delete is performed.
+
+The tool enumerates workspace descendant collection IDs using administrative Firestore APIs, including missing parent documents with surviving children. It reports counts by collection path pattern rather than exposing document contents or member IDs. It also scans up to 1,000 user paths for known profile links, request indexes and team notices, plus matching invite and public-share configurations. It checks reports referenced by those configurations. A depth or count limit fails the run instead of suggesting a partial inventory is complete. Firestore's administrative `listDocuments()` can itself retrieve a large list before the tool enforces its limit.
+
+## Run by a Firebase project administrator
+
+1. Confirm the exact Firebase project and workspace ID in the Firebase console. The workspace ID can contain spaces; quote it in the shell. Use synthetic staging data first.
+2. Install Node 22 and the local dependencies: `npm ci --prefix faculty-fund-functions --ignore-scripts`. Authenticate locally using Google Application Default Credentials with **read-only** permission to inspect the intended Firestore project. Do not paste credentials, tokens, or service account keys into chat or source files.
+3. Run `node scripts/workspace-firestore-inventory.cjs 'YOUR_PROJECT_ID' 'YOUR_WORKSPACE_ID'`. The tool refuses to run when the Firestore emulator environment variable is set, to avoid confusing an emulator result with the live project.
+4. Inspect the aggregate counts. An error or exceeded limit means the inventory is incomplete. A successful result is a point-in-time observation only; it does not lock the workspace against concurrent writes. Keep output private: even collection names and counts can reveal operational details.
+
+The scan only knows the listed external index formats; it cannot prove that no other top-level documents, Storage objects, backups, other Firebase projects, or downloaded/offline copies reference the workspace. The tool does not inspect or erase those. An inventory alone cannot make a browser deletion safe, nor can it revoke access. Safe deletion still needs coordinated rules that block new writes and invite redemption, a resumable cleanup of all verified record locations and user indexes, correct handling of old clients, and emulator/staging tests. Never delete the workspace parent alone; Firestore leaves its descendants behind.
