@@ -1,64 +1,13 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
-const code=html.slice(html.indexOf('function dashboardOutstandingRefunds('),html.indexOf('// Team review queue:'));
-class Element {
- constructor(){this.children=[];this.hidden=false;this.textContent='';this.attributes={};const set=new Set();this.classList={remove:name=>set.delete(name),toggle:(name,on)=>on?set.add(name):set.delete(name),contains:name=>set.has(name)};}
- setAttribute(key,value){this.attributes[key]=value}
- replaceChildren(...nodes){this.children=nodes}
- append(...nodes){this.children.push(...nodes)}
- appendChild(node){this.children.push(node)}
-}
-function setup(){
- const ids={};for(const id of ['dashboardRefundCard','dashboardRefundCount','dashboardRefundEmpty','dashboardRefundStatus','dashboardRefundList'])ids[id]=new Element();
- const state={orgId:null};const c=vm.createContext({window:{pondoTeamState:state},navigator:{onLine:true},document:{getElementById:id=>ids[id],createElement:()=>new Element()},payables:[],txs:[],fmt:n=>'₱'+n,
- payablePaid(id){return c.txs.filter(t=>t.type==='OUT'&&t.payableId===id).reduce((n,t)=>n+Math.round(t.amount*100),0)},
- payableOutstanding(p){return Math.max(0,Math.round(p.amount*100)-c.payablePaid(p.id))}});
- vm.runInContext(code,c);return {c,state,ids};
-}
-test('refund summary counts only outstanding refunds and accurately distinguishes payment and approval statuses',()=>{
- const {c,ids}=setup();c.payables.push(
- {id:'p',kind:'advance',description:'<img onerror=alert(1)>',amount:100,pendingApproval:{}},
- {id:'u',kind:'advance',description:'Unpaid',amount:200},
- {id:'a',kind:'advance',description:'Partial',amount:2400},
- {id:'f',kind:'advance',amount:10}, {id:'other',kind:'invoice',amount:10});
- c.txs.push({type:'OUT',payableId:'a',amount:1500},{type:'IN',payableId:'u',amount:200},{type:'OUT',payableId:'f',amount:10});
- c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'3');assert.equal(ids.dashboardRefundEmpty.hidden,true);assert.equal(ids.dashboardRefundCard.classList.contains('has-outstanding'),true);
- const rows=ids.dashboardRefundList.children;assert.equal(rows[0].children[0].textContent,'<img onerror=alert(1)>');assert.match(rows[0].children[1].textContent,/Pending approval · Outstanding ₱100/);assert.match(rows[1].children[1].textContent,/Awaiting payment · Outstanding ₱200/);assert.match(rows[2].children[1].textContent,/Partially paid · Outstanding ₱900/);
-});
-test('empty, unconfirmed and stale states do not confuse stale or previous workspace data with confirmed empty results',()=>{
- const {c,ids,state}=setup();c.renderDashboardRefunds();assert.equal(ids.dashboardRefundEmpty.hidden,false);assert.equal(ids.dashboardRefundCard.classList.contains('has-outstanding'),false);
- c.payables.push({id:'x',kind:'advance',amount:10});Object.assign(state,{orgId:'team',memberConfirmed:false,baselineReady:false});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundList.children.length,0);assert.equal(ids.dashboardRefundCount.hidden,true);assert.equal(ids.dashboardRefundEmpty.hidden,true);assert.equal(ids.dashboardRefundCard.classList.contains('has-outstanding'),false);
- state.memberConfirmed=true;state.baselineReady=true;state.online=true;c.renderDashboardRefunds();assert.equal(ids.dashboardRefundList.children.length,1);assert.equal(ids.dashboardRefundStatus.hidden,true);assert.equal(ids.dashboardRefundCard.classList.contains('has-outstanding'),true);
- for(const flag of ['dirty','syncError','listenerError','recoveryLocked','pushTimer','pushesInFlight']){state[flag]=true;c.renderDashboardRefunds();assert.equal(ids.dashboardRefundStatus.hidden,false);state[flag]=false}
- c.payables.length=0;state.online=false;c.renderDashboardRefunds();assert.equal(ids.dashboardRefundEmpty.hidden,true);assert.match(ids.dashboardRefundStatus.textContent,/out of date/);assert.equal(ids.dashboardRefundCard.classList.contains('has-outstanding'),false);
-});
-test('dashboard has ordered right rail and retains the existing review queue and responsive layout',()=>{
+test('overview keeps review and refund request entry without duplicate refund card',()=>{
  const dash=html.slice(html.indexOf('<!-- DASHBOARD -->'),html.indexOf('<!-- FUNDS -->'));
- assert.ok(dash.indexOf('dashboardActionsCard')<dash.indexOf('dashboard-side-column'));
- assert.ok(dash.indexOf('dashboardRefundTitle')<dash.indexOf('dashboard-side-column'));
- assert.ok(dash.indexOf('dashboardRefundTitle')<dash.indexOf('Refund Transactions'));
- const card=dash.slice(dash.indexOf('<section id="dashboardRefundCard"'),dash.indexOf('</section>',dash.indexOf('<section id="dashboardRefundCard"')));
- for(const id of ['refundImpactDetails','dashboardRefundList','dashboardRequestRefundBtn'])assert.match(card,new RegExp('id="'+id+'"'));
- assert.equal((dash.match(/id="dashboardRefundCard"/g)||[]).length,1);assert.equal((dash.match(/id="dashboardRequestRefundBtn"/g)||[]).length,1);
- assert.ok(dash.indexOf('Refund Transactions')<dash.indexOf('Recent Transactions'));
+ assert.doesNotMatch(dash,/id="dashboardRefundCard"/);
+ assert.match(dash,/id="dashboardActionsCard"/);
+ assert.match(dash,/id="dashboardRequestRefundBtn"[^>]*onclick="openRefundRequest\(\)"/);
  assert.match(dash,/onclick="switchTab\('refunds'\)"/);
- assert.match(html,/@media screen and \(min-width:1200px\).*?[\s\S]*?\.dashboard-desktop-grid\{display:grid/);
- assert.match(html,/function renderDashboardActions\(\) \{\s*if \(window\.renderDashboardRefunds\)/);
-});
-test('amber styling is available in both modes for outstanding requests',()=>{
- assert.match(html,/\.dashboard-refund-alert\.has-outstanding\{background:#fff8ed;border-color:#f3c888\}/);
- assert.match(html,/body\.dark-mode \.dashboard-refund-alert\.has-outstanding\{background:#302819;border-color:#78542c/);
-});
-
-test('member pending requests count separately without adding an approved payable or payment',()=>{
- const {c,state,ids}=setup();Object.assign(state,{orgId:'team',memberConfirmed:true,baselineReady:true,online:true});c.window.memberRefundPendingSummary=()=>({items:[{id:'r',description:'Supplies',amountCents:40000}],more:false});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'1');assert.equal(ids.dashboardRefundEmpty.hidden,true);assert.match(ids.dashboardRefundList.children[0].children[1].textContent,/Pending approval.*400/);assert.equal(c.payables.length,0);
- c.window.memberRefundPendingSummary=()=>null;c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'—');assert.equal(ids.dashboardRefundEmpty.hidden,true);
-});
-
-test('approvers see pending refunds only in the review queue; approved refunds remain in the summary',()=>{
- for(const role of ['owner','disbursing']){const {c,state,ids}=setup();Object.assign(state,{orgId:'team',role,memberConfirmed:true,baselineReady:true,online:true});c.window.memberRefundPendingSummary=()=>({items:[{id:'member',amountCents:800}],more:false});c.payables.push({id:'pending',kind:'advance',description:'Pending ledger',amount:10,pendingApproval:{}},{id:'approved',kind:'advance',description:'Approved ledger',amount:20});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'1');assert.equal(ids.dashboardRefundList.children.length,1);assert.equal(ids.dashboardRefundList.children[0].children[0].textContent,'Approved ledger');}
- const {c,state,ids}=setup();Object.assign(state,{orgId:'team',role:'reviewer',memberConfirmed:true,baselineReady:true,online:true});c.window.memberRefundPendingSummary=()=>({items:[{id:'member',description:'Pending member',amountCents:800}],more:false});c.payables.push({id:'pending',kind:'advance',description:'Pending ledger',amount:10,pendingApproval:{}});c.renderDashboardRefunds();assert.equal(ids.dashboardRefundCount.textContent,'2');assert.equal(ids.dashboardRefundList.children.length,2);
+ const refunds=html.slice(html.indexOf('<!-- REFUND HISTORY -->'),html.indexOf('<!-- PROJECTS -->'));
+ assert.match(refunds,/id="refundImpactDetails"/);assert.match(refunds,/id="requestRefundBtn"/);assert.match(refunds,/id="refundActiveList"/);
 });

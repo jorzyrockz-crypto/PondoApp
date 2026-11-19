@@ -2,28 +2,35 @@
 
 **Implemented in this branch; rules and app are not deployed or verified against a Firestore emulator here.** Before release, exercise the actual client and rules in the emulator and in a separate staging project with multiple accounts, then coordinate app and rules deployment. Checked-in rules are not evidence of the live rules. Do not broaden reviewer access to the ordinary financial snapshot.
 
-Confirmed online Viewer / Reviewer team members can submit a request from Overview or Refund History. Their request uses a separate Firestore inbox; it does not edit cash, project allocations, or the shared financial snapshot. Owner and Disbursing Officer can review member requests in the dashboard review queue or under Active refund requests in Refund History. Approval atomically marks the request approved and adds an unpaid, unassigned refund plus an audit entry to the current server snapshot, checking the snapshot baseline and revision. Rejection records a reason in the inbox without creating a payable. A project must be assigned and available funds allocated before payment. Existing Project Manager and approver refund workflows remain separate.
+Confirmed online Viewer / Reviewer team members can submit a request from Overview or Refund History. Their request uses a separate Firestore inbox; it does not edit cash, project allocations, or the shared financial snapshot. Owner and Disbursing Officer can review member requests in the dashboard review queue or under Active refund requests in Refund History. Approval atomically marks the request approved and adds an unpaid, unassigned refund plus an audit entry to the current server snapshot, checking the snapshot baseline and revision. Rejection records a reason in the inbox without creating a payable. Payment can use uncommitted cash without a project, or an assigned project’s unspent fund allocation. Existing Project Manager and approver refund workflows remain separate.
 
 
 ## Funding and payment
 
 Approval records an unpaid obligation even if there is no funding. It neither
-reserves cash nor records a payment. Before an unassigned member request can be
-paid, an editor selects its project in Refund History. If necessary, add a fund
-under Funds, then open the project and allocate funds under Funding sources.
-Only an authorized user can record a payment; adding or allocating money never
-pays a refund automatically.
+reserves cash nor records a payment. An authorized user can record a payment
+without assigning a project, using a selected fund's **uncommitted cash**:
+current fund cash minus unspent project allocations. Allocated project funds
+remain protected. A project may instead be assigned before recording a payment;
+then payment must use that project's allocation. Supplier expenses still require
+a project. Adding money never pays a refund automatically.
 
-Active approved refunds show a derived funding indication based on the current
-workspace snapshot: project needed, awaiting funding, partly funded, or awaiting
-payment. If no project is assigned, the app cannot determine which allocation
-will fund the expense. An empty fund list is called out separately. A team's
-unconfirmed, offline, dirty or failed sync shows funding as unavailable instead
-of asserting a zero balance. Amounts are a point-in-time comparison of current
-project allocations and fund cash, not a reservation; multiple obligations can
-share them, and payment-date and later-balance checks may reduce what can be
-paid. Multiple sources require separate payments. These indicators do not change
-or synchronize a stored status.
+A payment without a project is recorded as a fund expense linked to the refund,
+with no project. Partial payments and multiple fund sources are supported, one
+payment at a time. Once any cash payment is linked, changing or assigning the
+refund's project is blocked until those payments are individually voided, to
+preserve consistent payment and refund records. The standalone transaction
+link-to-project control also excludes linked payable payments. These checks are
+client-side; avoid editing the same workspace simultaneously in older app
+versions, which do not contain this protection.
+
+Active refunds show an informational funding indication from the current
+workspace snapshot. A project-free refund uses uncommitted cash; a refund with a
+project uses that project's unspent allocations and fund cash. An unconfirmed,
+offline, dirty or failed team sync shows funding as unavailable rather than
+asserting a zero balance. Amounts are point-in-time comparisons, not reservations;
+other obligations may depend on the same money, and payment-date and later-balance
+checks can reduce what is payable. Indicators do not change a stored status.
 
 Approvers may explicitly reject a request with “No available funds,” but the
 confirmation warns that rejection closes the request. An approved unpaid refund

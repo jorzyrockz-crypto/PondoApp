@@ -32,6 +32,7 @@ jobs:
           node tests/death-aid-modal.browser.cjs
           node tests/refund-suggestions.browser.cjs
           node tests/refund-funding.browser.cjs
+          node tests/refund-uncommitted.browser.cjs
           node tests/transactions-layout.browser.cjs
           node tests/sample-data.browser.cjs
           node tests/refund-impact.browser.cjs

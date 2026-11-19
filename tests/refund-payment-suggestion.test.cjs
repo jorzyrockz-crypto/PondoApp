@@ -23,3 +23,9 @@ test('project expense payments remain manually entered, and save-time checks rem
  for(const check of ['bill.pendingApproval','validateActualDate(date','date<bill.invoiceDate','dateReceived','amount>payableOutstanding(bill)','wouldOverdrawAtDate(fundId,date,amount)','allocationRemaining(fundId,bill.projectId)','fundCash(fundId)'])assert.ok(save.includes(check),check);
  assert.match(html,/bill\.kind==='advance'&&eligibleFunds\.length===1/);
 });
+
+test('project-free payment suggestion uses uncommitted cash and date limits',()=>{
+ const {c,n}=setup({outstanding:50000,cash:100000,historical:20000});c.bill.projectId=null;c.fundAvailable=()=>30000;
+ assert.equal(c.suggestedRefundPayment(c.bill,'fund','2026-05-15'),20000);c.updatePaymentNote();assert.equal(n.paymentAmount.value,'200.00');assert.match(n.paymentNote.textContent,/uncommitted fund cash/);assert.match(n.paymentNote.textContent,/allocations are protected/);
+ c.fundAvailable=()=>0;c.updatePaymentNote();assert.equal(n.paymentAmount.value,'');assert.match(n.paymentNote.textContent,/No uncommitted amount/);
+});

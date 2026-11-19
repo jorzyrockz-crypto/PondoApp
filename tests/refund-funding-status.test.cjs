@@ -7,9 +7,10 @@ function setup(){
  const t={funds:[],projects:[],allocations:[],txs:[],payables:[bill],navigator:{onLine:true},window:{pondoTeamState:{orgId:null}},fmt:n=>'₱'+n};
  const ctx=vm.createContext(t);vm.runInContext(accounting+helper,ctx);return {ctx,bill,...t};
 }
-test('approved refunds need a project and do not falsely infer project funding',()=>{
- const t=setup();let status=t.ctx.refundFundingStatus(t.bill);assert.match(status.title,/project needed/i);assert.match(status.detail,/No funds are recorded/);assert.match(status.detail,/No payment is automatic/);
- t.funds.push({id:'f',initialAmount:100});status=t.ctx.refundFundingStatus(t.bill);assert.doesNotMatch(status.detail,/No funds are recorded/);assert.match(status.detail,/Assign a project/);
+test('project-free refunds use only uncommitted cash and remain unpaid without it',()=>{
+ const t=setup();let status=t.ctx.refundFundingStatus(t.bill);assert.match(status.title,/awaiting uncommitted funds/i);assert.match(status.detail,/No funds are recorded/);
+ t.funds.push({id:'f',initialAmount:100});status=t.ctx.refundFundingStatus(t.bill);assert.match(status.title,/awaiting payment.*no project/i);assert.match(status.detail,/₱100/);assert.match(status.detail,/allocations are protected/);
+ t.projects.push({id:'p'});t.allocations.push({fundId:'f',projectId:'p',amount:75});status=t.ctx.refundFundingStatus(t.bill);assert.match(status.title,/partly funded/i);assert.match(status.detail,/₱25/);
  t.bill.pendingApproval={};assert.equal(t.ctx.refundFundingStatus(t.bill),null);
 });
 test('funding uses each project allocation and current cash, supports partial payment, and never reserves or pays',()=>{

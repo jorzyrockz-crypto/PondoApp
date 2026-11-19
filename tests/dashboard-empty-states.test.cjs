@@ -13,13 +13,8 @@ test('activity empty states use distinct copy and decorative icons',()=>{
  assert.match(html,/if\(!recent\.children\.length\) recent\.innerHTML=dashboardActivityEmpty\('transactions'\)/);
  assert.match(html,/if\(!recentRefund\.children\.length\) recentRefund\.innerHTML=dashboardActivityEmpty\('refundPayments'\)/);
 });
-test('request empty state is accessible, hidden when needed and supported in dark mode',()=>{
- assert.match(html,/id="dashboardRefundEmpty" class="dashboard-empty-state dashboard-empty-state--refund"/);
- assert.match(html,/No outstanding requests/);assert.match(html,/Requests awaiting approval or payment will appear here/);
- assert.match(html,/\.dashboard-empty-state\[hidden\]\{display:none!important\}/);
- assert.match(html,/empty\.hidden=total>0 \|\| stale \|\| \(team&&!approver&&!memberPending\)/);
- assert.match(html,/if\(unconfirmed\)\{empty\.hidden=true/);
- assert.match(html,/body\.dark-mode \.dashboard-empty-title/);assert.match(html,/body\.dark-mode \.dashboard-empty-copy/);
+test('dashboard keeps activity history links without the removed refund card',()=>{
+ assert.doesNotMatch(html,/id="dashboardRefundEmpty"/);
  assert.match(html,/class="dashboard-history-link" type="button" onclick="switchTab\('refunds'\)"/);
  assert.match(html,/class="dashboard-history-link" type="button" onclick="switchTab\('transactions'\)"/);
 });
