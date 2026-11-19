@@ -22,9 +22,9 @@ test('contribution reminders use workspace-scoped keys and re-arm after status o
  const a={id:'activity',title:'Dues',dueDate:'2026-01-01',label:'Due soon'};
  const code=html.slice(html.indexOf('function reminderStorageKey('),html.indexOf('\nasync function toggleContributionArchive'));
  const ctx=vm.createContext({window:win,localStorage:ls,document:{getElementById:()=>null},funds:[],txs:[],projects:[],sigs:[],contributionActivities:[a],org:{name:'Your organization'},pushNotification:n=>{if(n.action?.tab==='contributions')events.push(n);return n},contributionTotals:()=>({}),contributionDueInfo:a=>({label:a.label})});win.pushNotification=ctx.pushNotification;vm.runInContext(code,ctx);
- ctx.checkReminderNotifications();ctx.checkReminderNotifications();assert.equal(events.length,1);a.dueDate='2026-02-01';ctx.checkReminderNotifications();assert.equal(events.length,2);
+ ctx.checkReminderNotifications();ctx.checkReminderNotifications();assert.equal(events.length,1);assert.equal(events[0].visualKind,'due');a.dueDate='2026-02-01';ctx.checkReminderNotifications();assert.equal(events.length,2);
  a.label='Paid';ctx.checkReminderNotifications();a.label='Due soon';ctx.checkReminderNotifications();assert.equal(events.length,3);
- state.orgId='b';ctx.checkReminderNotifications();assert.equal(events.length,4);state.orgId='a';ctx.checkReminderNotifications();assert.equal(events.length,4);
+ state.orgId='b';ctx.checkReminderNotifications();assert.equal(events.length,4);state.orgId='a';ctx.checkReminderNotifications();assert.equal(events.length,4);a.label='Overdue';ctx.checkReminderNotifications();assert.equal(events.length,5);assert.equal(events[4].visualKind,'overdue');
 });
 test('backup export, snooze and reminders all use account and workspace keys',()=>{
  assert.match(html,/reminderStorageKey\('ft_last_backup_ts'\)/);assert.match(html,/reminderStorageKey\('ft_backup_reminder_until'\)/);assert.match(html,/reminderStorageKey\('ft_backup_overdue_notified'\)/);

@@ -21,7 +21,7 @@ test('owners and disbursing officers receive current pending requests without du
   const e=environment(),snap=snapshot(),s=state();
   snap.payables.push({id:'r',kind:'advance',description:'Taxi',pendingApproval:req()},{id:'other',kind:'invoice',pendingApproval:req()});
   for(const [key,id,label] of [['funds','f','Fund'],['projects','p','Project'],['contributionActivities','a','Activity'],['contributors','c','Contributor']])snap[key].push({id,name:label,title:label,pendingDeletion:req()});
-  e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,5);assert.ok(e.notifications.every(n=>n.approverOnly&&n.action.tab==='dashboard'&&n.recipientUid==='owner'));
+  e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,5);assert.ok(e.notifications.every(n=>n.approverOnly&&n.action.tab==='dashboard'&&n.recipientUid==='owner'));assert.equal(e.notifications.find(n=>n.title.startsWith('Refund')).visualKind,'refund');assert.ok(e.notifications.filter(n=>!n.title.startsWith('Refund')).every(n=>!n.visualKind));
   e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,5);
   const restarted=environment(e.store);restarted.context.processReviewNotifications(snap,s);assert.equal(restarted.notifications.length,0);
   restarted.context.processReviewNotifications(snap,state('officer','disbursing'));assert.equal(restarted.notifications.length,5);
@@ -36,7 +36,7 @@ test('only the requester receives confirmed outcomes, with correct refund and de
   snap.auditLog.push(decision('a','approve refund request'),decision('b','reject refund request'),decision('c','approve deletion request'),decision('d','reject deletion request'),decision('e','approve refund request','someone-else'));
   e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,4);
   assert.deepEqual(Array.from(e.notifications,n=>n.title),['Refund request approved','Refund request rejected','Deletion request approved','Deletion request rejected']);
-  assert.match(e.notifications[0].body,/not payment/);assert.match(e.notifications[1].body,/Missing receipt/);assert.equal(e.notifications[0].action.tab,'refunds');assert.equal(e.notifications[2].action.audit,true);assert.equal(e.notifications[2].action.tab,'transactions');
+  assert.deepEqual(Array.from(e.notifications,n=>n.visualKind),['refund','refund',undefined,undefined]);assert.match(e.notifications[0].body,/not payment/);assert.match(e.notifications[1].body,/Missing receipt/);assert.equal(e.notifications[0].action.tab,'refunds');assert.equal(e.notifications[2].action.audit,true);assert.equal(e.notifications[2].action.tab,'transactions');
   e.context.processReviewNotifications(snap,s);assert.equal(e.notifications.length,4);
 });
 test('initial snapshot seeds past outcomes, later reload catches up once',()=>{
@@ -62,10 +62,10 @@ test('refund submitter sees new recorded payments and voids, including catch-up 
  snap.payables.push({id:'r',kind:'advance',description:'Taxi',createdBy:{uid:'requester'},reimburseTo:'Somebody else'});snap.txs=[];
  e.context.processReviewNotifications(snap,s);
  snap.txs.push({id:'p1',type:'OUT',payableId:'r',amount:25,createdBy:{uid:'owner'}});
- const next=environment(e.store);next.context.fmt=n=>'₱'+n;next.context.processReviewNotifications(snap,s);assert.equal(next.notifications.length,1);assert.equal(next.notifications[0].title,'Refund payment recorded');assert.match(next.notifications[0].body,/₱25 recorded/);
+ const next=environment(e.store);next.context.fmt=n=>'₱'+n;next.context.processReviewNotifications(snap,s);assert.equal(next.notifications.length,1);assert.equal(next.notifications[0].title,'Refund payment recorded');assert.equal(next.notifications[0].visualKind,'refund');assert.match(next.notifications[0].body,/₱25 recorded/);
  next.context.processReviewNotifications(snap,s);assert.equal(next.notifications.length,1);
  snap.txs=[];snap.auditLog.push({id:'void',action:'void transaction',by:{uid:'owner'},reason:'Wrong amount',record:{type:'OUT',payableId:'r'}});next.context.processReviewNotifications(snap,s);
- assert.equal(next.notifications[1].title,'Refund payment voided');assert.equal(next.notifications[1].action.audit,true);assert.match(next.notifications[1].body,/Wrong amount/);
+ assert.equal(next.notifications[1].title,'Refund payment voided');assert.equal(next.notifications[1].visualKind,'refund');assert.equal(next.notifications[1].action.audit,true);assert.match(next.notifications[1].body,/Wrong amount/);
 });
 test('cancellation targets only the identified submitter; void context survives missing payable',()=>{
  const e=environment(),snap=snapshot(),s=state('requester','project-manager');e.context.fmt=String;e.context.processReviewNotifications(snap,s);
