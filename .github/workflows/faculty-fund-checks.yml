@@ -24,19 +24,29 @@ jobs:
         run: npm install --prefix "$RUNNER_TEMP/faculty-browser" playwright-core --no-audit --no-fund
       - name: Run synthetic Faculty Fund browser workflow
         run: |
-          export NODE_PATH="$RUNNER_TEMP/faculty-browser/node_modules"
-          export CHROMIUM_PATH="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
-          test -n "$CHROMIUM_PATH"
-          node tests/faculty-fund-ui.browser.cjs
-          node tests/faculty-spark-recovery.browser.cjs
-          node tests/death-aid-modal.browser.cjs
-          node tests/refund-suggestions.browser.cjs
-          node tests/refund-funding.browser.cjs
-          node tests/refund-uncommitted.browser.cjs
-          node tests/transactions-layout.browser.cjs
-          node tests/sample-data.browser.cjs
-          node tests/refund-impact.browser.cjs
-          node tests/member-refund.browser.cjs
-          node tests/my-refunds.browser.cjs
-          node tests/refund-transparency.browser.cjs
-          node tests/notification-mobile.browser.cjs
+          set +e
+          (
+            set -e
+            export NODE_PATH="$RUNNER_TEMP/faculty-browser/node_modules"
+            export CHROMIUM_PATH="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
+            test -n "$CHROMIUM_PATH"
+            node tests/faculty-fund-ui.browser.cjs
+            node tests/faculty-spark-recovery.browser.cjs
+            node tests/death-aid-modal.browser.cjs
+            node tests/refund-suggestions.browser.cjs
+            node tests/refund-funding.browser.cjs
+            node tests/refund-uncommitted.browser.cjs
+            node tests/transactions-layout.browser.cjs
+            node tests/sample-data.browser.cjs
+            node tests/refund-impact.browser.cjs
+            node tests/member-refund.browser.cjs
+            node tests/my-refunds.browser.cjs
+            node tests/refund-transparency.browser.cjs
+            node tests/notification-mobile.browser.cjs
+          ) > "$RUNNER_TEMP/browser-test.log" 2>&1
+          result=$?
+          cat "$RUNNER_TEMP/browser-test.log"
+          if [ "$result" -ne 0 ]; then
+            python -c 'import os,pathlib; s=pathlib.Path(os.environ["RUNNER_TEMP"],"browser-test.log").read_text(errors="replace")[-3500:]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+          fi
+          exit "$result"
