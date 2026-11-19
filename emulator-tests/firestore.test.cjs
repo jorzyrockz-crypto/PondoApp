@@ -227,3 +227,30 @@ test('approved requester auto-adds their own workspace and account-private notic
   await assertFails(updateDoc(ref(owner.db,`users/guest/organizationRequests/${orgId}`),{approvalNoticeRead:false}));
  }finally{tracker.stop();}
 });
+
+test('member refund inbox permits bounded member submissions but not reviewer ledger writes or decisions',async()=>{
+ const root='organizations/refund-test',path=root+'/memberRefundRequests/member-refund-123456';
+ await seed({[root]:{name:'Refund team'},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/members/ao']:{uid:'ao',role:'disbursing'},[root+'/members/viewer']:{uid:'viewer',role:'reviewer'},[root+'/members/manager']:{uid:'manager',role:'project-manager'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'owner',payables:[],auditLog:[]}});
+ const v=client('viewer'),owner=client('owner'),ao=client('ao'),outsider=client('outsider'),anon=client(null);
+ const request={uid:'viewer',description:'Supplies',reimburseTo:'Viewer',amountCents:5000,expenseDate:'2026-01-01',supplier:'',category:'',reference:'',status:'pending',createdAt:serverTimestamp()};
+ await assertFails(setDoc(ref(outsider,path),request));await assertFails(setDoc(ref(anon,path),request));await assertFails(setDoc(ref(v,path),{...request,uid:'owner'}));await assertFails(setDoc(ref(v,path),{...request,amountCents:-1}));await assertFails(setDoc(ref(v,path),{...request,receiptImage:'unsafe'}));
+ await assertSucceeds(setDoc(ref(v,path),request));await assertSucceeds(getDoc(ref(owner,path)));await assertFails(getDoc(ref(outsider,path)));
+ await assertFails(updateDoc(ref(v,path),{description:'tampered'}));await assertFails(updateDoc(ref(v,path),{status:'approved',decidedBy:'viewer',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(v,root+'/data/snapshot'),{_syncRevision:2,updatedBy:'viewer'}));
+ await assertFails(updateDoc(ref(ao,path),{status:'approved',decidedBy:'owner',decidedAt:serverTimestamp(),decisionReason:''}));await assertSucceeds(updateDoc(ref(ao,path),{status:'approved',decidedBy:'ao',decidedAt:serverTimestamp(),decisionReason:''}));await assertFails(updateDoc(ref(owner,path),{status:'rejected',decidedBy:'owner',decidedAt:serverTimestamp(),decisionReason:'duplicate'}));await assertFails(deleteDoc(ref(owner,path)));
+ await assertSucceeds(deleteDoc(ref(owner,root+'/members/viewer')));await assertFails(getDoc(ref(v,path)));await assertFails(setDoc(ref(v,root+'/memberRefundRequests/member-refund-987654'),request));
+});
+
+test('member request approval transaction creates exactly one unpaid payable and cash stays unchanged',async()=>{
+ const {createMemberRefundService}=await import('../member-refund-service.mjs');
+ const org='refund-atomic',root='organizations/'+org;
+ const ledger={org:{name:'Org'},funds:[],txs:[],sigs:[],projects:[],allocations:[],payables:[],auditLog:[],contributionActivities:[],contributors:[],contributionPayments:[]};
+ await seed({[root]:{name:'Team'},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/members/ao']:{uid:'ao',role:'disbursing'},[root+'/members/viewer']:{uid:'viewer',role:'reviewer'},[root+'/data/snapshot']:{...ledger,_syncRevision:1,updatedBy:'owner'}});
+ const sort=v=>Array.isArray(v)?v.map(sort):v&&typeof v==='object'?Object.keys(v).sort().reduce((a,k)=>(a[k]=sort(v[k]),a),{}):v,stable=v=>JSON.stringify(sort(v));
+ const createService=(uid,role)=>{const state={orgId:org,uid,role,memberConfirmed:true,baselineReady:true,online:true,lastSyncedRevision:1,lastSyncedJSON:stable(ledger),members:[{uid:'viewer',displayName:'Viewer'}]};return createMemberRefundService({db:client(uid),api,getState:()=>state,getSnapshot:()=>ledger,stripSnapshot:x=>x,stableJSON:stable,clientId:uid});};
+ const viewer=createService('viewer','reviewer'),owner=createService('owner','owner'),ao=createService('ao','disbursing'),id='member-refund-atomic-123';
+ const payload={uid:'viewer',description:'Supplies',reimburseTo:'Viewer',amountCents:25000,expenseDate:'2026-01-01',supplier:'',category:'',reference:''};
+ await viewer.submit(org,'viewer',id,payload);await viewer.submit(org,'viewer',id,payload);
+ const attempts=await Promise.allSettled([owner.decide(org,'owner',id,'approved','','Owner'),ao.decide(org,'ao',id,'approved','','AO')]);assert.equal(attempts.filter(x=>x.status==='fulfilled').length,1);
+ const snapshot=(await getDoc(ref(client('owner'),root+'/data/snapshot'))).data(),request=(await getDoc(ref(client('owner'),root+'/memberRefundRequests/'+id))).data();
+ assert.equal(snapshot.payables.length,1);assert.equal(snapshot.auditLog.length,1);assert.equal(snapshot.txs.length,0);assert.equal(snapshot.payables[0].amount,250);assert.equal(snapshot.payables[0].projectId,null);assert.equal(request.status,'approved');
+});

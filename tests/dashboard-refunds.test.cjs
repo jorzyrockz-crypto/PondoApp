@@ -38,7 +38,11 @@ test('empty, unconfirmed and stale states do not confuse stale or previous works
 test('dashboard has ordered right rail and retains the existing review queue and responsive layout',()=>{
  const dash=html.slice(html.indexOf('<!-- DASHBOARD -->'),html.indexOf('<!-- FUNDS -->'));
  assert.ok(dash.indexOf('dashboardActionsCard')<dash.indexOf('dashboard-side-column'));
+ assert.ok(dash.indexOf('dashboardRefundTitle')<dash.indexOf('dashboard-side-column'));
  assert.ok(dash.indexOf('dashboardRefundTitle')<dash.indexOf('Refund Transactions'));
+ const card=dash.slice(dash.indexOf('<section id="dashboardRefundCard"'),dash.indexOf('</section>',dash.indexOf('<section id="dashboardRefundCard"')));
+ for(const id of ['refundImpactDetails','dashboardRefundList','dashboardRequestRefundBtn'])assert.match(card,new RegExp('id="'+id+'"'));
+ assert.equal((dash.match(/id="dashboardRefundCard"/g)||[]).length,1);assert.equal((dash.match(/id="dashboardRequestRefundBtn"/g)||[]).length,1);
  assert.ok(dash.indexOf('Refund Transactions')<dash.indexOf('Recent Transactions'));
  assert.match(dash,/onclick="switchTab\('refunds'\)"/);
  assert.match(html,/@media screen and \(min-width:1200px\).*?[\s\S]*?\.dashboard-desktop-grid\{display:grid/);

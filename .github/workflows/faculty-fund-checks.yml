@@ -29,3 +29,9 @@ jobs:
           test -n "$CHROMIUM_PATH"
           node tests/faculty-fund-ui.browser.cjs
           node tests/faculty-spark-recovery.browser.cjs
+          node tests/death-aid-modal.browser.cjs
+          node tests/refund-suggestions.browser.cjs
+          node tests/transactions-layout.browser.cjs
+          node tests/sample-data.browser.cjs
+          node tests/refund-impact.browser.cjs
+          node tests/member-refund.browser.cjs
