@@ -8647,6 +8647,51 @@ body.dark-mode #tab-refunds .member-refund-row .member-refund-person-copy small{
 }
 @media (prefers-reduced-motion:reduce) {#tab-dashboard .hero-stat[role="button"] {transition:none}}
 body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
+#tab-dashboard #dashboardRequestRefundBtn{background:#fff5e9!important;border-color:#efd6b8!important;color:#934508!important}
+body.dark-mode #tab-dashboard #dashboardRequestRefundBtn{background:#483323!important;border-color:#76533a!important;color:#ffd5a7!important}
+/* Review queue: distinctive, accessible actions and scoped requester identity. */
+#tab-dashboard .dashboard-actions-card{border:1px solid #d9e5f4!important;background:#f8fbff!important;border-radius:20px;box-shadow:0 7px 24px #1d355f0d!important}
+#tab-dashboard .dashboard-actions-head h2{color:#18355c;font-weight:750}
+#tab-dashboard .dashboard-actions-head p{color:#5c7089}
+#tab-dashboard .dashboard-actions-count{background:#e5edff;color:#3e50b5}
+#tab-dashboard .dashboard-action-row{background:#fff;border:1px solid #dce6f3;border-left:4px solid #7180dd;border-radius:14px;padding:15px;align-items:center;min-width:0}
+#tab-dashboard .dashboard-action-row.dashboard-action-deletion{border-left-color:#dd9950}
+#tab-dashboard .dashboard-action-info{flex:1;min-width:0}
+#tab-dashboard .dashboard-action-info strong{color:#1c355b;line-height:1.4}
+#tab-dashboard .dashboard-action-info p{color:#58708a}
+#tab-dashboard .dashboard-action-requester{display:flex;align-items:center;gap:8px;margin-top:10px;min-width:0}
+#tab-dashboard .dashboard-action-requester > span:last-child{overflow-wrap:anywhere}
+#tab-dashboard .dashboard-action-avatar{position:relative;display:grid;place-items:center;flex:none;width:32px;height:32px;overflow:hidden;border-radius:50%;background:#e8edff;color:#4655a7;font-size:11px;font-weight:750}
+#tab-dashboard .dashboard-action-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#tab-dashboard .dashboard-action-buttons .btn{min-height:44px;border-radius:11px;padding:9px 15px;font-weight:750;line-height:1.3}
+#tab-dashboard .dashboard-action-buttons .dashboard-action-review{background:#eef3ff!important;border-color:#ccd8f4!important;color:#354d92!important}
+#tab-dashboard .dashboard-action-buttons .dashboard-action-approve{background:#008258!important;border-color:#008258!important;color:#fff!important}
+#tab-dashboard .dashboard-action-buttons .dashboard-action-reject{background:#fff0f0!important;border-color:#f3c5c3!important;color:#a3272d!important}
+#tab-dashboard .dashboard-action-buttons .btn:focus-visible{outline:3px solid #687ee8;outline-offset:2px}
+#tab-dashboard .dashboard-action-buttons .btn:disabled{opacity:.5;cursor:not-allowed}
+body.dark-mode #tab-dashboard .dashboard-actions-card{background:#172942!important;border-color:#2b456b!important}
+body.dark-mode #tab-dashboard .dashboard-actions-head h2,body.dark-mode #tab-dashboard .dashboard-action-info strong{color:#f3f7ff}
+body.dark-mode #tab-dashboard .dashboard-actions-head p,body.dark-mode #tab-dashboard .dashboard-action-info p{color:#b8c9e2}
+body.dark-mode #tab-dashboard .dashboard-actions-count{background:#303b6c;color:#e0e8ff}
+body.dark-mode #tab-dashboard .dashboard-action-row{background:#1d3452!important;border-color:#385579;border-left-color:#9baaff}
+body.dark-mode #tab-dashboard .dashboard-action-row.dashboard-action-deletion{border-left-color:#e3ae6a}
+body.dark-mode #tab-dashboard .dashboard-action-avatar{background:#303b6c;color:#e0e8ff}
+body.dark-mode #tab-dashboard .dashboard-action-buttons .dashboard-action-review{background:#293e61!important;border-color:#51678d!important;color:#e0e8ff!important}
+body.dark-mode #tab-dashboard .dashboard-action-buttons .dashboard-action-approve{background:#087855!important;border-color:#119669!important;color:#fff!important}
+body.dark-mode #tab-dashboard .dashboard-action-buttons .dashboard-action-reject{background:#542d36!important;border-color:#95505b!important;color:#ffdce0!important}
+@media(max-width:600px){#tab-dashboard .dashboard-action-buttons{width:100%}#tab-dashboard .dashboard-action-buttons .btn{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}}
+/* Cash comparison remains in Refund History rather than a second Overview card. */
+#tab-refunds .refund-impact-panel{margin:0 0 16px;padding:16px;border:1px solid #dbe4ef;border-radius:16px;background:var(--surface)}
+#tab-refunds .refund-impact-panel h3{margin:0;color:var(--ink);font-size:14px}
+#tab-refunds .refund-impact-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+#tab-refunds .refund-impact-value{padding:10px 12px;border-radius:10px;background:var(--surface2);min-width:0}
+#tab-refunds .refund-impact-value span{display:block;color:var(--ink2);font-size:11px;line-height:1.4}
+#tab-refunds .refund-impact-value strong{display:block;color:var(--ink);font-size:16px;line-height:1.3;margin-top:4px;overflow-wrap:anywhere}
+#tab-refunds .refund-impact-value.negative strong{color:#b42318}
+#tab-refunds .refund-impact-note,#tab-refunds .refund-impact-status,#tab-refunds .refund-impact-pending{margin:10px 0 0;color:var(--ink2);font-size:11px;line-height:1.5}
+body.dark-mode #tab-refunds .refund-impact-panel{background:#172942;border-color:#2b456b}
+body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
+@media(max-width:500px){#tab-refunds .refund-impact-values{grid-template-columns:1fr 1fr}#tab-refunds .refund-impact-value:last-child{grid-column:1/-1}}
 /* Bulk contributor entry: show more names and allow both touch-friendly and native resizing. */
 @media screen {
  #cBulkNames {min-height:160px!important;max-height:70dvh;resize:vertical;line-height:1.5;overflow:auto}
@@ -8750,16 +8795,9 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
       </div>
     </div>
 
-    <section id="dashboardRefundCard" class="dashboard-refund-alert refund-overview no-print" aria-labelledby="dashboardRefundTitle">
-      <div class="dashboard-refund-head"><div><p class="dashboard-refund-eyebrow">REIMBURSEMENTS</p><h2 id="dashboardRefundTitle">Refunds</h2></div><span id="dashboardRefundCount" class="dashboard-refund-count" aria-label="Outstanding refund requests">0</span></div>
-      <p id="dashboardRefundStatus" class="dashboard-refund-status" role="status" hidden></p>
-      <div id="refundImpact"><div id="refundImpactDetails"><div class="refund-impact-values"><div class="refund-impact-value"><span>Cash balance</span><strong id="refundImpactCash">—</strong></div><div class="refund-impact-value"><span>Approved refunds outstanding</span><strong id="refundImpactOwed">—</strong></div><div id="refundImpactNetBox" class="refund-impact-value"><span>Cash after approved refunds</span><strong id="refundImpactNet">—</strong></div></div><p id="refundImpactPending" class="refund-impact-pending" hidden></p><p class="refund-impact-note">Cash after refunds is a comparison, not a payment or available budget. It excludes supplier payables and pending approvals; fund restrictions and project allocations may limit what can be paid.</p></div></div>
-      <p id="memberRefundDashboardStatus" class="refund-impact-pending" hidden></p>
-      <div class="refund-overview-requests"><p id="dashboardRefundCaption" class="dashboard-refund-caption">Requests with an outstanding balance</p><div id="dashboardRefundEmpty" class="dashboard-empty-state dashboard-empty-state--refund"><strong id="dashboardRefundEmptyTitle" class="dashboard-empty-title">No outstanding requests</strong><p id="dashboardRefundEmptyCopy" class="dashboard-empty-copy">Requests awaiting approval or payment will appear here.</p></div><div id="dashboardRefundList" class="dashboard-refund-list"></div></div>
-      <div class="refund-overview-actions"><button type="button" id="dashboardRequestRefundBtn" class="btn btn-light" onclick="openRefundRequest()">+ Request refund</button><button type="button" class="dashboard-refund-link refund-impact-link" onclick="switchTab('refunds')">View refunds <span aria-hidden="true">→</span></button></div>
-    </section>
 
     <div class="dashboard-hero-actions no-print">
+      <button type="button" id="dashboardRequestRefundBtn" class="btn btn-light" onclick="openRefundRequest()">+ Request refund</button>
       <button type="button" class="btn btn-emerald" onclick="openTxModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add Transaction</button>
       <button type="button" class="btn btn-light" id="recordCashDonation" onclick="openCashDonation()">+ Record Cash Donation</button>
       <button type="button" class="btn btn-light" id="dashboardRecordDeathAid" onclick="openDashboardDeathAid()" aria-label="Record Death Aid">+ Aid Record</button>
@@ -8842,6 +8880,9 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
   <section id="tab-refunds" class="tab-section refunds-page" style="display:none">
     <div class="fund-page-head refunds-page-head"><div><p class="report-eyebrow">REIMBURSEMENTS</p><h2>Refund History</h2><p>Refund requests, approvals, and payments, in one place.</p></div><button type="button" id="requestRefundBtn" class="btn btn-emerald" onclick="openRefundRequest()"><span aria-hidden="true">+</span> Request a refund</button></div>
     <div class="project-page-summary refunds-page-summary"><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Pending approval</span><strong id="refundPendingCount">0</strong><small>Includes confirmed member requests</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v11H4zM4 10h16m-12 4h3"/></svg><span>Awaiting payment</span><strong id="refundAwaitingAmount">—</strong><small>Approved or partially paid</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>Paid out</span><strong id="refundPaidAmount">—</strong><small>Payments recorded</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></svg><span>Rejected / voided</span><strong id="refundClosedCount">0</strong><small>Recorded events</small></div></div>
+    <section class="refund-impact-panel" aria-label="Refund cash comparison"><h3>Cash and approved refunds</h3><p id="dashboardRefundStatus" class="refund-impact-status" role="status" hidden></p>
+      <div id="refundImpact"><div id="refundImpactDetails"><div class="refund-impact-values"><div class="refund-impact-value"><span>Cash balance</span><strong id="refundImpactCash">—</strong></div><div class="refund-impact-value"><span>Approved refunds outstanding</span><strong id="refundImpactOwed">—</strong></div><div id="refundImpactNetBox" class="refund-impact-value"><span>Cash after approved refunds</span><strong id="refundImpactNet">—</strong></div></div><p id="refundImpactPending" class="refund-impact-pending" hidden></p><p class="refund-impact-note">Cash after refunds is a comparison, not a payment or available budget. It excludes supplier payables and pending approvals; fund restrictions and project allocations may limit what can be paid.</p></div></div>
+    </section>
     <section class="refund-workspace"><details id="refundActiveSection" class="project-detail-section refund-active-section" open><summary><span class="refund-section-title">Active refund requests <span class="refund-section-count" id="refundActiveCount">(0)</span></span></summary><p class="detail-section-intro">Pending requests, approved refunds awaiting payment and partially paid refunds. Member-request attachments are not shared.</p><div id="memberRefundInbox" class="member-refund-inbox" hidden><p id="memberRefundInboxStatus" role="status"></p><span id="memberRefundInboxCount" hidden></span><div id="memberRefundInboxList"></div></div><div id="refundActiveList"></div></details>
     <details id="refundLogSection" class="project-detail-section refund-log-section"><summary><span class="refund-section-title">Refund log <span class="refund-section-count" id="refundLogCount">(0)</span></span></summary><p class="detail-section-intro">Refund activity, including confirmed member-request decisions. Member-request history is loaded separately and is not included in JSON backups.</p><p id="memberRefundHistoryStatus" role="status" class="detail-section-intro" hidden></p><div id="refundLogList" class="detail-list"></div><button type="button" class="btn btn-light" id="memberRefundMore" onclick="loadOlderMemberRefunds()" hidden>Load older member-request history</button></details></section>
   </section>
@@ -9249,12 +9290,12 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
   <div class="drag" id="payableSheetDrag" aria-hidden="true"></div>
   <header class="payable-header"><div class="payable-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v18l-2-1.5-3 1.5-3-1.5L7 21V3Z"/><path d="M10 8h4M10 12h4"/></svg></div><div class="payable-header-copy"><span class="payable-eyebrow">FINANCIAL WORKSPACE</span><h3 id="payableModalTitle">Record unpaid expense</h3><p id="payableSubtitle"></p></div><button class="payable-close" type="button" onclick="closePayableModal()" aria-label="Close">&times;</button></header>
   <div class="sheet-content payable-content">
-   <section id="refundWorkflow" class="payable-workflow" hidden aria-label="Refund workflow"><div class="payable-workflow-head"><strong>How refunds work</strong><span>3 STEPS</span></div><ol><li><b>1</b><span><strong>Record</strong> Add the expense and who paid.</span></li><li><b>2</b><span><strong id="refundReviewTitle">Review</strong> <span id="refundReviewText"></span></span></li><li><b>3</b><span><strong>Pay later</strong> Assign a project and record payment from its allocated fund.</span></li></ol></section>
+   <section id="refundWorkflow" class="payable-workflow" hidden aria-label="Refund workflow"><div class="payable-workflow-head"><strong>How refunds work</strong><span>3 STEPS</span></div><ol><li><b>1</b><span><strong>Record</strong> Add the expense and who paid.</span></li><li><b>2</b><span><strong id="refundReviewTitle">Review</strong> <span id="refundReviewText"></span></span></li><li><b>3</b><span><strong>Pay later</strong> Record payment from uncommitted cash, or from an assigned project’s allocated fund.</span></li></ol></section>
    <p id="payableContext" class="payable-context"></p>
    <div id="invoiceForm" class="payable-form">
     <div class="payable-section-title"><div><h4 id="payableDetailsTitle">Expense details</h4><p>Fields marked required are needed to save.</p></div><span>DETAILS</span></div>
     <div class="payable-fields">
-     <label id="invoiceProjectLabel" class="payable-field payable-wide" style="display:none"><span>Project <small id="invoiceProjectOptional">Optional</small></span><select id="invoiceProject" class="input" aria-label="Project"></select><small id="invoiceProjectHelp">You can assign a project later, before recording payment.</small></label>
+     <label id="invoiceProjectLabel" class="payable-field payable-wide" style="display:none"><span>Project <small id="invoiceProjectOptional">Optional</small></span><select id="invoiceProject" class="input" aria-label="Project"></select><small id="invoiceProjectHelp">Optional. Without a project, payment uses uncommitted fund cash.</small></label>
      <label class="payable-field payable-wide"><span>Expense description <small>Required</small></span><input id="invoiceDescription" class="input" placeholder="What was the expense for?" list="payableDescriptionSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" aria-describedby="payableDescriptionHelp"><small id="payableDescriptionHelp">Suggestions come from this workspace. You can type your own.</small></label>
      <label id="advancePayerLabel" class="payable-field payable-wide" style="display:none"><span>Person to reimburse <small>Required</small></span><input id="advancePayer" class="input" placeholder="Person who paid personally" list="refundPayerSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" aria-describedby="advancePayerHelp"><small id="advancePayerHelp">Suggestions come from previous refunds and workspace members. You can type a different name.</small></label>
      <label class="payable-field"><span id="payableAmountLabel">Expense amount (₱) <small>Required</small></span><input id="invoiceAmount" type="number" min="0.01" step="0.01" inputmode="decimal" class="input" placeholder="0.00"></label>
@@ -9272,7 +9313,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <p class="payable-cash-note">Recording this expense does not reduce fund cash. Record a payment later when money is actually paid.</p>
    </div>
    <div id="paymentForm" class="payable-form" style="display:none">
-    <div class="payable-section-title"><div><h4>Payment details</h4><p>Record money already paid from an allocated fund.</p></div><span>PAYMENT</span></div>
+    <div class="payable-section-title"><div><h4>Payment details</h4><p>Record money already paid from an eligible fund.</p></div><span>PAYMENT</span></div>
     <div class="payable-fields">
      <label class="payable-field payable-wide"><span>Fund source <small>Required</small></span><select id="paymentFund" class="input" onchange="updatePaymentNote()"></select></label>
      <label class="payable-field"><span>Payment amount (₱) <small>Required</small></span><input id="paymentAmount" type="number" min="0.01" step="0.01" inputmode="decimal" class="input" placeholder="0.00" oninput="paymentAmountEdited=true;updatePaymentNote()" aria-describedby="paymentNote"></label>
@@ -9297,8 +9338,8 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 111</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Workspace recovery and member refund requests</h4><ul><li>Approved refunds stay unpaid while awaiting a project or funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 112</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Workspace recovery and member refund requests</h4><ul><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -9319,7 +9360,7 @@ body.reduce-motion #tab-dashboard .hero-stat[role="button"] {transition:none}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='111', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='112', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -10477,7 +10518,7 @@ async function approveRefundRequest(id,guard){
   const bill=payables.find(x=>x.id===id);
   if(!bill||!bill.pendingApproval) return;
   const approvalWorkspace=pondoTeamState.orgId, pendingRequest=bill.pendingApproval;
-  if(!await appConfirm('Approve this refund request for '+fmt(bill.amount)+'? It will remain unpaid until a project is assigned, funds are allocated and a payment is recorded. Approval does not check or reserve funds.')) return;
+  if(!await appConfirm('Approve this refund request for '+fmt(bill.amount)+'? It remains unpaid until an authorized person records a payment. Approval does not check or reserve funds.')) return;
   if((guard&&!guard())||!canApproveRefunds()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||payables.find(x=>x.id===id)!==bill||bill.pendingApproval!==pendingRequest){appAlert('This request or your access changed. Review it again.');return;}
   auditLog.push({id:makeId('audit'),action:'approve refund request',timestamp:new Date().toISOString(),reason:'Approved by '+(currentUserDisplayName()||'an Owner/Disbursing Officer'),projectName:projects.find(p=>p.id===bill.projectId)?.name||'',record:{id:bill.id,description:bill.description,amount:bill.amount,reimburseTo:bill.reimburseTo,requestedBy:bill.pendingApproval.requestedBy,requestReason:bill.pendingApproval.reason},...(currentActorStamp()?{by:currentActorStamp()}:{})});
   delete bill.pendingApproval;
@@ -10508,6 +10549,7 @@ async function assignRefundProject(id,projectId){
   if(!canAssignRefundProject())return;
   const bill=payables.find(x=>x.id===id);
   if(!bill)return;
+  if(txs.some(t=>t.payableId===bill.id)){appAlert('Void linked refund payments before changing the project, to preserve the payment history.');return;}
   const project=projects.find(p=>p.id===projectId);
   if(!project){appAlert('Choose a valid project.');return;}
   const previousProjectName=projects.find(p=>p.id===bill.projectId)?.name||'(none yet)';
@@ -10673,8 +10715,8 @@ function setAllocation(projectId,fundId,amount){
  const increase=(n-spent)-Math.max(0,old-spent);if(increase>Math.max(0,fundAvailable(fundId))){appAlert('Insufficient uncommitted funds. Available: '+fmt(Math.max(0,fundAvailable(fundId))/100)+'.');return false;}
  const existing=allocations.find(a=>a.projectId===projectId&&a.fundId===fundId);allocations=allocations.filter(a=>!(a.projectId===projectId&&a.fundId===fundId));if(n>0)allocations.push({id:existing?.id||makeId('a'),projectId,fundId,amount:n/100});renderAll();return true;
 }
-async function assignExistingTransaction(txId,projectId){let t=txs.find(t=>t.id===txId);if(!t||t.type!=='OUT'||t.projectId||t.contributionPaymentId||t.deathAidPaymentId||!projects.some(p=>p.id===projectId)){appAlert('Choose a project for an unlinked expense.');return;}
- if(cents(t.amount)>allocationRemaining(t.fundId,projectId)){appAlert('The project needs enough unspent allocation from this fund before this expense can be linked.');return;} if(!await appConfirm('Link this existing expense to the selected project? The cash balance will not change.'))return;t.projectId=projectId;renderAll();}
+async function assignExistingTransaction(txId,projectId){let t=txs.find(t=>t.id===txId);if(!t||t.type!=='OUT'||t.projectId||t.contributionPaymentId||t.deathAidPaymentId||t.payableId||!projects.some(p=>p.id===projectId)){appAlert('Choose a project for an unlinked expense.');return;}
+ if(cents(t.amount)>allocationRemaining(t.fundId,projectId)){appAlert('The project needs enough unspent allocation from this fund before this expense can be linked.');return;} if(!await appConfirm('Link this existing expense to the selected project? The cash balance will not change.'))return;if(!txs.includes(t)||t.projectId||t.contributionPaymentId||t.deathAidPaymentId||t.payableId||!projects.some(p=>p.id===projectId)||cents(t.amount)>allocationRemaining(t.fundId,projectId)){appAlert('The expense or allocation changed. Review it again.');return;}t.projectId=projectId;renderAll();}
 let payableContext={projectId:null,payableId:null,kind:'supplier'};
 // projectId is optional: pass a real id to keep the existing "from inside a
 // project" flow (dropdown pre-filled and hidden, project name shown as
@@ -10689,7 +10731,7 @@ function configurePayableSheet(mode,needsReview){
  document.getElementById('payableSubtitle').textContent=refund?'For an expense someone paid personally.':payment?'Record a payment against this outstanding balance.':'Track a project expense that has not yet been paid.';
  document.getElementById('payableDetailsTitle').textContent=refund?'Refund details':'Expense details';
  document.getElementById('invoiceProjectOptional').textContent=refund?'Optional':'Required';
- document.getElementById('invoiceProjectHelp').textContent=refund?'You can assign a project later, before recording payment.':'Select the project this expense belongs to.';
+ document.getElementById('invoiceProjectHelp').textContent=refund?'Optional. Without a project, payment uses uncommitted fund cash.':'Select the project this expense belongs to.';
  document.getElementById('payableAmountLabel').innerHTML=(refund?'Expense amount (₱)':'Invoice amount (₱)')+' <small>Required</small>';
  document.getElementById('payableDateLabel').innerHTML=(refund?'Expense date':'Invoice date')+' <small>Required</small>';
  document.getElementById('savePayableBtn').style.display=payment?'none':'inline-flex';
@@ -10707,7 +10749,7 @@ function openInvoice(projectId,kind='supplier'){
   // later (assignRefundProject). Unpaid-expense bills stay tied to a
   // project's budget, so that flow still treats the blank option as a
   // placeholder the submitter must replace.
-  projectSelect.innerHTML='<option value="">'+(kind==='advance'?'No project yet (identify later)':'Choose project')+'</option>'+projects.map(x=>'<option value="'+attr(x.id)+'">'+escapeText(x.name)+'</option>').join('');
+  projectSelect.innerHTML='<option value="">'+(kind==='advance'?'No project (use uncommitted funds)':'Choose project')+'</option>'+projects.map(x=>'<option value="'+attr(x.id)+'">'+escapeText(x.name)+'</option>').join('');
   projectSelect.value=p?p.id:'';
   document.getElementById('invoiceProjectLabel').style.display=p?'none':'flex';
   document.getElementById('invoiceProjectLabel').hidden=!!p;
@@ -10837,7 +10879,7 @@ function renderMemberRefundInbox(){
   if(photo){const img=document.createElement('img');img.alt='';img.referrerPolicy='no-referrer';img.addEventListener('error',()=>img.remove(),{once:true});img.src=photo;avatar.appendChild(img);}
   copy.className='member-refund-person-copy';label.textContent='Submitted by';personName.textContent=name;copy.append(label,personName);person.append(avatar,copy);row.append(head,detail,person);
   const funding=document.createElement('p');funding.className='member-refund-funding';
-  funding.textContent=s.syncError||s.listenerError||s.dirty||s.pushTimer||s.pushesInFlight?'Funding information is waiting for team sync. Approval never pays or reserves money.':!funds.length?'No funds are recorded yet. If approved, this request stays unpaid until a project and allocated funds are available.':'Funding is checked after a project is assigned. Approval records an unpaid refund; it does not reserve funds or pay it.';
+  funding.textContent=s.syncError||s.listenerError||s.dirty||s.pushTimer||s.pushesInFlight?'Funding information is waiting for team sync. Approval never pays or reserves money.':!funds.length?'No funds are recorded yet. If approved, this request stays unpaid until eligible funds are available.':'An approved refund can use uncommitted cash or an assigned project’s allocation. Approval does not reserve funds or pay it.';
   row.appendChild(funding);
   if(approver){const actions=document.createElement('div');actions.className='member-refund-actions';for(const [decision,label] of [['approved','Approve'],['rejected','Reject']]){const button=document.createElement('button');button.type='button';button.className='btn btn-light';button.textContent=label;button.disabled=dashboardActionAvailability(s)!=='ready'||memberRefundBusy;button.onclick=()=>decideMemberRefund(item.id,decision);actions.appendChild(button)}row.appendChild(actions)}list.appendChild(row);
  }
@@ -10849,10 +10891,10 @@ async function loadOlderMemberRefunds(){
 async function decideMemberRefund(id,decision){
  if(memberRefundBusy)return;const scope=memberRefundScope(),s=window.pondoTeamState,item=(memberRefundPendingSummary()?.items||[]).find(x=>x.id===id)||memberRefundView.items.find(x=>x.id===id);if(!scope||!item||item.status!=='pending'||dashboardActionAvailability(s)!=='ready')return;
  memberRefundBusy=true;renderMemberRefundInbox();try{let reason='';if(decision==='rejected'){reason=await appReasonPrompt('Why reject this request? The decision remains in the refund log.',['Missing or unclear receipt','Not an approved expense','Wrong amount','Duplicate request','No available funds']);if(reason===null)return;reason=reason.trim();if(!reason||reason.length>300){appAlert('Enter a reason of up to 300 characters.');return;}}
- if(!await appConfirm(decision==='approved'?'Approve this member request? It will remain unpaid until a project is assigned, funds are allocated and a payment is recorded. Approval does not check or reserve funds.':reason==='No available funds'?'Reject and close this request for lack of funds? To keep a valid request waiting for payment instead, cancel and approve it as unpaid.':'Reject this member request? No payable will be created.'))return;
+ if(!await appConfirm(decision==='approved'?'Approve this member request? It remains unpaid until an authorized person records a payment. Approval does not check or reserve funds.':reason==='No available funds'?'Reject and close this request for lack of funds? To keep a valid request waiting for payment instead, cancel and approve it as unpaid.':'Reject this member request? No payable will be created.'))return;
  if(scope.org!==window.pondoTeamState?.orgId||scope.uid!==window.pondoTeamState?.uid||dashboardActionAvailability(window.pondoTeamState)!=='ready')throw Error('Workspace or access changed.');
  await window.memberRefundService.decide(scope.org,scope.uid,id,decision,reason,currentUserDisplayName());
- if(scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid){memberRefundView={...memberRefundView,items:memberRefundView.items.map(x=>x.id===id?{...x,status:decision,decisionReason:reason}:x)};memberRefundSetPendingView({...memberRefundPendingView,items:memberRefundPendingView.items.filter(x=>x.id!==id)});appAlert(decision==='approved'?'Request approved and unpaid. Assign a project, allocate funds and record a payment when funding is available.':'Request rejected.');}
+ if(scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid){memberRefundView={...memberRefundView,items:memberRefundView.items.map(x=>x.id===id?{...x,status:decision,decisionReason:reason}:x)};memberRefundSetPendingView({...memberRefundPendingView,items:memberRefundPendingView.items.filter(x=>x.id!==id)});appAlert(decision==='approved'?'Request approved and unpaid. Record a payment when eligible funds are available; a project is optional.':'Request rejected.');}
  }catch(e){if(scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid)appAlert('Could not confirm the decision: '+(e.message||e)+'. Refresh the request before retrying.');}finally{memberRefundBusy=false;renderMemberRefundInbox();}
 }
 window.decideMemberRefund=decideMemberRefund;
@@ -10892,7 +10934,21 @@ function previousRefundPaymentMethod(bill){
   const previous=txs.map((t,index)=>({t,index})).filter(({t})=>t.payableId===bill.id&&t.type==='OUT'&&typeof t.method==='string'&&t.method.trim()).sort((a,b)=>String(b.t.date||'').localeCompare(String(a.t.date||''))||b.index-a.index)[0];
   return previous?previous.t.method.trim():'';
 }
-function openPayablePayment(id){payablePreviousFocus=document.activeElement;let bill=payables.find(x=>x.id===id);if(!bill||payableOutstanding(bill)<=0||bill.pendingApproval)return;if(!bill.projectId){appAlert('This approved refund is still unpaid. In Refund History, assign a project to check its allocated funds. If needed, add a fund and allocate it to that project. No payment is made automatically.');return;}payableContext={projectId:bill.projectId,payableId:id};configurePayableSheet('payment',false);document.getElementById('payableModalTitle').textContent=bill.kind==='advance'?'Pay refund request':'Pay project expense';document.getElementById('payableContext').textContent=(bill.kind==='advance'?'Reimburse '+bill.reimburseTo+' · ':'')+bill.description+' · Outstanding '+fmt(payableOutstanding(bill)/100);document.getElementById('invoiceForm').style.display='none';document.getElementById('paymentForm').style.display='flex';let sel=document.getElementById('paymentFund');sel.innerHTML='<option value="">Choose allocated fund</option>';const eligibleFunds=funds.filter(f=>allocationRemaining(f.id,bill.projectId)>0);eligibleFunds.forEach(f=>{let o=document.createElement('option');o.value=f.id;o.textContent=f.name+' · '+fmt(allocationRemaining(f.id,bill.projectId)/100)+' unspent';sel.appendChild(o)});if(bill.kind==='advance'&&eligibleFunds.length===1)sel.value=eligibleFunds[0].id;paymentAmountEdited=false;document.getElementById('paymentAmount').value='';const previousMethod=previousRefundPaymentMethod(bill);document.getElementById('paymentMethod').value=previousMethod;document.getElementById('paymentMethodHint').hidden=!previousMethod;document.getElementById('paymentRef').value='';document.getElementById('paymentDate').value=localDate();document.getElementById('payableModal').style.display='block';document.body.classList.add('modal-open');updatePaymentNote();sel.focus();}
+function openPayablePayment(id){
+ payablePreviousFocus=document.activeElement;const bill=payables.find(x=>x.id===id);if(!bill||payableOutstanding(bill)<=0||bill.pendingApproval)return;
+ if(!bill.projectId&&bill.kind!=='advance'){appAlert('Assign a project before paying this expense.');return;}
+ if(bill.projectId&&!projects.some(p=>p.id===bill.projectId)){appAlert('The assigned project is unavailable. Review this refund before paying.');return;}
+ const projectless=!bill.projectId&&bill.kind==='advance';payableContext={projectId:bill.projectId||null,payableId:id};configurePayableSheet('payment',false);
+ document.getElementById('payableModalTitle').textContent=bill.kind==='advance'?'Pay refund request':'Pay project expense';
+ document.getElementById('payableContext').textContent=(bill.kind==='advance'?'Reimburse '+bill.reimburseTo+' · ':'')+bill.description+' · Outstanding '+fmt(payableOutstanding(bill)/100)+(projectless?' · No project':'');
+ document.getElementById('invoiceForm').style.display='none';document.getElementById('paymentForm').style.display='flex';
+ const sel=document.getElementById('paymentFund');sel.innerHTML=projectless?'<option value="">Choose fund with uncommitted cash</option>':'<option value="">Choose allocated fund</option>';
+ const eligibleFunds=funds.filter(f=>(projectless?fundAvailable(f.id):allocationRemaining(f.id,bill.projectId))>0);
+ eligibleFunds.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.name+' · '+fmt((projectless?fundAvailable(f.id):allocationRemaining(f.id,bill.projectId))/100)+(projectless?' uncommitted':' unspent');sel.appendChild(o)});
+ if(bill.kind==='advance'&&eligibleFunds.length===1)sel.value=eligibleFunds[0].id;paymentAmountEdited=false;document.getElementById('paymentAmount').value='';
+ const previousMethod=previousRefundPaymentMethod(bill);document.getElementById('paymentMethod').value=previousMethod;document.getElementById('paymentMethodHint').hidden=!previousMethod;
+ document.getElementById('paymentRef').value='';document.getElementById('paymentDate').value=localDate();document.getElementById('payableModal').style.display='block';document.body.classList.add('modal-open');updatePaymentNote();sel.focus();
+}
 function closePayableModal(){document.getElementById('payableModal').style.display='none';document.body.classList.remove('modal-open');if(!detailReturnProject&&!detailReturnFund&&payablePreviousFocus?.isConnected)payablePreviousFocus.focus();scheduleProjectReturn();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('payableModal').style.display!=='none'){e.preventDefault();e.stopImmediatePropagation();closePayableModal();}});
 // Refund suggestions are integer cents and never replace an amount the user edited.
@@ -10901,7 +10957,7 @@ let paymentAmountEdited=false;
 function suggestedRefundPayment(bill,fundId,date){
   const fund=funds.find(f=>f.id===fundId);
   if(!bill||bill.kind!=='advance'||bill.pendingApproval||!fund||!date||date>localDate()||date<bill.invoiceDate||(fund.dateReceived&&date<fund.dateReceived))return 0;
-  let max=Math.max(0,Math.min(payableOutstanding(bill),allocationRemaining(fundId,bill.projectId),fundCash(fundId)));
+  let max=Math.max(0,Math.min(payableOutstanding(bill),bill.projectId?allocationRemaining(fundId,bill.projectId):fundAvailable(fundId),fundCash(fundId)));
   let low=0,high=max;
   while(low<high){const mid=low+Math.ceil((high-low)/2);if(wouldOverdrawAtDate(fundId,date,mid))high=mid-1;else low=mid;}
   return low;
@@ -10915,11 +10971,11 @@ function updatePaymentNote(){
   if(b.kind!=='advance'){note.textContent=!f?'Allocate funds to this project first, then choose a source.':('Outstanding '+fmt(payableOutstanding(b)/100)+' · Unspent allocation '+fmt(allocationRemaining(f,b.projectId)/100)+' · Fund cash '+fmt(fundCash(f)/100));return;}
   const suggested=suggestedRefundPayment(b,f,date);
   if(!paymentAmountEdited)amount.value=suggested?(suggested/100).toFixed(2):'';
-  if(!f){note.textContent=document.getElementById('paymentFund').options.length>1?'Choose an allocated fund to suggest a payment amount.':'No unspent funds are allocated to this project. Allocate funds before recording a payment.';return;}
+  if(!f){note.textContent=b.projectId?(document.getElementById('paymentFund').options.length>1?'Choose an allocated fund to suggest a payment amount.':'No unspent funds are allocated to this project. Allocate funds before recording a payment.'):(document.getElementById('paymentFund').options.length>1?'Choose a fund with uncommitted cash.':'No uncommitted cash is available. The refund remains unpaid; project allocations are protected.');return;}
   const fund=funds.find(x=>x.id===f);
   if(!date||date>localDate()||date<b.invoiceDate||(fund?.dateReceived&&date<fund.dateReceived)){note.textContent='Choose a payment date that is not in the future or before the expense or fund receipt date.';return;}
-  if(!suggested){note.textContent='No amount is available from this fund for this payment date. Check the allocation and fund balance.';return;}
-  note.textContent='Suggested maximum '+fmt(suggested/100)+' based on the outstanding refund, unspent allocation and available fund balance. You can enter a smaller amount.';
+  if(!suggested){note.textContent=b.projectId?'No amount is available from this fund for this payment date. Check the allocation and fund balance.':'No uncommitted amount is available from this fund for this payment date. Project allocations remain protected.';return;}
+  note.textContent='Suggested maximum '+fmt(suggested/100)+(b.projectId?' based on the outstanding refund, unspent allocation and available fund balance.':' based on the outstanding refund and uncommitted fund cash; project allocations are protected.')+' You can enter a smaller amount.';
   useSuggestion.style.display=paymentAmountEdited?'inline-flex':'none';
 }
 async function savePayable(){const chosenProjectId=document.getElementById('invoiceProject').value||payableContext.projectId,project=chosenProjectId?projects.find(x=>x.id===chosenProjectId):null,description=document.getElementById('invoiceDescription').value.trim(),amount=parseMoney(document.getElementById('invoiceAmount').value),date=document.getElementById('invoiceDate').value,due=document.getElementById('invoiceDueDate').value;
@@ -10942,8 +10998,8 @@ payables.push(newPayable);
 // the full request -> approve/reject -> payment trail is visible in both
 // the audit history panel and the dedicated Refund History view.
 if(needsRefundApproval)auditLog.push({id:makeId('audit'),action:'request refund approval',timestamp:new Date().toISOString(),reason:'Submitted by '+(currentUserDisplayName()||'a teammate'),projectName:project?project.name:'',record:{id:newPayable.id,description:newPayable.description,amount:newPayable.amount,reimburseTo:newPayable.reimburseTo},...(payableActor?{by:payableActor}:{})});
-closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert(needsRefundApproval?'Refund request submitted. An Owner or Disbursing Officer can approve or reject it.':(project?'Unpaid expense recorded. No fund cash was reduced.':'Refund request recorded. Assign a project to it before it can be paid.'));}
-async function savePayablePayment(){const bill=payables.find(x=>x.id===payableContext.payableId),fundId=document.getElementById('paymentFund').value,amount=parseMoney(document.getElementById('paymentAmount').value),date=document.getElementById('paymentDate').value;if(!bill||!funds.some(f=>f.id===fundId)||!date||amount===null||amount<=0){appAlert('Choose an allocated fund and enter a valid payment date and amount.');return;}if(bill.pendingApproval){appAlert('This refund request is still pending approval by an Owner or Disbursing Officer.');return;}if(!validateActualDate(date,'payment'))return;if(date<bill.invoiceDate){appAlert('The payment date cannot be earlier than the expense date.');return;}if(funds.find(f=>f.id===fundId).dateReceived&&date<funds.find(f=>f.id===fundId).dateReceived){appAlert('The payment date cannot be earlier than the fund receipt date.');return;}if(amount>payableOutstanding(bill)){appAlert('Payment exceeds the outstanding payable of '+fmt(payableOutstanding(bill)/100)+'.');return;}if(wouldOverdrawAtDate(fundId,date,amount)){appAlert('This payment would make the fund cash balance negative on its date or a later recorded date.');return;}if(amount>allocationRemaining(fundId,bill.projectId)||amount>fundCash(fundId)){appAlert('Payment exceeds the unspent project allocation or fund cash balance.');return;}let paymentActor=currentActorStamp();txs.push({id:makeId('t'),date,fundId,projectId:bill.projectId,payableId:bill.id,type:'OUT',category:bill.category,description:(bill.kind==='advance'?'Reimbursement: ':'Payment: ')+bill.description,amount:amount/100,payee:bill.kind==='advance'?bill.reimburseTo:(bill.supplier||''),receiptNo:document.getElementById('paymentRef').value.trim(),method:document.getElementById('paymentMethod').value.trim(),...(paymentActor?{createdBy:paymentActor}:{})});closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Payment recorded. The payable balance and selected fund cash have been updated.');}
+closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert(needsRefundApproval?'Refund request submitted. An Owner or Disbursing Officer can approve or reject it.':(project?'Unpaid expense recorded. No fund cash was reduced.':'Refund recorded and unpaid. You can record payment from uncommitted fund cash when available.'));}
+async function savePayablePayment(){const bill=payables.find(x=>x.id===payableContext.payableId),fundId=document.getElementById('paymentFund').value,amount=parseMoney(document.getElementById('paymentAmount').value),date=document.getElementById('paymentDate').value;if(!bill||!funds.some(f=>f.id===fundId)||!date||amount===null||amount<=0){appAlert('Choose an eligible fund and enter a valid payment date and amount.');return;}if(bill.pendingApproval){appAlert('This refund request is still pending approval by an Owner or Disbursing Officer.');return;}if(!validateActualDate(date,'payment'))return;if(date<bill.invoiceDate){appAlert('The payment date cannot be earlier than the expense date.');return;}if(funds.find(f=>f.id===fundId).dateReceived&&date<funds.find(f=>f.id===fundId).dateReceived){appAlert('The payment date cannot be earlier than the fund receipt date.');return;}if(amount>payableOutstanding(bill)){appAlert('Payment exceeds the outstanding payable of '+fmt(payableOutstanding(bill)/100)+'.');return;}if(wouldOverdrawAtDate(fundId,date,amount)){appAlert('This payment would make the fund cash balance negative on its date or a later recorded date.');return;}if((bill.projectId||null)!==(payableContext.projectId||null)){appAlert('The refund project changed. Close and review the payment again.');return;}if(bill.projectId){if(!projects.some(p=>p.id===bill.projectId)||amount>allocationRemaining(fundId,bill.projectId)||amount>fundCash(fundId)){appAlert('Payment exceeds the unspent project allocation or fund cash balance.');return;}}else if(bill.kind!=='advance'||amount>fundAvailable(fundId)){appAlert('Payment exceeds uncommitted fund cash. Funds reserved for projects cannot be used.');return;}let paymentActor=currentActorStamp();txs.push({id:makeId('t'),date,fundId,projectId:bill.projectId||null,payableId:bill.id,type:'OUT',category:bill.category,description:(bill.kind==='advance'?'Reimbursement: ':'Payment: ')+bill.description,amount:amount/100,payee:bill.kind==='advance'?bill.reimburseTo:(bill.supplier||''),receiptNo:document.getElementById('paymentRef').value.trim(),method:document.getElementById('paymentMethod').value.trim(),...(paymentActor?{createdBy:paymentActor}:{})});closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Payment recorded. The payable balance and selected fund cash have been updated.');}
 async function deleteUnpaidPayable(id){let bill=payables.find(x=>x.id===id);if(!bill)return;if(payableSettled(bill)>0){appAlert('Void linked cash payments and non-cash settlements before voiding this payable.');return;}let reason=await appReasonPrompt('Why are you voiding this unpaid expense? A history entry will be kept.',['Recorded by mistake or duplicate entry','Wrong amount','No longer needed or cancelled']);if(reason===null)return;if(!reason.trim()){appAlert('A reason is required.');return;}if(await appConfirm('Void this unpaid expense? It will be removed from totals but preserved in history.')){if(!payables.includes(bill)||payableSettled(bill)>0){appAlert('The refund or settlement changed. Review it again.');return;}auditLog.push({id:makeId('audit'),action:'void payable',timestamp:new Date().toISOString(),reason:reason.trim(),projectName:projects.find(p=>p.id===bill.projectId)?.name||'',record:JSON.parse(JSON.stringify(bill)),...(currentActorStamp()?{by:currentActorStamp()}:{})});payables=payables.filter(x=>x.id!==id);renderAll();}}
 // A non-cash refund settlement records one approved absence date at ₱250.
 // It never creates a transaction or changes fund cash or project allocation.
@@ -10989,7 +11045,7 @@ document.getElementById('absenceCreditForm').addEventListener('submit',saveAbsen
 document.getElementById('absenceCreditOverlay').addEventListener('click',e=>{if(e.target.id==='absenceCreditOverlay')closeAbsenceCredit()});
 document.addEventListener('keydown',e=>{const overlay=document.getElementById('absenceCreditOverlay');if(overlay.hidden||!document.getElementById('appDialogOverlay').hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeAbsenceCredit();return}if(e.key==='Tab'){const nodes=[...overlay.querySelectorAll('button:not([disabled]),input:not([disabled])')].filter(x=>x.offsetParent!==null);if(nodes.length&&e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1).focus()}else if(nodes.length&&!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0].focus()}}},true);
 function renderPayablesForProject(project,card){const section=card.querySelector('.project-payables');section.innerHTML='';const bills=payables.filter(x=>x.projectId===project.id);if(!bills.length){section.innerHTML='<p class="funding-note">No bills or refunds recorded for this project.</p>';return;}bills.forEach(bill=>{let row=document.createElement('div');row.className='payable-row';const paid=payablePaid(bill.id),credit=payableCredit(bill.id),remaining=payableOutstanding(bill),status=payableStatus(bill);row.innerHTML=`<div class="project-payable-top"><div class="project-payable-title"><span class="project-payable-icon" aria-hidden="true">${LICON('receipt','#5b4ae8',19)}</span><div><strong>${bill.kind==='advance'?'Refund request · ':''}${escapeText(bill.description)}</strong><small>${bill.kind==='advance'?'Reimburse '+escapeText(bill.reimburseTo||'—'):escapeText(bill.supplier||'No supplier')} · Date ${escapeText(bill.invoiceDate||'—')}${bill.dueDate?' · Due '+escapeText(bill.dueDate):''}</small></div></div><span class="payable-status project-status-${bill.pendingApproval?'pending':remaining===0?'paid':paid+credit>0?'partial':'unpaid'}">${escapeText(status)}</span></div><div class="project-payable-amounts"><div><span>Recorded</span><strong>${fmt(bill.amount)}</strong></div><div><span>Cash paid</span><strong>${fmt(paid/100)}</strong></div><div><span>Outstanding</span><strong>${fmt(remaining/100)}</strong></div></div>${credit?'<p class="contrib-help">Non-cash settlement: '+fmt(credit/100)+'</p>':''}<div class="payable-row-info project-payable-notes">${createdByBadge(bill)}${pendingApprovalBadge(bill)}</div><div class="payable-actions"></div>`;if(bill.receiptNo||bill.receiptImage){let ref=document.createElement('small');ref.textContent='Reference: '+(bill.receiptNo||'—');row.querySelector('.payable-row-info').appendChild(ref);addReceiptLink(row.querySelector('.payable-row-info'),bill.receiptImage);}let history=txs.filter(t=>t.payableId===bill.id&&t.type==='OUT');if(history.length){let details=document.createElement('details');details.className='payable-history';details.dataset.payableId=bill.id;details.open=!!(card._payableHistoryOpen&&card._payableHistoryOpen[bill.id]);let summary=document.createElement('summary');summary.textContent='Payment history ('+history.length+')';details.appendChild(summary);history.forEach(t=>{let line=document.createElement('p');line.textContent=t.date+' · '+(funds.find(f=>f.id===t.fundId)?.name||'Unknown fund')+' · '+fmt(t.amount);details.appendChild(line)});row.querySelector('.payable-row-info').appendChild(details)}let actions=row.querySelector('.payable-actions');if(remaining>0&&!bill.pendingApproval){let pay=document.createElement('button');pay.type='button';pay.className='btn btn-emerald';pay.textContent='Record payment';pay.onclick=()=>openProjectChild(project.id,()=>openPayablePayment(bill.id));actions.appendChild(pay)}if(paid===0&&credit===0){let remove=document.createElement('button');remove.type='button';remove.className='btn btn-light';remove.textContent=bill.pendingApproval?'Cancel request':'Void';remove.onclick=()=>deleteUnpaidPayable(bill.id);actions.appendChild(remove)}row.querySelector('.refund-approve')?.addEventListener('click',()=>approveRefundRequest(bill.id));row.querySelector('.refund-reject')?.addEventListener('click',()=>rejectRefundRequest(bill.id));section.appendChild(row)})}
-function renderPayableReport(){let body=document.getElementById('reportPayablesTable');body.innerHTML='';payables.forEach(b=>{let project=b.projectId?projects.find(p=>p.id===b.projectId):null,paid=payablePaid(b.id),projectLabel=b.projectId?(project?.name||'Unknown project'):'No project yet';body.insertAdjacentHTML('beforeend',`<tr><td>${escapeText(projectLabel)}</td><td>${b.kind==='advance'?'Reimburse '+escapeText(b.reimburseTo)+' · ':''}${escapeText(b.description)}${b.supplier?' / '+escapeText(b.supplier):''}</td><td>${escapeText(b.invoiceDate)}</td><td>${escapeText(b.dueDate||'—')}</td><td>${fmt(b.amount)}</td><td>${fmt(paid/100)}</td><td>${fmt(payableCredit(b.id)/100)}</td><td>${fmt(payableOutstanding(b)/100)}</td><td>${payableStatus(b)}</td></tr>`)});if(!payables.length)body.innerHTML='<tr><td colspan="9">No project payables recorded.</td></tr>';}
+function renderPayableReport(){let body=document.getElementById('reportPayablesTable');body.innerHTML='';payables.forEach(b=>{let project=b.projectId?projects.find(p=>p.id===b.projectId):null,paid=payablePaid(b.id),projectLabel=b.projectId?(project?.name||'Unknown project'):'No project';body.insertAdjacentHTML('beforeend',`<tr><td>${escapeText(projectLabel)}</td><td>${b.kind==='advance'?'Reimburse '+escapeText(b.reimburseTo)+' · ':''}${escapeText(b.description)}${b.supplier?' / '+escapeText(b.supplier):''}</td><td>${escapeText(b.invoiceDate)}</td><td>${escapeText(b.dueDate||'—')}</td><td>${fmt(b.amount)}</td><td>${fmt(paid/100)}</td><td>${fmt(payableCredit(b.id)/100)}</td><td>${fmt(payableOutstanding(b)/100)}</td><td>${payableStatus(b)}</td></tr>`)});if(!payables.length)body.innerHTML='<tr><td colspan="9">No project payables recorded.</td></tr>';}
 function renderProjectCards(){
  const list=document.getElementById('projectsList'),q=(document.getElementById('projectSearch').value||'').trim().toLowerCase(),status=document.getElementById('projectStatusFilter').value;list.innerHTML='';
  let totals=projects.reduce((a,p)=>{let t=projectTotals(p.id);a.allocated+=t.allocated;a.spent+=t.spent;a.unpaid+=t.unpaid;return a},{allocated:0,spent:0,unpaid:0});document.getElementById('projectCount').textContent=projects.length;document.getElementById('projectAllocated').textContent=fmt(totals.allocated/100);document.getElementById('projectPaid').textContent=fmt(totals.spent/100);document.getElementById('projectOutstanding').textContent=fmt(totals.unpaid/100);
@@ -11061,8 +11117,13 @@ function refundFundingStatus(bill){
   if(!bill||bill.kind!=='advance'||bill.pendingApproval||payableOutstanding(bill)<=0)return null;
   const s=window.pondoTeamState;
   if(s?.orgId&&(!s.memberConfirmed||!s.baselineReady||s.online===false||!navigator.onLine||s.syncError||s.listenerError||s.recoveryLocked||s.dirty||s.pushTimer||s.pushesInFlight))
-    return {title:'Funding status unavailable',detail:'Wait for a confirmed online team sync before checking project funding. The refund remains unpaid.'};
-  if(!bill.projectId)return {title:'Awaiting payment · project needed',detail:(!funds.length?'No funds are recorded yet. ':'')+(s?.orgId&&s.role==='reviewer'?'An editor must assign a project to check its allocated funds. ':'Assign a project below to check its allocated funds. ')+'If needed, add a fund and allocate it to the project. No payment is automatic.'};
+    return {title:'Funding status unavailable',detail:'Wait for a confirmed online team sync before checking funding. The refund remains unpaid.'};
+  if(!bill.projectId){
+    const outstanding=payableOutstanding(bill),possible=funds.reduce((n,f)=>Math.min(outstanding,n+Math.max(0,fundAvailable(f.id))),0);
+    const note='Project allocations are protected; balances can change and are not reserved for this refund. Payment-date checks still apply.';
+    if(!possible)return {title:'Awaiting uncommitted funds',detail:(!funds.length?'No funds are recorded yet. ':'No uncommitted cash is currently available. ')+'The refund stays unpaid. '+note};
+    return {title:possible<outstanding?'Partly funded · no project':'Awaiting payment · no project',detail:'Up to '+fmt(possible/100)+' in uncommitted cash is shown against '+fmt(outstanding/100)+' outstanding. '+note};
+  }
   if(!projects.some(p=>p.id===bill.projectId))return {title:'Project unavailable',detail:'The assigned project is missing. Review the project before recording a payment; the refund remains unpaid.'};
   const outstanding=payableOutstanding(bill);
   const possible=funds.reduce((n,f)=>Math.min(outstanding,n+Math.max(0,Math.min(allocationRemaining(f.id,bill.projectId),fundCash(f.id)))),0);
@@ -11074,6 +11135,7 @@ function refundFundingStatus(bill){
 function renderRefundHistory(){
   const activeList=document.getElementById('refundActiveList');
   if(!activeList) return; // markup not present (older cached HTML mid-update)
+  renderRefundImpact();
   const requestBtn=document.getElementById('requestRefundBtn');
   if(requestBtn)requestBtn.textContent=refundRequestRequiresApproval()?'+ Request a refund':'+ Record a refund';
   const activeBills=payables.filter(b=>b.kind==='advance'&&payableOutstanding(b)>0).sort((a,b)=>String(b.invoiceDate||'').localeCompare(String(a.invoiceDate||'')));
@@ -11084,23 +11146,22 @@ function renderRefundHistory(){
   }else if(activeBills.length){
     activeBills.forEach(bill=>{
       const project=bill.projectId?projects.find(p=>p.id===bill.projectId):null;
-      const projectLabel=bill.projectId?(project?.name||'Unknown project'):'No project yet';
+      const projectLabel=bill.projectId?(project?.name||'Unknown project'):'No project';
       const paid=payablePaid(bill.id),credit=payableCredit(bill.id),remaining=payableOutstanding(bill),status=payableStatus(bill);
       const row=document.createElement('div');row.className='payable-row';
       const statusClass=bill.pendingApproval?'pending':paid+credit>0?'partial':'unpaid';
       row.innerHTML=`<div class="refund-card-top"><div class="refund-card-identity"><span class="refund-card-icon" aria-hidden="true">${LICON('receipt','#5b4ae8',20)}</span><div><strong>Reimburse ${escapeText(bill.reimburseTo||'—')}</strong><p>${escapeText(bill.description||'No description provided')}</p></div></div><span class="payable-status refund-status-${statusClass}">${escapeText(status)}</span></div><div class="refund-card-context"><span><b>Project</b> ${escapeText(projectLabel)}</span><span><b>Date</b> ${escapeText(bill.invoiceDate||'—')}</span></div><div class="refund-card-amounts"><div><span>Incurred</span><strong>${fmt(bill.amount)}</strong></div><div><span>Cash paid</span><strong>${fmt(paid/100)}</strong></div><div><span>Outstanding</span><strong>${fmt(remaining/100)}</strong></div></div>${credit?'<p class="contrib-help">Non-cash settlement: '+fmt(credit/100)+'</p>':''}<div class="payable-row-info refund-card-notes">${createdByBadge(bill)}${pendingApprovalBadge(bill)}</div><div class="payable-actions"></div>`;
       const info=row.querySelector('.payable-row-info');
+      if(!bill.projectId&&paid>0){const note=document.createElement('small');note.textContent='This refund has payments without a project; its project cannot be changed while those payments exist.';info.appendChild(note);}
       const funding=refundFundingStatus(bill);if(funding){const notice=document.createElement('div'),heading=document.createElement('strong'),detail=document.createElement('div');notice.className='refund-funding-status';heading.textContent=funding.title;detail.textContent=funding.detail;notice.append(heading,detail);info.before(notice);}
       if(bill.receiptNo){const ref=document.createElement('small');ref.textContent='Reference: '+bill.receiptNo;info.appendChild(ref);}
       if(bill.receiptImage) addReceiptLink(info,bill.receiptImage);
       // Team receipt attachments are device-local, even when a reference exists.
       if(pondoTeamState.orgId&&!bill.receiptImage){const note=document.createElement('small');note.textContent='Receipt attachments are not synced between devices.';info.appendChild(note);}
       const actions=row.querySelector('.payable-actions');
-      // No project yet: this was intentionally allowed at request time (see
-      // openRefundRequest/savePayable) -- offer an inline way to identify
-      // it now that a project exists, instead of only a payment/void choice
-      // that can't work without one.
-      if(!bill.projectId&&canAssignRefundProject()&&projects.length){
+      // An optional project can be assigned before the first cash payment.
+      // Afterwards, payment and payable project IDs must remain consistent.
+      if(!bill.projectId&&paid===0&&canAssignRefundProject()&&projects.length){
         const assignWrap=document.createElement('div');assignWrap.className='refund-assign';
         const sel=document.createElement('select');sel.className='input';sel.setAttribute('aria-label','Assign project');sel.style.height='36px';
         sel.innerHTML='<option value="">Assign project…</option>'+projects.map(x=>'<option value="'+attr(x.id)+'">'+escapeText(x.name)+'</option>').join('');
@@ -11873,10 +11934,6 @@ function dashboardActivityEmpty(kind){
 }
 
 // Read-only summary of refund requests in the active workspace. No new data is stored.
-function dashboardOutstandingRefunds(bills){
-  return bills.filter(b=>b && b.kind==='advance' && payableOutstanding(b)>0)
-    .slice().sort((a,b)=>String(b.invoiceDate||'').localeCompare(String(a.invoiceDate||'')));
-}
 function renderRefundImpact(){
   const panel=document.getElementById('refundImpact'),details=document.getElementById('refundImpactDetails'),status=document.getElementById('dashboardRefundStatus');
   if(!panel||!details||!status)return;
@@ -11894,34 +11951,7 @@ function renderRefundImpact(){
   document.getElementById('refundImpactNetBox').classList.toggle('negative',net<0);
   const pendingEl=document.getElementById('refundImpactPending');pendingEl.hidden=!pending;pendingEl.textContent=pending?'Awaiting approval (not included): '+fmt(pending/100):'';
 }
-function renderDashboardRefunds(){
-  const card=document.getElementById('dashboardRefundCard'),count=document.getElementById('dashboardRefundCount'),empty=document.getElementById('dashboardRefundEmpty'),status=document.getElementById('dashboardRefundStatus'),list=document.getElementById('dashboardRefundList');
-  if(!card||!count||!empty||!status||!list)return;
-  renderRefundImpact();
-  const state=window.pondoTeamState, team=!!state?.orgId;
-  const unconfirmed=team && (!state.memberConfirmed || !state.baselineReady);
-  const stale=team && (!state.online || !navigator.onLine || state.syncError || state.listenerError || state.recoveryLocked || state.dirty || state.pushTimer || state.pushesInFlight);
-  list.replaceChildren();count.hidden=unconfirmed;card.classList.remove('has-outstanding');
-  if(unconfirmed){empty.hidden=true;status.hidden=false;status.textContent='Waiting for the current workspace to be confirmed.';return;}
-  const approver=team&&['owner','disbursing'].includes(state.role),allItems=dashboardOutstandingRefunds(payables),items=approver?allItems.filter(b=>!b.pendingApproval):allItems,memberPending=window.memberRefundPendingSummary?.(),memberItems=approver?[]:(memberPending?.items||[]),total=items.length+memberItems.length;
-  const caption=document.getElementById('dashboardRefundCaption'),emptyTitle=document.getElementById('dashboardRefundEmptyTitle'),emptyCopy=document.getElementById('dashboardRefundEmptyCopy');
-  if(caption)caption.textContent=approver?'Approved refunds awaiting payment':'Requests with an outstanding balance';
-  if(emptyTitle)emptyTitle.textContent=approver?'No refunds awaiting payment':'No outstanding requests';
-  if(emptyCopy)emptyCopy.textContent=approver?'Pending refunds are in Needs your review.':'Requests awaiting approval or payment will appear here.';
-  card.classList.toggle('has-outstanding',total>0);
-  count.textContent=team&&!approver&&!memberPending?'—':String(total)+(!approver&&memberPending?.more?'+':'');count.setAttribute('aria-label',team&&!approver&&!memberPending?'Member requests waiting for confirmation':total+(approver?' approved refunds awaiting payment':' outstanding refund requests')+(!approver&&memberPending?.more?' or more':''));
-  status.hidden=!stale;status.textContent=stale?'Team data may be out of date or awaiting sync.':'';
-  empty.hidden=total>0 || stale || (team&&!approver&&!memberPending);
-  for(const bill of items.slice(0,4)){
-    const row=document.createElement('div');row.className='dashboard-refund-item';
-    const title=document.createElement('strong');title.textContent=bill.description||'Refund request';
-    const details=document.createElement('span');const stateLabel=bill.pendingApproval?'Pending approval':(bill.absenceCredits?.length?'Partially settled':payablePaid(bill.id)>0?'Partially paid':'Awaiting payment');
-    details.textContent=stateLabel+' · Outstanding '+fmt(payableOutstanding(bill)/100);
-    row.append(title,details);list.appendChild(row);
-  }
-  for(const request of memberItems.slice(0,Math.max(0,4-items.length))){const row=document.createElement('div');row.className='dashboard-refund-item';const title=document.createElement('strong');title.textContent=request.description||'Refund request';const detail=document.createElement('span');detail.textContent='Pending approval · '+fmt(request.amountCents/100);row.append(title,detail);list.appendChild(row);}
-  if(total>4||(!approver&&memberPending?.more)){const more=document.createElement('span');more.textContent=total>4?'+'+(total-4)+(!approver&&memberPending?.more?'+':'')+' more in Refund History':'More in Refund History';list.appendChild(more);}
-}
+function renderDashboardRefunds(){ renderRefundImpact(); }
 window.renderDashboardRefunds=renderDashboardRefunds;
 
 // Team review queue: derived from the current workspace, never stored separately.
@@ -11966,7 +11996,7 @@ function renderDashboardActions() {
   status.hidden=availability==='ready'&&!!memberPending; status.textContent=messages[availability]||(memberPending?.more?'Showing the first 100 pending member requests; review them to reveal more.':!memberPending?(window.memberRefundPendingIssue?.()||'Member requests are waiting for confirmation.'):'');if(memberPending?.more)status.hidden=false;
   const labels={fund:'Fund',project:'Project',contributionActivity:'Contribution activity',contributor:'Contributor'};
   requests.forEach(item=>{
-    const row=document.createElement('article'); row.className='dashboard-action-row';
+    const row=document.createElement('article'); row.className='dashboard-action-row '+(item.type==='refund'||item.type==='memberRefund'?'dashboard-action-refund':'dashboard-action-deletion');
     const info=document.createElement('div'); info.className='dashboard-action-info';
     const title=document.createElement('strong');
     const detail=document.createElement('p');
@@ -11984,10 +12014,15 @@ function renderDashboardActions() {
       detail.textContent=[context,req.reason?'Reason: '+req.reason:'', 'Approval permanently removes linked records.'].filter(Boolean).join(' · ');
     }
     const date=req.requestedAt && !Number.isNaN(Date.parse(req.requestedAt)) ? new Date(req.requestedAt).toLocaleDateString('en-PH') : '';
-    meta.textContent=['Requested by '+(req.requestedBy?.name||'a teammate'),date].filter(Boolean).join(' · ');
+    const requesterName=typeof req.requestedBy?.name==='string'&&req.requestedBy.name.trim()?req.requestedBy.name:'a teammate';
+    const avatar=document.createElement('span'),who=document.createElement('span');meta.className='dashboard-action-requester';avatar.className='dashboard-action-avatar';avatar.setAttribute('aria-hidden','true');
+    avatar.textContent=requesterName.trim().split(/\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join('')||'?';
+    const photo=notificationActorPhotoURL({type:'team',orgId:state.orgId,actorUid:req.requestedBy?.uid});
+    if(photo){const image=document.createElement('img');image.alt='';image.referrerPolicy='no-referrer';image.addEventListener('error',()=>image.remove(),{once:true});image.src=photo;avatar.appendChild(image);}
+    who.textContent=['Requested by '+requesterName,date].filter(Boolean).join(' · ');meta.append(avatar,who);
     info.append(title,detail,meta);
     const actions=document.createElement('div'); actions.className='dashboard-action-buttons';
-    const button=(label,handler,disabled)=>{const b=document.createElement('button');b.type='button';b.className='btn btn-light';b.textContent=label;b.disabled=!!disabled;b.addEventListener('click',handler);actions.appendChild(b)};
+    const button=(label,handler,disabled)=>{const b=document.createElement('button');b.type='button';b.className='btn btn-light dashboard-action-'+label.toLowerCase();b.textContent=label;b.disabled=!!disabled;b.addEventListener('click',handler);actions.appendChild(b)};
     button('Review',()=>reviewDashboardRequest(item),false);
     const act=approve=>{
       if(dashboardActionAvailability(window.pondoTeamState)!=='ready'){appAlert('Team sync or access changed. Refresh the request before taking action.');return;}
@@ -12108,7 +12143,7 @@ function renderAll(){
     const desktopDetail=(label,value)=>value?`<div><span>${label}</span><strong>${escapeText(value)}</strong></div>`:'';
     const desktopExtra=(label,value)=>value?`<span><b>${label}:</b> ${escapeText(value)}</span>`:'';
     let entry=document.createElement('div');entry.className='tx-entry';entry.innerHTML=`<div class="tx-row"><div class="tx-primary" style="display:flex; gap:12px; align-items:center"><div class="tx-icon ${cls}">${icon}</div><div class="tx-primary-copy"><div class="tx-title">${escapeText(t.description)}</div><span class="tx-kind ${cls}">${escapeText(transactionKind(t))}</span><div class="tx-desktop-extra">${desktopExtra('Category',t.category)}${desktopExtra('Paid to / from',t.payee)}${desktopExtra('Reference',t.receiptNo)}${desktopExtra('Method',t.method)}${desktopExtra('Notes',t.notes)}</div><div class="tx-meta">${escapeText(transactionKind(t))} • ${escapeText(t.date)} • ${escapeText(fundName)} ${t.projectId?' • Project: '+escapeText(projectName):''} ${t.payee?' • '+escapeText(t.payee):''}${t.receiptNo?' • Ref: '+escapeText(t.receiptNo):''}${t.method?' • '+escapeText(t.method):''}${t.notes?' • '+escapeText(t.notes):''}</div>${createdByBadge(t)}</div></div><div class="tx-desktop-details">${desktopDetail('Date',t.date)}${desktopDetail('Fund',fundName)}${desktopDetail('Project',projectName)}</div><span class="tx-amount ${cls}">${t.type==='OUT'?'−':'+'}${fmt(t.amount)}</span></div>`;
-    if(t.type==='OUT'&&!t.projectId&&!t.contributionPaymentId&&!t.deathAidPaymentId){let eligible=projects.filter(p=>allocationRemaining(t.fundId,p.id)>=cents(t.amount));if(eligible.length){let select=document.createElement('select');select.className='assign-select';select.setAttribute('aria-label','Assign existing expense to project');select.innerHTML='<option value="">Link to project…</option>';eligible.forEach(p=>{let o=document.createElement('option');o.value=p.id;o.textContent=p.name;select.appendChild(o)});let button=document.createElement('button');button.className='btn btn-light assign-btn';button.textContent='Link';button.onclick=()=>assignExistingTransaction(t.id,select.value);let controls=document.createElement('div');controls.className='assign-controls';controls.append(select,button);entry.appendChild(controls)}}let controls=entry.querySelector('.assign-controls')||document.createElement('div');controls.className='assign-controls';if(!controls.isConnected&&!entry.contains(controls))entry.appendChild(controls);addReceiptLink(controls,t.receiptImage||contributionPayments.find(m=>m.id===t.contributionPaymentId)?.receiptImage);let voidButton=document.createElement('button');voidButton.className='btn btn-light assign-btn';voidButton.textContent='Void';voidButton.setAttribute('aria-label','Void transaction: '+t.description);voidButton.onclick=()=>voidTransaction(t.id);controls.appendChild(voidButton);txList.appendChild(entry);
+    if(t.type==='OUT'&&!t.projectId&&!t.payableId&&!t.contributionPaymentId&&!t.deathAidPaymentId){let eligible=projects.filter(p=>allocationRemaining(t.fundId,p.id)>=cents(t.amount));if(eligible.length){let select=document.createElement('select');select.className='assign-select';select.setAttribute('aria-label','Assign existing expense to project');select.innerHTML='<option value="">Link to project…</option>';eligible.forEach(p=>{let o=document.createElement('option');o.value=p.id;o.textContent=p.name;select.appendChild(o)});let button=document.createElement('button');button.className='btn btn-light assign-btn';button.textContent='Link';button.onclick=()=>assignExistingTransaction(t.id,select.value);let controls=document.createElement('div');controls.className='assign-controls';controls.append(select,button);entry.appendChild(controls)}}let controls=entry.querySelector('.assign-controls')||document.createElement('div');controls.className='assign-controls';if(!controls.isConnected&&!entry.contains(controls))entry.appendChild(controls);addReceiptLink(controls,t.receiptImage||contributionPayments.find(m=>m.id===t.contributionPaymentId)?.receiptImage);let voidButton=document.createElement('button');voidButton.className='btn btn-light assign-btn';voidButton.textContent='Void';voidButton.setAttribute('aria-label','Void transaction: '+t.description);voidButton.onclick=()=>voidTransaction(t.id);controls.appendChild(voidButton);txList.appendChild(entry);
   });
   renderPersonalDeathTransactions(q,filter);
   renderAudit();

@@ -17,7 +17,7 @@ function setup(){
   const state={orgId:'team',role:'owner',memberConfirmed:true,online:true,baselineReady:true};
   const calls=[];
   const ctx=vm.createContext({window:{pondoTeamState:state,memberRefundPendingSummary:()=>({items:[],more:false})},navigator:{onLine:true},document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null},
-    payables:[],projects:[],funds:[],contributionActivities:[],contributors:[],fmt:n=>'₱'+n,
+    payables:[],projects:[],funds:[],contributionActivities:[],contributors:[],fmt:n=>'₱'+n,notificationActorPhotoURL:n=>{const member=state.members?.find(m=>m.uid===n.actorUid);return member?.photoURL||'';},
     approveRefundRequest:(...args)=>calls.push(['approveRefund',...args]),rejectRefundRequest:(...args)=>calls.push(['rejectRefund',...args]),approveDeletionRequest:(...args)=>calls.push(['approveDelete',...args]),rejectDeletionRequest:(...args)=>calls.push(['rejectDelete',...args]),appAlert:m=>calls.push(['alert',m]),switchTab:t=>calls.push(['tab',t]),openFundDetails:id=>calls.push(['fund',id]),openProjectDetails:id=>calls.push(['project',id]),openContributionDetails:id=>calls.push(['activity',id]),contributionSelectedPeriod:{},contributionSearch:'',contributionStatus:''});
   vm.runInContext(source,ctx);return {ctx,state,ids,calls};
 }
@@ -63,4 +63,12 @@ test('confirmed member requests appear in the approver queue and use their own d
  t.state.members=[{uid:'other',displayName:'Ana'}];c.window.memberRefundPendingSummary=()=>({items,more:false});c.window.decideMemberRefund=(id,decision)=>t.calls.push([id,decision]);
  c.renderDashboardActions();assert.equal(t.ids.dashboardActionsCount.textContent,'1');const row=t.ids.dashboardActionsList.children[0];assert.match(row.children[0].children[0].textContent,/Member refund request/);assert.match(row.children[0].children[1].textContent,/123.45/);row.children[1].children[1].click();assert.deepEqual(t.calls,[['member-r','approved']]);
  t.state.role='reviewer';c.renderDashboardActions();assert.equal(t.ids.dashboardActionsCard.hidden,true);t.state.role='owner';c.window.memberRefundPendingSummary=()=>null;c.renderDashboardActions();assert.equal(t.ids.dashboardActionsCount.textContent,'—');assert.equal(t.ids.dashboardActionsEmpty.hidden,true);assert.match(t.ids.dashboardActionsStatus.textContent,/confirmation/);
+});
+
+test('queue shows requester photo and falls back to initials, with distinct actions',()=>{
+ const t=setup();t.state.members=[{uid:'m',displayName:'Maria Santos',photoURL:'https://lh3.googleusercontent.com/p'}];t.ctx.window.memberRefundPendingSummary=()=>({items:[{id:'r',uid:'m',amountCents:100}],more:false});t.ctx.renderDashboardActions();
+ const row=t.ids.dashboardActionsList.children[0], avatar=row.children[0].children[2].children[0],buttons=row.children[1].children;
+ assert.equal(avatar.textContent,'MS');assert.equal(avatar.children[0].src,'https://lh3.googleusercontent.com/p');assert.equal(avatar.children[0].referrerPolicy,'no-referrer');
+ for(const [i,name] of ['review','approve','reject'].entries())assert.match(buttons[i].className,new RegExp('dashboard-action-'+name));
+ t.state.members[0].photoURL='';t.ctx.renderDashboardActions();assert.equal(t.ids.dashboardActionsList.children[0].children[0].children[2].children[0].children.length,0);
 });
