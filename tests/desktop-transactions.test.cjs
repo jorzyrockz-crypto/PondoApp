@@ -30,3 +30,7 @@ test('desktop details are escaped and existing receipt and void controls remain 
  let controls=entry.children[0],receipt=controls.children.find(x=>x.className==='receipt-link'),button=controls.children.find(x=>x.textContent==='Void');
  assert.ok(receipt);assert.equal(button.attributes['aria-label'],'Void transaction: Classroom supplies');button.onclick();assert.equal(voided(),'b');
 });
+
+test('transaction titles open a single record modal instead of expandable rows',()=>{
+ const src=html.slice(html.indexOf('function ledgerDetailContext()'),html.indexOf('function renderUnifiedRecent('));assert.match(src,/function openUnifiedLedgerDetail\(key\)/);assert.match(src,/unifiedLedgerRows\(\)\.find\(item=>item\.key===key\)/);assert.match(src,/dt\.textContent=name;dd\.textContent=String\(value\)/);assert.match(src,/addReceiptLink\(attachments,row\.receipt\)/);assert.match(src,/appendRefundItems\(attachments,row\.itemsJSON\)/);assert.match(src,/appendSharedMemberReceipt\(attachments/);assert.doesNotMatch(src,/createElement\('details'\)|addUnifiedDetails/);assert.match(html,/#txList>\.tx-entry:nth-child\(even\)/);assert.match(html,/body\.dark-mode #tab-transactions #txList>\.tx-entry:nth-child\(even\)/);
+});

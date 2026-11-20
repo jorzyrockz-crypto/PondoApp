@@ -8,3 +8,8 @@ test('missing and historical details are not fabricated; deleted rows are not re
 test('filtered totals never count requests, voids or non-cash credits as cash',()=>{const rows=build(example());assert.deepEqual(totals(rows),{IN:12500,OUT:1700,TRACKING:3500});assert.deepEqual(totals(rows.filter(r=>r.impact==='NONE')),{IN:0,OUT:0,TRACKING:0});assert.equal(totals([{impact:'IN',amount:Number.MAX_SAFE_INTEGER}]).IN,null);});
 
 test('supplier bill payments are not mislabeled or linked as refund requests',()=>{const rows=build({funds:[{id:'f',name:'F'}],bills:[{id:'bill',kind:'bill',description:'Supplier invoice'}],transactions:[{id:'t',payableId:'bill',fundId:'f',type:'OUT',date:'2026-01-01',amount:1}]});assert.match(rows[0].kind,/Payable payment/);assert.equal(rows[0].refundId,null);assert.equal(matches(rows[0],{type:'REFUND'}),false);});
+
+test('record-specific details retain historical metadata and refund context',()=>{
+ const data=example();data.audits[0].record={...data.audits[0].record,fundId:'f',projectId:'pr',category:'Materials',payee:'Supplier',receiptNo:'R-42',method:'Cash',notes:'Original note',receiptImage:'data:image/png;base64,YWJj'};data.refunds[0].bill={projectId:'pr',dueDate:'2026-04-30'};
+ const rows=build(data),audit=rows.find(x=>x.key==='audit:v'),refund=rows.find(x=>x.key==='refund:r');const fields=Object.fromEntries(audit.details);assert.equal(fields.Fund,'Fund');assert.equal(fields.Project,'Project');assert.equal(fields.Reference,'R-42');assert.equal(fields.Notes,'Original note');assert.equal(fields.Reason,'Duplicate');assert.equal(audit.receipt,'data:image/png;base64,YWJj');assert.equal(Object.fromEntries(refund.details).Project,'Project');assert.equal(Object.fromEntries(refund.details)['Due date'],'2026-04-30');
+});
