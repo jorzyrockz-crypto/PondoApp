@@ -6955,6 +6955,7 @@ body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #132
 #tab-report .report-overview .report-kpi strong { color: #1d355f !important; }
 #tab-report .report-preview-label { margin-top: 12px; color: #58709a !important; }
 #tab-report .report-paper { border: 1px solid #dbe4ef !important; box-shadow: 0 8px 22px rgb(22 42 78 / .05) !important; }
+ .team-draft-review{display:grid;gap:10px;margin:14px 0;padding:16px;border:1px solid var(--line);border-radius:16px;min-width:0}.team-draft-review[hidden]{display:none}.team-draft-review h3,.team-draft-review p{margin:0}.team-draft-review p{font-size:12px;line-height:1.5}.team-draft-review #teamDraftReviewRows{display:grid;gap:8px;max-height:400px;overflow:auto;min-width:0}.team-draft-review .offline-transfer-row select{width:100%;margin-top:8px}.team-draft-review .offline-transfer-row pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:200px;overflow:auto;font:11px/1.5 monospace}
 #settings-data .offline-transfer-card {display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
 #settings-data .offline-transfer-card h3{margin:0;font-size:16px}#settings-data .offline-transfer-card p{margin:0;font-size:12px;line-height:1.5;color:var(--ink2)}
 #settings-data #offlineTransferReview[hidden]{display:none}#settings-data #offlineTransferReview{display:grid;gap:10px;min-width:0}
@@ -8794,7 +8795,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 </div>
 <div id="pondoApp" inert>
 <div id="guestBanner" class="guest-banner no-print" role="status" hidden>Offline tracker · Saved only on this device, separate from signed-in workspaces. <button type="button" id="guestSignInBtn">Return to sign in</button></div>
-<div id="reviewerBanner" hidden role="status"><span id="reviewerBannerText">Reviewer access — you can view this organization's data but cannot make changes.</span> <button id="recoveryTeamButton" type="button" onclick="openTeamModal()" hidden>Team &amp; draft</button><button id="recoveryOfflineButton" type="button" onclick="continueRecoveryOffline()" hidden>Continue offline</button></div>
+<div id="reviewerBanner" hidden role="status"><span id="reviewerBannerText">Reviewer access — you can view this organization's data but cannot make changes.</span> <button id="recoveryReviewButton" type="button" onclick="openTeamModal();reviewTeamDraft()" hidden>Reconcile draft</button> <button id="recoveryTeamButton" type="button" onclick="openTeamModal()" hidden>Team &amp; draft</button><button id="recoveryOfflineButton" type="button" onclick="continueRecoveryOffline()" hidden>Continue offline</button></div>
 <div id="saveStatus" hidden role="status" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;background:#153c2c;color:#fff;padding:8px 14px;border-radius:10px;font:12px system-ui;box-shadow:0 3px 12px #0003">Saving changes…</div>
 <header class="topbar no-print">
   <div class="topbar-inner">
@@ -9170,8 +9171,15 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
               </div>
               <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
               <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
-              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>A team draft may be unconfirmed, or device storage could not be read. Download and verify it before discarding it. Continue offline keeps the readable draft on this device and opens a separate tracker. The draft is not automatically merged with the team copy; do not clear browser data.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button> <button class="btn btn-light" type="button" onclick="continueRecoveryOffline()">Continue in separate offline tracker</button></div>
+              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>A team draft may be unconfirmed, or device storage could not be read. Download and verify it before discarding it. Continue offline keeps the readable draft on this device and opens a separate tracker. The draft is not automatically merged with the team copy; do not clear browser data.</p><button class="btn btn-emerald" type="button" onclick="reviewTeamDraft()">Reconcile draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button> <button class="btn btn-light" type="button" onclick="continueRecoveryOffline()">Continue in separate offline tracker</button></div>
             </div>
+            <section id="teamDraftReview" hidden class="team-draft-review" aria-labelledby="teamDraftReviewTitle">
+              <h3 id="teamDraftReviewTitle">Review team draft</h3>
+              <p id="teamDraftReviewDestination"></p><p>Compare the saved draft with the current server copy. Choose whether to add or skip every draft-only record and which version to keep for each conflict. Draft-only records may have been deleted by someone else. Team-only records are kept; draft deletions, organization details and settings are not applied. Local images are not shared automatically.</p>
+              <p id="teamDraftReviewStatus" role="status" aria-live="polite"></p><div id="teamDraftReviewRows"></div>
+              <div class="offline-transfer-actions"><button class="btn btn-emerald" id="teamDraftReviewConfirm" type="button" onclick="confirmTeamDraftReview()" disabled>Confirm reconciliation</button><button class="btn btn-light" type="button" onclick="closeTeamDraftReview()">Cancel</button></div>
+            </section>
+            <button id="downloadReconciledDraft" class="btn btn-light" type="button" onclick="downloadLatestReconciledDraft()" hidden>Download last reconciled draft</button>
             <div class="team-card team-customize" id="teamAppearanceOwner" hidden>
               <p class="team-kicker">MAKE IT YOURS</p><div class="team-heading"><h3 class="team-card-title">Workspace settings</h3><details class="team-info"><summary aria-label="About workspace settings">i</summary><div>The display name, color and icon are shared with your team. The original registered name remains the search name; financial report names and existing links do not change.</div></details></div>
               <div class="team-name-controls"><label for="teamDisplayName">Workspace display name<input id="teamDisplayName" class="input" maxlength="120" autocomplete="off"></label><button type="button" class="btn btn-light" onclick="pondoTeam.saveDisplayName()">Save name</button></div><p id="teamNameStatus" role="status" class="team-copy"></p>
@@ -9409,7 +9417,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 119</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 120</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9450,7 +9458,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='119', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='120', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -13042,6 +13050,7 @@ function validateOfflineTransferSnapshot(snapshot){
   validateCoreBackup(nf,nt,np,ns,na,nb,newOrg);
   if(newAudit.some(x=>!x||typeof x!=='object'||Array.isArray(x)||typeof x.id!=='string'||!x.id.trim())||new Set(newAudit.map(x=>x.id)).size!==newAudit.length)throw Error('Invalid or duplicate history record.');
 }
+window.validateOfflineTransferSnapshot=validateOfflineTransferSnapshot;
 // A reviewed, one-way copy from this device's isolated offline tracker.
 let offlineTransfer=null,offlineTransferGeneration=0;
 const offlineTransferLabels={funds:'Fund',txs:'Transaction',sigs:'Signatory',projects:'Project',allocations:'Allocation',payables:'Refund / payable',auditLog:'History entry',contributionActivities:'Contribution / Death Aid',contributors:'Contributor',contributionPayments:'Contribution payment'};
@@ -13112,6 +13121,64 @@ async function applyOfflineTransfer(){
   renderAll(true);updateStorageInfo();m.busy=false;closeOfflineTransfer();appAlert(m.team?'Copied to this device. Wait for team sync to confirm the changes; if sync fails, use the team draft recovery and keep the offline tracker.':'Copied to your personal tracker on this device. The offline tracker is unchanged.');
  }catch(e){appAlert('Copy stopped: '+(e.message||'Review again.'));}
  finally{if(offlineTransfer===m){m.busy=false;document.querySelectorAll('#offlineTransferRows select').forEach(x=>x.disabled=false);updateOfflineTransferPlan();}}
+}
+// Review a saved TEAM draft against a freshly read server snapshot. The
+// separate device-only offline tracker uses a different review and store.
+let teamDraftReview=null,teamDraftReviewGeneration=0;
+function teamDraftArchivePrefix(uid,orgId){return 'ft_team_reconciled_draft:'+encodeURIComponent(uid)+':'+encodeURIComponent(orgId)+':';}
+function archiveReconciledDraft(uid,orgId,raw){const prefix=teamDraftArchivePrefix(uid,orgId),existing=Object.keys(localStorage).find(k=>k.startsWith(prefix)&&localStorage.getItem(k)===raw);if(existing)return existing;const key=prefix+Date.now()+'-'+makeId('draft');if(localStorage.getItem(key)!==null)throw Error('Could not create a unique draft backup.');localStorage.setItem(key,raw);if(localStorage.getItem(key)!==raw)throw Error('Could not verify the draft backup.');return key;}
+function updateReconciledDraftDownload(){const b=document.getElementById('downloadReconciledDraft'),s=window.pondoTeamState;if(!b)return;try{const prefix=teamDraftArchivePrefix(s?.uid||'',s?.orgId||'');b.hidden=!s?.uid||!s?.orgId||!Object.keys(localStorage).some(k=>k.startsWith(prefix));}catch(e){b.hidden=true;}}
+window.updateReconciledDraftDownload=updateReconciledDraftDownload;
+function downloadLatestReconciledDraft(){const s=window.pondoTeamState;try{if(!s?.uid||!s?.orgId||s.uid!==window.pondoCurrentUser?.uid)throw Error('No active team');const prefix=teamDraftArchivePrefix(s.uid,s.orgId),key=Object.keys(localStorage).filter(k=>k.startsWith(prefix)).sort().at(-1),raw=key&&localStorage.getItem(key);if(raw==null)throw Error('No saved draft');const url=URL.createObjectURL(new Blob([raw],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='Pondo_Reconciled_Team_Draft.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);appAlert('Draft download started. Verify and store the file safely.');}catch(e){appAlert('Could not read the saved reconciled draft. Do not clear browser data.');}}
+function closeTeamDraftReview(){if(teamDraftReview?.busy)return;teamDraftReviewGeneration++;teamDraftReview=null;document.getElementById('teamDraftReview').hidden=true;document.getElementById('teamDraftReviewRows').replaceChildren();}
+function teamDraftReviewStillLocal(m){const s=window.pondoTeamState;try{return !!(s===m.state&&s.recoveryLocked&&s.orgId===m.review.org&&s.uid===m.review.uid&&window.pondoCurrentUser?.uid===m.review.uid&&!window.pondoGuestMode&&!trackerFatal&&!trackerPending&&trackerDB===m.db&&trackerRevision===m.localRevision&&JSON.stringify(currentSnapshot())===m.localSnapshot&&localStorage.getItem(m.key)===m.review.raw)}catch(e){return false;}}
+function updateTeamDraftReview(){
+ const m=teamDraftReview;if(!m||m.busy)return;const status=document.getElementById('teamDraftReviewStatus'),button=document.getElementById('teamDraftReviewConfirm');
+ try{const p=window.pondoTeamDraftReconcile.plan(m.review.target,m.review.draft,m.choices);m.plan=p;
+  if(p.unresolved){status.textContent=p.unresolved+' record(s) still need a choice.';button.disabled=true;return;}
+  window.pondoTeamDraftReconcile.checked(m.review.target,m.review.draft,m.choices,validateOfflineTransferSnapshot);
+  status.textContent=p.changes.filter(x=>x.kind==='add').length+' addition(s), '+p.changes.filter(x=>x.kind==='replace').length+' replacement(s), '+p.skipped+' addition(s) skipped and '+p.unchanged+' identical record(s). Team-only records are kept.';button.disabled=false;
+ }catch(e){m.plan=null;status.textContent='Cannot reconcile these choices: '+(e.message||'Invalid records.');button.disabled=true;}
+}
+function renderTeamDraftReview(m){
+ const rows=document.getElementById('teamDraftReviewRows');rows.replaceChildren();const p=window.pondoTeamDraftReconcile.plan(m.review.target,m.review.draft,m.choices);
+ const add=(entry,conflict)=>{const box=document.createElement('div');box.className='offline-transfer-row';const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=(conflict?'Conflict: ':'Draft-only: ')+(offlineTransferLabels[entry.field]||entry.field)+' · '+entry.id;details.appendChild(summary);
+  if(conflict){const label=document.createElement('strong');label.textContent='Current team copy';details.appendChild(label);offlineTransferSafeDetails(entry.destination,details);}
+  const label=document.createElement('strong');label.textContent='Saved team draft';details.appendChild(label);offlineTransferSafeDetails(entry.offline,details);box.appendChild(details);
+  const select=document.createElement('select'),key=JSON.stringify([entry.field,entry.id]);select.setAttribute('aria-label','Choose action for '+(offlineTransferLabels[entry.field]||entry.field)+' '+entry.id);const options=conflict?[['','Choose a version'],['destination','Keep current team version'],['offline','Use saved draft version']]:[['','Choose whether to add'],['add','Add draft record'],['skip','Skip draft record']];for(const [v,t] of options){const option=document.createElement('option');option.value=v;option.textContent=t;select.appendChild(option)}select.value=m.choices[key]||'';select.onchange=()=>{m.choices[key]=select.value;updateTeamDraftReview();};box.appendChild(select);rows.appendChild(box);
+ };
+ p.additions.forEach(x=>add(x,false));p.conflicts.forEach(x=>add(x,true));updateTeamDraftReview();
+}
+async function reviewTeamDraft(){
+ if(teamDraftReview?.busy)return;const token=++teamDraftReviewGeneration;teamDraftReview=null;const panel=document.getElementById('teamDraftReview'),status=document.getElementById('teamDraftReviewStatus');panel.hidden=false;document.getElementById('teamDraftReviewRows').replaceChildren();document.getElementById('teamDraftReviewConfirm').disabled=true;status.textContent='Checking team access and loading the current server copy…';
+ const s=window.pondoTeamState,uid=window.pondoCurrentUser?.uid,orgId=s?.orgId;
+ try{
+  if(window.pondoGuestMode||!uid||!orgId||s.uid!==uid||!s.recoveryLocked||!trackerDB||trackerFatal||trackerPending||!window.pondoTeamDraftReconcile)throw Error('Reconnect and open the team with the saved draft. You need confirmed editor access and working local storage.');
+  const db=trackerDB,localRevision=trackerRevision,localSnapshot=JSON.stringify(currentSnapshot()),key='ft_team_draft:'+uid+':'+orgId;
+  const review=await window.pondoTeamDraftReconcile.service.review(orgId,uid);if(token!==teamDraftReviewGeneration)return;
+  const m={state:s,review,key,db,localRevision,localSnapshot,choices:Object.create(null),busy:false};if(!teamDraftReviewStillLocal(m))throw Error('The workspace or local data changed. Review again.');
+  const p=window.pondoTeamDraftReconcile.plan(review.target,review.draft,m.choices);if(p.additions.length+p.conflicts.length>500)throw Error('This review supports up to 500 changed records. Download the draft and seek help with a larger reconciliation.');
+  document.getElementById('teamDraftReviewDestination').textContent='Team: '+(s.orgName||orgId);teamDraftReview=m;renderTeamDraftReview(m);
+ }catch(e){if(token===teamDraftReviewGeneration)status.textContent='Could not review: '+(e.message||'The draft or server is unavailable.');}
+}
+async function confirmTeamDraftReview(){
+ const m=teamDraftReview;if(!m||m.busy||!m.plan||m.plan.unresolved)return;const choices=JSON.parse(JSON.stringify(m.choices));let teamConfirmed=false;m.busy=true;document.getElementById('teamDraftReviewConfirm').disabled=true;document.querySelectorAll('#teamDraftReviewRows select').forEach(el=>el.disabled=true);
+ try{
+  if(!await appConfirm('Apply these choices to the current team copy? Selected draft versions replace matching records; skipped draft additions and team-only records are not changed. A device-only copy of the original draft will be kept.'))return;
+  if(teamDraftReview!==m||!teamDraftReviewStillLocal(m))throw Error('The workspace, draft or local data changed. Review again.');
+  window.pondoTeamDraftReconcile.checked(m.review.target,m.review.draft,choices,validateOfflineTransferSnapshot);
+  // A verified, separate local archive is created before any cloud write.
+  archiveReconciledDraft(m.review.uid,m.review.org,m.review.raw);updateReconciledDraftDownload();
+  if(!teamDraftReviewStillLocal(m))throw Error('The workspace or draft changed. Review again.');
+  const result=await window.pondoTeamDraftReconcile.service.commit(m.review,choices);teamConfirmed=true;
+  if(!teamDraftReviewStillLocal(m)){appAlert('The team transaction was confirmed, but local data or access changed. The draft is still kept; review again before continuing.');return;}
+  const local=window.pondoTeamDraftReconcile.localSnapshot(result.snapshot,result.changes);applySnapshot(local);let task;window.__pondoApplyingRemote=true;try{task=saveAll();}finally{window.__pondoApplyingRemote=false;}
+  if(!await task){appAlert('The team transaction was confirmed, but the local save failed. The original draft is still kept; export a backup before reloading.');return;}
+  const s=window.pondoTeamState;if(s!==m.state||s.orgId!==m.review.org||s.uid!==m.review.uid||window.pondoCurrentUser?.uid!==m.review.uid||!s.recoveryLocked||trackerDB!==m.db||trackerPending||trackerRevision!==m.localRevision+1||JSON.stringify(currentSnapshot())!==JSON.stringify(local)||localStorage.getItem(m.key)!==m.review.raw){appAlert('The team transaction was confirmed, but local data or access changed. The draft is still kept; review again.');return;}
+  localStorage.removeItem(m.key);if(localStorage.getItem(m.key)!==null)throw Error('Could not clear the original recovery marker; the confirmed team copy and archived draft are kept.');
+  m.busy=false;closeTeamDraftReview();window.pondoTeamDraftReconcile.finish(m.review.uid,m.review.org);renderAll(true);updateReconciledDraftDownload();appAlert('Team reconciliation confirmed by the server. The original draft is kept on this device; download it from Team for an independent backup. Wait for the team view to reconnect before editing.');
+ }catch(e){appAlert(teamConfirmed?'The team transaction was confirmed, but local recovery did not finish: '+(e.message||'Check local storage.')+' The device backup was kept. Review the team copy and draft before retrying.':'Reconciliation was not completed: '+(e.message||'The team save may be unconfirmed.')+' The draft is kept. Review again before retrying.');}
+ finally{if(teamDraftReview===m){m.busy=false;document.querySelectorAll('#teamDraftReviewRows select').forEach(el=>el.disabled=false);updateTeamDraftReview();}}
 }
 function handleImport(input,verifyOnly=false){
  const file=input.files[0],mode=verifyOnly?'overwrite':importMode;if(!file)return;const reader=new FileReader();reader.onload=async e=>{try{
@@ -13473,7 +13540,7 @@ window.startTabGuard=(function(){
 // overwriting a team draft. Verify the same controlled offline shell and draft
 // immediately before leaving; failures do not clear or replace any records.
 const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
-const PONDO_RECOVERY_SHELL='pondo-v119';
+const PONDO_RECOVERY_SHELL='pondo-v120';
 let recoveryOfflineBusy=false;
 function recoveryOfflineExitStillSafe(exit){
  const s=window.pondoTeamState;
@@ -13787,6 +13854,7 @@ import { recoverWorkspaceMemberships } from "./workspace-membership-recovery.mjs
 // Loaded via the official CDN ES-module build (no bundler/build step required).
 import { createMemberRefundService, refundReceiptDigest } from "./member-refund-service.mjs";
 import { planEditorRefundReceipts, writeEditorRefundReceipts } from "./refund-receipt-sync.mjs";
+import { createTeamDraftReconciler, reviewTeamDraftPlan, checkedTeamDraftPlan } from "./team-draft-reconcile.mjs";
 window.pondoRefundReceiptDigest = refundReceiptDigest;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
@@ -14121,6 +14189,7 @@ function applyRoleUI() {
   if (banner) {
     banner.hidden = !(isReviewer || recoveryLocked);
     document.getElementById('reviewerBannerText').textContent = recoveryLocked ? 'Team editing paused: the local draft needs review, or device storage could not be read.' : "Reviewer access — you can view financial data and submit refund requests, but cannot edit, approve or pay them.";
+    document.getElementById('recoveryReviewButton').hidden=!recoveryLocked;
     document.getElementById('recoveryTeamButton').hidden=!recoveryLocked;
     document.getElementById('recoveryOfflineButton').hidden=!recoveryLocked;
   }
@@ -14381,6 +14450,13 @@ async function doPush() {
 }
 
 window.pondoCloudSync = { push: schedulePush };
+window.pondoTeamDraftReconcile={
+ service:createTeamDraftReconciler({db:firestoreDb,api:{doc,getDocFromServer,runTransaction,serverTimestamp},getState:()=>pondoTeamState,getUser:()=>window.pondoCurrentUser,getDraft:(uid,org)=>localStorage.getItem(teamDraftKey(uid,org)),validate:window.validateOfflineTransferSnapshot,stripSnapshot:stripHeavyFields,stableJSON:stableSnapshotJSON,sharedData:sharedSnapshotData,sharedRevision:sharedSnapshotRevision,clientId:CLIENT_ID}),
+ plan:reviewTeamDraftPlan,checked:checkedTeamDraftPlan,
+ localSnapshot:(snapshot,changes)=>{const local=reattachLocalImages(snapshot);for(const change of changes){const i=local[change.field].findIndex(x=>x.id===change.id);if(i>=0)local[change.field][i]=structuredClone(snapshot[change.field].find(x=>x.id===change.id));}return local;},
+ finish:(uid,org)=>{if(pondoTeamState.uid!==uid||pondoTeamState.orgId!==org||window.pondoCurrentUser?.uid!==uid)throw Error('Workspace changed.');subscribeToOrg(org);renderTeamPanel();},
+};
+
 window.memberRefundService=createMemberRefundService({db:firestoreDb,api:{doc,collection,query,where,orderBy,limit,onSnapshot,runTransaction,serverTimestamp,getDocFromServer,getDocsFromServer,startAfter},getState:()=>pondoTeamState,getSnapshot:()=>window.currentSnapshot(),stableJSON:stableSnapshotJSON,stripSnapshot:stripHeavyFields,clientId:CLIENT_ID});
 let memberRefundUnsub=null,memberRefundPendingUnsub=null,memberRefundWatchKey='',memberRefundWatchGeneration=0;
 function stopMemberRefundWatch(){memberRefundWatchGeneration++;if(memberRefundUnsub)memberRefundUnsub();if(memberRefundPendingUnsub)memberRefundPendingUnsub();memberRefundUnsub=memberRefundPendingUnsub=null;memberRefundWatchKey='';window.memberRefundSetPendingView?.({org:null,uid:null,status:'unconfirmed',items:[]});window.memberRefundSetView?.({org:null,uid:null,status:'unconfirmed',items:[]});}
@@ -15121,6 +15197,7 @@ function renderTeamPanel() {
   document.getElementById('teamMyRole').textContent = (facultyPresidentKnown&&facultyPresidentUid===pondoTeamState.uid?'Faculty President · ':'') + (roleLabels[pondoTeamState.role] || pondoTeamState.role || '—');
   const presidentStatus=document.getElementById('teamFacultyPresidentStatus');
   if(presidentStatus){const member=pondoTeamState.members.find(m=>m.uid===facultyPresidentUid);presidentStatus.textContent=facultyPresidentKnown?(facultyPresidentUid?'Faculty President: '+(member?.displayName||member?.email||'not a current team member'):'Faculty President: not assigned'):'Faculty President status unavailable until the test workspace and rules are ready.';}
+  window.updateReconciledDraftDownload?.();
   const draftRecovery = document.getElementById('teamDraftRecovery');
   if (draftRecovery) draftRecovery.hidden = !pondoTeamState.recoveryLocked;
   setSyncBadge(navigator.onLine ? 'live' : 'offline');
