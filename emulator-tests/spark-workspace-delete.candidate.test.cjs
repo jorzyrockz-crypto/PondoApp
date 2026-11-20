@@ -110,7 +110,7 @@ test('known recovery entries can be cleared only by the initiating owner, while 
 test('recovery checkpoint workflow resumes through backups and sessions without finalizing',async()=>{
  const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs'),api=require('firebase/firestore'),owner=db('owner');
  const paths=[root+'/sparkVerifiedBackups/a',root+'/sparkVerifiedBackups/b',root+'/sparkRestoreProofSessions/s',root+'/sparkVerifiedBackups/a/collections/sparkDiscoveryPeople/entries/p',root+'/sparkVerifiedBackups/b/collections/sparkDiscoveryPayments/entries/q',root+'/sparkRestoreProof/current/sessions/s/collections/sparkDiscoveryLines/entries/r'];
- await env.withSecurityRulesDisabled(async ctx=>{for(const p of paths)await setDoc(doc(ctx.firestore(),p),{sample:true});});
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(const p of paths)await setDoc(doc(admin,p),{sample:true});});
  const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');let checkpoint={type:'backup',cursor:null},r;
  for(let i=0;i<12;i++){r=await cleanup.clearRecoveryNext(orgId,'owner',checkpoint);if(r.state==='awaiting-verification')break;checkpoint=r.checkpoint;}
  assert.deepEqual(r,{state:'awaiting-verification',finalized:false});
