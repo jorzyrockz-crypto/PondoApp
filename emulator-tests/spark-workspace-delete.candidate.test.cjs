@@ -5,8 +5,9 @@ const {initializeTestEnvironment,assertFails,assertSucceeds}=require('@firebase/
 const {doc,collection,getDoc,getDocs,setDoc,updateDoc,deleteDoc,query,where,writeBatch,serverTimestamp,arrayRemove}=require('firebase/firestore');
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Local emulator required.');
 let env;const projectId='demo-pondo-security',orgId='org~faculty fund test cleanup',root='organizations/'+orgId,variant=process.env.PONDO_SPARK_DELETE_RULES||'ordinary';
-if(!['ordinary','facultyTest'].includes(variant))throw Error('Invalid candidate variant.');
-test.before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.join(__dirname,variant==='ordinary'?'../experiments/spark-workspace-delete/firestore.rules':'../experiments/spark-workspace-delete/firestore.faculty-test.rules'),'utf8')}})});
+const variants={ordinary:'firestore.rules',facultyTest:'firestore.faculty-test.rules',facultyRelease:'firestore.faculty-release-candidate.rules',facultyRecovery:'firestore.faculty-recovery-candidate.rules'};
+if(!Object.hasOwn(variants,variant))throw Error('Invalid candidate variant.');
+test.before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.join(__dirname,'../experiments/spark-workspace-delete',variants[variant]),'utf8')}})});
 test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore(),rows={
  [root]:{name:'Cleanup',createdBy:'owner',discoverable:true},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/members/otherowner']:{uid:'otherowner',role:'owner'},[root+'/members/editor']:{uid:'editor',role:'project-manager'},[root+'/members/viewer']:{uid:'viewer',role:'reviewer'},
  ['users/stranger']:{orgMemberships:['another-team'],displayName:'Stranger'},['users/viewer']:{orgMemberships:[orgId,'another-team'],displayName:'Private Viewer',activeOrganizationId:orgId},['users/viewer/organizationRequests/'+orgId]:{orgId},[root+'/sparkDiscoveryRevision/current']:{revision:1,updatedBy:'owner'},[root+'/sparkDiscoveryPeople/p']:{name:'Sample'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'owner',payables:[]},[root+'/refundReceipts/request']:{uid:'viewer',digest:'a'.repeat(64),image:'data:image/jpeg;base64,YWJj'},[root+'/hidden/private']:{secret:true},'invites/INVITE':{orgId:'org~faculty fund test cleanup',role:'reviewer',revoked:false,expiresAt:null,maxUses:null,usedCount:0,createdBy:'owner'}
@@ -70,4 +71,23 @@ test('cleanup of the initiating owner’s join request preserves their unrelated
  const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');
  for(let i=0;i<40;i++){const r=await cleanup.clearNext(orgId,'owner');if(r.state==='awaiting-verification')break;}
  const profile=(await assertSucceeds(getDoc(doc(owner,'users/owner')))).data();assert.deepEqual(profile.orgMemberships,['another-team']);assert.equal(profile.activeOrganizationId,'another-team');assert.equal(profile.organizationId,null);assert.equal(profile.displayName,'Owner');
+});
+
+
+test('activated Faculty and recovery control paths are frozen without pretending to erase backups', {skip: !['facultyRelease','facultyRecovery'].includes(variant)}, async()=>{
+ const actualOrg='org~activated faculty',actualRoot='organizations/'+actualOrg,owner=db('owner'),viewer=db('viewer');
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(const [p,v] of Object.entries({
+  [actualRoot]:{name:'Activated Faculty',createdBy:'owner',discoverable:true},[actualRoot+'/members/owner']:{uid:'owner',role:'owner'},[actualRoot+'/members/viewer']:{uid:'viewer',role:'reviewer'},
+  [actualRoot+'/facultyFundRelease/current']:{enabled:true,schema:1},[actualRoot+'/sparkDiscoveryPeople/p']:{name:'Sample'},[actualRoot+'/sparkDiscoveryRevision/current']:{revision:1,updatedBy:'owner'},
+  [actualRoot+'/sparkVerifiedBackups/backup']:{manifest:[],revision:1},[actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p']:{name:'Archived'},[actualRoot+'/sparkRestoreProof/current']:{remaining:0},[actualRoot+'/sparkRestoreProofSessions/session']:{state:'active'}
+ }))await setDoc(doc(admin,p),v);});
+ await assertSucceeds(getDoc(doc(viewer,actualRoot+'/facultyFundRelease/current')));
+ if(variant==='facultyRelease')await assertSucceeds(getDoc(doc(viewer,actualRoot+'/sparkDiscoveryPeople/p')));
+ if(variant==='facultyRecovery'){await assertSucceeds(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup')));await assertSucceeds(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p')));}
+ await assertSucceeds(updateDoc(doc(owner,actualRoot),freeze()));
+ await assertFails(getDoc(doc(viewer,actualRoot+'/facultyFundRelease/current')));await assertFails(getDoc(doc(viewer,actualRoot+'/sparkDiscoveryPeople/p')));
+ await assertFails(getDoc(doc(owner,actualRoot+'/facultyFundRelease/current')));await assertFails(deleteDoc(doc(owner,actualRoot+'/facultyFundRelease/current')));
+ await assertFails(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup')));await assertFails(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p')));
+ await assertFails(getDoc(doc(owner,actualRoot+'/sparkRestoreProof/current')));await assertFails(updateDoc(doc(owner,actualRoot+'/sparkRestoreProofSessions/session'),{state:'completed'}));
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,actualRoot+'/facultyFundRelease/current'))).exists(),true);assert.equal((await getDoc(doc(admin,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p'))).exists(),true)});
 });
