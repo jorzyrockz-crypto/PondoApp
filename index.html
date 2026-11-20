@@ -4807,8 +4807,10 @@ body.role-reviewer .card-color-setting select{pointer-events:none;opacity:.6;}
 .pending-deletion-actions{display:flex;gap:8px;margin-top:6px;}
 .pending-deletion-actions .btn{font-size:12px;padding:6px 10px;min-height:0;}
 body.role-reviewer .pending-deletion-actions{display:none!important;}
-#reviewerBanner{position:fixed;left:0;right:0;bottom:0;z-index:500;background:#fffbeb;color:#92400e;text-align:center;padding:8px 12px;font-size:12px;font-weight:600;}
+#reviewerBanner{position:fixed;left:0;right:0;bottom:calc(82px + env(safe-area-inset-bottom));z-index:500;max-height:32vh;overflow:auto;background:#fffbeb;color:#92400e;text-align:center;padding:8px 12px;font-size:12px;font-weight:600;}
 #reviewerBanner[hidden]{display:none!important;}
+#reviewerBanner button{margin:3px 3px 0;padding:8px 12px;min-height:36px;border:1px solid #b87b36;border-radius:9px;background:white;color:#713f12;font-weight:700;cursor:pointer}
+#reviewerBanner button[hidden]{display:none!important;}
 </style>
 
 
@@ -8792,7 +8794,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 </div>
 <div id="pondoApp" inert>
 <div id="guestBanner" class="guest-banner no-print" role="status" hidden>Offline tracker · Saved only on this device, separate from signed-in workspaces. <button type="button" id="guestSignInBtn">Return to sign in</button></div>
-<div id="reviewerBanner" hidden role="status">Reviewer access — you can view this organization's data but cannot make changes.</div>
+<div id="reviewerBanner" hidden role="status"><span id="reviewerBannerText">Reviewer access — you can view this organization's data but cannot make changes.</span> <button id="recoveryTeamButton" type="button" onclick="openTeamModal()" hidden>Team &amp; draft</button><button id="recoveryOfflineButton" type="button" onclick="continueRecoveryOffline()" hidden>Continue offline</button></div>
 <div id="saveStatus" hidden role="status" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;background:#153c2c;color:#fff;padding:8px 14px;border-radius:10px;font:12px system-ui;box-shadow:0 3px 12px #0003">Saving changes…</div>
 <header class="topbar no-print">
   <div class="topbar-inner">
@@ -9168,7 +9170,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
               </div>
               <p style="font-size:12px;color:var(--ink2);margin:6px 0 0">Your role: <strong id="teamMyRole">—</strong></p>
               <p id="teamSyncStatusText" style="font-size:12px;color:var(--ink2);margin:4px 0 0">Not connected</p>
-              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>A team draft may be unconfirmed, or device storage could not be read. Download and verify the draft before discarding it or reloading. It has not been automatically merged with the team copy; do not clear browser data.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button></div>
+              <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>A team draft may be unconfirmed, or device storage could not be read. Download and verify the draft before discarding it or reloading. It has not been automatically merged with the team copy; do not clear browser data.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button> <button class="btn btn-light" type="button" onclick="continueRecoveryOffline()">Continue in separate offline tracker</button></div>
             </div>
             <div class="team-card team-customize" id="teamAppearanceOwner" hidden>
               <p class="team-kicker">MAKE IT YOURS</p><div class="team-heading"><h3 class="team-card-title">Workspace settings</h3><details class="team-info"><summary aria-label="About workspace settings">i</summary><div>The display name, color and icon are shared with your team. The original registered name remains the search name; financial report names and existing links do not change.</div></details></div>
@@ -9407,7 +9409,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 118</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 119</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9448,7 +9450,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='118', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='119', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9629,7 +9631,8 @@ window.pondoWorkspace={
 function downloadCurrentSnapshot(){let x={...currentSnapshot(),appSettings,exportedAt:new Date().toISOString()},url=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='Pondo_Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function showFatalSave(error){if(trackerFatal)return;trackerFatal=true;storageWarningOpen=true;let veil=document.createElement('section');veil.setAttribute('role','alertdialog');veil.setAttribute('aria-modal','true');veil.style.cssText='position:fixed;inset:0;z-index:10000;background:#f5f7f5;color:#17231d;display:flex;align-items:center;justify-content:center;padding:20px';let box=document.createElement('div');box.style.cssText='width:min(100%,520px);background:white;padding:24px;border-radius:18px;font:15px/1.5 system-ui';let title=document.createElement('h1');title.textContent='Changes could not be saved';let msg=document.createElement('p');msg.textContent=(error?.name==='StorageConflict'?'Another copy changed the stored records. ':'Storage is unavailable or full. ')+'Current changes may only exist in memory. Export a backup before reloading; do not continue editing.';let b=document.createElement('button');b.textContent='Export current data, including unsaved changes';b.style.cssText='padding:12px;background:#087f5b;color:white;border:0;border-radius:10px';b.onclick=downloadCurrentSnapshot;box.append(title,msg,b);veil.append(box);[...document.body.children].filter(el=>el.tagName!=='SCRIPT').forEach(el=>el.inert=true);document.body.append(veil);veil.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();b.focus()}});b.focus()}
 function saveAll(){if(!trackerDB)return saveLegacy();if(trackerFatal)return Promise.resolve(false);let snap;try{snap=structuredClone(currentSnapshot())}catch(e){showFatalSave(e);return Promise.resolve(false)}if(window.pondoCloudSync)window.pondoCloudSync.push(snap);try{const wsKey=window.pondoGuestMode?'offline-guest':(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(snap))}catch(e){/* non-fatal */}trackerPending++;storageWarningOpen=true;let badge=document.getElementById('saveStatus');let showBadge=badge&&!window.__pondoSuppressFeedback;if(showBadge){badge.hidden=false;badge.textContent='Saving changes…'}let task=trackerQueue.then(async()=>{if(trackerFatal)return false;try{trackerRevision=await trackerDB.save(snap,trackerRevision);return true}catch(e){showFatalSave(e);return false}});trackerQueue=task.then(ok=>{trackerPending--;if(!trackerPending&&!trackerFatal){storageWarningOpen=false;if(showBadge){badge.textContent='Saved';setTimeout(()=>{if(!trackerPending)badge.hidden=true},1500)}}return ok});return trackerQueue}
-window.addEventListener('beforeunload',e=>{const team=window.pondoTeamState;if(trackerPending||(team&&team.orgId&&(team.pushTimer||team.pushesInFlight||team.syncError))){e.preventDefault();e.returnValue=''}});
+let pondoSafeOfflineExit=null;
+window.addEventListener('beforeunload',e=>{const team=window.pondoTeamState;if(pondoSafeOfflineExit&&recoveryOfflineExitStillSafe(pondoSafeOfflineExit))return;if(trackerPending||(team&&team.orgId&&(team.pushTimer||team.pushesInFlight||team.syncError))){e.preventDefault();e.returnValue=''}});
 function saveLegacy(){let old={},keys=[],written=[];try{let data={ft_org:org,ft_funds:funds,ft_txs:txs,ft_sigs:sigs,ft_projects:projects,ft_allocations:allocations,ft_payables:payables,ft_audit_log:auditLog,ft_contrib_activities:contributionActivities,ft_contributors:contributors,ft_contrib_payments:contributionPayments};keys=Object.keys(data);for(const k of keys)old[k]=localStorage.getItem(k);for(const k of keys){localStorage.setItem(k,JSON.stringify(data[k]));written.push(k)}storageWarningOpen=false;try{const wsKey=(window.pondoTeamState&&window.pondoTeamState.orgId)?window.pondoTeamState.orgId:'personal';localStorage.setItem('ft_ws_cache:'+wsKey,JSON.stringify(currentSnapshot()))}catch(cacheErr){/* non-fatal */}return true;}catch(e){try{for(const k of written)localStorage.removeItem(k);for(const k of written)if(old[k]!==null)localStorage.setItem(k,old[k])}catch(rollbackError){}if(!storageWarningOpen){storageWarningOpen=true;appAlert('Browser storage is full or unavailable. Changes may not be saved. Export a JSON backup now before reloading.');}return false;}}
 // appSettings (defined further down, in the APP SETTINGS section) is read
 // here by reference at call time, not at parse time -- fmt() itself is
@@ -10347,7 +10350,7 @@ function validCashDonation(d,type){
 }
 function teamDataUnavailableMessage(){
  const s=window.pondoTeamState;
- if(s?.recoveryLocked)return 'Team editing is paused because a local draft may not be confirmed, or device storage could not be read. Open Team and download the saved draft before discarding or reloading. Do not clear browser data.';
+ if(s?.recoveryLocked)return 'Team editing is paused because a draft may be unconfirmed, or device storage could not be read. Open Team for a backup, or choose Continue offline to use the separate tracker if the draft is readable. Do not discard it or clear browser data.';
  if(s?.orgId&&(!s.memberConfirmed||!s.baselineReady))return 'This team’s access and data have not been confirmed. Reconnect and wait for the workspace to load. The separate Continue offline tracker does not contain this team’s records.';
  return 'This action is unavailable with your current workspace access.';
 }
@@ -13466,6 +13469,42 @@ window.startTabGuard=(function(){
  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
  };
 })();
+// Recovery continues in the independent guest tracker, never by unlocking or
+// overwriting a team draft. Verify the same controlled offline shell and draft
+// immediately before leaving; failures do not clear or replace any records.
+const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
+const PONDO_RECOVERY_SHELL='pondo-v119';
+let recoveryOfflineBusy=false;
+function recoveryOfflineExitStillSafe(exit){
+ const s=window.pondoTeamState;
+ try{return !!(exit&&Date.now()-exit.time<10000&&s===exit.state&&s.recoveryLocked&&s.orgId===exit.org&&s.uid===exit.uid&&window.pondoCurrentUser?.uid===exit.uid&&!window.pondoGuestMode&&!trackerFatal&&!trackerPending&&!s.pushTimer&&!s.pushesInFlight&&!s.pendingSnapshot&&trackerRevision===exit.revision&&JSON.stringify(currentSnapshot())===exit.snapshot&&localStorage.getItem(exit.key)===exit.raw)}catch(e){return false;}
+}
+async function recoveryOfflineShellReady(){
+ const worker=navigator.serviceWorker?.controller;
+ if(!worker||worker.scriptURL!==new URL('./sw.js',location.href).href||typeof MessageChannel==='undefined'||!window.caches)return false;
+ const version=await new Promise(resolve=>{const channel=new MessageChannel();let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);channel.port1.close();resolve(value)};const timer=setTimeout(()=>finish(null),1500);channel.port1.onmessage=e=>finish(e.data?.version);try{worker.postMessage({type:'PONDO_GET_CACHE_VERSION'},[channel.port2])}catch(e){finish(null)}});
+ if(version!==PONDO_RECOVERY_SHELL)return false;
+ const cache=await caches.open(PONDO_RECOVERY_SHELL);
+ for(const path of ['./index.html','./refund-items.js','./offline-sync.js','./faculty-fund-ui.js','./faculty-fund-notifications.js'])if(!await cache.match(new URL(path,location.href).href))return false;
+ return true;
+}
+async function continueRecoveryOffline(){
+ if(recoveryOfflineBusy)return;const s=window.pondoTeamState,uid=window.pondoCurrentUser?.uid;
+ if(!s?.recoveryLocked||!s.orgId||!s.uid||s.uid!==uid||window.pondoGuestMode){appAlert('The workspace or recovery status changed. Review Team again.');return;}
+ recoveryOfflineBusy=true;try{
+  const key='ft_team_draft:'+uid+':'+s.orgId;let raw;try{raw=localStorage.getItem(key)}catch(e){raw=null}
+  if(raw===null){appAlert('The saved team draft cannot be read on this device. Do not reload or clear browser data. Open Team and try downloading the draft, or export a backup before seeking help.');return;}
+  if(trackerFatal||!trackerDB||s.pushTimer||s.pushesInFlight||s.pendingSnapshot){appAlert('A save is incomplete or still in progress. Keep this page open and export a backup before leaving.');return;}
+  await trackerQueue;if(trackerFatal||trackerPending){appAlert('Local saving is incomplete. Export a backup before leaving.');return;}
+  const exit={state:s,org:s.orgId,uid,key,raw,revision:trackerRevision,snapshot:JSON.stringify(currentSnapshot()),time:Date.now()};
+  if(!recoveryOfflineExitStillSafe(exit)){appAlert('The workspace, draft or save status changed. Review Team again.');return;}
+  if(!await appConfirm('Continue in the separate offline tracker? Your saved team draft stays on this device; it is not automatically merged or backed up. The offline tracker does not contain your team records; its records need manual review later. Finish any unsaved forms first.'))return;
+  if(!await recoveryOfflineShellReady()){appAlert('The offline app is not ready to reopen safely on this device. Keep this page open, download your draft in Team, and reconnect or update Pondo before trying again.');return;}
+  exit.time=Date.now();if(!recoveryOfflineExitStillSafe(exit)){appAlert('The workspace, draft or save status changed. Review Team again.');return;}
+  const intent=String(Date.now());try{sessionStorage.setItem(PONDO_RECOVERY_OFFLINE_INTENT,intent);if(sessionStorage.getItem(PONDO_RECOVERY_OFFLINE_INTENT)!==intent)throw Error('Session storage unavailable')}catch(e){appAlert('Could not prepare offline mode. Keep this page open and download your draft from Team.');return;}
+  pondoSafeOfflineExit=exit;setTimeout(()=>{if(pondoSafeOfflineExit===exit){pondoSafeOfflineExit=null;try{if(sessionStorage.getItem(PONDO_RECOVERY_OFFLINE_INTENT)===intent)sessionStorage.removeItem(PONDO_RECOVERY_OFFLINE_INTENT)}catch(e){}}},10000);location.reload();
+ }catch(e){appAlert('Could not open offline mode safely. Keep this page open and download your draft from Team.');}finally{recoveryOfflineBusy=false;}
+}
 // Kept outside the Firebase module so this works even when the SDK could not
 // load from the network. This is deliberately a separate local workspace.
 window.pondoGuestMode=false;
@@ -13480,6 +13519,8 @@ document.getElementById('authOfflineBtn').addEventListener('click',()=>{
  document.getElementById('teamSignedOutNotice').hidden=false;
  window.startTabGuard();
 });
+// One-time, same-tab intent: no team records or credentials are put in it.
+try{const raw=sessionStorage.getItem(PONDO_RECOVERY_OFFLINE_INTENT);if(raw!==null){sessionStorage.removeItem(PONDO_RECOVERY_OFFLINE_INTENT);const age=Date.now()-Number(raw);if(/^\d+$/.test(raw)&&age>=0&&age<120000)document.getElementById('authOfflineBtn').click();}}catch(e){/* stay on sign-in if session storage is unavailable */}
 document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
  // Wait for local writes before returning to the normal sign-in flow.
  if(trackerPending)await trackerQueue;
@@ -14079,7 +14120,9 @@ function applyRoleUI() {
   const banner = document.getElementById('reviewerBanner');
   if (banner) {
     banner.hidden = !(isReviewer || recoveryLocked);
-    banner.textContent = recoveryLocked ? 'Team editing paused: a local draft may be unconfirmed, or storage could not be read. Open Team to download it before discarding or reloading.' : "Reviewer access — you can view financial data and submit refund requests, but cannot edit, approve or pay them.";
+    document.getElementById('reviewerBannerText').textContent = recoveryLocked ? 'Team editing paused: the local draft needs review, or device storage could not be read.' : "Reviewer access — you can view financial data and submit refund requests, but cannot edit, approve or pay them.";
+    document.getElementById('recoveryTeamButton').hidden=!recoveryLocked;
+    document.getElementById('recoveryOfflineButton').hidden=!recoveryLocked;
   }
 }
 

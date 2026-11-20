@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v118';
+const CACHE_VERSION = 'pondo-v119';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 const APP_SHELL = [
@@ -108,6 +108,7 @@ self.addEventListener('install', (event) => {
 // Android browsers may reject new Notification in a page. The requesting
 // open client is the only destination for a click; this is not push delivery.
 self.addEventListener('message', event => {
+  if(event.data && event.data.type === 'PONDO_GET_CACHE_VERSION'){event.ports?.[0]?.postMessage({version:CACHE_VERSION});return;}
   if(event.data && event.data.type === 'PONDO_ACTIVATE_UPDATE'){event.waitUntil(self.skipWaiting());return;}
   const d=event.data,source=event.source;
   if(!d||d.type!=='PONDO_SHOW_NOTIFICATION'||!source||typeof source.id!=='string'||typeof source.url!=='string')return;
@@ -136,7 +137,7 @@ self.addEventListener('activate', (event) => {
       const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
       if (obsolete.length) {
         // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
-        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v118', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v119', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
       }
       await Promise.all(obsolete.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())
