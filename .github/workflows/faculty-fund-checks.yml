@@ -49,6 +49,7 @@ jobs:
             node tests/notification-mobile.browser.cjs
             node tests/tablet-dashboard-permission.browser.cjs
             node tests/fund-transaction.browser.cjs
+            node tests/fund-settings.browser.cjs
           ) > "$RUNNER_TEMP/browser-test.log" 2>&1
           result=$?
           cat "$RUNNER_TEMP/browser-test.log"

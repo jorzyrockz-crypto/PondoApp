@@ -8720,10 +8720,11 @@ body.dark-mode #tab-dashboard .dashboard-action-buttons .dashboard-action-reject
 }
 /* Fund details: the action belongs to the heading, immediately before close. */
 .detail-head-controls{display:flex;align-items:flex-start;gap:8px;flex:none}
-#detailFundTransaction[hidden]{display:none!important}
+#detailFundTransaction[hidden],#detailFundSettings[hidden]{display:none!important}
 #detailFundTransaction{min-height:44px;height:auto;padding:9px 12px;white-space:normal;line-height:1.25;font-size:12px;text-align:center}
-body.role-reviewer #detailFundTransaction{display:none!important}
-@media(max-width:600px){.fund-detail .detail-head{flex-wrap:wrap}.fund-detail .detail-head>div:first-child{flex:1 1 100%}.fund-detail .detail-head-controls{width:100%;justify-content:flex-end}}
+body.role-reviewer #detailFundTransaction,body.role-reviewer #detailFundSettings{display:none!important}
+#detailFundSettings{min-height:44px;height:auto;padding:9px 12px;white-space:normal;line-height:1.25;font-size:12px}
+@media(max-width:600px){.fund-detail .detail-head{flex-wrap:wrap}.fund-detail .detail-head>div:first-child{flex:1 1 100%}.fund-detail .detail-head-controls{width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}.fund-detail .detail-head-controls .btn{min-width:0}}
 #fundTxChoice[hidden],#fabTxTypeField[hidden],#fabTxFundField[hidden],#fabTxProjectField[hidden],#fabSheet .fab-tabs-row[hidden]{display:none!important}
 #fundTxChoice{margin:0 0 18px;padding:12px;border:1px solid #dbe4ef;border-radius:12px;background:#f6f8ff}
 #fundTxChoice p{margin:0;color:#344a6c;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
@@ -8736,6 +8737,20 @@ body.dark-mode #fundTxChoice{background:#102038;border-color:#385579}
 body.dark-mode #fundTxChoice p,body.dark-mode #fundTxChoice #fundTxChoiceNote{color:#c6d6eb}
 body.dark-mode .fund-tx-switch button{background:#1c304c;border-color:#385579;color:#eef4ff}
 body.dark-mode .fund-tx-switch button[aria-pressed="true"]{background:#574ad1;border-color:#8e82ff;color:white}
+/* Fund settings: a focused modal over the fund detail, with immediate color. */
+.fund-settings-overlay[hidden]{display:none!important}
+.fund-settings-overlay{position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(7,15,30,.65)}
+.fund-settings-dialog{width:min(100%,540px);max-height:min(92dvh,850px);overflow:auto;overscroll-behavior:contain;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px #0004}
+.fund-settings-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px;border-bottom:1px solid var(--line)}
+.fund-settings-head h2{margin:0;font-size:20px;line-height:1.2}.fund-settings-head p{margin:5px 0 0;color:var(--ink2);font-size:12px;overflow-wrap:anywhere}
+.fund-settings-body{display:grid;gap:14px;padding:20px}.fund-settings-body label{display:grid;gap:6px;color:var(--ink);font-size:12px;font-weight:700}
+.fund-settings-body .input{width:100%;min-height:44px}.fund-settings-body textarea.input{min-height:82px;resize:vertical;padding:10px 12px}
+.fund-settings-body small,.fund-settings-status{color:var(--ink2);font-size:11px;line-height:1.45}.fund-settings-status{margin:0;min-height:1em}
+.fund-settings-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;padding:0 20px 20px}.fund-settings-actions .btn{min-height:44px;height:auto}.fund-settings-actions .fund-settings-delete{margin-right:auto;color:#a52e34;border-color:#edc2c6;background:#fff4f4}
+body.dark-mode .fund-settings-actions .fund-settings-delete{background:#4c2630;border-color:#86505b;color:#ffdadd}
+.fund-settings-dialog :focus-visible{outline:2px solid #8173f4;outline-offset:2px}
+@media(max-width:420px){.fund-settings-overlay{padding:10px}.fund-settings-head,.fund-settings-body{padding:16px}.fund-settings-actions{padding:0 16px 16px}.fund-settings-actions .fund-settings-delete{width:100%;margin:0}.fund-settings-actions .btn:not(.fund-settings-delete){flex:1}}
+@media print{.fund-settings-overlay{display:none!important}}
 /* Requester view: a read-only projection of the existing refund ledger. */
 #tab-refunds .my-refund-intro,#tab-refunds .my-refund-status{color:var(--ink2);font-size:12px;line-height:1.5;margin:10px 0}
 #tab-refunds .my-refund-list{display:grid;gap:10px;margin:12px 0}
@@ -9394,7 +9409,17 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
  </div>
 </div>
 <div id="contributionFormOverlay" class="contribution-form-overlay no-print" hidden><div class="contribution-form-dialog" id="contributionFormPanel" role="dialog" aria-modal="true" aria-labelledby="contributionFormTitle"><div id="contribFormDrag" class="contrib-drag-handle" aria-hidden="true"><span></span></div><div class="detail-head"><div><div class="detail-eyebrow">Contributions</div><h2 id="contributionFormTitle"></h2></div><button type="button" class="detail-close" onclick="closeContributionForm()" aria-label="Close">×</button></div><form id="contributionForm" class="contribution-form-body"><div id="contributionFormFields"></div><button type="submit" class="btn btn-emerald contribution-save">Save</button><button type="button" class="btn btn-light contribution-cancel" onclick="closeContributionForm()">Cancel</button></form></div></div><div id="contributionPrint" aria-hidden="true"></div><datalist id="teammateNameSuggestions"></datalist><datalist id="txDescriptionSuggestions"></datalist><datalist id="projectNameSuggestions"></datalist><datalist id="projectDescriptionSuggestions"></datalist><datalist id="payableDescriptionSuggestions"></datalist><datalist id="refundPayerSuggestions"></datalist><datalist id="payableSupplierSuggestions"></datalist><datalist id="payableCategorySuggestions"></datalist><datalist id="activityTitleSuggestions"></datalist>
-<div id="detailOverlay" class="detail-overlay no-print" hidden><div id="detailDialog" class="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detailTitle" tabindex="-1"><div id="detailDragHandle" class="detail-drag-handle" aria-hidden="true"><span></span></div><div class="detail-head"><div><div id="detailEyebrow" class="detail-eyebrow"></div><h2 id="detailTitle"></h2><p id="detailSub" class="detail-sub"></p><p id="detailFutureWarning" class="detail-future-warning" hidden></p></div><div class="detail-head-controls"><button type="button" id="detailFundTransaction" class="btn btn-emerald fund-header-transaction" hidden>+ Record transaction</button><button type="button" id="detailClose" class="detail-close" aria-label="Close details">×</button></div></div><div id="detailFilterDock" class="detail-filter-dock" hidden></div><div id="detailBody" class="detail-body"></div><div class="detail-footer">Current recorded values. Initial fund receipts are shown separately from transactions.</div></div></div>
+<div id="fundSettingsOverlay" class="fund-settings-overlay no-print" hidden><section class="fund-settings-dialog" role="dialog" aria-modal="true" aria-labelledby="fundSettingsTitle">
+ <header class="fund-settings-head"><div><h2 id="fundSettingsTitle">Fund settings</h2><p id="fundSettingsSubtitle"></p></div><button type="button" id="fundSettingsClose" class="detail-close" aria-label="Close fund settings">×</button></header>
+ <div class="fund-settings-body"><label for="fundSettingsName">Fund name<input id="fundSettingsName" class="input" type="text" maxlength="160" autocomplete="off"></label>
+ <label for="fundSettingsDescription">Description<textarea id="fundSettingsDescription" class="input" rows="3" maxlength="1000"></textarea></label>
+ <label for="fundSettingsDate">Opening receipt date<input id="fundSettingsDate" class="input" type="date"><small>The opening date cannot be after the fund’s recorded transactions. Leaving it blank keeps the existing date.</small></label>
+ <label for="fundSettingsAmount">Opening amount (PHP)<input id="fundSettingsAmount" class="input" type="number" min="0" step="0.01" inputmode="decimal"><small id="fundSettingsAmountHelp">This is the original opening receipt, not a new income transaction.</small></label>
+ <label for="fundSettingsColor">Fund card color<select id="fundSettingsColor" class="input"></select><small>Color changes apply immediately and are saved separately from the other fields.</small></label>
+ <p id="fundSettingsStatus" class="fund-settings-status" role="status" aria-live="polite"></p></div>
+ <footer class="fund-settings-actions"><button type="button" id="fundSettingsDelete" class="btn btn-light fund-settings-delete">Delete fund</button><button type="button" id="fundSettingsCancel" class="btn btn-light">Cancel</button><button type="button" id="fundSettingsSave" class="btn btn-emerald">Save changes</button></footer>
+ </section></div>
+<div id="detailOverlay" class="detail-overlay no-print" hidden><div id="detailDialog" class="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detailTitle" tabindex="-1"><div id="detailDragHandle" class="detail-drag-handle" aria-hidden="true"><span></span></div><div class="detail-head"><div><div id="detailEyebrow" class="detail-eyebrow"></div><h2 id="detailTitle"></h2><p id="detailSub" class="detail-sub"></p><p id="detailFutureWarning" class="detail-future-warning" hidden></p></div><div class="detail-head-controls"><button type="button" id="detailFundTransaction" class="btn btn-emerald fund-header-transaction" hidden>+ Record transaction</button><button type="button" id="detailFundSettings" class="btn btn-light fund-header-settings" hidden>Fund settings</button><button type="button" id="detailClose" class="detail-close" aria-label="Close details">×</button></div></div><div id="detailFilterDock" class="detail-filter-dock" hidden></div><div id="detailBody" class="detail-body"></div><div class="detail-footer">Current recorded values. Initial fund receipts are shown separately from transactions.</div></div></div>
 <div id="payableModal" class="payable-modal no-print" style="display:none" role="dialog" aria-modal="true" aria-labelledby="payableModalTitle">
  <div class="sheet-backdrop" onclick="closePayableModal()"></div><div class="sheet payable-sheet" id="payableSheetPanel">
   <div class="drag" id="payableSheetDrag" aria-hidden="true"></div>
@@ -9450,8 +9475,8 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 125</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 126</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Fund details now offer a Fund settings dialog for descriptions, opening details, immediate card colors and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -9496,7 +9521,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='125', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='126', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -10678,19 +10703,23 @@ function pendingDeletionBadge(record,type,id){
 // Shared entry point for every blocked delete/remove: personal workspaces
 // cascade-delete immediately after a strong warning; organization workspaces
 // file a pending request instead, requiring Owner/Disbursing approval.
-async function requestOrForceDelete(type,id,kindLabel,reasonPresets){
+async function requestOrForceDelete(type,id,kindLabel,reasonPresets,guard){
   const record=PENDING_DELETION_TYPES[type]().find(x=>x.id===id);
   if(!record) return;
   if(!checkFundraisingDeletion(type,id))return;
   if(record.pendingDeletion){ appAlert('A deletion request for this '+kindLabel+' is already pending approval.'); return; }
   if(!window.pondoTeamState?.orgId){
     if(!await appConfirm('This '+kindLabel+' has linked financial records. Deleting it will permanently remove it along with everything linked to it (transactions, payments, allocations, etc., as applicable). This cannot be undone. Delete anyway?')) return;
+    if(guard&&!guard()){appAlert('The fund, workspace or linked records changed. Review before deleting.');return;}
+    if(!checkFundraisingDeletion(type,id))return;
     PENDING_DELETION_FORCE[type](id);
     return;
   }
   const reason=await appReasonPrompt('Why do you want to delete this '+kindLabel+'? An Owner or Disbursing Officer will need to approve this before it is permanently removed.',reasonPresets);
   if(reason===null) return;
   if(!reason.trim()){ appAlert('A reason is required.'); return; }
+  if(guard&&!guard()){appAlert('The fund, workspace or linked records changed. Review before deleting.');return;}
+  if(!checkFundraisingDeletion(type,id))return;
   record.pendingDeletion={requestedBy:currentActorStamp()||{name:currentUserDisplayName()||'A teammate'},requestedAt:new Date().toISOString(),reason:reason.trim()};
   auditLog.push({id:makeId('audit'),action:'request deletion approval',timestamp:new Date().toISOString(),reason:reason.trim(),record:{type,id,label:PENDING_DELETION_LABEL(type,record)},...(currentActorStamp()?{by:currentActorStamp()}:{})});
   renderAll();
@@ -10792,7 +10821,7 @@ async function assignRefundProject(id,projectId){
   renderAll();
   soundEvent('add');
 }
-async function deleteFund(id){ let f=funds.find(x=>x.id===id); if(!f)return; if(f.pendingDeletion){appAlert('A deletion request for this fund is already pending approval.');return;} if(txs.some(t=>t.fundId===id)||allocations.some(a=>a.fundId===id)){await requestOrForceDelete('fund',id,'fund source',['No longer needed','Recorded by mistake or duplicate entry','Cleaning up completed records']);return;} if(await appConfirm('Delete this fund source?')){funds=funds.filter(f=>f.id!==id);renderAll();soundEvent('delete');} }
+async function deleteFund(id,guard){ let f=funds.find(x=>x.id===id); if(!f||!checkFundraisingDeletion('fund',id))return; if(f.pendingDeletion){appAlert('A deletion request for this fund is already pending approval.');return;} if(txs.some(t=>t.fundId===id)||allocations.some(a=>a.fundId===id)){await requestOrForceDelete('fund',id,'fund source',['No longer needed','Recorded by mistake or duplicate entry','Cleaning up completed records'],guard);return;} if(await appConfirm(window.pondoTeamState?.orgId?'Delete this fund from the shared workspace for everyone? This cannot be undone.':'Delete this fund source? This cannot be undone.')){if(guard&&!guard()){appAlert('The fund, workspace or linked records changed. Review before deleting.');return;}if(!checkFundraisingDeletion('fund',id))return;funds=funds.filter(f=>f.id!==id);renderAll();soundEvent('delete');} }
 // Cascading force-delete used once a blocked fund deletion is allowed through
 // (personal workspace) or approved (organization workspace): removes the
 // fund plus every transaction/allocation that referenced it, and detaches
@@ -11737,7 +11766,7 @@ function downloadReportCSV(){const d=reportData(),rows=[...(currentUserDisplayNa
 
 let detailPreviousFocus=null,activeProjectDetail=null,activeContributionDetail=null,activeFundDetail=null,detailReturnProject=null,detailReturnFund=null,detailReturnScroll=0;
 const detailOverlay=document.getElementById('detailOverlay'),detailDialog=document.getElementById('detailDialog');
-function openDetails(kind,title,sub,body,refresh=false){const fundAction=document.getElementById('detailFundTransaction');fundAction.hidden=kind!=='Fund source';fundAction.onclick=null;detailOverlay.classList.toggle('contribution-detail-overlay',kind==='Contribution activity');detailDialog.classList.toggle('contribution-detail',kind==='Contribution activity');detailDialog.classList.toggle('project-detail',kind.startsWith('Project · '));detailDialog.classList.toggle('fund-detail',kind==='Fund source');let previousScroll=document.getElementById('detailBody').scrollTop,oldFocus=document.activeElement,wasInside=detailDialog.contains(oldFocus);if(!refresh)detailPreviousFocus=document.activeElement;document.getElementById('detailEyebrow').textContent=kind;document.getElementById('detailEyebrow').style.borderLeft='';document.getElementById('detailEyebrow').style.paddingLeft='';document.getElementById('detailTitle').textContent=title;document.getElementById('detailSub').textContent=sub;let futureNote=document.getElementById('detailFutureWarning');futureNote.hidden=!futureRecordCount();futureNote.textContent='Warning: existing future-dated records are included in current totals.';const filterDock=document.getElementById('detailFilterDock');filterDock.replaceChildren();filterDock.hidden=true;document.getElementById('detailBody').innerHTML=body;detailOverlay.hidden=false;document.body.classList.add('modal-open');document.getElementById('detailBody').scrollTop=refresh?previousScroll:0;if(!refresh)document.getElementById('detailClose').focus();else if(wasInside&&!oldFocus.isConnected)detailDialog.focus()}
+function openDetails(kind,title,sub,body,refresh=false){const fundAction=document.getElementById('detailFundTransaction'),fundSettingsAction=document.getElementById('detailFundSettings');fundAction.hidden=fundSettingsAction.hidden=kind!=='Fund source';fundAction.onclick=fundSettingsAction.onclick=null;detailOverlay.classList.toggle('contribution-detail-overlay',kind==='Contribution activity');detailDialog.classList.toggle('contribution-detail',kind==='Contribution activity');detailDialog.classList.toggle('project-detail',kind.startsWith('Project · '));detailDialog.classList.toggle('fund-detail',kind==='Fund source');let previousScroll=document.getElementById('detailBody').scrollTop,oldFocus=document.activeElement,wasInside=detailDialog.contains(oldFocus);if(!refresh)detailPreviousFocus=document.activeElement;document.getElementById('detailEyebrow').textContent=kind;document.getElementById('detailEyebrow').style.borderLeft='';document.getElementById('detailEyebrow').style.paddingLeft='';document.getElementById('detailTitle').textContent=title;document.getElementById('detailSub').textContent=sub;let futureNote=document.getElementById('detailFutureWarning');futureNote.hidden=!futureRecordCount();futureNote.textContent='Warning: existing future-dated records are included in current totals.';const filterDock=document.getElementById('detailFilterDock');filterDock.replaceChildren();filterDock.hidden=true;document.getElementById('detailBody').innerHTML=body;detailOverlay.hidden=false;document.body.classList.add('modal-open');document.getElementById('detailBody').scrollTop=refresh?previousScroll:0;if(!refresh)document.getElementById('detailClose').focus();else if(wasInside&&!oldFocus.isConnected)detailDialog.focus()}
 // Keep one set of filter controls: dock them under the heading on mobile,
 // and return the same live controls to the list when the viewport widens.
 function positionContributionFilters(){
@@ -11801,31 +11830,62 @@ function openFundDetails(id,refresh=false){activeProjectDetail=null;activeContri
 <div class="project-detail-workspace"><details class="project-detail-section" data-section="receipt" ${state('receipt',true)}><summary><span>Initial fund receipt</span></summary><p class="detail-section-intro">The opening amount recorded when this fund was created.</p><div class="fund-opening-receipt"><span class="fund-receipt-icon" aria-hidden="true">${LICON('wallet','#5b4ae8',19)}</span><div><strong>Opening receipt</strong><small>Received ${escapeText(f.dateReceived||'Date not recorded')}</small></div><strong class="fund-receipt-amount">+${fmt(f.initialAmount)}</strong></div></details>
 <details class="project-detail-section" data-section="allocations" ${state('allocations',true)}><summary><span>Project allocations <span class="project-section-count">${as.length}</span></span></summary><p class="detail-section-intro">${fmt(fundReserved(id)/100)} reserved in unspent allocations. Payments reduce the fund’s cash balance.</p>${alloc}</details>
 <details class="project-detail-section" data-section="transactions" ${state('transactions',true)}><summary><span>Transaction activity <span class="project-section-count">${items.length}</span></span></summary>${detailTransactions(items,false)}</details>
-<details class="project-detail-section" data-section="settings" ${state('settings')}><summary><span>Fund settings</span></summary><div class="card-color-setting" style="margin-top:14px"><label for="fundCardColor">Card color</label><select id="fundCardColor" class="input">${colorOptions(cardColorKey(f))}</select><span>Color identifies this fund; it does not indicate its financial status.</span></div><button type="button" class="btn btn-light fund-edit-btn" style="margin-top:14px">Edit fund</button></details></div>`;
+</div>`;
   openDetails('Fund source',f.name,f.purpose||'No purpose provided',body,refresh);
   setDetailCardColor(f);
-  const root=document.getElementById('detailBody');
-  const colorSel=root.querySelector('#fundCardColor');
-  colorSel.style.borderLeftColor=cardColor(f).hex;
-  colorSel.onchange=e=>{if(!CARD_COLORS[e.target.value])return;f.color=e.target.value;saveAll();applyAppearance();renderAll();openFundDetails(id,true)};
-  root.querySelector('.fund-edit-btn').onclick=async()=>{
-    let name=await appPrompt('Fund name',f.name);if(name===null)return;name=name.trim();if(!name){appAlert('A fund name is required.');return}
-    let purpose=await appPrompt('Purpose (optional)',f.purpose||'');if(purpose===null)return;
-    let dateRaw=await appPrompt('Date received (YYYY-MM-DD)',f.dateReceived||'');if(dateRaw===null)return;dateRaw=dateRaw.trim();
-    if(dateRaw&&!validateActualDate(dateRaw,'fund receipt'))return;
-    let amtRaw=isDonationFund(f)?'0':await appPrompt('Initial amount received (PHP)',String(f.initialAmount));if(amtRaw===null)return;
-    let amount=parseMoney(amtRaw);if(amount===null){appAlert('Enter a non-negative amount with up to two decimal places.');return}
-    if(isDonationFund(f)&&amount!==0){appAlert('A donation fund has a zero opening balance; its donation is recorded as income.');return;}
-    if(!funds.includes(f)){appAlert('This fund is no longer available.');return;}
-    const effectiveDate=dateRaw||f.dateReceived,relatedNow=txs.filter(t=>t.fundId===id);
-    if(effectiveDate&&relatedNow.some(t=>t.date<effectiveDate)){appAlert('The fund date cannot be later than its transactions.');return;}
-    let datedCash=amount,byDate={};relatedNow.forEach(t=>{byDate[t.date]=(byDate[t.date]||0)+(t.type==='IN'?1:-1)*cents(t.amount)});
-    for(const day of Object.keys(byDate).sort()){datedCash+=byDate[day];if(!Number.isSafeInteger(datedCash)||datedCash<0){appAlert('This opening amount would make recorded cash negative or exceed the supported balance.');return;}}
-    if(datedCash<fundReserved(id)){appAlert('The fund balance cannot be lower than reserved project allocations.');return;}
-    f.name=name;f.purpose=purpose.trim();if(dateRaw)f.dateReceived=dateRaw;f.initialAmount=amount/100;saveAll();renderAll();openFundDetails(id,true)
-  };
+  document.getElementById('detailFundSettings').onclick=()=>openFundSettings(id);
   document.getElementById('detailFundTransaction').onclick=()=>{if(!donationCanEdit()||trackerFatal){appAlert(teamDataUnavailableMessage());return;}openFundChild(id,()=>openFundTransaction(id))};
   document.querySelector('.detail-footer').textContent='Current recorded values. Initial fund receipts are shown separately from transactions.'}
+
+// Fund settings edits one confirmed fund; color is persisted separately as an
+// immediate change, while the other fields are committed together on Save.
+let fundSettingsContext=null;
+function fundSettingsValues(){return ['fundSettingsName','fundSettingsDescription','fundSettingsDate','fundSettingsAmount'].map(id=>document.getElementById(id).value);}
+function fundSettingsCurrent(ctx){const s=window.pondoTeamState;return !!(ctx&&fundSettingsContext===ctx&&!document.getElementById('fundSettingsOverlay').hidden&&!detailOverlay.hidden&&activeFundDetail===ctx.id&&donationContext()===ctx.workspace&&donationCanEdit()&&(!s?.orgId||(s.uid&&s.uid===window.pondoCurrentUser?.uid&&!s.listenerError))&&!trackerFatal&&funds.includes(ctx.fund)&&!ctx.fund.pendingDeletion&&JSON.stringify(ctx.fund)===ctx.record);}
+function fundSettingsControlsBusy(busy){for(const id of ['fundSettingsName','fundSettingsDescription','fundSettingsDate','fundSettingsColor','fundSettingsDelete','fundSettingsCancel','fundSettingsClose','fundSettingsSave'])document.getElementById(id).disabled=busy;document.getElementById('fundSettingsAmount').disabled=busy||!!fundSettingsContext&&isDonationFund(fundSettingsContext.fund);}
+function openFundSettings(id){
+ const f=funds.find(x=>x.id===id),s=window.pondoTeamState;if(!f||activeFundDetail!==id||!donationCanEdit()||trackerFatal||(s?.orgId&&(!s.uid||s.uid!==window.pondoCurrentUser?.uid||s.listenerError))){appAlert(teamDataUnavailableMessage());return;}if(f.pendingDeletion){appAlert('A deletion request is pending; resolve it before editing this fund.');return;}
+ const ctx=fundSettingsContext={id,fund:f,workspace:donationContext(),record:JSON.stringify(f),busy:false};document.getElementById('fundSettingsSubtitle').textContent=f.name;
+ document.getElementById('fundSettingsName').value=f.name||'';document.getElementById('fundSettingsDescription').value=f.purpose||'';document.getElementById('fundSettingsDate').value=f.dateReceived||'';document.getElementById('fundSettingsAmount').value=String(f.initialAmount??0);document.getElementById('fundSettingsAmountHelp').textContent=isDonationFund(f)?'A cash donation fund has a zero opening amount; its donation is recorded separately.':'This is the original opening receipt, not a new income transaction.';
+ const color=document.getElementById('fundSettingsColor');color.innerHTML=colorOptions(cardColorKey(f));document.getElementById('fundSettingsStatus').textContent='';ctx.initial=fundSettingsValues();fundSettingsControlsBusy(false);detailDialog.inert=true;document.getElementById('fundSettingsOverlay').hidden=false;document.getElementById('fundSettingsName').focus();
+}
+async function closeFundSettings(force=false){
+ const ctx=fundSettingsContext;if(!ctx||ctx.busy||ctx.closing)return;
+ if(!force&&JSON.stringify(fundSettingsValues())!==JSON.stringify(ctx.initial)){ctx.closing=true;let discard;try{discard=await appConfirm('Discard unsaved fund name, description, date or amount changes? Color changes were saved separately.');}finally{ctx.closing=false;}if(!discard||fundSettingsContext!==ctx)return;}
+ document.getElementById('fundSettingsOverlay').hidden=true;detailDialog.inert=false;fundSettingsContext=null;if(!detailOverlay.hidden&&document.getElementById('detailFundSettings').getClientRects().length)document.getElementById('detailFundSettings').focus();
+}
+async function changeFundSettingsColor(){
+ const ctx=fundSettingsContext,color=document.getElementById('fundSettingsColor'),status=document.getElementById('fundSettingsStatus');if(!fundSettingsCurrent(ctx)||ctx.busy||!CARD_COLORS[color.value]){status.textContent='The fund, workspace or access changed. Close and review the fund again.';return;}
+ ctx.busy=true;fundSettingsControlsBusy(true);ctx.fund.color=color.value;ctx.record=JSON.stringify(ctx.fund);setDetailCardColor(ctx.fund);const task=saveAll();renderAll(true);status.textContent='Saving color…';
+ try{const saved=await task;if(fundSettingsContext!==ctx)return;if(!saved){status.textContent='Color could not be saved. Export a backup and follow the storage warning.';return;}if(!fundSettingsCurrent(ctx)){status.textContent='The fund, workspace or access changed while saving. Check the fund and sync status.';return;}status.textContent=window.pondoTeamState?.orgId?'Color saved on this device. Wait for team sync to confirm it.':'Color saved on this device.';}finally{if(fundSettingsContext===ctx){ctx.busy=false;fundSettingsControlsBusy(false);}}
+}
+async function saveFundSettings(){
+ const ctx=fundSettingsContext,status=document.getElementById('fundSettingsStatus');if(!fundSettingsCurrent(ctx)||ctx.busy){status.textContent='The fund, workspace or access changed. Close and review the fund again.';return;}
+ const [nameRaw,purposeRaw,date,rawAmount]=fundSettingsValues(),name=nameRaw.trim(),amount=parseMoney(rawAmount),f=ctx.fund,id=ctx.id;
+ if(!name){status.textContent='Enter a fund name.';document.getElementById('fundSettingsName').focus();return;}
+ if(date&&!validateActualDate(date,'fund receipt'))return;
+ if(amount===null){status.textContent='Enter a non-negative opening amount with up to two decimals.';return;}
+ if(isDonationFund(f)&&amount!==0){status.textContent='A donation fund must have a zero opening amount.';return;}
+ const effectiveDate=date||f.dateReceived,related=txs.filter(t=>t.fundId===id);if(effectiveDate&&related.some(t=>t.date<effectiveDate)){status.textContent='The opening date cannot be later than a recorded transaction.';return;}
+ let datedCash=amount,byDate={};related.forEach(t=>{byDate[t.date]=(byDate[t.date]||0)+(t.type==='IN'?1:-1)*cents(t.amount)});for(const day of Object.keys(byDate).sort()){datedCash+=byDate[day];if(!Number.isSafeInteger(datedCash)||datedCash<0){status.textContent='This opening amount would make recorded cash negative or exceed the supported balance.';return;}}if(datedCash<fundReserved(id)){status.textContent='The fund balance cannot be lower than reserved project allocations.';return;}
+ ctx.busy=true;fundSettingsControlsBusy(true);f.name=name;f.purpose=purposeRaw.trim();if(date)f.dateReceived=date;f.initialAmount=amount/100;ctx.record=JSON.stringify(f);const task=saveAll();renderAll(true);status.textContent='Saving fund settings…';
+ try{const saved=await task;if(fundSettingsContext!==ctx)return;if(!saved){status.textContent='The changes could not be saved. Export a backup and follow the storage warning.';return;}if(!fundSettingsCurrent(ctx)){status.textContent='The fund, workspace or access changed while saving. Check the fund and sync status.';return;}ctx.initial=fundSettingsValues();openFundDetails(id,true);ctx.busy=false;fundSettingsControlsBusy(false);await closeFundSettings(true);if(window.pondoTeamState?.orgId)appAlert('Fund settings saved on this device. Wait for team sync to confirm the changes.');}finally{if(fundSettingsContext===ctx){ctx.busy=false;fundSettingsControlsBusy(false);}}
+}
+async function deleteFundFromSettings(){
+ const ctx=fundSettingsContext,status=document.getElementById('fundSettingsStatus');if(!fundSettingsCurrent(ctx)||ctx.busy){status.textContent='The fund, workspace or access changed. Close and review the fund again.';return;}
+ if(JSON.stringify(fundSettingsValues())!==JSON.stringify(ctx.initial)){status.textContent='Save or discard the unsaved settings before deleting this fund.';return;}
+ ctx.busy=true;fundSettingsControlsBusy(true);try{
+  await trackerQueue;if(!fundSettingsCurrent(ctx)||trackerPending||trackerFatal){status.textContent='The fund or save status changed. Review it again.';return;}
+  const snapshot=JSON.stringify(currentSnapshot()),guard=()=>fundSettingsCurrent(ctx)&&!trackerFatal&&!trackerPending&&JSON.stringify(currentSnapshot())===snapshot;
+  await deleteFund(ctx.id,guard);
+  if(fundSettingsContext!==ctx)return;
+  if(!funds.includes(ctx.fund)){if(funds.some(f=>f.id===ctx.id)||donationContext()!==ctx.workspace){status.textContent='The fund or workspace changed. Close and review it again.';return;}ctx.busy=false;await closeFundSettings(true);if(activeFundDetail===ctx.id)closeDetails();return;}
+  if(ctx.fund.pendingDeletion){ctx.busy=false;openFundDetails(ctx.id,true);await closeFundSettings(true);return;}
+ }finally{if(fundSettingsContext===ctx){ctx.busy=false;fundSettingsControlsBusy(false);if(!document.getElementById('fundSettingsOverlay').contains(document.activeElement)&&document.getElementById('appDialogOverlay').hidden)document.getElementById('fundSettingsDelete').focus();}}
+}
+document.getElementById('fundSettingsClose').onclick=()=>closeFundSettings();document.getElementById('fundSettingsCancel').onclick=()=>closeFundSettings();document.getElementById('fundSettingsSave').onclick=saveFundSettings;document.getElementById('fundSettingsDelete').onclick=deleteFundFromSettings;document.getElementById('fundSettingsColor').onchange=changeFundSettingsColor;
+document.getElementById('fundSettingsOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeFundSettings()});
+document.addEventListener('keydown',e=>{const overlay=document.getElementById('fundSettingsOverlay');if(overlay.hidden||!document.getElementById('appDialogOverlay').hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeFundSettings();return;}if(e.key==='Tab'){e.stopImmediatePropagation();const nodes=[...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled])')].filter(n=>n.getClientRects().length);if(!nodes.length){e.preventDefault();return;}if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0].focus()}}},true);
 
 function openProjectDetails(id,refresh=false){
  const p=projects.find(x=>x.id===id);if(!p)return;const t=projectTotals(id),as=allocations.filter(a=>a.projectId===id),items=txs.filter(x=>x.projectId===id),bills=payables.filter(x=>x.projectId===id),raisers=contributionActivities.filter(x=>x.fundraising&&x.projectId===id),related=p.series?projects.filter(x=>x.id!==id&&String(x.series||'').trim().toLowerCase()===p.series.trim().toLowerCase()):[];
@@ -13680,7 +13740,7 @@ window.startTabGuard=(function(){
 // overwriting a team draft. Verify the same controlled offline shell and draft
 // immediately before leaving; failures do not clear or replace any records.
 const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
-const PONDO_RECOVERY_SHELL='pondo-v125';
+const PONDO_RECOVERY_SHELL='pondo-v126';
 let recoveryOfflineBusy=false;
 function recoveryOfflineExitStillSafe(exit){
  const s=window.pondoTeamState;
