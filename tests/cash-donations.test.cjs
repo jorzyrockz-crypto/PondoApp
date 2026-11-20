@@ -57,7 +57,7 @@ test('pooled receipts reject earlier dates, pending deletion, unsafe totals and 
 
 test('receipt register is a paginated table and printing uses the full filtered set',()=>{
  const section=html.slice(html.indexOf('<section id="donationRegister"'),html.indexOf('<div id="fundView-faculty"'));
- assert.match(section,/<table class="donation-receipts-table">/);assert.doesNotMatch(section,/<details|openCashDonation\(\)/);assert.match(section,/onclick="printCashDonations\(\)"/);
+ assert.match(section,/<table class="donation-receipts-table">/);assert.doesNotMatch(section,/id="donationSummary"|donation-receipts-note/);assert.doesNotMatch(section,/<details|openCashDonation\(\)/);assert.match(section,/onclick="printCashDonations\(\)"/);
  for(const id of ['donationSearch','donationFrom','donationTo','donationFundFilter','donationProjectFilter'])assert.match(section,new RegExp('id="'+id+'"[^>]*donationFiltersChanged\\(\\)'));
  assert.match(source,/const DONATION_PAGE_SIZE=20/);assert.match(source,/rows\.slice\(start,start\+DONATION_PAGE_SIZE\)/);assert.match(source,/function donationFiltersChanged\(\)\{donationPage=1/);assert.match(source,/function printCashDonations\(\)[\s\S]*?const rows=cashDonationRows\(\)/);assert.match(source,/edit\.hidden=!donationCanEdit\(\)/);assert.match(html,/\.donation-table-scroll\{[^}]*overflow-x:auto/);
 });
