@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
-const source=html.slice(html.indexOf('function uniqueDescriptionValues('),html.indexOf('\nfunction handleFab()'));
+const source=html.slice(html.indexOf('function uniqueDescriptionValues('),html.indexOf('\n// Cash donations are metadata'));
 class Element{
  constructor(){this.children=[];this.value='';this.textContent='';this.hidden=false;this.isConnected=true;this.focused=false;}
  appendChild(child){this.children.push(child)} replaceChildren(...children){this.children=children;this.value=''} focus(){this.focused=true}

@@ -33,6 +33,7 @@ jobs:
             node tests/faculty-fund-ui.browser.cjs
             node tests/faculty-spark-recovery.browser.cjs
             node tests/death-aid-modal.browser.cjs
+            node tests/cash-donation-workflow.browser.cjs
             node tests/refund-suggestions.browser.cjs
             node tests/refund-item-layout.browser.cjs
             node tests/refund-funding.browser.cjs
