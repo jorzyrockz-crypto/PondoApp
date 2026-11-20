@@ -53,7 +53,7 @@ test('Death Aid register is below the contribution activity workspace',()=>{
 test('Death Aid record form is an accessible modal with guarded access and dismissal',()=>{
  assert.match(html,/id="deathAidFormOverlay" class="contribution-form-overlay no-print" hidden/);
  assert.match(html,/role="dialog" aria-modal="true" aria-labelledby="deathAidModalTitle"/);
- assert.match(html,/function showDeathAidCreate\(\)\{\s*if\(!deathAidCanWrite\(\)\)return/);
+ assert.match(html,/function showDeathAidCreate\(\)\{\s*if\(!deathAidCanWrite\(\)\)\{appAlert\([\s\S]*?return;\}/);
  assert.match(html,/function closeDeathAidCreate\(restoreFocus=true\)/);
  assert.match(html,/overlay=document.getElementById\('deathAidFormOverlay'\)[\s\S]*?e.key==='Escape'[\s\S]*?e.key==='Tab'/);
 });
@@ -62,7 +62,7 @@ test('dashboard has a distinct Death Aid card showing actual handover totals, no
  assert.match(html,/renderDashboardDeathAidCard\(rail\)/);
  assert.match(html,/payments.filter\(p=>p.remittance\)/);
  assert.match(html,/Awaiting handover to BaPSTEA; not an unpaid member balance/);
- assert.match(html,/function openDashboardDeathAidRegister\(\)\{if\(!deathAidCanRead\(\)\)return;switchTab\('contributions'\)/);
+ assert.match(html,/function openDashboardDeathAidRegister\(\)\{if\(!deathAidCanRead\(\)\)\{appAlert\([\s\S]*?return;\}switchTab\('contributions'\)/);
 });
 test('funded payments create exactly one guarded expense and personal payments do not',async()=>{
  const t=setup(),c=t.ctx,a=activity('a','Person',50),opened=[];t.nodes.deathAidFormOverlay.hidden=false;c.openDeathAidPayments=id=>opened.push(id);c.contributionActivities.push(a);c.funds.push({id:'f',name:'School',initialAmount:100,dateReceived:'2026-01-01'});c.fundAvailable=()=>5000;c.wouldOverdrawAtDate=()=>false;
