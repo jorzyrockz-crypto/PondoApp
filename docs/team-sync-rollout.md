@@ -42,3 +42,19 @@ against malicious authorized editors.
 Account isolation, actual Firebase rule enforcement, device recovery, and
 end-to-end multi-user behavior still require review and validation before any
 production release. Node tests use mocks and are not emulator security tests.
+
+## Returning to team work after an unconfirmed draft
+
+An internet connection does not itself prove that Firestore is reachable or
+that the user still has access. When a team draft is protected, the primary
+path is to review it against a fresh server copy and explicitly choose each
+addition or conflict. The transaction checks the server baseline and role;
+only a confirmed result can finish recovery. Download and verify a backup.
+
+The separate offline tracker is an optional alternative, even if the device
+reports a connection. It does not contain team records and does not merge or
+back up the saved draft. Its switch is separately confirmed and guarded; a
+reconnection while the choice is open updates the guidance. If review cannot
+reach the server, keep the draft and retry after checking connectivity and
+access. Never clear browser data or discard an unverified draft to get past a
+warning.
