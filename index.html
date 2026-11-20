@@ -9291,7 +9291,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
         <section class="offline-transfer-card" aria-labelledby="offlineTransferTitle">
           <h3 id="offlineTransferTitle">Review offline data</h3>
           <p>Copy records from this device’s separate offline tracker to the workspace you have open. Review additions and choose between conflicting versions before confirming.</p>
-          <p>Nothing is deleted automatically. Organization details and settings are not copied; records with different IDs may still be duplicates. Team changes need a connection and sync confirmation.</p>
+          <p>Nothing is deleted automatically. Organization details and settings are not copied; records with different IDs may still be duplicates. Team changes need a connection and sync confirmation. Other embedded images remain device-only; refund records with local receipt images cannot yet be copied to a team.</p>
           <button class="btn btn-light" type="button" id="offlineTransferOpen" onclick="reviewOfflineTransfer()">Review offline changes</button>
           <div id="offlineTransferReview" hidden>
             <p id="offlineTransferDestination" class="offline-transfer-destination"></p>
@@ -13062,6 +13062,7 @@ function updateOfflineTransferPlan(){
   if(result.unresolved){status.textContent=result.unresolved+' conflict(s) need your choice. '+result.changes.length+' record(s) currently selected for copying.';button.disabled=true;return;}
   if(!result.changes.length){status.textContent='No records selected for copying. '+result.unchanged+' identical record(s) already exist.';button.disabled=true;return;}
   if(result.changes.some(x=>offlineTransferHasSharedRef(x.offline)||(x.kind==='replace'&&offlineTransferHasSharedRef(x.destination))))throw Error('A selected record or replacement has a shared receipt or pending approval/deletion. It cannot be copied safely; keep the destination version or resolve it first.');
+  if(m.team&&result.changes.some(x=>x.field==='payables'&&x.offline.kind==='advance'&&x.offline.receiptImage))throw Error('Refunds with local receipt images cannot yet be copied to a team as shared receipts. Keep the destination version where possible; the offline data remains unchanged.');
   validateOfflineTransferSnapshot(result.merged);
   status.textContent=result.changes.filter(x=>x.kind==='add').length+' addition(s), '+result.changes.filter(x=>x.kind==='replace').length+' replacement(s), '+result.conflicts.filter(x=>x.choice==='destination').length+' destination version(s) kept, and '+result.unchanged+' identical record(s). Check each detail before confirming.';button.disabled=false;
  }catch(e){m.plan=null;status.textContent='Cannot copy these choices: '+(e.message||'Invalid records.');button.disabled=true;}
@@ -13095,7 +13096,7 @@ async function applyOfflineTransfer(){
   if(!await appConfirm('Copy the reviewed '+m.plan.changes.length+' record(s) to '+(m.team?'this team workspace':'your personal tracker')+'? Selected offline versions replace matching destination records. The offline tracker stays unchanged. Export a backup first.'))return;
   const source=await readOfflineTransferSource();
   if(token!==offlineTransferGeneration||offlineTransfer!==m||JSON.stringify(m.choices)!==choicesJSON||!offlineTransferReady()||m.scope!==offlineTransferScope()||m.revision!==trackerRevision||JSON.stringify(m.target)!==JSON.stringify(currentSnapshot())||source.revision!==m.sourceRevision||JSON.stringify(source.snapshot)!==m.sourceJSON||(m.team&&(window.pondoTeamState.lastSyncedRevision!==m.teamRevision||window.pondoTeamState.lastSyncedJSON!==m.teamBaseline)))throw Error('The offline data, workspace, access or records changed. Review again.');
-  const plan=PondoOfflineSync.plan(m.target,m.source,m.choices);if(plan.unresolved||!plan.changes.length||plan.changes.some(x=>offlineTransferHasSharedRef(x.offline)||(x.kind==='replace'&&offlineTransferHasSharedRef(x.destination))))throw Error('Review the choices again.');validateOfflineTransferSnapshot(plan.merged);
+  const plan=PondoOfflineSync.plan(m.target,m.source,m.choices);if(plan.unresolved||!plan.changes.length||plan.changes.some(x=>offlineTransferHasSharedRef(x.offline)||(x.kind==='replace'&&offlineTransferHasSharedRef(x.destination))))throw Error('Review the choices again.');if(m.team&&plan.changes.some(x=>x.field==='payables'&&x.offline.kind==='advance'&&x.offline.receiptImage))throw Error('Refund receipts cannot yet be shared by this transfer.');validateOfflineTransferSnapshot(plan.merged);
   applySnapshot(structuredClone(plan.merged));const ok=await saveAll();
   if(!ok){appAlert('The copy could not be confirmed locally. Team sync may also be unconfirmed. Keep the offline tracker and export a backup before retrying.');return;}
   if(m.scope!==offlineTransferScope()){appAlert('The copy was saved, but the workspace changed. Return to the destination and check its sync status.');return;}
