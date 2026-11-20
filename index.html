@@ -4619,17 +4619,17 @@ body.dark-mode .auth-manual-fallback{color:#d1d5db;}
 .team-modal{position:fixed;inset:0;z-index:170;display:grid;place-items:center;padding:24px}
 .team-modal-backdrop{position:absolute;inset:0;background:rgba(10,25,31,.66);backdrop-filter:blur(5px)}
 .team-dialog{position:relative;display:flex;flex-direction:column;width:min(1080px,100%);max-height:min(850px,92dvh);background:#f6f8f6;color:var(--ink);border-radius:24px;box-shadow:0 24px 90px #001d1745;overflow:hidden;outline:none}
-.team-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:26px 32px;background:#103f35;color:#fff}
-.team-modal-header h2{font-family:'Fraunces',serif;font-size:clamp(24px,3vw,34px);line-height:1.1;letter-spacing:-.02em;margin:5px 0 6px}
+.team-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 22px;background:#103f35;color:#fff}
+.team-modal-header h2{font-family:'Fraunces',serif;font-size:clamp(22px,2.4vw,28px);line-height:1.1;letter-spacing:-.02em;margin:3px 0 4px}
 .team-modal-header p:not(.team-kicker){margin:0;color:#c4dbd1;font-size:13px;line-height:1.5}
 .team-kicker{font-size:10px!important;font-weight:800;letter-spacing:.14em;color:#168166!important;margin:0 0 7px!important}
 .team-modal-header .team-kicker{color:#91d1bc!important}
 .team-close{border:1px solid #ffffff55;background:#ffffff12;color:#fff;width:40px;height:40px;border-radius:14px;font-size:27px;line-height:1;cursor:pointer;flex:none}
-.team-modal-content{overflow:auto;overscroll-behavior:contain;padding:22px 26px 30px}
+.team-modal-content{overflow:auto;overscroll-behavior:contain;padding:14px 18px 22px}
 .team-panel{display:flex;flex-direction:column;gap:14px}
-#teamSignedInPanel{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.55fr);align-items:start;gap:14px}
-#teamActiveOrgPanel{display:grid;grid-column:2;grid-row:1 / span 5;gap:14px;min-width:0}
-.team-modal .team-card{background:#fff;border:1px solid #e2eae5;border-radius:18px;box-shadow:0 3px 12px #113d2908;padding:18px;min-width:0}
+#teamSignedInPanel{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.55fr);align-items:start;gap:10px}
+#teamActiveOrgPanel{display:grid;grid-column:2;grid-row:1 / span 5;gap:10px;min-width:0}
+.team-modal .team-card{background:#fff;border:1px solid #e2eae5;border-radius:18px;box-shadow:0 3px 12px #113d2908;padding:14px;min-width:0}
 .team-modal .team-card-title{font-size:16px;line-height:1.2;margin:0 0 10px;font-weight:800}
 .team-modal .team-copy{font-size:12px;line-height:1.55;color:var(--ink2);margin:8px 0 12px}
 .team-org-identity{display:flex;gap:12px;align-items:center;min-width:0}
@@ -4637,11 +4637,16 @@ body.dark-mode .auth-manual-fallback{color:#d1d5db;}
 .team-org-name{font-family:'Fraunces',serif;font-size:22px;line-height:1.1;margin:0;overflow-wrap:anywhere}
 .team-appearance-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team-appearance-fields label{font-size:12px;font-weight:700}.team-appearance-fields select{margin-top:6px}
 .team-suggestions:not(:empty){margin:8px 0;padding:8px;background:#f2f7f4;border:1px solid #d7e7de;border-radius:12px}.team-suggestion{display:block;width:100%;text-align:left;border:0;border-radius:8px;background:transparent;color:inherit;padding:10px;font:inherit;cursor:pointer}.team-suggestion:hover,.team-suggestion:focus-visible{background:#dcefe5}.team-suggestion-status{font-size:12px;color:var(--ink2);margin:4px}body.dark-mode .team-suggestions:not(:empty){background:#15211e;border-color:#34453e}body.dark-mode .team-suggestion:hover,body.dark-mode .team-suggestion:focus-visible{background:#274538}
-.team-save-appearance{margin-top:12px;min-height:42px}
+.team-save-appearance{margin-top:10px;min-height:40px}
+.refund-items-editor[hidden]{display:none!important}.refund-items-editor{padding:12px;border:1px solid var(--line);border-radius:12px}.refund-items-editor label{display:block;font-size:12px;font-weight:700}.refund-items-editor .refund-item-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(70px,.7fr) minmax(85px,1fr) auto;gap:6px;align-items:end;margin-top:8px}.refund-items-editor input:not([type=checkbox]){width:100%;min-width:0}.refund-items-editor input[type=checkbox]{width:auto}.refund-item-amount{font-size:12px;color:var(--ink2);margin:4px 0}.refund-items-editor .btn{min-height:36px}.refund-items-note{font-size:12px;color:var(--ink2)}@media(max-width:480px){.refund-items-editor .refund-item-row{grid-template-columns:1fr 1fr}.refund-items-editor .refund-item-name{grid-column:1/-1}}
+
+.team-heading{display:flex;align-items:center;gap:8px;margin:0 0 8px}.team-heading .team-card-title{margin:0}.team-info{position:relative;flex:none}.team-info summary{display:grid;place-items:center;width:20px;height:20px;border:1px solid #8aa99c;border-radius:50%;font-size:12px;font-weight:800;color:#426a5c;cursor:pointer;list-style:none}.team-info summary::-webkit-details-marker{display:none}.team-info[open]>div{position:absolute;top:26px;left:0;z-index:4;width:min(290px,70vw);padding:10px 12px;border:1px solid #cbded3;border-radius:10px;background:#fff;color:#293e36;box-shadow:0 8px 24px #0002;font-size:12px;line-height:1.45}.team-info summary:focus-visible{outline:3px solid #42bfa1;outline-offset:2px}body.dark-mode .team-info[open]>div{background:#20342e;color:#e4f4ec;border-color:#486757}
+.team-name-controls{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin-bottom:10px}.team-name-controls label{font-size:12px;font-weight:700;flex:1;min-width:180px}.team-name-controls input{margin-top:5px}.team-name-controls button{min-height:40px}
+
 .team-modal .team-member-row{background:#f6f8f7;border:1px solid #e6eee9;min-width:0;flex-wrap:wrap}.team-modal .team-member-row .tm-name{white-space:normal;overflow-wrap:anywhere}
 .team-modal button:focus-visible,.team-modal select:focus-visible,.team-modal input:focus-visible{outline:3px solid #42bfa1;outline-offset:2px}
 body.dark-mode .team-dialog{background:#111b19;color:#e5f2ec}body.dark-mode .team-modal .team-card{background:#1d2926;border-color:#34453e}body.dark-mode .team-modal .team-member-row{background:#15211e;border-color:#34453e}
-@media(max-width:700px){.team-modal{padding:0;align-items:end}.team-dialog{width:100%;height:94dvh;max-height:94dvh;border-radius:22px 22px 0 0}.team-modal-header{padding:22px 20px}.team-modal-content{padding:16px 16px max(24px,env(safe-area-inset-bottom))}#teamSignedInPanel{display:flex;flex-direction:column}#teamSignedInPanel>*{width:100%}#teamActiveOrgPanel{display:flex;flex-direction:column}#teamActiveOrgPanel>*{width:100%}.team-modal .team-member-row>div:last-child{max-width:100%;flex-wrap:wrap}.team-modal .team-member-row select{max-width:100%}}
+@media(max-width:700px){.team-modal{padding:0;align-items:end}.team-dialog{width:100%;height:94dvh;max-height:94dvh;border-radius:22px 22px 0 0}.team-modal-header{padding:14px 16px}.team-modal-content{padding:12px 12px max(20px,env(safe-area-inset-bottom))}#teamSignedInPanel{display:flex;flex-direction:column}#teamSignedInPanel>*{width:100%}#teamActiveOrgPanel{display:flex;flex-direction:column}#teamActiveOrgPanel>*{width:100%}.team-modal .team-member-row>div:last-child{max-width:100%;flex-wrap:wrap}.team-modal .team-member-row select{max-width:100%}}
 .team-card{padding:16px;border-radius:18px;background:#f7f7f5;}
 body.dark-mode .team-card{background:#1c1c1e;}
 .team-sync-badge{font-size:14px;line-height:1;color:#9ca3af;}
@@ -8555,7 +8560,8 @@ body.dark-mode #tab-dashboard .refund-impact-value.negative strong {color:#ffaaa
 .member-refund-overlay{position:fixed;inset:0;z-index:9000;background:rgb(8 17 36 / .65);display:flex;align-items:center;justify-content:center;padding:16px}
 .member-refund-overlay[hidden],#memberRefundInbox[hidden],#memberRefundCheck[hidden],#memberRefundMore[hidden],#memberRefundDraftNotice[hidden],#memberRefundDashboardStatus[hidden]{display:none!important}.member-refund-dialog{width:min(100%,560px);max-height:calc(100dvh - 32px);overflow:auto;border-radius:18px;background:var(--surface);color:var(--ink);padding:20px;box-shadow:0 18px 60px #0005}
 .member-refund-dialog header,.member-refund-inbox-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.member-refund-dialog h2,.member-refund-inbox h3{margin:0;font-size:17px}.member-refund-dialog p,.member-refund-inbox p{font-size:12px;line-height:1.5;color:var(--ink2)}
-.member-refund-dialog .member-refund-warning{padding:10px;border-radius:10px;background:#fff4dc;color:#74430a}.member-refund-dialog form{display:grid;gap:12px}.member-refund-dialog label{display:grid;gap:5px;font-size:12px;font-weight:700}.member-refund-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.member-refund-inbox{margin:0;padding:0;border:0;background:transparent}.member-refund-row{border-top:1px solid var(--line);padding:12px 0}.member-refund-row strong,.member-refund-row span{display:block;overflow-wrap:anywhere}.member-refund-row span{font-size:12px;line-height:1.5;color:var(--ink2);margin-top:4px}.member-refund-row .member-refund-actions{justify-content:flex-start;margin-top:8px}.member-refund-actions .btn{min-height:44px;height:auto;white-space:normal}.member-refund-note{margin:0}body.dark-mode .member-refund-dialog .member-refund-warning{background:#4b351c;color:#ffe0a9}
+.member-refund-dialog form,.member-refund-dialog label,.member-refund-dialog input{min-width:0;max-width:100%;box-sizing:border-box}.member-refund-dialog input[type=file]{width:100%}
+.member-refund-dialog .member-refund-warning{padding:10px;border-radius:10px;background:#fff4dc;color:#74430a}.member-refund-dialog form{display:grid;gap:12px}.member-refund-dialog label{display:grid;gap:5px;font-size:12px;font-weight:700}.member-refund-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.member-refund-inbox{margin:0;padding:0;border:0;background:transparent}.member-refund-row{border-top:1px solid var(--line);padding:12px 0}.member-refund-row strong,.member-refund-row span{display:block;overflow-wrap:anywhere}.member-refund-row span{font-size:12px;line-height:1.5;color:var(--ink2);margin-top:4px}.member-refund-row .member-refund-actions{justify-content:flex-start;margin-top:8px}.member-refund-actions .btn{min-height:44px;height:auto;white-space:normal}.member-refund-note{margin:0}#memberRefundModal .refund-items-editor>label{display:flex;align-items:center;gap:6px}body.dark-mode .member-refund-dialog .member-refund-warning{background:#4b351c;color:#ffe0a9}
 #tab-refunds #memberRefundInboxList .member-refund-row{margin:0 0 12px;padding:16px;border:1px solid #dbe4ef;border-radius:14px;background:#fff}
 #tab-refunds #memberRefundInboxList .member-refund-row strong{color:#1d355f;font-size:14px;line-height:1.35}
 body.dark-mode #tab-refunds #memberRefundInboxList .member-refund-row{background:#1d3452;border-color:#385579}
@@ -8931,7 +8937,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
       <div id="refundImpact"><div id="refundImpactDetails"><div class="refund-impact-values"><div class="refund-impact-value"><span>Cash balance</span><strong id="refundImpactCash">—</strong></div><div class="refund-impact-value"><span>Approved refunds outstanding</span><strong id="refundImpactOwed">—</strong></div><div id="refundImpactNetBox" class="refund-impact-value"><span>Cash after approved refunds</span><strong id="refundImpactNet">—</strong></div></div><p id="refundImpactPending" class="refund-impact-pending" hidden></p><p class="refund-impact-note">Cash after refunds is a comparison, not a payment or available budget. It excludes supplier payables and pending approvals; fund restrictions and project allocations may limit what can be paid.</p></div></div>
     </section>
     <details id="refundTransparencySection" class="refund-transparency" hidden><summary>Refund transparency</summary><p>Review identity links and payment activity. Recipient selections are reported by the person recording the refund, not independently verified. These flags do not mean a refund was reviewed or approved by another person.</p><label class="transparency-filter" for="refundTransparencyFilter">Show <select id="refundTransparencyFilter" class="input" onchange="renderRefundTransparency()"><option value="flagged">All flagged refunds</option><option value="requester">Requester is recipient</option><option value="recorder">Recorded by recipient</option><option value="unlinked">Recipient not linked</option></select></label><p id="refundTransparencyStatus" role="status"></p><div id="refundTransparencyList" class="transparency-list"></div><button type="button" id="refundTransparencyMore" class="btn btn-light my-refund-more" onclick="loadOlderMemberRefunds()" hidden>Load older workspace request history</button></details>
-    <section class="refund-workspace"><details id="myRefundSection" class="project-detail-section my-refund-section" open hidden><summary><span class="refund-section-title">My refund requests <span class="refund-section-count" id="myRefundCount"></span></span></summary><p class="my-refund-intro">Requests you submitted or recorded, matched to your account. A recorded payment is not confirmation that money was received.</p><p id="myRefundStatus" class="my-refund-status" role="status" hidden></p><div id="myRefundList" class="my-refund-list"></div><button type="button" id="myRefundMore" class="btn btn-light my-refund-more" onclick="loadOlderMemberRefunds()" hidden>Load older workspace request history</button></details><details id="refundActiveSection" class="project-detail-section refund-active-section" open><summary><span class="refund-section-title">Active refund requests <span class="refund-section-count" id="refundActiveCount">(0)</span></span></summary><p class="detail-section-intro">Pending requests, approved refunds awaiting payment and partially paid refunds. Member-request attachments are not shared.</p><div id="memberRefundInbox" class="member-refund-inbox" hidden><p id="memberRefundInboxStatus" role="status"></p><span id="memberRefundInboxCount" hidden></span><div id="memberRefundInboxList"></div></div><div id="refundActiveList"></div></details>
+    <section class="refund-workspace"><details id="myRefundSection" class="project-detail-section my-refund-section" open hidden><summary><span class="refund-section-title">My refund requests <span class="refund-section-count" id="myRefundCount"></span></span></summary><p class="my-refund-intro">Requests you submitted or recorded, matched to your account. A recorded payment is not confirmation that money was received.</p><p id="myRefundStatus" class="my-refund-status" role="status" hidden></p><div id="myRefundList" class="my-refund-list"></div><button type="button" id="myRefundMore" class="btn btn-light my-refund-more" onclick="loadOlderMemberRefunds()" hidden>Load older workspace request history</button></details><details id="refundActiveSection" class="project-detail-section refund-active-section" open><summary><span class="refund-section-title">Active refund requests <span class="refund-section-count" id="refundActiveCount">(0)</span></span></summary><p class="detail-section-intro">Pending requests, approved refunds awaiting payment and partially paid refunds. Shared member receipt images are available to workspace members.</p><div id="memberRefundInbox" class="member-refund-inbox" hidden><p id="memberRefundInboxStatus" role="status"></p><span id="memberRefundInboxCount" hidden></span><div id="memberRefundInboxList"></div></div><div id="refundActiveList"></div></details>
     <details id="refundLogSection" class="project-detail-section refund-log-section"><summary><span class="refund-section-title">Refund log <span class="refund-section-count" id="refundLogCount">(0)</span></span></summary><p class="detail-section-intro">Refund activity, including confirmed member-request decisions. Member-request history is loaded separately and is not included in JSON backups.</p><p id="memberRefundHistoryStatus" role="status" class="detail-section-intro" hidden></p><div id="refundLogList" class="detail-list"></div><button type="button" class="btn btn-light" id="memberRefundMore" onclick="loadOlderMemberRefunds()" hidden>Load older member-request history</button></details></section>
   </section>
 
@@ -9146,9 +9152,8 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
         <div id="teamLoading" class="team-card"><p style="margin:0;font-size:13px;color:var(--ink2)">Checking your organizations…</p></div>
         <div id="teamSignedInPanel" hidden>
           <div class="team-card">
-            <p class="team-kicker">YOUR SPACE</p><h3 class="team-card-title">Your workspaces</h3>
+            <p class="team-kicker">YOUR SPACE</p><div class="team-heading"><h3 class="team-card-title">Your workspaces</h3><details class="team-info"><summary aria-label="About workspaces">i</summary><div>Each workspace keeps separate team records. Personal data stays on this device.</div></details></div>
             <div id="teamWorkspaceList" style="display:flex;flex-direction:column;gap:8px"></div><p id="teamMembershipRecoveryStatus" role="status" style="font-size:12px;color:var(--ink2);line-height:1.5" hidden></p>
-            <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:10px 0 0">Each organization keeps its own separate data. "Personal" is local to this device only and is never shared.</p>
           </div>
           <div id="teamActiveOrgPanel" hidden>
             <div class="team-card">
@@ -9161,17 +9166,17 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
               <div id="teamDraftRecovery" hidden style="margin-top:10px;font-size:12px;line-height:1.5"><p>An unconfirmed team draft was found on this device. Download and verify it before discarding it. It has not been merged with the team copy.</p><button class="btn btn-light" type="button" onclick="pondoTeam.downloadDraft()">Download saved draft</button> <button class="btn btn-light" type="button" onclick="pondoTeam.discardDraft()">Discard draft and reload</button></div>
             </div>
             <div class="team-card team-customize" id="teamAppearanceOwner" hidden>
-              <p class="team-kicker">MAKE IT YOURS</p><h3 class="team-card-title">Team appearance</h3>
-              <p class="team-copy">Choose a shared color and icon for this workspace. Everyone on the team will see them.</p>
+              <p class="team-kicker">MAKE IT YOURS</p><div class="team-heading"><h3 class="team-card-title">Workspace settings</h3><details class="team-info"><summary aria-label="About workspace settings">i</summary><div>The display name, color and icon are shared with your team. The original registered name remains the search name; financial report names and existing links do not change.</div></details></div>
+              <div class="team-name-controls"><label for="teamDisplayName">Workspace display name<input id="teamDisplayName" class="input" maxlength="120" autocomplete="off"></label><button type="button" class="btn btn-light" onclick="pondoTeam.saveDisplayName()">Save name</button></div><p id="teamNameStatus" role="status" class="team-copy"></p>
               <div class="team-appearance-fields"><label>Team color<select id="teamColor" class="input"><option value="emerald">Emerald</option><option value="ocean">Ocean</option><option value="violet">Violet</option><option value="rose">Rose</option><option value="amber">Amber</option><option value="slate">Slate</option></select></label>
               <label>Team icon<select id="teamIcon" class="input"><option value="diamond">◆ Diamond</option><option value="star">★ Star</option><option value="heart">♥ Heart</option><option value="sun">☀ Sun</option><option value="leaf">✿ Flower</option><option value="book">▣ Book</option></select></label></div>
               <button type="button" class="btn btn-dark team-save-appearance" onclick="pondoTeam.saveAppearance()">Save team appearance</button><p id="teamAppearanceStatus" role="status" class="team-copy"></p>
-              <p class="team-copy">Registered-name changes and permanent workspace deletion are not yet available. Your records and links remain unchanged.</p>
+              <p class="team-copy">Permanent workspace deletion is not yet available.</p>
             </div>
             <div class="team-card" id="teamDiscoveryOwner" hidden>
-              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Organization discovery</p>
+              <div class="team-heading"><strong>Organization discovery</strong><details class="team-info"><summary aria-label="About discovery">i</summary><div>Only the original registered name is searchable. Financial records stay private. Verify requesters before approval; existing invite links still grant their assigned role.</div></details></div>
               <label style="display:flex;align-items:center;gap:10px;font-size:13px"><input id="teamDiscoverable" type="checkbox" onchange="pondoTeam.setDiscovery(this.checked)"> Make this organization searchable</label>
-              <p style="font-size:12px;line-height:1.5;color:var(--ink2)">Only the organization name is listed. Financial records remain private. Verify requesters through a trusted channel before approval. Existing invite links still grant their assigned role immediately.</p>
+
               <button type="button" class="btn btn-light" onclick="pondoTeam.loadJoinRequests()">Reconnect requests</button>
               <div id="teamJoinRequests" aria-live="polite" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>
             </div>
@@ -9191,22 +9196,19 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
               </div>
             </div>
             <div class="team-card">
-              <p style="font-weight:700;font-size:14px;margin:0 0 10px">Members</p>
-              <p style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">To assign a Faculty President, choose Faculty President beside a Viewer’s name. They keep Viewer access and can accept Faculty Fund handovers. To change Presidents, assign another Viewer.</p>
+              <div class="team-heading"><strong>Members</strong><details class="team-info"><summary aria-label="About Faculty President">i</summary><div>Assign Faculty President beside a Viewer’s name. They keep Viewer access and can accept Faculty Fund handovers. To change Presidents, assign another Viewer.</div></details></div>
               <p id="teamFacultyPresidentStatus" role="status" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px"></p>
               <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
             </div>
             <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
           </div>
           <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Create an organization</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 12px">Sync this fund tracker's data in real time with a team. The registered team name must be unique and starts private. Names ignore case for A–Z and extra spaces; other letters and Unicode lookalikes can differ. It is separate from the editable name on financial reports. Everyone who joins sees the same live funds, transactions, projects and payables.</p>
+            <div class="team-heading"><strong>Create an organization</strong><details class="team-info"><summary aria-label="About creating an organization">i</summary><div>The registered name must be unique and starts private. Names ignore ASCII case and extra spaces; other Unicode lookalikes can differ. This search name is separate from the financial report name. Team members share funds, transactions, projects and payables.</div></details></div>
             <input id="teamNewOrgName" class="input" aria-label="Unique organization name" placeholder="Organization name" maxlength="120">
             <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">Create Organization</button>
           </div>
           <div class="team-card">
-            <p style="font-weight:700;font-size:14px;margin:0 0 6px">Find an organization</p>
-            <p style="font-size:12px;color:var(--ink2);line-height:1.5">Start typing a registered name to see searchable organizations. Only teams that opted in appear. An owner must approve your request.</p>
+            <div class="team-heading"><strong>Find an organization</strong><details class="team-info"><summary aria-label="About finding an organization">i</summary><div>Search using the original registered name. Only teams that opted in appear. An owner must approve your request.</div></details></div>
             <input id="teamSearchOrg" class="input" aria-label="Organization name" aria-describedby="teamSearchSuggestions" placeholder="Start typing an organization name" maxlength="120" autocomplete="off" oninput="pondoTeam.suggestOrganizations()">
             <div id="teamSearchSuggestions" class="team-suggestions" aria-live="polite"></div>
             <button type="button" class="btn btn-dark" style="width:100%;min-height:46px;margin-top:10px" onclick="pondoTeam.searchOrganization()">Search</button>
@@ -9220,7 +9222,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
             <button class="btn btn-light" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.joinWithPastedInput()">Join Organization</button>
           </div>
         </div>
-        <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Note: receipt attachments and the organization logo are not synced between devices yet — only funds, transactions, projects, payables and contribution records sync in real time.</p>
+        <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Refund receipt images sync when a team refund is confirmed. Other receipt attachments and the organization logo remain on this device.</p>
       </div>
 </div>
   </section>
@@ -9279,8 +9281,8 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
       </div>
       <div id="settings-data" class="settings-panel" style="display:none; flex-direction:column; gap:12px">
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0">Storage</p><p style="font-size:12px; color:var(--ink2); margin:6px 0 0" id="storageInfo">Funds: 3 • Transactions: 6 • Projects: 0</p><p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:8px 0 0">Records and images are stored in this browser. Capacity varies and may be cleared; export a backup regularly.</p></div>
-        <section class="sample-data-card" aria-labelledby="sampleDataTitle"><div class="sample-data-head"><span class="sample-data-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 13h3M7 16h6"/></svg></span><div><span class="sample-data-kicker">EXPLORE PONDO</span><h3 id="sampleDataTitle" class="sample-data-title">Preview with sample data</h3><p class="sample-data-copy">Explore example funds, expenses, refunds, donations, contributions and Death Aid.</p></div></div><div class="sample-data-status-row"><span class="sample-data-status-label">SAMPLE DATA</span><p id="sampleDataStatus" class="sample-data-status" role="status" aria-live="polite"></p></div><p class="sample-data-note">Samples are included in totals, reports and backups; in a team workspace they can sync to other members. Clearing is blocked if your own records depend on samples.</p><div class="sample-data-actions"><button id="loadSampleDataBtn" class="btn btn-emerald" type="button" onclick="loadSampleData()">Load sample data</button><button id="clearSampleDataBtn" class="btn btn-light" type="button" onclick="clearSampleData()">Clear sample data</button></div></section>
-        <button class="btn btn-dark" style="width:100%; height:48px" onclick="exportJSONFull()">Export Full JSON Backup</button>
+        <section class="sample-data-card" aria-labelledby="sampleDataTitle"><div class="sample-data-head"><span class="sample-data-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 13h3M7 16h6"/></svg></span><div><span class="sample-data-kicker">EXPLORE PONDO</span><h3 id="sampleDataTitle" class="sample-data-title">Preview with sample data</h3><p class="sample-data-copy">Explore example funds, projects, transactions, itemized refunds, contributions, donations and Death Aid.</p></div></div><div class="sample-data-status-row"><span class="sample-data-status-label">SAMPLE DATA</span><p id="sampleDataStatus" class="sample-data-status" role="status" aria-live="polite"></p></div><p class="sample-data-note">Samples affect totals, reports and backups and can sync to a team. By default the sample receipt stays on this device. Clearing is blocked if your records depend on samples.</p><label class="sample-data-note"><input id="sampleSharedReceipt" type="checkbox" disabled> Include a shared sample receipt (owner of a disposable workspace named “Pondo Sample Test …” only)</label><p class="sample-data-note">Shared test receipts remain in Firestore after clearing samples. Permanent workspace deletion is not available yet.</p><div class="sample-data-actions"><button id="loadSampleDataBtn" class="btn btn-emerald" type="button" onclick="loadSampleData()">Load sample data</button><button id="clearSampleDataBtn" class="btn btn-light" type="button" onclick="clearSampleData()">Clear sample data</button></div></section>
+        <button class="btn btn-dark" style="width:100%; height:48px" onclick="exportJSONFull()">Export JSON Backup</button><p style="font-size:12px;line-height:1.5;color:var(--ink2)">Team refund request history and shared receipt images may not be included. Download shared receipts separately.</p>
         <div style="padding:16px;border-radius:20px;border:1px solid var(--line)"><p style="font-size:14px;font-weight:600;margin:0 0 6px">Check a backup without restoring</p><p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 10px">Select a saved JSON backup to check its structure and supported financial links. This does not change your records or prove it is complete or recoverable in every situation.</p><input type="file" id="verifyBackupFile" accept=".json,application/json" aria-label="Choose a JSON backup to check" onchange="handleImport(this,true)"></div><button class="btn btn-light" style="width:100%; height:48px" onclick="downloadCSV()">Export Funds CSV</button>
         <div style="padding:16px; border-radius:20px; border:1px solid var(--line)"><p style="font-size:14px; font-weight:600; margin:0 0 10px">Import JSON</p><input type="file" id="importFile" accept=".json" style="width:100%; font-size:13px" onchange="handleImport(this)"><div style="display:flex; gap:8px; margin-top:10px"><button class="btn btn-light" style="flex:1" onclick="setImportMode('merge')">Merge</button><button class="btn btn-light" style="flex:1" onclick="setImportMode('overwrite')">Overwrite</button></div><p style="font-size:11px; color:var(--ink2); margin:8px 0 0">Current: <span id="importModeLabel">Merge</span></p></div>
         <button class="btn" style="width:100%; height:48px; background:#fffbeb; color:#92400e" onclick="clearTransactionsOnly()">Clear Transactions Only</button>
@@ -9348,6 +9350,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
      <label id="advancePayerLabel" class="payable-field payable-wide" style="display:none"><span>Person to reimburse <small>Required</small></span><input id="advancePayer" oninput="clearRefundRecipientLink('advanceRecipientMember')" class="input" placeholder="Person who paid personally" list="refundPayerSuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" aria-describedby="advancePayerHelp"><small id="advancePayerHelp">Suggestions come from previous refunds and workspace members. You can type a different name.</small></label>
      <label id="advanceRecipientMemberLabel" class="payable-field payable-wide" hidden><span>Link recipient to a team member <small>Optional</small></span><select id="advanceRecipientMember" class="input" onchange="selectRefundRecipient('advanceRecipientMember','advancePayer')"></select><small>Choose a member to identify them. Editing the name clears the link.</small></label>
      <label class="payable-field"><span id="payableAmountLabel">Expense amount (₱) <small>Required</small></span><input id="invoiceAmount" type="number" min="0.01" step="0.01" inputmode="decimal" class="input" placeholder="0.00"></label>
+     <div id="payableRefundItemsEditor" class="payable-field payable-wide refund-items-editor" hidden></div>
      <label class="payable-field"><span id="payableDateLabel">Expense date <small>Required</small></span><input id="invoiceDate" type="date" class="input"></label>
     </div>
     <div class="payable-divider"><span>Supporting details</span><small>OPTIONAL</small></div>
@@ -9357,7 +9360,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
      <label class="payable-field"><span>Due date</span><input id="invoiceDueDate" type="date" class="input"></label>
      <label class="payable-field"><span>Receipt / invoice reference</span><input id="invoiceRef" class="input" placeholder="Reference number"></label>
      <label class="payable-field"><span>Category</span><input id="invoiceCategory" class="input" placeholder="e.g. Supplies" list="payableCategorySuggestions" autocomplete="off" onfocus="refreshDescriptionSuggestions()" aria-describedby="payableSuggestionsHelp"></label>
-     <div class="payable-field payable-wide payable-file"><span>Receipt attachment <small>Optional · Images up to 5 MB · PDF up to 1 MB</small></span><div class="receipt-picker"><div class="receipt-picker-actions"><label class="receipt-picker-button" for="invoiceImage">Choose file</label><input class="receipt-picker-input" id="invoiceImage" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" aria-label="Choose receipt image or PDF" onchange="selectReceiptSource('invoiceImage',false)"><label class="receipt-picker-button" for="invoiceImageCamera">Take photo</label><input class="receipt-picker-input" id="invoiceImageCamera" type="file" accept="image/*" capture="environment" aria-label="Take a photo of receipt" onchange="selectReceiptSource('invoiceImage',true)"></div><div class="receipt-picker-selection"><span id="invoiceImageStatus" aria-live="polite">No file selected</span><button type="button" class="receipt-picker-clear" id="invoiceImageClear" onclick="clearReceiptSelection('invoiceImage')" hidden>Remove file</button></div><small>PNG, JPEG, WebP or PDF. Camera depends on your device. Attachments stay on this device and are included in JSON backups; they do not sync between devices.</small></div></div>
+     <div class="payable-field payable-wide payable-file"><span>Receipt attachment <small>Optional · Images up to 5 MB · PDF up to 1 MB</small></span><div class="receipt-picker"><div class="receipt-picker-actions"><label class="receipt-picker-button" for="invoiceImage">Choose file</label><input class="receipt-picker-input" id="invoiceImage" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" aria-label="Choose receipt image or PDF" onchange="selectReceiptSource('invoiceImage',false)"><label class="receipt-picker-button" for="invoiceImageCamera">Take photo</label><input class="receipt-picker-input" id="invoiceImageCamera" type="file" accept="image/*" capture="environment" aria-label="Take a photo of receipt" onchange="selectReceiptSource('invoiceImage',true)"></div><div class="receipt-picker-selection"><span id="invoiceImageStatus" aria-live="polite">No file selected</span><button type="button" class="receipt-picker-clear" id="invoiceImageClear" onclick="clearReceiptSelection('invoiceImage')" hidden>Remove file</button></div><small id="payableReceiptHelp">PNG, JPEG, WebP or PDF. Other expense attachments remain on this device.</small><div id="payableReceiptPreview" hidden><p>Check that the receipt is readable before saving.</p><img id="payableReceiptPreviewImage" alt="Receipt preview" style="max-width:100%;max-height:320px;object-fit:contain"><a id="payableReceiptPreviewDownload" download="receipt-preview.jpg">Download preview</a></div><p id="payableReceiptPreviewStatus" role="status"></p></div></div>
     </div>
     <p class="payable-cash-note">Recording this expense does not reduce fund cash. Record a payment later when money is actually paid.</p>
    </div>
@@ -9379,7 +9382,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
  </div>
 </div>
 
-<div id="memberRefundModal" class="member-refund-overlay no-print" hidden><section class="member-refund-dialog" role="dialog" aria-modal="true" aria-labelledby="memberRefundTitle"><header><h2 id="memberRefundTitle">Request a refund</h2><button type="button" class="icon-btn" aria-label="Close" onclick="closeMemberRefundRequest()">×</button></header><p>A confirmed team member can submit a request. An Owner or Disbursing Officer must approve it before it becomes payable. No cash is paid by submitting.</p><p class="member-refund-warning">Receipt files are not sent or shared by this form. Provide supporting documents directly to the approver.</p><p id="memberRefundDraftNotice" class="member-refund-warning" role="status" hidden></p><form id="memberRefundForm"><label>Person to reimburse <input id="memberRefundPerson" class="input" maxlength="160" oninput="clearRefundRecipientLink('memberRefundRecipientMember')" required></label><label id="memberRefundRecipientMemberLabel">Link recipient to a team member <small>Optional</small><select id="memberRefundRecipientMember" class="input" onchange="selectRefundRecipient('memberRefundRecipientMember','memberRefundPerson')"></select><small>Editing the name clears the member link. Linked requests require up-to-date workspace security rules.</small></label><label>Description <input id="memberRefundDescription" class="input" maxlength="300" required></label><label>Amount · ₱ <input id="memberRefundAmount" class="input" type="number" min="0.01" max="10000000" step="0.01" inputmode="decimal" required></label><label>Expense date <input id="memberRefundDate" class="input" type="date" required></label><label>Supplier (optional) <input id="memberRefundSupplier" class="input" maxlength="160"></label><label>Category (optional) <input id="memberRefundCategory" class="input" maxlength="160"></label><label>Receipt reference (optional) <input id="memberRefundReference" class="input" maxlength="160"></label><p class="member-refund-note">The project can be assigned after approval. Your request remains on this device until the server confirms submission.</p><button type="button" id="memberRefundCheck" class="btn btn-light" onclick="checkMemberRefundDraft()" hidden>Check previous submission</button><div class="member-refund-actions"><button type="button" class="btn btn-light" onclick="closeMemberRefundRequest()">Cancel</button><button id="memberRefundSubmit" class="btn btn-emerald" type="submit">Submit request</button></div></form></section></div>
+<div id="memberRefundModal" class="member-refund-overlay no-print" hidden><section class="member-refund-dialog" role="dialog" aria-modal="true" aria-labelledby="memberRefundTitle"><header><h2 id="memberRefundTitle">Request a refund</h2><button type="button" class="icon-btn" aria-label="Close" onclick="closeMemberRefundRequest()">×</button></header><p>A confirmed team member can submit a request. An Owner or Disbursing Officer must approve it before it becomes payable. No cash is paid by submitting.</p><p class="member-refund-warning">Optional receipt images are shared with workspace members. Preview the image and check that the text is readable before submitting. Updated workspace rules are required.</p><p id="memberRefundDraftNotice" class="member-refund-warning" role="status" hidden></p><form id="memberRefundForm"><label>Person to reimburse <input id="memberRefundPerson" class="input" maxlength="160" oninput="clearRefundRecipientLink('memberRefundRecipientMember')" required></label><label id="memberRefundRecipientMemberLabel">Link recipient to a team member <small>Optional</small><select id="memberRefundRecipientMember" class="input" onchange="selectRefundRecipient('memberRefundRecipientMember','memberRefundPerson')"></select><small>Editing the name clears the member link. Linked requests require up-to-date workspace security rules.</small></label><label>Description <input id="memberRefundDescription" class="input" maxlength="300" required></label><label>Amount · ₱ <input id="memberRefundAmount" class="input" type="number" min="0.01" max="10000000" step="0.01" inputmode="decimal" required></label><div id="memberRefundItemsEditor" class="refund-items-editor"></div><label>Expense date <input id="memberRefundDate" class="input" type="date" required></label><label>Supplier (optional) <input id="memberRefundSupplier" class="input" maxlength="160"></label><label>Category (optional) <input id="memberRefundCategory" class="input" maxlength="160"></label><label>Receipt reference (optional) <input id="memberRefundReference" class="input" maxlength="160"></label><label>Receipt image (optional) <input id="memberRefundReceipt" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectMemberRefundReceipt(this)"></label><div id="memberRefundReceiptPreview" hidden><p>Download and zoom in to verify the text is readable.</p><img id="memberRefundReceiptImage" alt="Receipt preview" style="max-width:100%;max-height:320px;object-fit:contain"><a id="memberRefundReceiptDownload" download="receipt-preview.jpg">Download preview</a></div><button id="memberRefundReceiptRemove" type="button" class="btn btn-light" onclick="clearMemberRefundReceipt()" hidden>Remove receipt</button><p id="memberRefundReceiptStatus" role="status"></p><p class="member-refund-note">The project can be assigned after approval. Your request remains on this device until the server confirms submission.</p><button type="button" id="memberRefundCheck" class="btn btn-light" onclick="checkMemberRefundDraft()" hidden>Check previous submission</button><div class="member-refund-actions"><button type="button" class="btn btn-light" onclick="closeMemberRefundRequest()">Cancel</button><button id="memberRefundSubmit" class="btn btn-emerald" type="submit">Submit request</button></div></form></section></div>
 
 <div id="aboutOverlay" class="about-overlay no-print" hidden>
   <section class="about-dialog" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" tabindex="-1">
@@ -9387,8 +9390,8 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 113</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Workspace recovery and member refund requests</h4><ul><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 116</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -9421,12 +9424,13 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
  if(media.addEventListener)media.addEventListener('change',place);else if(media.addListener)media.addListener(place);
 })();
 </script>
+<script src="./refund-items.js"></script>
 <script src="./faculty-fund-ui.js"></script>
 <script src="./faculty-fund-notifications.js"></script>
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='113', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='116', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9731,14 +9735,16 @@ function renderTeamSwitcherMenu(){
   const activeKey=state.orgId||'personal';
   const rows=[{key:'personal',label:'Personal (this device)',sub:''}].concat((state.memberships||[]).map(m=>({key:m.orgId,label:m.name||'Organization',sub:roleLabels[m.role]||m.role||''})));
   const facepileHtml=(state.orgId&&typeof buildTeamFacepileHtml==='function')?buildTeamFacepileHtml(state.members||[]):'';
-  menu.innerHTML=rows.map(r=>{
+  const menuHtml=rows.map(r=>{
     const active=r.key===activeKey;
     const keyAttr=escapeTeamText(r.key).replace(/"/g,'&quot;');
     const rowHtml='<button class="header-menu-item team-switch-item'+(active?' active':'')+'" type="button" data-ws-key="'+keyAttr+'" onclick="pondoTeam.switchActiveWorkspace(this.dataset.wsKey)"><span class="tsi-check">'+(active?'✓':'')+'</span><span class="tsi-text"><span class="tsi-name">'+escapeTeamText(r.label)+'</span>'+(r.sub?'<span class="tsi-role">'+escapeTeamText(r.sub)+'</span>':'')+'</span>'+(window.pondoWorkspaceApprovalItems?.some(item=>item.recipientUid===window.pondoCurrentUser?.uid&&item.orgId===r.key&&!item.newSeen)?'<span class="workspace-new-tag">New</span>':'')+'</button>';
     return rowHtml+((active&&facepileHtml)?'<div class="team-switch-facepile">'+facepileHtml+'</div>':'');
   }).join('')
+  +(state.membershipsLoading?'<div class="header-menu-item" role="status">Checking workspaces…</div>':state.membershipsLoadError?'<div class="header-menu-item" role="status">Workspaces could not be checked. Reconnect and try again.</div>':'')
   +'<div class="team-switch-divider"></div>'
   +'<button class="header-menu-item" type="button" onclick="closeTeamSwitcher();openTeamModal()"><span class="tsi-text">Manage team</span></button>';
+  if(menu._workspaceHtml!==menuHtml){menu.innerHTML=menuHtml;menu._workspaceHtml=menuHtml;}
 }
 function closeTeamSwitcher(restoreFocus=false){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let wasOpen=!menu.hidden;if(wasOpen)window.pondoMarkVisibleWorkspaceNewsSeen?.(menu);menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
 function toggleTeamSwitcher(){const menu=document.getElementById('teamSwitcherMenu'),button=document.getElementById('teamHeaderBadge');if(!menu||!button)return;let open=menu.hidden;if(!open){closeTeamSwitcher();return;}renderTeamSwitcherMenu();closeHeaderMore();if(window.closeHeaderAvatarMenu)window.closeHeaderAvatarMenu();if(window.closeNotifCenter)window.closeNotifCenter();menu.hidden=false;button.setAttribute('aria-expanded','true')}
@@ -9773,13 +9779,15 @@ function renderHeaderAvatarMenu(){
   const userName=escapeTeamText((user&&(user.displayName||user.email))||'Signed in');
   const userEmail=(user&&user.displayName&&user.email)?escapeTeamText(user.email):'';
   const avatarImgHtml=(user&&user.photoURL)?('<img src="'+escapeTeamText(user.photoURL).replace(/"/g,'&quot;')+'" alt="">'):('<span class="avatar-menu-initial">'+escapeTeamText(userName.trim().charAt(0).toUpperCase()||'?')+'</span>');
-  menu.innerHTML=
+  const menuHtml=
     '<div class="avatar-menu-user">'+avatarImgHtml+'<span class="avatar-menu-user-text"><span class="avatar-menu-name">'+userName+'</span>'+(userEmail?'<span class="avatar-menu-email">'+userEmail+'</span>':'')+'</span></div>'
     +'<div class="team-switch-divider"></div>'
     +rowsHtml
+    +(state.membershipsLoading?'<div class="header-menu-item" role="status">Checking workspaces…</div>':state.membershipsLoadError?'<div class="header-menu-item" role="status">Workspaces could not be checked. Reconnect and try again.</div>':'')
     +'<div class="team-switch-divider"></div>'
     +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();openTeamModal()"><span class="tsi-text">Manage team</span></button>'
     +'<button class="header-menu-item" type="button" onclick="closeHeaderAvatarMenu();if(window.pondoSignOut)window.pondoSignOut();"><span class="tsi-text">Sign out</span></button>';
+  if(menu._workspaceHtml!==menuHtml){menu.innerHTML=menuHtml;menu._workspaceHtml=menuHtml;}
 }
 function closeHeaderAvatarMenu(restoreFocus=false){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let wasOpen=!menu.hidden;if(wasOpen)window.pondoMarkVisibleWorkspaceNewsSeen?.(menu);menu.hidden=true;button.setAttribute('aria-expanded','false');if(restoreFocus&&wasOpen)button.focus()}
 function toggleHeaderAvatarMenu(){const menu=document.getElementById('headerAvatarMenu'),button=document.getElementById('headerAvatarBtn');if(!menu||!button)return;let open=menu.hidden;if(!open){closeHeaderAvatarMenu();return;}renderHeaderAvatarMenu();closeHeaderMore();if(window.closeTeamSwitcher)window.closeTeamSwitcher();if(window.closeNotifCenter)window.closeNotifCenter();menu.hidden=false;button.setAttribute('aria-expanded','true')}
@@ -10584,9 +10592,12 @@ async function approveRefundRequest(id,guard){
   if(!canApproveRefunds()){ appAlert('Only an Owner or Disbursing Officer can approve a refund request.'); return; }
   const bill=payables.find(x=>x.id===id);
   if(!bill||!bill.pendingApproval) return;
-  const approvalWorkspace=pondoTeamState.orgId, pendingRequest=bill.pendingApproval;
+  const approvalWorkspace=pondoTeamState.orgId, approvalUid=pondoTeamState.uid, pendingRequest=bill.pendingApproval, approvalCopy=JSON.stringify(bill);
   if(!await appConfirm('Approve this refund request for '+fmt(bill.amount)+'? It remains unpaid until an authorized person records a payment. Approval does not check or reserve funds.')) return;
   if((guard&&!guard())||!canApproveRefunds()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||payables.find(x=>x.id===id)!==bill||bill.pendingApproval!==pendingRequest){appAlert('This request or your access changed. Review it again.');return;}
+  if(bill.itemsJSON){try{if(window.PondoRefundItems.parse(bill.itemsJSON).total!==cents(bill.amount))throw Error('Invalid total');}catch(e){appAlert('The item details do not match the refund total. Review the request before approving.');return;}}
+  if(bill.sharedReceiptDigest){try{await window.memberRefundService.receipt(approvalWorkspace,approvalUid,id,bill.sharedReceiptDigest,bill.sharedReceiptKind||'member');}catch(e){appAlert('The shared receipt could not be verified. Review again when connected.');return;}}
+  if((guard&&!guard())||!canApproveRefunds()||pondoTeamState.recoveryLocked||pondoTeamState.orgId!==approvalWorkspace||pondoTeamState.uid!==approvalUid||payables.find(x=>x.id===id)!==bill||JSON.stringify(bill)!==approvalCopy){appAlert('This request or your access changed. Review it again.');return;}
   auditLog.push({id:makeId('audit'),action:'approve refund request',timestamp:new Date().toISOString(),reason:'Approved by '+(currentUserDisplayName()||'an Owner/Disbursing Officer'),projectName:projects.find(p=>p.id===bill.projectId)?.name||'',record:{id:bill.id,description:bill.description,amount:bill.amount,reimburseTo:bill.reimburseTo,requestedBy:bill.pendingApproval.requestedBy,requestReason:bill.pendingApproval.reason},...(currentActorStamp()?{by:currentActorStamp()}:{})});
   delete bill.pendingApproval;
   renderAll();
@@ -10842,6 +10853,9 @@ function openInvoice(projectId,kind='supplier'){
   document.getElementById('invoiceForm').style.display='flex';document.getElementById('paymentForm').style.display='none';
   ['invoiceDescription','invoiceSupplier','invoiceAmount','invoiceDueDate','invoiceCategory','invoiceRef','advancePayer'].forEach(id=>document.getElementById(id).value='');
   clearReceiptSelection('invoiceImage');
+  document.getElementById('payableRefundItemsEditor').hidden=kind!=='advance';
+  resetRefundItems('payableRefund','invoiceAmount');
+  document.getElementById('payableReceiptHelp').textContent=kind==='advance'&&window.pondoTeamState?.orgId?'JPEG, PNG or WebP receipt images are shared with workspace members. Check the preview for readability. Updated workspace rules are required.':'PNG, JPEG, WebP or PDF. Attachments stay on this device.';
   document.getElementById('invoiceDate').value=localDate();
   refreshDescriptionSuggestions();
   // Requesting a refund is almost always for yourself -- prefill the
@@ -10863,7 +10877,7 @@ function openInvoice(projectId,kind='supplier'){
 // who-to-reimburse already identify the request, and a project can be
 // assigned later (assignRefundProject below) once one exists or is known
 // -- see savePayable() and renderRefundHistory().
-let memberRefundBusy=false,memberRefundPreviousFocus=null,memberRefundContext=null,memberRefundView={org:null,uid:null,status:'unconfirmed',items:[]};
+let memberRefundBusy=false,memberRefundPreviousFocus=null,memberRefundContext=null,memberRefundReceipt=null,memberRefundReceiptReading=false,memberRefundReceiptError=false,memberRefundReceiptGeneration=0,memberRefundView={org:null,uid:null,status:'unconfirmed',items:[]};
 function memberRefundScope(){const s=window.pondoTeamState;return s?.orgId&&s?.uid?{org:s.orgId,uid:s.uid}:null;}
 function memberRefundAvailable(){const s=window.pondoTeamState;return !!(s?.orgId&&s.uid&&s.uid===window.pondoCurrentUser?.uid&&s.role==='reviewer'&&s.memberConfirmed&&s.baselineReady&&!s.recoveryLocked&&!s.listenerError&&!s.syncError&&s.online&&navigator.onLine&&window.memberRefundService);}
 function memberRefundDraftKey(scope){return 'ft_member_refund_draft:'+encodeURIComponent(scope.uid)+':'+encodeURIComponent(scope.org);}
@@ -10965,6 +10979,8 @@ function renderMemberRefundInbox(){
   const funding=document.createElement('p');funding.className='member-refund-funding';
   funding.textContent=s.syncError||s.listenerError||s.dirty||s.pushTimer||s.pushesInFlight?'Funding information is waiting for team sync. Approval never pays or reserves money.':!funds.length?'No funds are recorded yet. If approved, this request stays unpaid until eligible funds are available.':'An approved refund can use uncommitted cash or an assigned project’s allocation. Approval does not reserve funds or pay it.';
   row.appendChild(funding);
+  if(item.itemsJSON)appendRefundItems(row,item.itemsJSON);
+  if(item.receiptDigest)appendSharedMemberReceipt(row,item.id,item.receiptDigest);
   if(approver){const actions=document.createElement('div');actions.className='member-refund-actions';for(const [decision,label] of [['approved','Approve'],['rejected','Reject']]){const button=document.createElement('button');button.type='button';button.className='btn btn-light';button.textContent=label;button.disabled=dashboardActionAvailability(s)!=='ready'||memberRefundBusy;button.onclick=()=>decideMemberRefund(item.id,decision);actions.appendChild(button)}row.appendChild(actions)}list.appendChild(row);
  }
 }
@@ -10982,16 +10998,92 @@ async function decideMemberRefund(id,decision){
  }catch(e){if(scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid)appAlert('Could not confirm the decision: '+(e.message||e)+'. Refresh the request before retrying.');}finally{memberRefundBusy=false;renderMemberRefundInbox();}
 }
 window.decideMemberRefund=decideMemberRefund;
+// An itemized refund is one payable: totals are computed in centavos, never
+// separate cash transactions. Total-only entry remains available.
+function resetRefundItems(prefix,amountId,serialized){
+ const box=document.getElementById(prefix+'ItemsEditor'),amount=document.getElementById(amountId);if(!box||!amount)return;
+ box.replaceChildren();const toggle=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.id=prefix+'ItemsEnabled';toggle.append(check,document.createTextNode(' Itemize this refund'));box.append(toggle);
+ const content=document.createElement('div');content.hidden=true;const note=document.createElement('p');note.className='refund-items-note';note.textContent='Add items, quantities and unit prices. The total is calculated for you. Itemized member requests require updated workspace rules.';const list=document.createElement('div');list.id=prefix+'ItemsList';const add=document.createElement('button');add.type='button';add.className='btn btn-light';add.textContent='+ Add item';add.onclick=()=>addRefundItem(prefix,amountId);content.append(note,list,add);box.append(content);
+ check.onchange=()=>{content.hidden=!check.checked;amount.readOnly=check.checked;if(check.checked&&!list.children.length)addRefundItem(prefix,amountId);if(check.checked)updateRefundItemTotal(prefix,amountId);else amount.value='';};
+ if(serialized){try{const parsed=window.PondoRefundItems.parse(serialized);check.checked=true;content.hidden=false;amount.readOnly=true;for(const item of parsed.lines)addRefundItem(prefix,amountId,item);updateRefundItemTotal(prefix,amountId);}catch(e){check.checked=true;content.hidden=false;amount.readOnly=true;note.textContent='The saved item details are invalid. Check with an approver before retrying.';}}
+ else amount.readOnly=false;
+}
+function addRefundItem(prefix,amountId,item){
+ const list=document.getElementById(prefix+'ItemsList');if(!list||list.children.length>=window.PondoRefundItems.MAX_ITEMS)return;
+ const row=document.createElement('div');row.className='refund-item-row';
+ const field=(caption,key,value,type)=>{const label=document.createElement('label');if(key==='name')label.className='refund-item-name';label.textContent=caption;const input=document.createElement('input');input.className='input';input.dataset.refundItem=key;input.type=type;input.value=value||'';input.setAttribute('aria-label',caption);if(key==='name')input.maxLength=120;else{input.min=key==='quantity'?'0.001':'0.01';input.step=key==='quantity'?'0.001':'0.01';input.inputMode='decimal';}input.oninput=()=>updateRefundItemTotal(prefix,amountId);label.append(input);row.append(label);};
+ field('Item','name',item?.name,'text');field('Quantity','quantity',item?String(item.qtyMilli/1000):'','number');field('Unit price','price',item?(item.unitCents/100).toFixed(2):'','number');
+ const remove=document.createElement('button');remove.type='button';remove.className='btn btn-light';remove.textContent='Remove';remove.setAttribute('aria-label','Remove item');remove.onclick=()=>{row.remove();updateRefundItemTotal(prefix,amountId)};const lineAmount=document.createElement('div');lineAmount.className='refund-item-amount';lineAmount.setAttribute('aria-live','polite');lineAmount.textContent='Item amount: —';row.append(remove,lineAmount);list.append(row);updateRefundItemTotal(prefix,amountId);
+}
+function readRefundItems(prefix){
+ const enabled=document.getElementById(prefix+'ItemsEnabled');if(!enabled?.checked)return null;
+ const rows=[...document.getElementById(prefix+'ItemsList').children];const items=rows.map(row=>({name:row.querySelector('[data-refund-item="name"]').value.trim(),qtyMilli:window.PondoRefundItems.quantity(row.querySelector('[data-refund-item="quantity"]').value),unitCents:window.PondoRefundItems.price(row.querySelector('[data-refund-item="price"]').value)}));const result=window.PondoRefundItems.validate(items);return {itemsJSON:JSON.stringify(items),total:result.total};
+}
+function updateRefundItemTotal(prefix,amountId){
+ const amount=document.getElementById(amountId),list=document.getElementById(prefix+'ItemsList');
+ for(const row of list?.children||[]){const out=row.querySelector('.refund-item-amount');try{const item={name:row.querySelector('[data-refund-item="name"]').value.trim()||'Item',qtyMilli:window.PondoRefundItems.quantity(row.querySelector('[data-refund-item="quantity"]').value),unitCents:window.PondoRefundItems.price(row.querySelector('[data-refund-item="price"]').value)};out.textContent='Item amount: '+fmt(window.PondoRefundItems.validate([item]).total/100);}catch(e){out.textContent='Item amount: —';}}
+ try{amount.value=(readRefundItems(prefix).total/100).toFixed(2);}catch(e){amount.value='';}
+}
+function appendRefundItems(parent,json){if(!json)return;try{const result=window.PondoRefundItems.parse(json),details=document.createElement('details'),summary=document.createElement('summary'),list=document.createElement('ul');summary.textContent='Items ('+result.lines.length+')';for(const item of result.lines){const li=document.createElement('li');li.textContent=item.name+' · '+(item.qtyMilli/1000)+' × '+fmt(item.unitCents/100)+' = '+fmt(item.amountCents/100);list.append(li);}details.append(summary,list);parent.appendChild(details);}catch(e){const warning=document.createElement('small');warning.textContent='Item details are invalid; verify before approving.';parent.appendChild(warning);}}
+
+// Re-encode without aggressive quality loss; reject rather than silently
+// shrinking until the text is unreadable. The user previews the actual image.
+async function prepareMemberRefundReceipt(file){
+ if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<=0||file.size>10*1024*1024)throw Error('Choose a JPEG, PNG or WebP image up to 10 MB.');
+ const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(Error('Could not read the image.'));reader.onload=()=>resolve(reader.result);reader.readAsDataURL(file)});
+ const image=await new Promise((resolve,reject)=>{const img=new Image();img.onerror=()=>reject(Error('Could not open the image.'));img.onload=()=>resolve(img);img.src=data});
+ if(!image.width||!image.height||image.width*image.height>100000000)throw Error('The receipt image dimensions are not supported.');
+ const scale=Math.min(1,2000/Math.max(image.width,image.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+ const ctx=canvas.getContext('2d');if(!ctx)throw Error('Image processing is unavailable.');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+ for(const quality of [.9,.84,.78]){const result=canvas.toDataURL('image/jpeg',quality);if(result.length<=600000)return result;}
+ throw Error('This image is too detailed to fit without stronger compression. Crop the receipt or use a clearer image and try again.');
+}
+function clearMemberRefundReceipt(){
+ memberRefundReceiptGeneration++;memberRefundReceiptReading=false;memberRefundReceiptError=false;memberRefundReceipt=null;
+ const file=document.getElementById('memberRefundReceipt');if(file)file.value='';const preview=document.getElementById('memberRefundReceiptPreview');if(preview)preview.hidden=true;
+ const image=document.getElementById('memberRefundReceiptImage');if(image)image.removeAttribute('src');const link=document.getElementById('memberRefundReceiptDownload');if(link)link.removeAttribute('href');const remove=document.getElementById('memberRefundReceiptRemove');if(remove)remove.hidden=true;const status=document.getElementById('memberRefundReceiptStatus');if(status)status.textContent='';
+}
+function showMemberReceiptPreview(image){const preview=document.getElementById('memberRefundReceiptPreview'),img=document.getElementById('memberRefundReceiptImage');if(preview&&img){img.src=image;preview.hidden=false;document.getElementById('memberRefundReceiptDownload').href=image;document.getElementById('memberRefundReceiptRemove').hidden=false;}}
+async function selectMemberRefundReceipt(input){
+ const scope=memberRefundContext,generation=++memberRefundReceiptGeneration,file=input.files?.[0];memberRefundReceipt=null;document.getElementById('memberRefundReceiptPreview').hidden=true;
+ const status=document.getElementById('memberRefundReceiptStatus');memberRefundReceiptError=false;document.getElementById('memberRefundReceiptRemove').hidden=!file;if(!file){memberRefundReceiptReading=false;status.textContent='';return;}
+ memberRefundReceiptReading=true;status.textContent='Preparing receipt…';
+ try{const image=await prepareMemberRefundReceipt(file),digest=await window.pondoRefundReceiptDigest(image);if(generation!==memberRefundReceiptGeneration||memberRefundContext!==scope||!memberRefundAvailable())return;memberRefundReceipt={image,digest};showMemberReceiptPreview(image);status.textContent='Check that the preview is readable. Workspace members can see this receipt.';}
+ catch(e){if(generation===memberRefundReceiptGeneration&&memberRefundContext===scope){memberRefundReceiptError=true;status.textContent=e.message||'Could not prepare this receipt.';}}
+ finally{if(generation===memberRefundReceiptGeneration)memberRefundReceiptReading=false;}
+}
+let payableSharedReceipt=null,payableSharedReceiptReading=false,payableSharedReceiptError=false,payableReceiptGeneration=0;
+function resetPayableSharedReceipt(){payableReceiptGeneration++;payableSharedReceipt=null;payableSharedReceiptReading=false;payableSharedReceiptError=false;const preview=document.getElementById('payableReceiptPreview'),image=document.getElementById('payableReceiptPreviewImage'),link=document.getElementById('payableReceiptPreviewDownload'),status=document.getElementById('payableReceiptPreviewStatus');if(preview)preview.hidden=true;if(image)image.removeAttribute('src');if(link)link.removeAttribute('href');if(status)status.textContent='';}
+async function selectPayableSharedReceipt(file){
+ resetPayableSharedReceipt();const scope=memberRefundScope(),context=payableContext,generation=payableReceiptGeneration;
+ if(!file||context?.kind!=='advance'||!scope)return;
+ const status=document.getElementById('payableReceiptPreviewStatus');payableSharedReceiptReading=true;status.textContent='Preparing shared receipt…';
+ try{const image=await prepareMemberRefundReceipt(file),digest=await window.pondoRefundReceiptDigest(image);if(generation!==payableReceiptGeneration||context!==payableContext||scope.org!==window.pondoTeamState?.orgId||scope.uid!==window.pondoCurrentUser?.uid)return;
+  payableSharedReceipt={image,digest,org:scope.org,uid:scope.uid,file};const preview=document.getElementById('payableReceiptPreview');document.getElementById('payableReceiptPreviewImage').src=image;document.getElementById('payableReceiptPreviewDownload').href=image;preview.hidden=false;status.textContent='Check the preview. This receipt will be shared with workspace members when the team copy is confirmed.';
+ }catch(e){if(generation===payableReceiptGeneration){payableSharedReceiptError=true;status.textContent=e.message||'Could not prepare this receipt.';}}
+ finally{if(generation===payableReceiptGeneration)payableSharedReceiptReading=false;}
+}
+function appendSharedMemberReceipt(parent,id,digest,kind='member'){
+ const button=document.createElement('button');button.type='button';button.className='btn btn-light';button.textContent='View shared receipt';
+ button.onclick=async()=>{const scope=memberRefundScope();if(!scope||scope.uid!==window.pondoCurrentUser?.uid||!window.memberRefundService?.receipt)return;button.disabled=true;
+  try{const image=await window.memberRefundService.receipt(scope.org,scope.uid,id,digest,kind);if(!button.isConnected||scope.org!==window.pondoTeamState?.orgId||scope.uid!==window.pondoCurrentUser?.uid||!window.pondoTeamState?.memberConfirmed)return;
+   const img=document.createElement('img');img.alt='Shared receipt';img.src=image;img.style.cssText='display:block;max-width:100%;max-height:500px;object-fit:contain';const link=document.createElement('a');link.href=image;link.download='refund-receipt.jpg';link.textContent='Download full-size receipt';button.replaceWith(img,link);
+  }catch(e){if(button.isConnected&&scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoCurrentUser?.uid){button.disabled=false;appAlert('Could not verify the shared receipt. Check your connection and access.');}}
+ };parent.appendChild(button);
+}
+
 function openMemberRefundRequest(){
  if(!memberRefundAvailable()){appAlert('A confirmed online team workspace is required to submit a member request.');return;}const scope=memberRefundScope();memberRefundPreviousFocus=document.activeElement;memberRefundContext=scope;
+ clearMemberRefundReceipt();
  prepareRefundRecipientSelector('memberRefundRecipientMember','memberRefundRecipientMemberLabel');
  document.getElementById('memberRefundCheck').hidden=true;document.getElementById('memberRefundDraftNotice').hidden=true;
+ resetRefundItems('memberRefund','memberRefundAmount');
  const ids=['Person','Description','Amount','Date','Supplier','Category','Reference'];for(const name of ids)document.getElementById('memberRefund'+name).value='';document.getElementById('memberRefundPerson').value=currentUserDisplayName();document.getElementById('memberRefundDate').value=localDate();
- try{const saved=JSON.parse(localStorage.getItem(memberRefundDraftKey(scope))||'null');if(saved?.payload){document.getElementById('memberRefundCheck').hidden=false;const p=saved.payload;for(const [field,value] of Object.entries({Person:p.reimburseTo,Description:p.description,Amount:p.amountCents/100,Date:p.expenseDate,Supplier:p.supplier,Category:p.category,Reference:p.reference}))document.getElementById('memberRefund'+field).value=value;if(p.reimburseToUid){const sel=document.getElementById('memberRefundRecipientMember');let opt=[...sel.options].find(o=>o.value===p.reimburseToUid);if(!opt){opt=document.createElement('option');opt.value=p.reimburseToUid;opt.textContent=p.reimburseTo+' · ID: '+p.reimburseToUid;opt.dataset.recipientName=p.reimburseTo;sel.appendChild(opt);}sel.value=p.reimburseToUid;sel.dataset.name=p.reimburseTo;document.getElementById('memberRefundRecipientMemberLabel').hidden=false;}document.getElementById('memberRefundDraftNotice').textContent='A previous submission is not confirmed. Review and retry the same request or check its status.';document.getElementById('memberRefundDraftNotice').hidden=false;}}catch(e){memberRefundContext=null;appAlert('The saved request draft could not be read. Do not submit a duplicate; check with an approver.');return;}
+ try{const saved=JSON.parse(localStorage.getItem(memberRefundDraftKey(scope))||'null');if(saved?.payload){document.getElementById('memberRefundCheck').hidden=false;const p=saved.payload;if(p.receiptDigest&&typeof saved.receiptImage==='string'){memberRefundReceipt={image:saved.receiptImage,digest:p.receiptDigest};showMemberReceiptPreview(saved.receiptImage);document.getElementById('memberRefundReceiptStatus').textContent='Saved receipt restored. Check its readability before retrying.';}resetRefundItems('memberRefund','memberRefundAmount',p.itemsJSON);for(const [field,value] of Object.entries({Person:p.reimburseTo,Description:p.description,Amount:p.amountCents/100,Date:p.expenseDate,Supplier:p.supplier,Category:p.category,Reference:p.reference}))document.getElementById('memberRefund'+field).value=value;if(p.reimburseToUid){const sel=document.getElementById('memberRefundRecipientMember');let opt=[...sel.options].find(o=>o.value===p.reimburseToUid);if(!opt){opt=document.createElement('option');opt.value=p.reimburseToUid;opt.textContent=p.reimburseTo+' · ID: '+p.reimburseToUid;opt.dataset.recipientName=p.reimburseTo;sel.appendChild(opt);}sel.value=p.reimburseToUid;sel.dataset.name=p.reimburseTo;document.getElementById('memberRefundRecipientMemberLabel').hidden=false;}document.getElementById('memberRefundDraftNotice').textContent='A previous submission is not confirmed. Review and retry the same request or check its status.';document.getElementById('memberRefundDraftNotice').hidden=false;}}catch(e){memberRefundContext=null;appAlert('The saved request draft could not be read. Do not submit a duplicate; check with an approver.');return;}
  document.getElementById('memberRefundModal').hidden=false;document.body.classList.add('modal-open');document.getElementById('memberRefundPerson').focus();
 }
-function closeMemberRefundRequest(force=false){if(memberRefundBusy&&!force)return;document.getElementById('memberRefundModal').hidden=true;memberRefundContext=null;document.body.classList.remove('modal-open');if(!force&&memberRefundPreviousFocus?.isConnected)memberRefundPreviousFocus.focus();}
-document.getElementById('memberRefundModal').addEventListener('keydown',e=>{if(e.key==='Escape'&&!memberRefundBusy){e.preventDefault();e.stopPropagation();closeMemberRefundRequest();return;}if(e.key==='Tab'){const nodes=[...e.currentTarget.querySelectorAll('button:not([disabled]):not([hidden]),input:not([disabled])')].filter(x=>x.offsetParent!==null);if(nodes.length){const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}});
+function closeMemberRefundRequest(force=false){if(memberRefundBusy&&!force)return;document.getElementById('memberRefundModal').hidden=true;clearMemberRefundReceipt();memberRefundContext=null;document.body.classList.remove('modal-open');if(!force&&memberRefundPreviousFocus?.isConnected)memberRefundPreviousFocus.focus();}
+document.getElementById('memberRefundModal').addEventListener('keydown',e=>{if(e.key==='Escape'&&!memberRefundBusy){e.preventDefault();e.stopPropagation();closeMemberRefundRequest();return;}if(e.key==='Tab'){const nodes=[...e.currentTarget.querySelectorAll('button:not([disabled]):not([hidden]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])')].filter(x=>x.offsetParent!==null);if(nodes.length){const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}});
 window.memberRefundRecheck=()=>{if(memberRefundContext&&(!memberRefundAvailable()||memberRefundContext.org!==window.pondoTeamState?.orgId||memberRefundContext.uid!==window.pondoTeamState?.uid))closeMemberRefundRequest(true);};
 async function checkMemberRefundDraft(){
  if(memberRefundBusy||!memberRefundAvailable()||!memberRefundContext)return;const scope=memberRefundContext,key=memberRefundDraftKey(scope);let draft;try{draft=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}if(!draft?.id||!draft.payload){appAlert('The saved draft could not be read.');return;}
@@ -11001,11 +11093,12 @@ async function checkMemberRefundDraft(){
  }catch(e){if(memberRefundContext===scope)appAlert('Could not check the server. Keep the draft and retry when connected.');}finally{memberRefundBusy=false;document.getElementById('memberRefundCheck').disabled=false;}
 }
 document.getElementById('memberRefundForm').addEventListener('submit',async e=>{
- e.preventDefault();if(memberRefundBusy||!memberRefundAvailable()||!memberRefundContext)return;const scope=memberRefundContext;if(scope.org!==window.pondoTeamState.orgId||scope.uid!==window.pondoTeamState.uid)return;
- const field=n=>document.getElementById('memberRefund'+n).value.trim(),amount=parseMoney(field('Amount')),date=field('Date'),payload={uid:scope.uid,description:field('Description'),reimburseTo:field('Person'),amountCents:amount,expenseDate:date,supplier:field('Supplier'),category:field('Category'),reference:field('Reference'),...(refundRecipientUid('memberRefundRecipientMember','memberRefundPerson')?{reimburseToUid:refundRecipientUid('memberRefundRecipientMember','memberRefundPerson')}:{})};
+ e.preventDefault();if(memberRefundBusy||!memberRefundAvailable()||!memberRefundContext)return;if(memberRefundReceiptReading){appAlert('Wait until the receipt image is ready.');return;}if(memberRefundReceiptError){appAlert('Choose a readable receipt image or remove the attachment before submitting.');return;}const scope=memberRefundContext;if(scope.org!==window.pondoTeamState.orgId||scope.uid!==window.pondoTeamState.uid)return;
+ let itemized;try{itemized=readRefundItems('memberRefund');}catch(err){appAlert(err.message);return;}
+ const field=n=>document.getElementById('memberRefund'+n).value.trim(),amount=itemized?itemized.total:parseMoney(field('Amount')),date=field('Date'),payload={...(itemized?{itemsJSON:itemized.itemsJSON}:{}),...(memberRefundReceipt?{receiptDigest:memberRefundReceipt.digest}:{}),uid:scope.uid,description:field('Description'),reimburseTo:field('Person'),amountCents:amount,expenseDate:date,supplier:field('Supplier'),category:field('Category'),reference:field('Reference'),...(refundRecipientUid('memberRefundRecipientMember','memberRefundPerson')?{reimburseToUid:refundRecipientUid('memberRefundRecipientMember','memberRefundPerson')}:{})};
  if(!payload.description||payload.description.length>300||!payload.reimburseTo||payload.reimburseTo.length>160||amount===null||amount<=0||amount>1000000000||!date||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)||!validateActualDate(date,'expense')||[payload.supplier,payload.category,payload.reference].some(x=>x.length>160)){appAlert('Check the description, person, date and positive amount.');return;}
- let draft,key=memberRefundDraftKey(scope);try{draft=JSON.parse(localStorage.getItem(key)||'null');if(draft&&JSON.stringify(draft.payload)!==JSON.stringify(payload)){appAlert('An earlier submission is not confirmed. Restore and retry the same request; check with an approver before submitting a different one.');return;}if(!draft){draft={id:makeId('member-refund'),payload};localStorage.setItem(key,JSON.stringify(draft));if(localStorage.getItem(key)!==JSON.stringify(draft))throw Error('Draft could not be verified.');}}catch(err){appAlert('Cannot safely save the submission draft on this device. Request was not sent.');return;}
- memberRefundBusy=true;document.getElementById('memberRefundSubmit').disabled=true;try{const result=await window.memberRefundService.submit(scope.org,scope.uid,draft.id,payload);try{if(localStorage.getItem(key)===JSON.stringify(draft))localStorage.removeItem(key)}catch(e){}if(memberRefundContext===scope&&scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid){memberRefundBusy=false;closeMemberRefundRequest();appAlert(result==='pending'?'Request confirmed by the server. An Owner or Disbursing Officer can review it.':'The server confirms this request was already '+result+'. Check Refund History for the request or decision.');}}
+ let draft,key=memberRefundDraftKey(scope);try{draft=JSON.parse(localStorage.getItem(key)||'null');if(draft&&(JSON.stringify(draft.payload)!==JSON.stringify(payload)||(draft.receiptImage||null)!==(memberRefundReceipt?.image||null))){appAlert('An earlier submission is not confirmed. Restore and retry the same request; check with an approver before submitting a different one.');return;}if(!draft){draft={id:makeId('member-refund'),payload,...(memberRefundReceipt?{receiptImage:memberRefundReceipt.image}:{})};localStorage.setItem(key,JSON.stringify(draft));if(localStorage.getItem(key)!==JSON.stringify(draft))throw Error('Draft could not be verified.');}}catch(err){appAlert('Cannot safely save the submission draft on this device. Request was not sent.');return;}
+ memberRefundBusy=true;document.getElementById('memberRefundSubmit').disabled=true;try{const result=await window.memberRefundService.submit(scope.org,scope.uid,draft.id,payload,draft.receiptImage);try{if(localStorage.getItem(key)===JSON.stringify(draft))localStorage.removeItem(key)}catch(e){}if(memberRefundContext===scope&&scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid){memberRefundBusy=false;closeMemberRefundRequest();appAlert(result==='pending'?'Request confirmed by the server. An Owner or Disbursing Officer can review it.':'The server confirms this request was already '+result+'. Check Refund History for the request or decision.');}}
  catch(err){if(memberRefundContext===scope)document.getElementById('memberRefundCheck').hidden=false;if(scope.org===window.pondoTeamState?.orgId&&scope.uid===window.pondoTeamState?.uid)appAlert('Submission not confirmed: '+(err.message||err)+'. Your draft is kept. Retry this same request or check with an approver before trying another.');}finally{memberRefundBusy=false;document.getElementById('memberRefundSubmit').disabled=false;}
 });
 function openRefundRequest(){
@@ -11063,27 +11156,29 @@ function updatePaymentNote(){
   note.textContent='Suggested maximum '+fmt(suggested/100)+(b.projectId?' based on the outstanding refund, unspent allocation and available fund balance.':' based on the outstanding refund and uncommitted fund cash; project allocations are protected.')+' You can enter a smaller amount.';
   useSuggestion.style.display=paymentAmountEdited?'inline-flex':'none';
 }
-async function savePayable(){const chosenProjectId=document.getElementById('invoiceProject').value||payableContext.projectId,project=chosenProjectId?projects.find(x=>x.id===chosenProjectId):null,description=document.getElementById('invoiceDescription').value.trim(),amount=parseMoney(document.getElementById('invoiceAmount').value),date=document.getElementById('invoiceDate').value,due=document.getElementById('invoiceDueDate').value;
+async function savePayable(){let itemized=null;try{if(payableContext.kind==='advance')itemized=readRefundItems('payableRefund');}catch(err){appAlert(err.message);return;}const chosenProjectId=document.getElementById('invoiceProject').value||payableContext.projectId,project=chosenProjectId?projects.find(x=>x.id===chosenProjectId):null,description=document.getElementById('invoiceDescription').value.trim(),amount=itemized?itemized.total:parseMoney(document.getElementById('invoiceAmount').value),date=document.getElementById('invoiceDate').value,due=document.getElementById('invoiceDueDate').value;
 // A refund request is still fully identified without a project -- the
 // description, amount, date, receipt and who-to-reimburse are enough, and
 // a project can be assigned later (assignRefundProject) once one exists.
 // Unpaid-expense bills are a project budget line item, so those still
 // require a project up front.
 if(payableContext.kind!=='advance'&&!project){appAlert('Choose a project for this expense.');return;}
-if(!description||amount===null||amount<=0||!date){appAlert('Enter a project expense description, invoice date and a valid amount greater than zero.');return;}if(!validateActualDate(date,'expense'))return;if(due&&due<date){appAlert('The due date cannot be before the invoice date.');return;}let person=document.getElementById('advancePayer').value.trim(),recipientUid=refundRecipientUid('advanceRecipientMember','advancePayer'),refundWorkspace=window.pondoTeamState?.orgId||null,refundActor=window.pondoCurrentUser?.uid||null;if(payableContext.kind==='advance'&&!person){appAlert('Enter the person who paid personally and should be reimbursed.');return;}let image;try{image=await readReceipt('invoiceImage')}catch(e){appAlert(e.message);return;}if((window.pondoTeamState?.orgId||null)!==refundWorkspace||(window.pondoCurrentUser?.uid||null)!==refundActor||(recipientUid&&(!window.pondoTeamState?.memberConfirmed||!window.pondoTeamState.members?.some(m=>m.uid===recipientUid)||recipientUid!==refundRecipientUid('advanceRecipientMember','advancePayer')))){appAlert('The workspace or selected recipient changed. Review the refund again.');return;}let payableActor=currentActorStamp();
+if(!description||amount===null||amount<=0||!date){appAlert('Enter a project expense description, invoice date and a valid amount greater than zero.');return;}if(!validateActualDate(date,'expense'))return;if(due&&due<date){appAlert('The due date cannot be before the invoice date.');return;}let person=document.getElementById('advancePayer').value.trim(),recipientUid=refundRecipientUid('advanceRecipientMember','advancePayer'),refundWorkspace=window.pondoTeamState?.orgId||null,refundActor=window.pondoCurrentUser?.uid||null;if(payableContext.kind==='advance'&&!person){appAlert('Enter the person who paid personally and should be reimbursed.');return;}let image,sharedReceipt=null;const selectedReceipt=document.getElementById('invoiceImage').files?.[0]||document.getElementById('invoiceImageCamera')?.files?.[0];
+if(payableContext.kind==='advance'&&refundWorkspace&&selectedReceipt){if(payableSharedReceiptReading){appAlert('Wait until the receipt is ready.');return;}if(payableSharedReceiptError||!payableSharedReceipt||payableSharedReceipt.file!==selectedReceipt||payableSharedReceipt.org!==refundWorkspace||payableSharedReceipt.uid!==refundActor){appAlert('Choose a readable image or remove the receipt before saving.');return;}if(!window.pondoTeamState?.memberConfirmed||!navigator.onLine){appAlert('Confirm your team access online before sharing a receipt.');return;}sharedReceipt=payableSharedReceipt;image=sharedReceipt.image;}
+else try{image=await readReceipt('invoiceImage')}catch(e){appAlert(e.message);return;}if((window.pondoTeamState?.orgId||null)!==refundWorkspace||(window.pondoCurrentUser?.uid||null)!==refundActor||(recipientUid&&(!window.pondoTeamState?.memberConfirmed||!window.pondoTeamState.members?.some(m=>m.uid===recipientUid)||recipientUid!==refundRecipientUid('advanceRecipientMember','advancePayer')))){appAlert('The workspace or selected recipient changed. Review the refund again.');return;}let payableActor=currentActorStamp();
 // A personal-advance request filed by a teammate who isn't an Owner or
 // Disbursing Officer (in a team workspace) needs their sign-off before it
 // becomes an active, payable reimbursement claim -- see "Refund requests"
 // above. Owner/Disbursing Officer and solo/personal workspaces keep today's
 // behavior: immediately active, no extra step.
 let needsRefundApproval=payableContext.kind==='advance'&&refundRequestRequiresApproval();
-let newPayable={id:makeId('ap'),projectId:project?project.id:null,kind:payableContext.kind,description,supplier:document.getElementById('invoiceSupplier').value.trim(),reimburseTo:person,...(payableContext.kind==='advance'&&recipientUid?{reimburseToUid:recipientUid}:{}),receiptNo:document.getElementById('invoiceRef').value.trim(),receiptImage:image,amount:amount/100,invoiceDate:date,dueDate:due,category:document.getElementById('invoiceCategory').value.trim()||'Project expense',...(payableActor?{createdBy:payableActor}:{}),...(needsRefundApproval?{pendingApproval:{requestedBy:payableActor||{name:currentUserDisplayName()||'A teammate'},requestedAt:new Date().toISOString()}}:{})};
+let newPayable={...(itemized?{itemsJSON:itemized.itemsJSON}:{}),...(sharedReceipt?{sharedReceiptDigest:sharedReceipt.digest,sharedReceiptKind:'editor'}:{}),id:makeId('ap'),projectId:project?project.id:null,kind:payableContext.kind,description,supplier:document.getElementById('invoiceSupplier').value.trim(),reimburseTo:person,...(payableContext.kind==='advance'&&recipientUid?{reimburseToUid:recipientUid}:{}),receiptNo:document.getElementById('invoiceRef').value.trim(),receiptImage:image,amount:amount/100,invoiceDate:date,dueDate:due,category:document.getElementById('invoiceCategory').value.trim()||'Project expense',...(payableActor?{createdBy:payableActor}:{}),...(needsRefundApproval?{pendingApproval:{requestedBy:payableActor||{name:currentUserDisplayName()||'A teammate'},requestedAt:new Date().toISOString()}}:{})};
 payables.push(newPayable);
 // Log the submission itself (mirrors "request deletion approval" above) so
 // the full request -> approve/reject -> payment trail is visible in both
 // the audit history panel and the dedicated Refund History view.
 if(needsRefundApproval)auditLog.push({id:makeId('audit'),action:'request refund approval',timestamp:new Date().toISOString(),reason:'Submitted by '+(currentUserDisplayName()||'a teammate'),projectName:project?project.name:'',record:{id:newPayable.id,description:newPayable.description,amount:newPayable.amount,reimburseTo:newPayable.reimburseTo},...(payableActor?{by:payableActor}:{})});
-closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert(needsRefundApproval?'Refund request submitted. An Owner or Disbursing Officer can approve or reject it.':(project?'Unpaid expense recorded. No fund cash was reduced.':'Refund recorded and unpaid. You can record payment from uncommitted fund cash when available.'));}
+closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert(needsRefundApproval?(sharedReceipt?'Refund saved on this device. Wait for team sync to confirm the request and shared receipt.':'Refund request submitted. An Owner or Disbursing Officer can approve or reject it.'):(project?'Unpaid expense recorded. No fund cash was reduced.':(sharedReceipt?'Refund saved on this device. Wait for team sync to confirm the refund and shared receipt.':'Refund recorded and unpaid. You can record payment from uncommitted fund cash when available.')));}
 async function savePayablePayment(){const bill=payables.find(x=>x.id===payableContext.payableId),fundId=document.getElementById('paymentFund').value,amount=parseMoney(document.getElementById('paymentAmount').value),date=document.getElementById('paymentDate').value;if(!bill||!funds.some(f=>f.id===fundId)||!date||amount===null||amount<=0){appAlert('Choose an eligible fund and enter a valid payment date and amount.');return;}if(bill.pendingApproval){appAlert('This refund request is still pending approval by an Owner or Disbursing Officer.');return;}if(!validateActualDate(date,'payment'))return;if(date<bill.invoiceDate){appAlert('The payment date cannot be earlier than the expense date.');return;}if(funds.find(f=>f.id===fundId).dateReceived&&date<funds.find(f=>f.id===fundId).dateReceived){appAlert('The payment date cannot be earlier than the fund receipt date.');return;}if(amount>payableOutstanding(bill)){appAlert('Payment exceeds the outstanding payable of '+fmt(payableOutstanding(bill)/100)+'.');return;}if(wouldOverdrawAtDate(fundId,date,amount)){appAlert('This payment would make the fund cash balance negative on its date or a later recorded date.');return;}if((bill.projectId||null)!==(payableContext.projectId||null)){appAlert('The refund project changed. Close and review the payment again.');return;}if(bill.projectId){if(!projects.some(p=>p.id===bill.projectId)||amount>allocationRemaining(fundId,bill.projectId)||amount>fundCash(fundId)){appAlert('Payment exceeds the unspent project allocation or fund cash balance.');return;}}else if(bill.kind!=='advance'||amount>fundAvailable(fundId)){appAlert('Payment exceeds uncommitted fund cash. Funds reserved for projects cannot be used.');return;}let paymentActor=currentActorStamp();txs.push({id:makeId('t'),date,fundId,projectId:bill.projectId||null,payableId:bill.id,type:'OUT',category:bill.category,description:(bill.kind==='advance'?'Reimbursement: ':'Payment: ')+bill.description,amount:amount/100,payee:bill.kind==='advance'?bill.reimburseTo:(bill.supplier||''),receiptNo:document.getElementById('paymentRef').value.trim(),method:document.getElementById('paymentMethod').value.trim(),...(paymentActor?{createdBy:paymentActor}:{})});closePayableModal();renderAll();returnToProjectDetail();soundEvent('add');if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Payment recorded. The payable balance and selected fund cash have been updated.');}
 async function deleteUnpaidPayable(id){let bill=payables.find(x=>x.id===id);if(!bill)return;if(payableSettled(bill)>0){appAlert('Void linked cash payments and non-cash settlements before voiding this payable.');return;}let reason=await appReasonPrompt('Why are you voiding this unpaid expense? A history entry will be kept.',['Recorded by mistake or duplicate entry','Wrong amount','No longer needed or cancelled']);if(reason===null)return;if(!reason.trim()){appAlert('A reason is required.');return;}if(await appConfirm('Void this unpaid expense? It will be removed from totals but preserved in history.')){if(!payables.includes(bill)||payableSettled(bill)>0){appAlert('The refund or settlement changed. Review it again.');return;}auditLog.push({id:makeId('audit'),action:'void payable',timestamp:new Date().toISOString(),reason:reason.trim(),projectName:projects.find(p=>p.id===bill.projectId)?.name||'',record:JSON.parse(JSON.stringify(bill)),...(currentActorStamp()?{by:currentActorStamp()}:{})});payables=payables.filter(x=>x.id!==id);renderAll();}}
 // A non-cash refund settlement records one approved absence date at ₱250.
@@ -11129,7 +11224,7 @@ async function voidAbsenceCredit(billId,creditId){
 document.getElementById('absenceCreditForm').addEventListener('submit',saveAbsenceCredit);
 document.getElementById('absenceCreditOverlay').addEventListener('click',e=>{if(e.target.id==='absenceCreditOverlay')closeAbsenceCredit()});
 document.addEventListener('keydown',e=>{const overlay=document.getElementById('absenceCreditOverlay');if(overlay.hidden||!document.getElementById('appDialogOverlay').hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeAbsenceCredit();return}if(e.key==='Tab'){const nodes=[...overlay.querySelectorAll('button:not([disabled]),input:not([disabled])')].filter(x=>x.offsetParent!==null);if(nodes.length&&e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1).focus()}else if(nodes.length&&!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0].focus()}}},true);
-function renderPayablesForProject(project,card){const section=card.querySelector('.project-payables');section.innerHTML='';const bills=payables.filter(x=>x.projectId===project.id);if(!bills.length){section.innerHTML='<p class="funding-note">No bills or refunds recorded for this project.</p>';return;}bills.forEach(bill=>{let row=document.createElement('div');row.className='payable-row';const paid=payablePaid(bill.id),credit=payableCredit(bill.id),remaining=payableOutstanding(bill),status=payableStatus(bill);row.innerHTML=`<div class="project-payable-top"><div class="project-payable-title"><span class="project-payable-icon" aria-hidden="true">${LICON('receipt','#5b4ae8',19)}</span><div><strong>${bill.kind==='advance'?'Refund request · ':''}${escapeText(bill.description)}</strong><small>${bill.kind==='advance'?'Reimburse '+escapeText(bill.reimburseTo||'—'):escapeText(bill.supplier||'No supplier')} · Date ${escapeText(bill.invoiceDate||'—')}${bill.dueDate?' · Due '+escapeText(bill.dueDate):''}</small></div></div><span class="payable-status project-status-${bill.pendingApproval?'pending':remaining===0?'paid':paid+credit>0?'partial':'unpaid'}">${escapeText(status)}</span></div><div class="project-payable-amounts"><div><span>Recorded</span><strong>${fmt(bill.amount)}</strong></div><div><span>Cash paid</span><strong>${fmt(paid/100)}</strong></div><div><span>Outstanding</span><strong>${fmt(remaining/100)}</strong></div></div>${credit?'<p class="contrib-help">Non-cash settlement: '+fmt(credit/100)+'</p>':''}<div class="payable-row-info project-payable-notes">${createdByBadge(bill)}${pendingApprovalBadge(bill)}</div><div class="payable-actions"></div>`;if(bill.receiptNo||bill.receiptImage){let ref=document.createElement('small');ref.textContent='Reference: '+(bill.receiptNo||'—');row.querySelector('.payable-row-info').appendChild(ref);addReceiptLink(row.querySelector('.payable-row-info'),bill.receiptImage);}let history=txs.filter(t=>t.payableId===bill.id&&t.type==='OUT');if(history.length){let details=document.createElement('details');details.className='payable-history';details.dataset.payableId=bill.id;details.open=!!(card._payableHistoryOpen&&card._payableHistoryOpen[bill.id]);let summary=document.createElement('summary');summary.textContent='Payment history ('+history.length+')';details.appendChild(summary);history.forEach(t=>{let line=document.createElement('p');line.textContent=t.date+' · '+(funds.find(f=>f.id===t.fundId)?.name||'Unknown fund')+' · '+fmt(t.amount);details.appendChild(line)});row.querySelector('.payable-row-info').appendChild(details)}let actions=row.querySelector('.payable-actions');if(remaining>0&&!bill.pendingApproval){let pay=document.createElement('button');pay.type='button';pay.className='btn btn-emerald';pay.textContent='Record payment';pay.onclick=()=>openProjectChild(project.id,()=>openPayablePayment(bill.id));actions.appendChild(pay)}if(paid===0&&credit===0){let remove=document.createElement('button');remove.type='button';remove.className='btn btn-light';remove.textContent=bill.pendingApproval?'Cancel request':'Void';remove.onclick=()=>deleteUnpaidPayable(bill.id);actions.appendChild(remove)}row.querySelector('.refund-approve')?.addEventListener('click',()=>approveRefundRequest(bill.id));row.querySelector('.refund-reject')?.addEventListener('click',()=>rejectRefundRequest(bill.id));section.appendChild(row)})}
+function renderPayablesForProject(project,card){const section=card.querySelector('.project-payables');section.innerHTML='';const bills=payables.filter(x=>x.projectId===project.id);if(!bills.length){section.innerHTML='<p class="funding-note">No bills or refunds recorded for this project.</p>';return;}bills.forEach(bill=>{let row=document.createElement('div');row.className='payable-row';const paid=payablePaid(bill.id),credit=payableCredit(bill.id),remaining=payableOutstanding(bill),status=payableStatus(bill);row.innerHTML=`<div class="project-payable-top"><div class="project-payable-title"><span class="project-payable-icon" aria-hidden="true">${LICON('receipt','#5b4ae8',19)}</span><div><strong>${bill.kind==='advance'?'Refund request · ':''}${escapeText(bill.description)}</strong><small>${bill.kind==='advance'?'Reimburse '+escapeText(bill.reimburseTo||'—'):escapeText(bill.supplier||'No supplier')} · Date ${escapeText(bill.invoiceDate||'—')}${bill.dueDate?' · Due '+escapeText(bill.dueDate):''}</small></div></div><span class="payable-status project-status-${bill.pendingApproval?'pending':remaining===0?'paid':paid+credit>0?'partial':'unpaid'}">${escapeText(status)}</span></div><div class="project-payable-amounts"><div><span>Recorded</span><strong>${fmt(bill.amount)}</strong></div><div><span>Cash paid</span><strong>${fmt(paid/100)}</strong></div><div><span>Outstanding</span><strong>${fmt(remaining/100)}</strong></div></div>${credit?'<p class="contrib-help">Non-cash settlement: '+fmt(credit/100)+'</p>':''}<div class="payable-row-info project-payable-notes">${createdByBadge(bill)}${pendingApprovalBadge(bill)}</div><div class="payable-actions"></div>`;if(bill.receiptNo||bill.receiptImage){let ref=document.createElement('small');ref.textContent='Reference: '+(bill.receiptNo||'—');row.querySelector('.payable-row-info').appendChild(ref);addReceiptLink(row.querySelector('.payable-row-info'),bill.receiptImage);}if(bill.itemsJSON)appendRefundItems(row.querySelector('.payable-row-info'),bill.itemsJSON);if(bill.sharedReceiptDigest)appendSharedMemberReceipt(row.querySelector('.payable-row-info'),bill.id,bill.sharedReceiptDigest,bill.sharedReceiptKind||'member');let history=txs.filter(t=>t.payableId===bill.id&&t.type==='OUT');if(history.length){let details=document.createElement('details');details.className='payable-history';details.dataset.payableId=bill.id;details.open=!!(card._payableHistoryOpen&&card._payableHistoryOpen[bill.id]);let summary=document.createElement('summary');summary.textContent='Payment history ('+history.length+')';details.appendChild(summary);history.forEach(t=>{let line=document.createElement('p');line.textContent=t.date+' · '+(funds.find(f=>f.id===t.fundId)?.name||'Unknown fund')+' · '+fmt(t.amount);details.appendChild(line)});row.querySelector('.payable-row-info').appendChild(details)}let actions=row.querySelector('.payable-actions');if(remaining>0&&!bill.pendingApproval){let pay=document.createElement('button');pay.type='button';pay.className='btn btn-emerald';pay.textContent='Record payment';pay.onclick=()=>openProjectChild(project.id,()=>openPayablePayment(bill.id));actions.appendChild(pay)}if(paid===0&&credit===0){let remove=document.createElement('button');remove.type='button';remove.className='btn btn-light';remove.textContent=bill.pendingApproval?'Cancel request':'Void';remove.onclick=()=>deleteUnpaidPayable(bill.id);actions.appendChild(remove)}row.querySelector('.refund-approve')?.addEventListener('click',()=>approveRefundRequest(bill.id));row.querySelector('.refund-reject')?.addEventListener('click',()=>rejectRefundRequest(bill.id));section.appendChild(row)})}
 function renderPayableReport(){let body=document.getElementById('reportPayablesTable');body.innerHTML='';payables.forEach(b=>{let project=b.projectId?projects.find(p=>p.id===b.projectId):null,paid=payablePaid(b.id),projectLabel=b.projectId?(project?.name||'Unknown project'):'No project';body.insertAdjacentHTML('beforeend',`<tr><td>${escapeText(projectLabel)}</td><td>${b.kind==='advance'?'Reimburse '+escapeText(b.reimburseTo)+' · ':''}${escapeText(b.description)}${b.supplier?' / '+escapeText(b.supplier):''}</td><td>${escapeText(b.invoiceDate)}</td><td>${escapeText(b.dueDate||'—')}</td><td>${fmt(b.amount)}</td><td>${fmt(paid/100)}</td><td>${fmt(payableCredit(b.id)/100)}</td><td>${fmt(payableOutstanding(b)/100)}</td><td>${payableStatus(b)}</td></tr>`)});if(!payables.length)body.innerHTML='<tr><td colspan="9">No project payables recorded.</td></tr>';}
 function renderProjectCards(){
  const list=document.getElementById('projectsList'),q=(document.getElementById('projectSearch').value||'').trim().toLowerCase(),status=document.getElementById('projectStatusFilter').value;list.innerHTML='';
@@ -11150,12 +11245,14 @@ function selectReceiptSource(id,fromCamera){
  const file=source.files?.[0]||other.files?.[0];
  document.getElementById(id+'Status').textContent=file?'Selected: '+file.name:'No file selected';
  document.getElementById(id+'Clear').hidden=!file;
+ if(id==='invoiceImage')void selectPayableSharedReceipt(file);
 }
 function clearReceiptSelection(id){
  const file=document.getElementById(id),camera=document.getElementById(id+'Camera');
  if(file)file.value='';if(camera)camera.value='';
  const status=document.getElementById(id+'Status'),clear=document.getElementById(id+'Clear');
  if(status)status.textContent='No file selected';if(clear)clear.hidden=true;
+ if(id==='invoiceImage')resetPayableSharedReceipt();
 }
 // Receipt attachments stay in the legacy receiptImage field so old records,
 // backups and local-only sync behavior continue to work without migration.
@@ -11291,7 +11388,7 @@ function buildMyRefundRows(uid,bills,transactions,audits,memberItems){
   if(!r||r.uid!==uid||typeof r.id!=='string'||!['pending','approved','rejected'].includes(r.status))continue;
   let row=rows.get(r.id);
   if(!row){row={id:r.id,bill:null,description:r.description||'Refund request',payee:r.reimburseTo||'',amount:Number.isSafeInteger(r.amountCents)?r.amountCents:0,date:stamp(r.createdAt)||r.expenseDate||'',events:[]};rows.set(r.id,row);}
-  row.memberStatus=r.status;row.decisionReason=r.decisionReason||'';
+  row.memberStatus=r.status;row.decisionReason=r.decisionReason||'';row.itemsJSON=r.itemsJSON||row.bill?.itemsJSON;row.receiptDigest=r.receiptDigest||row.bill?.sharedReceiptDigest;
   // Never attach a ledger record belonging to another account, even on an ID conflict.
   if(!row.bill&&allBills.has(r.id))row.conflict=true;
  }
@@ -11299,10 +11396,10 @@ function buildMyRefundRows(uid,bills,transactions,audits,memberItems){
   if(!event||!['reject refund request','void payable'].includes(event.action))continue;
   const b=event.record;if(!b||b.kind!=='advance'||typeof b.id!=='string'||owner(b)!==uid)continue;
   let row=rows.get(b.id);if(!row){row={id:b.id,bill:null,description:b.description||'Refund request',payee:b.reimburseTo||'',amount:cents(b.amount),date:b.invoiceDate||'',events:[]};rows.set(b.id,row);}
-  if(!row.bill){row.closed=event.action==='reject refund request'?'Rejected':b.pendingApproval?'Cancelled':'Voided';row.decisionReason=event.reason||'';}
+  if(!row.bill){row.closed=event.action==='reject refund request'?'Rejected':b.pendingApproval?'Cancelled':'Voided';row.decisionReason=event.reason||'';row.itemsJSON=b.itemsJSON;}
  }
  for(const row of rows.values()){
-  const bill=row.bill;
+  const bill=row.bill;if(!row.itemsJSON&&bill)row.itemsJSON=bill.itemsJSON;if(!row.receiptDigest&&bill)row.receiptDigest=bill.sharedReceiptDigest;
   if(!bill&&allBills.has(row.id))row.conflict=true;
   if(bill&&row.memberStatus==='rejected'){row.status='Status awaiting confirmation';row.paid=null;row.credit=null;row.outstanding=null;row.conflict=true;}
   else if(bill){
@@ -11348,6 +11445,8 @@ function renderMyRefunds(){
   const card=document.createElement('details');card.className='my-refund-card';card.dataset.refundId=row.id;card.open=open.has(row.id);
   const summary=document.createElement('summary'),title=document.createElement('span'),badge=document.createElement('span');title.className='my-refund-title';title.textContent=row.description;badge.className='my-refund-badge';badge.textContent=row.status;summary.append(title,badge);card.appendChild(summary);
   const meta=document.createElement('p');meta.className='my-refund-meta';meta.textContent='Person to reimburse: '+(row.payee||'—')+(row.decisionReason?' · Reason: '+row.decisionReason:'');card.appendChild(meta);
+  appendRefundItems(card,row.itemsJSON);
+  if(row.receiptDigest&&!row.conflict)appendSharedMemberReceipt(card,row.id,row.receiptDigest,row.bill?.sharedReceiptKind||'member');
   const amounts=document.createElement('div');amounts.className='my-refund-amounts';
   for(const [label,value] of [['Requested',row.amount],['Cash paid',row.paid],['Outstanding',row.outstanding]]){const box=document.createElement('div'),name=document.createElement('span'),number=document.createElement('strong');name.textContent=label;number.textContent=value==null?'—':fmt(value/100);box.append(name,number);amounts.appendChild(box);}card.appendChild(amounts);
   if(row.credit){const note=document.createElement('p');note.className='my-refund-meta';note.textContent='Non-cash settlement: '+fmt(row.credit/100)+' (not cash paid).';card.appendChild(note);}
@@ -11385,12 +11484,14 @@ function renderRefundHistory(){
       const statusClass=bill.pendingApproval?'pending':paid+credit>0?'partial':'unpaid';
       row.innerHTML=`<div class="refund-card-top"><div class="refund-card-identity"><span class="refund-card-icon" aria-hidden="true">${LICON('receipt','#5b4ae8',20)}</span><div><strong>Reimburse ${escapeText(bill.reimburseTo||'—')}</strong><p>${escapeText(bill.description||'No description provided')}</p></div></div><span class="payable-status refund-status-${statusClass}">${escapeText(status)}</span></div><div class="refund-card-context"><span><b>Project</b> ${escapeText(projectLabel)}</span><span><b>Date</b> ${escapeText(bill.invoiceDate||'—')}</span></div><div class="refund-card-amounts"><div><span>Incurred</span><strong>${fmt(bill.amount)}</strong></div><div><span>Cash paid</span><strong>${fmt(paid/100)}</strong></div><div><span>Outstanding</span><strong>${fmt(remaining/100)}</strong></div></div>${credit?'<p class="contrib-help">Non-cash settlement: '+fmt(credit/100)+'</p>':''}<div class="payable-row-info refund-card-notes">${createdByBadge(bill)}${pendingApprovalBadge(bill)}</div><div class="payable-actions"></div>`;
       const info=row.querySelector('.payable-row-info');
+      appendRefundItems(info,bill.itemsJSON);
       if(!bill.projectId&&paid>0){const note=document.createElement('small');note.textContent='This refund has payments without a project; its project cannot be changed while those payments exist.';info.appendChild(note);}
       const funding=refundFundingStatus(bill);if(funding){const notice=document.createElement('div'),heading=document.createElement('strong'),detail=document.createElement('div');notice.className='refund-funding-status';heading.textContent=funding.title;detail.textContent=funding.detail;notice.append(heading,detail);info.before(notice);}
       if(bill.receiptNo){const ref=document.createElement('small');ref.textContent='Reference: '+bill.receiptNo;info.appendChild(ref);}
       if(bill.receiptImage) addReceiptLink(info,bill.receiptImage);
-      // Team receipt attachments are device-local, even when a reference exists.
-      if(pondoTeamState.orgId&&!bill.receiptImage){const note=document.createElement('small');note.textContent='Receipt attachments are not synced between devices.';info.appendChild(note);}
+      if(bill.sharedReceiptDigest)appendSharedMemberReceipt(info,bill.id,bill.sharedReceiptDigest,bill.sharedReceiptKind||'member');
+      // Legacy receipt attachments without a shared digest remain device-local.
+      if(pondoTeamState.orgId&&!bill.receiptImage&&!bill.sharedReceiptDigest){const note=document.createElement('small');note.textContent='Receipt attachments are not synced between devices.';info.appendChild(note);}
       const actions=row.querySelector('.payable-actions');
       // An optional project can be assigned before the first cash payment.
       // Afterwards, payment and payable project IDs must remain consistent.
@@ -12728,19 +12829,28 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
  function sampleDataPresent(){return sampleDataLists().some(list=>list.some(isSampleRecord))||contributionActivities.some(a=>a.deathAid?.payments?.some(isSampleRecord));}
  function sampleDataContext(){return JSON.stringify([window.pondoTeamState?.orgId||null,window.pondoTeamState?.uid||null,window.pondoCurrentUser?.uid||null,!!window.pondoGuestMode]);}
  function sampleDataCanWrite(){const state=window.pondoTeamState;return !document.body.classList.contains('role-reviewer')&&(!state?.orgId||!!(state.role&&state.role!=='reviewer'&&state.memberConfirmed&&state.baselineReady&&!state.recoveryLocked));}
- function updateSampleDataStatus(){let status=document.getElementById('sampleDataStatus'),clear=document.getElementById('clearSampleDataBtn'),load=document.getElementById('loadSampleDataBtn');if(!status)return;let count=sampleDataLists().reduce((n,list)=>n+list.filter(isSampleRecord).length,0)+contributionActivities.reduce((n,a)=>n+(a.deathAid?.payments||[]).filter(isSampleRecord).length,0);status.textContent=count?count+' marked sample records loaded. Included in workspace totals.':'No sample records loaded.';if(clear)clear.disabled=sampleDataBusy||!count||!sampleDataCanWrite();if(load)load.disabled=sampleDataBusy||!!count||!sampleDataCanWrite();}
+ // The immutable registered ID, not an editable display name, identifies a
+ // deliberately named test workspace. This is an accident guard, not security.
+ function sampleCloudEligible(){const s=window.pondoTeamState;return !!(s&&/^org~pondo sample test .+$/.test(s.orgId||'')&&s.uid&&s.uid===window.pondoCurrentUser?.uid&&!window.pondoGuestMode&&s.role==='owner'&&s.memberConfirmed&&s.baselineReady&&!s.recoveryLocked&&!s.listenerError&&!s.syncError&&!s.dirty&&!s.pushTimer&&!s.pushesInFlight&&s.online!==false&&navigator.onLine!==false&&typeof window.pondoRefundReceiptDigest==='function'&&typeof window.pondoCloudSync?.push==='function'&&!!trackerDB&&!trackerFatal);}
+ function updateSampleDataStatus(){let status=document.getElementById('sampleDataStatus'),clear=document.getElementById('clearSampleDataBtn'),load=document.getElementById('loadSampleDataBtn'),shared=document.getElementById('sampleSharedReceipt');if(!status)return;let count=sampleDataLists().reduce((n,list)=>n+list.filter(isSampleRecord).length,0)+contributionActivities.reduce((n,a)=>n+(a.deathAid?.payments||[]).filter(isSampleRecord).length,0);status.textContent=count?count+' marked sample records loaded. Included in workspace totals.':'No sample records loaded.';if(clear)clear.disabled=sampleDataBusy||!count||!sampleDataCanWrite();if(load)load.disabled=sampleDataBusy||!!count||!sampleDataCanWrite();if(shared){const eligible=sampleCloudEligible();shared.disabled=sampleDataBusy||!!count||!eligible;if(!eligible&&!sampleDataBusy)shared.checked=false;}}
  function updateStorageInfo(){ let el=document.getElementById('storageInfo'); if(el) el.innerText='Funds: '+funds.length+' • Transactions: '+txs.length+' • Projects: '+projects.length+' • Signatories: '+sigs.length+' • Storage: '+(trackerDB?'Transactional':'Legacy'); updateSampleDataStatus(); }
  async function loadSampleData(){
    if(sampleDataBusy||!sampleDataCanWrite())return;
    if(sampleDataPresent()){appAlert('Sample data is already loaded. Clear it first if you want to reload the preview.');return;}
+   const includeShared=!!document.getElementById('sampleSharedReceipt')?.checked;if(includeShared&&!sampleCloudEligible()){appAlert('Shared samples require an online, synced owner in a disposable workspace registered as Pondo Sample Test followed by a unique name.');return;}
    sampleDataBusy=true;updateSampleDataStatus();try{
    const context=sampleDataContext(),before=JSON.stringify(currentSnapshot()),team=!!window.pondoTeamState?.orgId;
    if(!await appConfirm('Load fictional sample records into this workspace? They appear alongside existing records and affect totals, reports and backups.'+(team?' They can sync to other team members.':'')+' Clear sample data later; clearing is blocked if your own records depend on it.'))return;
-   if(!sampleDataCanWrite()||context!==sampleDataContext()||before!==JSON.stringify(currentSnapshot())||sampleDataPresent()){appAlert('The workspace, access or records changed. Review before loading sample data.');return;}
-   let run;const ids=sampleDataLists().flatMap(list=>list.map(x=>x?.id)).concat(contributionActivities.flatMap(a=>(a.deathAid?.payments||[]).flatMap(p=>[p.id,p.memberId,p.remittance?.id])));for(let i=0;i<3;i++){run=makeId('sample');if(!ids.some(id=>typeof id==='string'&&(id===run||id.startsWith(run+'-'))))break;run=null;}if(!run){appAlert('Could not safely create sample record IDs. Try again.');return;}const sid=key=>run+'-'+key;
+   if(includeShared&&await appPrompt('This creates a real shared Firestore receipt in this disposable test workspace. Clear sample data cannot delete it, and permanent workspace deletion is not available yet. Type CREATE to continue:')!=='CREATE')return;
+   if(!sampleDataCanWrite()||context!==sampleDataContext()||before!==JSON.stringify(currentSnapshot())||sampleDataPresent()||(includeShared&&!sampleCloudEligible())){appAlert('The workspace, access or records changed. Review before loading sample data.');return;}
+   let run;const ids=sampleDataLists().flatMap(list=>list.map(x=>x?.id)).concat(contributionActivities.flatMap(a=>(a.deathAid?.payments||[]).flatMap(p=>[p.id,p.memberId,p.remittance?.id])),payables.flatMap(b=>(b.absenceCredits||[]).map(c=>c.id)));for(let i=0;i<3;i++){run=makeId('sample');if(!ids.some(id=>typeof id==='string'&&(id===run||id.startsWith(run+'-'))))break;run=null;}if(!run){appAlert('Could not safely create sample record IDs. Try again.');return;}const sid=key=>run+'-'+key;
+   // A clearly fictional, locally retained example; never impersonates a
+   // real uploaded/shared Firestore receipt or creates immutable cloud docs.
+   let sampleReceipt;try{const canvas=document.createElement('canvas');canvas.width=700;canvas.height=320;const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas unavailable');ctx.fillStyle='#fff';ctx.fillRect(0,0,700,320);ctx.fillStyle='#111';ctx.font='bold 34px sans-serif';ctx.fillText('SAMPLE RECEIPT — NOT VALID',24,58);ctx.font='24px sans-serif';ctx.fillText('Transport trips   2 × PHP 600.00',24,125);ctx.fillText('Delivery fee     1 × PHP 1,200.00',24,170);ctx.font='bold 27px sans-serif';ctx.fillText('TOTAL PHP 2,400.00',24,240);sampleReceipt=canvas.toDataURL('image/jpeg',0.9);if(!sampleReceipt.startsWith('data:image/jpeg;base64,'))throw Error('JPEG unavailable');}catch(e){appAlert('Could not create the sample receipt on this device. No sample data was loaded.');return;}
+   let sampleReceiptDigest=null;if(includeShared){try{sampleReceiptDigest=await window.pondoRefundReceiptDigest(sampleReceipt);}catch(e){appAlert('Could not prepare the shared test receipt. No sample data was loaded.');return;}if(!sampleCloudEligible()||context!==sampleDataContext()||before!==JSON.stringify(currentSnapshot())||sampleDataPresent()){appAlert('The workspace, access or records changed. Review before loading sample data.');return;}}
    const today=localDate(),year=today.slice(0,4),d=monthDay=>{const date=year+'-'+monthDay;return date>today?today:date;};
    const monthIndex=Number(today.slice(5,7)),currentMonth=today.slice(0,7),previousMonth=monthIndex===1?(Number(year)-1)+'-12':year+'-'+String(monthIndex-1).padStart(2,'0');
-   const f1=sid('fund-operations'),f2=sid('fund-projects'),f3=sid('fund-community'),p1=sid('project-supplies'),p2=sid('project-ict'),p3=sid('project-wellness'),b1=sid('payable-supplies'),b2=sid('payable-refund'),a1=sid('activity-ambagan'),a2=sid('activity-community');
+   const f1=sid('fund-operations'),f2=sid('fund-projects'),f3=sid('fund-community'),p1=sid('project-supplies'),p2=sid('project-ict'),p3=sid('project-wellness'),b1=sid('payable-supplies'),b2=sid('payable-refund'),b3=sid('payable-paid-refund'),a1=sid('activity-ambagan'),a2=sid('activity-community');
    funds.push(
      {id:f1,name:'General Operations',purpose:'Daily school activities and supplies',initialAmount:52000,dateReceived:d('01-12'),color:'blue',sampleData:true},
      {id:f2,name:'School Projects Fund',purpose:'Programs, equipment, and improvements',initialAmount:36000,dateReceived:d('02-05'),color:'violet',sampleData:true},
@@ -12758,14 +12868,16 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
    );
    payables.push(
      {id:b1,projectId:p1,kind:'supplier',description:'Additional classroom materials',supplier:'School Supply Depot',category:'Supplies',amount:5200,invoiceDate:d('04-18'),dueDate:d('05-18'),sampleData:true},
-     {id:b2,projectId:p3,kind:'advance',description:'Transport reimbursement',reimburseTo:'Maria Santos',supplier:'Personal advance',category:'Refund',amount:2400,invoiceDate:d('03-28'),dueDate:d('04-10'),sampleData:true}
+     {id:b2,projectId:p3,kind:'advance',description:'Transport reimbursement',reimburseTo:'Maria Santos',supplier:'Personal advance',category:'Refund',amount:2400,invoiceDate:d('03-28'),dueDate:d('04-10'),receiptNo:'SAMPLE-001',receiptImage:sampleReceipt,...(sampleReceiptDigest?{sharedReceiptDigest:sampleReceiptDigest,sharedReceiptKind:'editor'}:{}),itemsJSON:JSON.stringify([{name:'[Sample] Transport trips',qtyMilli:2000,unitCents:60000},{name:'[Sample] Delivery fee',qtyMilli:1000,unitCents:120000}]),sampleData:true},
+     {id:b3,projectId:p1,kind:'advance',description:'Teaching materials',reimburseTo:'Bea Navarro',supplier:'Example shop',category:'Refund',amount:300,invoiceDate:d('04-01'),dueDate:'',sampleData:true}
    );
    txs.push(
      {id:sid('tx-income'),date:d('03-01'),fundId:f1,type:'IN',category:'Grant',description:'District operating release',amount:8000,payee:'District Office',method:'Bank transfer',sampleData:true},
      {id:sid('tx-supplies'),date:d('04-20'),fundId:f1,projectId:p1,type:'OUT',category:'Supplies',description:'Classroom replenishment',amount:6500,payee:'School Supply Depot',method:'Purchase',sampleData:true},
      {id:sid('tx-ict'),date:d('05-06'),fundId:f2,projectId:p2,type:'OUT',category:'Equipment',description:'Tablets and network equipment',amount:12800,payee:'Learning Tech Partners',method:'Purchase',sampleData:true},
      {id:sid('tx-supplies-payment'),date:d('05-10'),fundId:f1,projectId:p1,payableId:b1,type:'OUT',category:'Supplies',description:'Payment: Additional classroom materials',amount:3500,payee:'School Supply Depot',method:'Fund payment',sampleData:true},
-     {id:sid('tx-refund-payment'),date:d('04-12'),fundId:f3,projectId:p3,payableId:b2,type:'OUT',category:'Refund',description:'Reimbursement: Transport reimbursement',amount:1500,payee:'Maria Santos',method:'Fund payment',sampleData:true}
+     {id:sid('tx-refund-payment'),date:d('04-12'),fundId:f3,projectId:p3,payableId:b2,type:'OUT',category:'Refund',description:'Reimbursement: Transport reimbursement',amount:1500,payee:'Maria Santos',method:'Fund payment',sampleData:true},
+     {id:sid('tx-paid-refund'),date:d('04-10'),fundId:f1,projectId:p1,payableId:b3,type:'OUT',category:'Refund',description:'Reimbursement: Teaching materials',amount:300,payee:'Bea Navarro',method:'Fund payment',sampleData:true}
    );
    sigs.push(
      {id:sid('sig-1'),name:'Ana Reyes',title:'School Head',sampleData:true},
@@ -12803,7 +12915,8 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
    contributors.push({id:sid('person-fundraising'),activityId:fundraising,name:'Sofia Ramos',expected:1000,sampleData:true},{id:sid('person-monthly-1'),activityId:monthly,name:'Mark Villanueva',expected:300,period:previousMonth,sampleData:true},{id:sid('person-monthly-2'),activityId:monthly,name:'Mark Villanueva',expected:300,period:currentMonth,sampleData:true});
    contributionPayments.push({id:sid('payment-raised'),contributorId:sid('person-fundraising'),amount:400,date:d('06-05'),receivedBy:'Joel Cruz',method:'raised',fundId:f2,projectId:p2,txId:sid('tx-raised'),reference:'',sampleData:true},{id:sid('payment-monthly'),contributorId:sid('person-monthly-1'),amount:300,date:previousMonth+'-01',receivedBy:'Ana Reyes',method:'personal',reference:'',sampleData:true});
    txs.push({id:sid('tx-raised'),date:d('06-05'),fundId:f2,projectId:p2,type:'IN',category:'Project fundraising',description:'Fundraising: Books fundraising',amount:400,payee:'Sofia Ramos',method:'Cash',contributionPaymentId:sid('payment-raised'),sampleData:true});
-   payables.push({id:sid('payable-unassigned-refund'),projectId:null,kind:'advance',description:'Transport for outreach',reimburseTo:'Paolo Lim',supplier:'',category:'Refund',amount:750,invoiceDate:d('06-01'),dueDate:'',sampleData:true});
+   payables.push({id:sid('payable-unassigned-refund'),projectId:null,kind:'advance',description:'Transport for outreach',reimburseTo:'Paolo Lim',supplier:'',category:'Refund',amount:750,invoiceDate:d('06-01'),dueDate:'',absenceCredits:[{id:sid('credit-1'),absenceDate:d('05-31'),grantedDate:d('06-02'),grantedAt:d('06-02')+'T12:00:00.000Z',amount:250,sampleData:true}],sampleData:true});
+   auditLog.push({id:sid('audit-void'),action:'void transaction',timestamp:d('06-03')+'T12:00:00.000Z',reason:'[Sample] Entered in error',fundName:'[Sample] General Operations',record:{description:'[Sample] Voided stationery purchase',amount:150},sampleData:true});
    contributionActivities.push({id:death,title:'Death Aid: Elena Santos',amount:0,sampleData:true,deathAid:{version:1,subject:'Elena Santos',details:'Example family record',date:d('03-01'),suggested:100,payments:[
      {id:sid('death-personal-1'),memberId:sid('death-member-1'),name:'Maria Santos',position:'Teacher',amount:100,date:d('03-05'),method:'Cash',collectedBy:'Ana Reyes',source:'personal',sampleData:true,remittance:{id:sid('death-handover'),date:d('03-12'),receiver:'Community representative',role:'Coordinator',sampleData:true}},
      {id:sid('death-personal-2'),memberId:sid('death-member-1'),name:'Maria Santos',position:'Teacher',amount:50,date:d('03-15'),method:'Cash',collectedBy:'Ana Reyes',source:'personal',sampleData:true},
@@ -12820,8 +12933,8 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
    for(const x of contributionActivities.filter(isSampleRecord)){if(x.deathAid){x.deathAid.subject=mark(x.deathAid.subject);x.title='Death Aid: '+x.deathAid.subject;for(const payment of x.deathAid.payments){payment.name=mark(payment.name);if(payment.collectedBy)payment.collectedBy=mark(payment.collectedBy);if(payment.remittance)payment.remittance.receiver=mark(payment.remittance.receiver);}}else x.title=mark(x.title);}
    for(const x of contributors.filter(isSampleRecord))x.name=mark(x.name);
    for(const x of contributionPayments.filter(isSampleRecord))x.receivedBy=mark(x.receivedBy);
-   const saved=await saveAll();if(context!==sampleDataContext())return;if(saved===false){updateStorageInfo();appAlert('Sample data may not have been saved. Export a backup before reloading or retrying.');return;}renderAll(true);updateStorageInfo();appAlert('Sample data loaded. It is included in totals and reports until cleared.');
-   }finally{sampleDataBusy=false;updateSampleDataStatus();}
+   const saved=await saveAll();if(context!==sampleDataContext())return;if(saved===false){updateStorageInfo();appAlert('Sample data may not have been saved. Export a backup before reloading or retrying.');return;}renderAll(true);updateStorageInfo();appAlert(includeShared?'Sample data saved locally. Wait for team sync to confirm the shared test receipt; it will remain in Firestore after clearing samples.':'Sample data loaded. It is included in totals and reports until cleared.');
+   }finally{sampleDataBusy=false;const shared=document.getElementById('sampleSharedReceipt');if(shared)shared.checked=false;updateSampleDataStatus();}
  }
  function sampleClearBlockReason(){
    const sf=new Set(funds.filter(isSampleRecord).map(x=>x.id)),sp=new Set(projects.filter(isSampleRecord).map(x=>x.id)),sb=new Set(payables.filter(isSampleRecord).map(x=>x.id)),sa=new Set(contributionActivities.filter(isSampleRecord).map(x=>x.id)),sm=new Set(contributors.filter(isSampleRecord).map(x=>x.id)),sc=new Set(contributionPayments.filter(isSampleRecord).map(x=>x.id)),st=new Set(txs.filter(isSampleRecord).map(x=>x.id));
@@ -12830,7 +12943,7 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
    if(contributionActivities.some(a=>!isSampleRecord(a)&&a.deathAid?.payments?.some(isSampleRecord)))return 'A marked sample payment belongs to an unmarked Death Aid record.';
    if(contributionActivities.some(a=>isSampleRecord(a)&&a.deathAid?.payments.some(p=>!isSampleRecord(p))))return 'A sample Death Aid record contains an unmarked payment.';
    if(sampleDeath.some(p=>p.remittance&&!isSampleRecord(p.remittance)))return 'A sample payment has an unmarked handover.';
-   if(payables.some(b=>isSampleRecord(b)&&b.absenceCredits?.length))return 'A sample refund has non-cash credits.';
+   if(payables.some(b=>isSampleRecord(b)&&b.absenceCredits?.some(c=>!isSampleRecord(c))))return 'A sample refund has non-sample non-cash credits.';
    if(sampleDataLists().some(list=>list.some(x=>isSampleRecord(x)&&(x.pendingApproval||x.pendingDeletion))))return 'A sample record has a pending request.';
    if(allocations.some(a=>!isSampleRecord(a)&&(sf.has(a.fundId)||sp.has(a.projectId)))||payables.some(b=>!isSampleRecord(b)&&sp.has(b.projectId))||contributors.some(p=>!isSampleRecord(p)&&sa.has(p.activityId))||contributionPayments.some(p=>!isSampleRecord(p)&&(sm.has(p.contributorId)||sf.has(p.fundId)||sp.has(p.projectId)||st.has(p.txId)))||txs.some(t=>!isSampleRecord(t)&&(sf.has(t.fundId)||sp.has(t.projectId)||sb.has(t.payableId)||sc.has(t.contributionPaymentId)||sd.has(t.deathAidPaymentId)||sa.has(t.deathAidActivityId))))return 'An unmarked transaction, refund, allocation, contributor or payment is linked to sample data.';
    if(contributionActivities.some(a=>!isSampleRecord(a)&&(sp.has(a.projectId)||a.deathAid?.payments.some(p=>sf.has(p.fundId)||st.has(p.txId)||sr.has(p.remittance?.id)))))return 'An unmarked activity or handover is linked to sample data.';
@@ -12844,7 +12957,7 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
    let reason=sampleClearBlockReason();if(reason){appAlert('Cannot clear sample data: '+reason+' Resolve the link first; your records were not changed.');return;}
    sampleDataBusy=true;updateSampleDataStatus();try{
    const context=sampleDataContext(),before=JSON.stringify(currentSnapshot());
-   if(!await appConfirm('Clear marked sample records and any edits to them? They will be removed from totals, reports and backups. Unmarked records will not be deleted.'))return;
+   if(!await appConfirm('Clear marked sample records and any edits to them? They will be removed from totals, reports and backups. Unmarked records will not be deleted.'+(payables.some(b=>isSampleRecord(b)&&b.sharedReceiptDigest)?' Shared sample receipt documents remain in Firestore; they cannot currently be cleared here.':'')))return;
    if(!sampleDataCanWrite()||context!==sampleDataContext()||before!==JSON.stringify(currentSnapshot())){appAlert('The workspace, access or records changed. Review before clearing sample data.');return;}
    reason=sampleClearBlockReason();if(reason){appAlert('Cannot clear sample data: '+reason+' Resolve the link first; your records were not changed.');return;}
    funds=funds.filter(x=>!isSampleRecord(x));projects=projects.filter(x=>!isSampleRecord(x));sigs=sigs.filter(x=>!isSampleRecord(x));allocations=allocations.filter(x=>!isSampleRecord(x));payables=payables.filter(x=>!isSampleRecord(x));txs=txs.filter(x=>!isSampleRecord(x));auditLog=auditLog.filter(x=>!isSampleRecord(x));contributionActivities=contributionActivities.filter(x=>!isSampleRecord(x));contributors=contributors.filter(x=>!isSampleRecord(x));contributionPayments=contributionPayments.filter(x=>!isSampleRecord(x));
@@ -12854,7 +12967,7 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
 
 function syncAboutSettings(){ document.getElementById('settingsOrgName').value=org.name; document.getElementById('settingsOrgLoc').value=org.location; document.getElementById('settingsPeriodFrom').value=org.periodFrom; document.getElementById('settingsPeriodTo').value=org.periodTo; let s=document.getElementById('settingsSigs'); s.innerHTML=''; sigs.forEach(sig=>{ s.innerHTML+='<div style="display:flex; justify-content:space-between; padding:8px 10px; border-radius:10px; background:white"><span style="font-size:13px">'+escapeText(sig.name)+' — '+escapeText(sig.title)+'</span></div>'; }); document.getElementById('lastBackup').innerText=localStorage.getItem(reminderStorageKey('ft_last_backup'))||'Never'; }
 async function saveOrgFromSettings(){ org.name=document.getElementById('settingsOrgName').value; org.location=document.getElementById('settingsOrgLoc').value; org.periodFrom=document.getElementById('settingsPeriodFrom').value; org.periodTo=document.getElementById('settingsPeriodTo').value; saveAll(); renderAll(); if(trackerDB)await trackerQueue;if(!storageWarningOpen)appAlert('Organization saved'); }
-function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem(reminderStorageKey('ft_last_backup'), new Date().toLocaleString());localStorage.setItem(reminderStorageKey('ft_last_backup_ts'),String(Date.now()));localStorage.removeItem(reminderStorageKey('ft_backup_reminder_until'));localStorage.removeItem(reminderStorageKey('ft_backup_overdue_notified'))}catch(e){} updateBackupReminder();appAlert('Backup export started. Keep the downloaded file in a safe place.'); }
+function exportJSONFull(){ let data={org, funds, txs, sigs, projects, allocations, payables, auditLog, contributionActivities, contributors, contributionPayments, appSettings, exportedAt:new Date().toISOString()}; let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='Pondo_Backup.json'; a.click(); try{localStorage.setItem(reminderStorageKey('ft_last_backup'), new Date().toLocaleString());localStorage.setItem(reminderStorageKey('ft_last_backup_ts'),String(Date.now()));localStorage.removeItem(reminderStorageKey('ft_backup_reminder_until'));localStorage.removeItem(reminderStorageKey('ft_backup_overdue_notified'))}catch(e){} updateBackupReminder();appAlert(window.pondoTeamState?.orgId?'Backup export started. Team refund request history and shared receipt images may not be included; download shared receipts separately. Keep all files in a safe place.':'Backup export started. Keep the downloaded file in a safe place.'); }
 // Validate the staged core records before replacing any live state.
 function validateCoreBackup(fundsIn,txsIn,projectsIn,sigsIn,allocsIn,billsIn,orgIn){
  const idList=(label,arr)=>{if(arr.some(x=>!x||typeof x!=='object'||Array.isArray(x)||typeof x.id!=='string'||!x.id.trim())||new Set(arr.map(x=>x.id)).size!==arr.length)throw Error('Invalid or duplicate '+label+' ID.');};
@@ -12873,7 +12986,7 @@ function validateCoreBackup(fundsIn,txsIn,projectsIn,sigsIn,allocsIn,billsIn,org
  // A refund request (kind 'advance') may have no project yet -- it can be
  // identified/assigned later (assignRefundProject) -- but an unpaid-expense
  // bill (kind 'supplier') is a project budget line item and still needs one.
- for(const x of billsIn)if(!money(x.amount,true)||!['advance','supplier'].includes(x.kind)||(x.projectId==null?x.kind!=='advance':!projectsIn.some(p=>p.id===x.projectId))||typeof x.description!=='string'||!optionalDate(x.invoiceDate)||!optionalDate(x.dueDate)||!textFields(x,['supplier','reimburseTo','reimburseToUid','category','receiptNo','receiptImage'])||(x.reimburseToUid!=null&&(!x.reimburseToUid||x.reimburseToUid.length>128||x.reimburseToUid.includes('/'))))throw Error('A payable has invalid details.');
+ for(const x of billsIn)if(!money(x.amount,true)||!['advance','supplier'].includes(x.kind)||(x.projectId==null?x.kind!=='advance':!projectsIn.some(p=>p.id===x.projectId))||typeof x.description!=='string'||!optionalDate(x.invoiceDate)||!optionalDate(x.dueDate)||!textFields(x,['supplier','reimburseTo','reimburseToUid','category','receiptNo','receiptImage','itemsJSON','sharedReceiptDigest','sharedReceiptKind'])||(x.sharedReceiptDigest!=null&&(!/^[a-f0-9]{64}$/.test(x.sharedReceiptDigest)||!['member','editor'].includes(x.sharedReceiptKind)))||(x.sharedReceiptKind!=null&&!x.sharedReceiptDigest)||(x.itemsJSON!=null&&(()=>{try{return window.PondoRefundItems.parse(x.itemsJSON).total!==cents(x.amount)}catch(e){return true}})())||(x.reimburseToUid!=null&&(!x.reimburseToUid||x.reimburseToUid.length>128||x.reimburseToUid.includes('/'))))throw Error('A payable has invalid details.');
  const creditIds=new Set();for(const bill of billsIn){
   if(bill.absenceCredits==null)continue;
   if(bill.kind!=='advance'||!Array.isArray(bill.absenceCredits)||bill.pendingApproval)throw Error('Invalid non-cash refund settlements.');
@@ -13516,7 +13629,9 @@ import { createWorkspaceApprovalTracker } from "./workspace-approval.mjs";
 import { recoverWorkspaceMemberships } from "./workspace-membership-recovery.mjs";
 // Firebase Authentication — gates access to the Pondo fund tracker.
 // Loaded via the official CDN ES-module build (no bundler/build step required).
-import { createMemberRefundService } from "./member-refund-service.mjs";
+import { createMemberRefundService, refundReceiptDigest } from "./member-refund-service.mjs";
+import { planEditorRefundReceipts, writeEditorRefundReceipts } from "./refund-receipt-sync.mjs";
+window.pondoRefundReceiptDigest = refundReceiptDigest;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getAuth,
@@ -13721,9 +13836,8 @@ window.pondoSettingsSync = { push: scheduleSettingsPush };
 // Roles: owner (manage members + full edit), disbursing / project-manager
 // (full edit), reviewer (read-only — enforced by firestore.rules, not just
 // the UI). Only funds/transactions/projects/payables/contribution records
-// sync — embedded receipt attachments and the org logo stay local to each
-// device because they would blow past Firestore's 1 MiB per-document
-// limit; this file reattaches a device's own locally-cached images onto
+// sync — other embedded receipt attachments and the org logo stay local to each
+// device; team refund images use separate bounded receipt documents. This file reattaches a device's own locally-cached images onto
 // incoming updates so they are never deleted by a remote sync.
 const CLIENT_ID = 'c_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
 const HEAVY_IMAGE_KEYS = ['payables', 'txs', 'contributionPayments'];
@@ -13748,7 +13862,12 @@ const pondoTeamState = {
   memberConfirmed: false,
   members: [],
   orgMemberships: [], // every orgId this user belongs to (not just the active one)
-  memberships: [], // resolved {orgId, name, role} for each entry above, for the workspace switcher
+  memberships: [], // display only; never used to authorize access
+  membershipsLoading: false,
+  membershipsLoaded: false,
+  initialWorkspacePending: false,
+  membershipsLoadError: false,
+  initializationToken: null,
   unsubMembers: null,
   unsubOrgDoc: null,
   unsubData: null,
@@ -13905,13 +14024,17 @@ function updateHeaderTeamBadge() {
   if (notifBellBtn) { notifBellBtn.hidden = false; if (window.updateNotifBadge) window.updateNotifBadge(); }
   if (!pondoTeamState.orgId) {
     const hasOtherOrgs = pondoTeamState.orgMemberships && pondoTeamState.orgMemberships.length > 0;
+    if(pondoTeamState.membershipsLoading){badge.title='Checking your workspaces';text.textContent='Checking workspaces…';}
+    else if(pondoTeamState.membershipsLoadError){badge.title='Workspaces could not be checked';text.textContent='Workspaces unavailable';}
+    else {
     badge.title = hasOtherOrgs ? 'Working with personal, local-only data. Tap to switch workspace.' : 'You are the only person who can see this data. Tap to set up team collaboration.';
     text.textContent = hasOtherOrgs ? 'Personal · Switch' : 'Solo · Add team';
+    }
   } else {
     const roleLabel = facultyPresidentKnown && facultyPresidentUid===pondoTeamState.uid ? 'Faculty President' : (ROLE_LABELS[pondoTeamState.role] || '');
     badge.title = (pondoTeamState.orgName || 'Team') + ' — Network status only, not proof of sync. Tap to switch workspace or manage members.';
     const teamIcons={diamond:'◆',star:'★',heart:'♥',sun:'☀',leaf:'✿',book:'▣'};
-    text.textContent = (teamIcons[pondoTeamState.teamIcon]||teamIcons.diamond)+' '+(pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
+    text.textContent = pondoTeamState.membershipsLoading && !pondoTeamState.orgName ? 'Checking workspaces…' : (teamIcons[pondoTeamState.teamIcon]||teamIcons.diamond)+' '+(pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
     badge.classList.add(navigator.onLine ? 'live' : 'offline');
     if (avatarBtn) avatarBtn.classList.add(navigator.onLine ? 'live' : 'offline');
   }
@@ -14051,17 +14174,23 @@ function schedulePush(snapshotArg) {
 async function doPush() {
   if (!canWriteOrgData() || pondoTeamState.syncError || pondoTeamState.pushesInFlight || !pondoTeamState.pendingSnapshot) return;
   const orgId = pondoTeamState.orgId, uid = pondoTeamState.uid;
-  const stripped = stripHeavyFields(pondoTeamState.pendingSnapshot);
+  const localSnapshot = JSON.parse(JSON.stringify(pondoTeamState.pendingSnapshot));
+  const stripped = stripHeavyFields(localSnapshot);
   const json = stableSnapshotJSON(stripped), baseline = pondoTeamState.lastSyncedJSON, baselineRevision = pondoTeamState.lastSyncedRevision;
   pondoTeamState.pendingSnapshot = null;
   pondoTeamState.pushesInFlight++;
   try {
     const ref = doc(firestoreDb, 'organizations', orgId, 'data', 'snapshot');
+    const receiptItems = await planEditorRefundReceipts(localSnapshot, baseline);
+    if(pondoTeamState.orgId!==orgId || pondoTeamState.uid!==uid || window.pondoCurrentUser?.uid!==uid)throw Error('Workspace or account changed.');
     await runTransaction(firestoreDb, async transaction => {
       const server = await transaction.get(ref);
       const data = server.exists() ? server.data() : null;
       const serverJSON = data ? stableSnapshotJSON(sharedSnapshotData(data)) : null;
       if (serverJSON !== baseline || sharedSnapshotRevision(data) !== baselineRevision) throw new Error('Team snapshot changed since it was loaded');
+      const writeReceipts=await writeEditorRefundReceipts({transaction,db:firestoreDb,doc,serverTimestamp,orgId,uid,items:receiptItems});
+      if(pondoTeamState.orgId!==orgId || pondoTeamState.uid!==uid || window.pondoCurrentUser?.uid!==uid)throw Error('Workspace or account changed.');
+      writeReceipts();
       transaction.set(ref, { ...stripped, _syncRevision: baselineRevision + 1, updatedAt: serverTimestamp(), updatedBy: uid, writerClientId: CLIENT_ID });
     });
     if (pondoTeamState.orgId === orgId && pondoTeamState.uid === uid) {
@@ -14191,6 +14320,7 @@ function handleTeamListenerError(orgId, label, err) {
 function subscribeToOrg(orgId) {
   teardownOrgSubscriptions();
   pondoTeamState.orgId = orgId;
+  pondoTeamState.orgName = pondoTeamState.memberships.find(m=>m.orgId===orgId)?.name || '';
   pondoTeamState.lastSyncedJSON = null;
   pondoTeamState.lastSyncedRevision = 0;
   pondoTeamState.baselineReady = false;
@@ -14215,9 +14345,15 @@ function subscribeToOrg(orgId) {
   applyRoleUI();
   setSyncBadge(navigator.onLine ? 'live' : 'offline');
 
-  pondoTeamState.unsubOrgDoc = onSnapshot(doc(firestoreDb, 'organizations', orgId), (snap) => {
-    if (!snap.exists()) { handleRemovedFromOrg(); return; }
-    pondoTeamState.orgName = snap.data().name || 'Organization';
+  const subscriptionUid=pondoTeamState.uid, subscriptionToken=pondoTeamState.initializationToken;
+  const subscriptionCurrent=()=>pondoTeamState.uid===subscriptionUid&&window.pondoCurrentUser?.uid===subscriptionUid&&pondoTeamState.initializationToken===subscriptionToken&&pondoTeamState.orgId===orgId;
+  pondoTeamState.unsubOrgDoc = onSnapshot(doc(firestoreDb, 'organizations', orgId), { includeMetadataChanges: true }, (snap) => {
+    if (!subscriptionCurrent()) return;
+    // A missing cached organization is not evidence of lost access.
+    if (!snap.exists()) { if(!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites) handleRemovedFromOrg(); return; }
+    pondoTeamState.orgName = snap.data().displayName || snap.data().name || 'Organization';
+    pondoTeamState.memberships = pondoTeamState.memberships.map(m=>m.orgId===orgId?{...m,name:pondoTeamState.orgName}:m);
+    window.refreshTeamSwitcherMenuIfOpen?.();
     pondoTeamState.discoverable = snap.data().discoverable === true;
     const colors=['emerald','ocean','violet','rose','amber','slate'],icons=['diamond','star','heart','sun','leaf','book'];
     pondoTeamState.teamColor=colors.includes(snap.data().teamColor)?snap.data().teamColor:'emerald';
@@ -14225,9 +14361,10 @@ function subscribeToOrg(orgId) {
     const color=document.getElementById('teamColor'),icon=document.getElementById('teamIcon');
     if(color&&icon&&!document.getElementById('teamAppearanceOwner')?.contains(document.activeElement)){color.value=pondoTeamState.teamColor;icon.value=pondoTeamState.teamIcon;}
     renderTeamPanel();
-  }, (err) => handleTeamListenerError(orgId, 'Organization', err));
+  }, (err) => {if(subscriptionCurrent())handleTeamListenerError(orgId, 'Organization', err);});
 
   pondoTeamState.unsubMembers = onSnapshot(collection(firestoreDb, 'organizations', orgId, 'members'), { includeMetadataChanges: true }, (snap) => {
+    if (!subscriptionCurrent()) return;
     const members = [];
     const memberConfirmed = !snap.metadata.fromCache && !snap.metadata.hasPendingWrites;
     pondoTeamState.memberConfirmed = memberConfirmed;
@@ -14289,9 +14426,10 @@ function subscribeToOrg(orgId) {
     // or while the dropdown happens to be open) -- keep the open dropdown's
     // teammate facepile in sync instead of leaving it stuck empty/stale.
     if (window.refreshTeamSwitcherMenuIfOpen) window.refreshTeamSwitcherMenuIfOpen();
-  }, (err) => handleTeamListenerError(orgId, 'Members', err));
+  }, (err) => {if(subscriptionCurrent())handleTeamListenerError(orgId, 'Members', err);});
 
   pondoTeamState.unsubData = onSnapshot(doc(firestoreDb, 'organizations', orgId, 'data', 'snapshot'), { includeMetadataChanges: true }, (snap) => {
+    if (!subscriptionCurrent()) return;
     // A cached snapshot is not a safe base for a transaction. Do not replace
     // a local draft until a server-confirmed snapshot has been received.
     if (snap.metadata.fromCache || snap.metadata.hasPendingWrites) return;
@@ -14380,7 +14518,7 @@ function subscribeToOrg(orgId) {
         } catch (e) { /* non-fatal: skip the notification if diffing failed */ }
       }
     }
-  }, (err) => handleTeamListenerError(orgId, 'Organization data', err));
+  }, (err) => {if(subscriptionCurrent())handleTeamListenerError(orgId, 'Organization data', err);});
 }
 
 // Switches which workspace's data is loaded: 'personal' for this device's
@@ -14391,6 +14529,7 @@ function subscribeToOrg(orgId) {
 async function switchActiveWorkspace(key) {
   const current = pondoTeamState.orgId || 'personal';
   if (key === current) { if (window.closeTeamSwitcher) window.closeTeamSwitcher(); if (window.closeHeaderAvatarMenu) window.closeHeaderAvatarMenu(); return; }
+  if (pondoTeamState.initialWorkspacePending) { notify('Please wait while your workspace is checked.'); return; }
   if (!window.pondoWorkspace || !window.applySnapshot || !window.renderAll) return;
   if (pondoTeamState.pushTimer || pondoTeamState.pushesInFlight || pondoTeamState.dirty) {
     notify('A team save is awaiting confirmation. Wait before switching workspaces. If it remains pending, export a backup before leaving or reloading.');
@@ -14469,46 +14608,54 @@ let membershipRefreshGeneration=0;
 async function refreshMemberships() {
   const generation=++membershipRefreshGeneration;
   const uid = pondoTeamState.uid;
-  if (!uid) { pondoTeamState.memberships = []; return; }
+  if (!uid || uid!==window.pondoCurrentUser?.uid) return;
   const ids = pondoTeamState.orgMemberships.slice();
-  const results = [];
+  const previous = new Map(pondoTeamState.memberships.map(m=>[m.orgId,m]));
   const missing = [];
-  for (const orgId of ids) {
+  // Reads for independent workspaces can proceed together; publish one stable
+  // list only after all have settled. Previous labels are display hints only.
+  const resolved = await Promise.all(ids.map(async orgId => {
+    const prior = previous.get(orgId) || {orgId, name: pondoTeamState.orgId === orgId ? (pondoTeamState.orgName || 'Organization') : 'Organization', role: pondoTeamState.orgId === orgId ? pondoTeamState.role : ''};
+    let memberSnap;
+    try { memberSnap = await getDocFromServer(doc(firestoreDb, 'organizations', orgId, 'members', uid)); }
+    catch (e) { return prior; }
+    if (!memberSnap.exists()) { missing.push(orgId); return prior; }
+    let name = prior.name;
     try {
-      const memberSnap = await getDocFromServer(doc(firestoreDb, 'organizations', orgId, 'members', uid));
-      if (!memberSnap.exists()) { missing.push(orgId); continue; }
       const orgSnap = await getDoc(doc(firestoreDb, 'organizations', orgId));
-      results.push({
-        orgId,
-        name: orgSnap.exists() ? (orgSnap.data().name || 'Organization') : 'Organization',
-        role: memberSnap.data().role || 'member',
-      });
-    } catch (e) {
-      // Offline or a transient read error — keep it in the list rather than dropping it.
-      results.push({ orgId, name: pondoTeamState.orgId === orgId ? (pondoTeamState.orgName || 'Organization') : 'Organization', role: pondoTeamState.orgId === orgId ? pondoTeamState.role : '' });
-    }
-  }
+      if (orgSnap.exists()) name = orgSnap.data().displayName || orgSnap.data().name || name;
+    } catch (e) { /* Keep the last known name while offline. */ }
+    return {orgId, name, role: memberSnap.data().role || prior.role || 'member'};
+  }));
+  const results = new Map(resolved.map(m=>[m.orgId,m]));
   if(uid!==pondoTeamState.uid||uid!==window.pondoCurrentUser?.uid||generation!==membershipRefreshGeneration)return;
   // Recheck removals transactionally: a concurrent re-approval must not be
   // erased, and arrayRemove avoids overwriting another device's new entries.
   let removed=[];
   if(missing.length)try{removed=await runTransaction(firestoreDb,async tx=>{
-    const profile=doc(firestoreDb,'users',uid), checks=await Promise.all(missing.map(id=>tx.get(doc(firestoreDb,'organizations',id,'members',uid))));
+    const profile=doc(firestoreDb,'users',uid), [profileSnap,...checks]=await Promise.all([tx.get(profile),...missing.map(id=>tx.get(doc(firestoreDb,'organizations',id,'members',uid)))]);
     const absent=missing.filter((id,i)=>!checks[i].exists());
     if(uid!==pondoTeamState.uid||uid!==window.pondoCurrentUser?.uid||generation!==membershipRefreshGeneration)return [];
-    if(absent.length)tx.set(profile,{orgMemberships:arrayRemove(...absent)},{merge:true});return absent;
+    if(absent.length){const patch={orgMemberships:arrayRemove(...absent)};if(absent.includes(profileSnap.data()?.activeOrganizationId))patch.activeOrganizationId=null;tx.set(profile,patch,{merge:true});}return absent;
   });}catch(e){/* Keep uncertain memberships instead of silently losing them. */}
   if(uid!==pondoTeamState.uid||uid!==window.pondoCurrentUser?.uid||generation!==membershipRefreshGeneration)return;
   const removedSet=new Set(removed), currentIds=pondoTeamState.orgMemberships.filter(id=>!removedSet.has(id));
   pondoTeamState.orgMemberships=currentIds;
-  pondoTeamState.memberships=currentIds.map(id=>results.find(m=>m.orgId===id)||pondoTeamState.memberships.find(m=>m.orgId===id)||{orgId:id,name:'Organization',role:''});
+  // IDs added during this refresh are resolved by the newer refresh, not
+  // momentarily published as generic placeholder rows.
+  pondoTeamState.memberships=currentIds.map(id=>results.get(id)||pondoTeamState.memberships.find(m=>m.orgId===id)).filter(Boolean);
+  if(pondoTeamState.orgId && !pondoTeamState.orgName){const active=results.get(pondoTeamState.orgId);if(active?.name && active.name!=='Organization')pondoTeamState.orgName=active.name;}
+  pondoTeamState.membershipsLoaded=true;
+  pondoTeamState.membershipsLoading=!!pondoTeamState.initialWorkspacePending;
+  pondoTeamState.membershipsLoadError=false;
   if (window.renderTeamSwitcherMenu) window.renderTeamSwitcherMenu();
   if (window.refreshHeaderAvatarMenuIfOpen) window.refreshHeaderAvatarMenuIfOpen();
   renderTeamPanel();
 }
 
 async function handleRemovedFromOrg() {
-  const removedOrgId = pondoTeamState.orgId;
+  const removedOrgId = pondoTeamState.orgId, uid = pondoTeamState.uid, token = pondoTeamState.initializationToken;
+  if(!removedOrgId || !uid || window.pondoCurrentUser?.uid!==uid)return;
   pondoTeamState.orgMemberships = pondoTeamState.orgMemberships.filter((id) => id !== removedOrgId);
   const fallback = pondoTeamState.orgMemberships[0] || 'personal';
   try {
@@ -14517,8 +14664,9 @@ async function handleRemovedFromOrg() {
       activeOrganizationId: fallback === 'personal' ? null : fallback,
     }, { merge: true });
   } catch (e) { /* non-fatal */ }
+  if(pondoTeamState.uid!==uid || window.pondoCurrentUser?.uid!==uid || pondoTeamState.initializationToken!==token || pondoTeamState.orgId!==removedOrgId)return;
   await switchActiveWorkspace(fallback);
-  await refreshMemberships();
+  if(pondoTeamState.uid===uid && window.pondoCurrentUser?.uid===uid && pondoTeamState.initializationToken===token)await refreshMemberships();
 }
 
 function randomInviteCode() {
@@ -14604,10 +14752,12 @@ async function joinWithInviteCode(code) {
     }
     return invite.orgId;
   });
+  if(window.pondoCurrentUser?.uid!==user.uid||pondoTeamState.uid!==user.uid)throw new Error('Account changed while joining.');
   pondoTeamState.orgMemberships = Array.from(new Set([...pondoTeamState.orgMemberships, orgId]));
   await setDoc(doc(firestoreDb, 'users', user.uid), {
     orgMemberships: arrayUnion(orgId), activeOrganizationId: orgId,
   }, { merge: true });
+  if(window.pondoCurrentUser?.uid!==user.uid||pondoTeamState.uid!==user.uid)throw new Error('Account changed while joining.');
   await switchActiveWorkspace(orgId);
   await refreshMemberships();
   if(pondoTeamState.orgId!==orgId)throw new Error('Membership may have been created, but the workspace did not open. Check Team before retrying.');
@@ -14745,9 +14895,11 @@ function renderTeamPanel() {
   const activeKey = pondoTeamState.orgId || 'personal';
   const wsList = document.getElementById('teamWorkspaceList');
   if (wsList) {
-    wsList.innerHTML = '';
     const rows = [{ key: 'personal', name: 'Personal (this device)', role: '' }]
       .concat(pondoTeamState.memberships.map((m) => ({ key: m.orgId, name: m.name, role: ROLE_LABELS[m.role] || m.role })));
+    const listKey=JSON.stringify([pondoTeamState.uid,activeKey,rows,pondoTeamState.membershipsLoading,pondoTeamState.membershipsLoadError]);
+    if(wsList._workspaceKey!==listKey){
+    wsList.innerHTML = '';
     rows.forEach((r) => {
       const row = document.createElement('div');
       row.className = 'team-member-row';
@@ -14778,6 +14930,12 @@ function renderTeamPanel() {
       }
       wsList.appendChild(row);
     });
+    if(pondoTeamState.membershipsLoading || pondoTeamState.membershipsLoadError){
+      const status=document.createElement('p');status.className='tm-meta';status.setAttribute('role','status');
+      status.textContent=pondoTeamState.membershipsLoading?'Checking workspaces…':'Workspaces could not be checked. Reconnect and try again.';wsList.appendChild(status);
+    }
+    wsList._workspaceKey=listKey;
+    }
   }
 
   const activeOrgPanel = document.getElementById('teamActiveOrgPanel');
@@ -14800,6 +14958,7 @@ function renderTeamPanel() {
   const teamIcon=document.getElementById('teamOrgIcon');
   if(teamIcon){const icons={diamond:'◆',star:'★',heart:'♥',sun:'☀',leaf:'✿',book:'▣'},colors={emerald:'#087d60',ocean:'#2563a8',violet:'#6d43a6',rose:'#ad3e5e',amber:'#a35d0a',slate:'#4b6175'};teamIcon.textContent=icons[pondoTeamState.teamIcon]||icons.diamond;teamIcon.style.setProperty('--team-color',colors[pondoTeamState.teamColor]||colors.emerald);}
   const appearance=document.getElementById('teamAppearanceOwner');if(appearance)appearance.hidden=pondoTeamState.role!=='owner';
+  const nameInput=document.getElementById('teamDisplayName');if(nameInput&&document.activeElement!==nameInput)nameInput.value=pondoTeamState.orgName||'';
   const roleLabels = { owner: 'Owner', disbursing: 'Administrative Officer (AO) / Disbursing Officer', reviewer: 'Viewer / Reviewer (view data; request refunds)', 'project-manager': 'Project Manager' };
   document.getElementById('teamMyRole').textContent = (facultyPresidentKnown&&facultyPresidentUid===pondoTeamState.uid?'Faculty President · ':'') + (roleLabels[pondoTeamState.role] || pondoTeamState.role || '—');
   const presidentStatus=document.getElementById('teamFacultyPresidentStatus');
@@ -15010,6 +15169,17 @@ async function myJoinRequests(){
   }catch(e){if(uid===pondoTeamState.uid)output.textContent='Could not load requests. '+(e.message||e);}
 }
 
+async function saveTeamDisplayName(){
+ const s=pondoTeamState,orgId=s.orgId,uid=s.uid,input=document.getElementById('teamDisplayName'),status=document.getElementById('teamNameStatus');
+ const name=(input.value||'').trim().replace(/\s+/gu,' ');
+ if(!orgId||!uid||window.pondoCurrentUser?.uid!==uid||s.role!=='owner'||!s.memberConfirmed){status.textContent='A confirmed workspace owner is required.';return;}
+ if(!navigator.onLine){status.textContent='Connect to the internet before saving.';return;}
+ if(!name||name.length>120||/[\/\p{Cc}\p{Cf}]/u.test(name)){status.textContent='Enter 1 to 120 characters without slashes or control characters.';return;}
+ status.textContent='Saving…';
+ try{await updateDoc(doc(firestoreDb,'organizations',orgId),{displayName:name});if(s.orgId===orgId&&s.uid===uid&&window.pondoCurrentUser?.uid===uid)status.textContent='Name saved for your team. The registered search name is unchanged.';}
+ catch(e){if(s.orgId===orgId&&s.uid===uid&&window.pondoCurrentUser?.uid===uid)status.textContent='Could not confirm the name. Check your connection and updated workspace rules.';}
+}
+
 async function saveTeamAppearance(){
  const s=pondoTeamState,orgId=s.orgId,uid=s.uid,color=document.getElementById('teamColor').value,icon=document.getElementById('teamIcon').value,status=document.getElementById('teamAppearanceStatus');
  if(!orgId||!uid||s.role!=='owner'||!s.memberConfirmed){status.textContent='A confirmed workspace owner is required.';return;}
@@ -15022,6 +15192,7 @@ async function saveTeamAppearance(){
 
 window.pondoTeam = {
   saveAppearance: saveTeamAppearance,
+  saveDisplayName: saveTeamDisplayName,
   downloadDraft: downloadTeamDraft,
   discardDraft: discardTeamDraft,
   createOrganization,
@@ -15035,11 +15206,11 @@ window.pondoTeam = {
 };
 
 function maybeShowTeamOnboarding() {
-  if (pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // already has at least one org
+  if (pondoTeamState.membershipsLoading || pondoTeamState.membershipsLoadError || pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // wait for the initial check
   if (localStorage.getItem('ft_team_onboarding_seen')) return;
   try { localStorage.setItem('ft_team_onboarding_seen', '1'); } catch (e) { /* ignore */ }
   setTimeout(async () => {
-    if (pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // may have joined via an invite link in the meantime
+    if (pondoTeamState.membershipsLoading || pondoTeamState.membershipsLoadError || pondoTeamState.orgId || pondoTeamState.orgMemberships.length) return; // may have joined in the meantime
     const proceed = await confirmAction('Set up team collaboration? Invite others to view or edit this fund tracker together in real time, with roles like Disbursing Officer or Reviewer, who can view data and request refunds. You can always do this later from Team.');
     if (proceed) openTeamModal();
   }, 700);
@@ -15087,11 +15258,18 @@ async function recoverMembershipList(uid){
  }catch(e){if(current()&&status){status.hidden=false;status.textContent='Could not check for missing workspaces. Reconnect and use Refresh my requests.';}}
 }
 
-window.addEventListener('online',()=>{const uid=pondoTeamState.uid;if(uid&&window.pondoCurrentUser?.uid===uid)void recoverMembershipList(uid);});
+window.addEventListener('online',()=>{const uid=pondoTeamState.uid;if(uid&&window.pondoCurrentUser?.uid===uid){if(pondoTeamState.membershipsLoadError)void initCollaboration(window.pondoCurrentUser);else {void recoverMembershipList(uid);void refreshMemberships();}}});
 
 async function initCollaboration(user) {
   pondoTeamState.uid = user.uid;
+  const token = pondoTeamState.initializationToken = {};
+  const current = () => pondoTeamState.initializationToken === token && window.pondoCurrentUser?.uid === user.uid && pondoTeamState.uid === user.uid;
+  pondoTeamState.membershipsLoading = true;
+  pondoTeamState.membershipsLoaded = false;
+  pondoTeamState.initialWorkspacePending = true;
+  pondoTeamState.membershipsLoadError = false;
   renderTeamPanel();
+  window.refreshTeamSwitcherMenuIfOpen?.();
   try {
     const userRef = doc(firestoreDb, 'users', user.uid);
     const userSnap = await getDoc(userRef);
@@ -15101,12 +15279,12 @@ async function initCollaboration(user) {
       // Only migrate missing fields, against the latest server version. Never
       // overwrite a workspace added concurrently by another device.
       migrated=await runTransaction(firestoreDb,async tx=>{const latest=await tx.get(userRef),data=latest.exists()?latest.data():{},next=legacyMigrateUserDoc(latest),patch={};
-        if(window.pondoCurrentUser?.uid!==user.uid||pondoTeamState.uid!==user.uid)return next;
+        if(!current())return next;
         if(!Array.isArray(data.orgMemberships))patch.orgMemberships=next.orgMemberships;
         if(!Object.prototype.hasOwnProperty.call(data,'activeOrganizationId'))patch.activeOrganizationId=next.activeOrganizationId||null;
         if(Object.keys(patch).length)tx.set(userRef,patch,{merge:true});return next;});
     }catch(e){/* offline: use the cached view without overwriting the server */}
-    if(window.pondoCurrentUser?.uid!==user.uid||pondoTeamState.uid!==user.uid)return;
+    if(!current())return;
     pondoTeamState.orgMemberships = migrated.orgMemberships;
     void recoverMembershipList(user.uid);
     let orgId = migrated.activeOrganizationId;
@@ -15114,46 +15292,60 @@ async function initCollaboration(user) {
     const pendingInvite = getPendingInviteCode();
     if (pendingInvite) {
       try {
+        // The invite flow intentionally switches workspaces itself.
+        pondoTeamState.initialWorkspacePending=false;
         await joinWithInviteCode(pendingInvite);
+        if(!current())return;
         clearInviteFromUrl();
+        pondoTeamState.initialWorkspacePending=false;
         await refreshMemberships();
         if(window.pondoCurrentUser?.uid===user.uid&&pondoTeamState.uid===user.uid)approvalTracker.start(user.uid);
         return;
       } catch (err) {
+        if(!current())return;
+        pondoTeamState.initialWorkspacePending=true;
         console.warn('Could not join via invite link:', err);
         notify('Could not finish opening the invitation. Membership may already have been created. Check Team and your connection before trying the original link again.');
       }
     }
 
+    // Begin list preloading without waiting for the active workspace lookup.
+    const preload = refreshMemberships();
     if (orgId) {
       try {
         const memberSnap = await getDoc(doc(firestoreDb, 'organizations', orgId, 'members', user.uid));
-        if (!memberSnap.exists() && !memberSnap.metadata.fromCache) {
-          pondoTeamState.orgMemberships = pondoTeamState.orgMemberships.filter((id) => id !== orgId);
-          orgId = pondoTeamState.orgMemberships[0] || null;
-          try { await setDoc(userRef, { orgMemberships: arrayRemove(migrated.activeOrganizationId), activeOrganizationId: orgId }, { merge: true }); } catch (e) { /* non-fatal */ }
-        }
+        if (!current()) return;
+        // Cached membership permits offline display only; memberConfirmed still
+        // gates privileged actions until a live members snapshot arrives.
+        if (!memberSnap.exists() && !memberSnap.metadata.fromCache && !memberSnap.metadata.hasPendingWrites) orgId = null; // refresh rechecks the index
       } catch (e) {
-        orgId = null;
+        orgId = null; // membership could not be read
       }
     }
-
-    if (orgId) {
-      subscribeToOrg(orgId);
-    } else {
-      renderTeamPanel();
-      maybeShowTeamOnboarding();
-    }
-    await refreshMemberships();
+    if (!current()) return;
+    if (orgId) subscribeToOrg(orgId);
+    pondoTeamState.initialWorkspacePending=false;
+    if(pondoTeamState.membershipsLoaded)pondoTeamState.membershipsLoading=false;
+    renderTeamPanel();
+    window.refreshTeamSwitcherMenuIfOpen?.();
+    await preload;
+    if (!current()) return;
+    if (!orgId) maybeShowTeamOnboarding();
     if(window.pondoCurrentUser?.uid===user.uid&&pondoTeamState.uid===user.uid)approvalTracker.start(user.uid);
   } catch (err) {
+    if(!current())return;
+    pondoTeamState.initialWorkspacePending=false;
+    pondoTeamState.membershipsLoading=false;
+    pondoTeamState.membershipsLoadError=true;
     console.warn('Could not initialize collaboration:', err);
     renderTeamPanel();
+    window.refreshTeamSwitcherMenuIfOpen?.();
   }
 }
 
 function teardownCollaboration() {
   approvalTracker.stop();membershipRefreshGeneration++;membershipRecoveryGeneration++;
+  pondoTeamState.initializationToken=null;pondoTeamState.initialWorkspacePending=false;pondoTeamState.membershipsLoaded=false;pondoTeamState.membershipsLoading=false;pondoTeamState.membershipsLoadError=false;
   const recoveryStatus=document.getElementById('teamMembershipRecoveryStatus');if(recoveryStatus){recoveryStatus.hidden=true;recoveryStatus.textContent='';}
   clearTimeout(teamSuggestTimer);teamSuggestGeneration++;teamSearchGeneration++;
   ['teamSearchResults','teamSearchSuggestions','teamMyRequests','teamJoinRequests'].forEach(id=>document.getElementById(id)?.replaceChildren());
@@ -15163,6 +15355,7 @@ function teardownCollaboration() {
   teamActivityMemory.membersByOrg = {};
   pondoTeamState.uid = null;
   pondoTeamState.orgId = null;
+  pondoTeamState.orgName = '';
   pondoTeamState.discoverable = false;
   pondoTeamState.role = null;
   pondoTeamState.memberConfirmed = false;
@@ -15404,6 +15597,7 @@ onAuthStateChanged(auth, (user) => {
         headerAvatarInitial.textContent = (user.displayName || user.email || '?').trim().charAt(0).toUpperCase();
       }
     }
+    if(pondoTeamState.uid && pondoTeamState.uid !== user.uid) teardownCollaboration();
     window.pondoCurrentUser = user;
     startRemovalInbox(user.uid);
     upsertUserProfile(user);

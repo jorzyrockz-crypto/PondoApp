@@ -1,6 +1,6 @@
 # Receipt cloud sync: implementation foundation (not enabled)
 
-Receipt attachments currently remain local to each device, including PDF receipts. **There is no working cloud receipt sync in the app yet.** The Storage rules and the transport-independent integrity primitives in `receipt-sync/core.cjs` are a foundation only. Do not deploy these rules or change the UI's local-only description until the integration and security validation below are complete.
+Team refund images now use a separate Firestore-based workflow; see [refund-itemization.md](refund-itemization.md) for its limits and rollout. Other expense attachments, including PDF receipts, remain local to each device. The Storage rules and transport-independent integrity primitives in `receipt-sync/core.cjs` are an unwired prototype for broader attachments. Do not deploy these Storage rules until the integration and security validation below are complete.
 
 ## Intended behavior and authorization
 

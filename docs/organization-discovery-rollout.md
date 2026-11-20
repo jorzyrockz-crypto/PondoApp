@@ -32,7 +32,7 @@ grant their configured role without a second approval.
 Firestore-only access has no server-side per-user search/request rate limits.
 Authentication is not a substitute for abuse controls. Review Firebase usage,
 quotas, billing, App Check and monitoring before exposing the service broadly.
-Receipt attachments and logos remain device-local and are not cloud-synced.
+Shared team refund receipt images use separate bounded Firestore documents; other receipt attachments and logos remain device-local. See `refund-itemization.md` for limits and backup caveats.
 
 ## Deploy safely
 
