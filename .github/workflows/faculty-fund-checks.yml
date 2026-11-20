@@ -33,7 +33,9 @@ jobs:
             node tests/faculty-fund-ui.browser.cjs
             node tests/faculty-spark-recovery.browser.cjs
             node tests/death-aid-modal.browser.cjs
+            node tests/cash-donation-workflow.browser.cjs
             node tests/refund-suggestions.browser.cjs
+            node tests/refund-item-layout.browser.cjs
             node tests/refund-funding.browser.cjs
             node tests/refund-uncommitted.browser.cjs
             node tests/transactions-layout.browser.cjs
@@ -47,6 +49,10 @@ jobs:
             node tests/my-refunds.browser.cjs
             node tests/refund-transparency.browser.cjs
             node tests/notification-mobile.browser.cjs
+            node tests/tablet-dashboard-permission.browser.cjs
+            node tests/fund-transaction.browser.cjs
+            node tests/fund-settings.browser.cjs
+            node tests/income-edit.browser.cjs
           ) > "$RUNNER_TEMP/browser-test.log" 2>&1
           result=$?
           cat "$RUNNER_TEMP/browser-test.log"

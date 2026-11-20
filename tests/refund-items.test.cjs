@@ -12,3 +12,5 @@ test('rejects malformed, overlarge, empty, zero or fractional-cent totals',()=>{
  assert.throws(()=>items.parse('{oops'));assert.throws(()=>items.parse('x'.repeat(10001)));
 });
 test('both refund entry paths include an item editor while total-only remains available',()=>{const html=fs.readFileSync('index.html','utf8');assert.match(html,/id="payableRefundItemsEditor"/);assert.match(html,/id="memberRefundItemsEditor"/);assert.match(html,/Itemize this refund/);assert.match(html,/amount=itemized\?itemized.total:parseMoney/);assert.match(html,/appendRefundItems\(row,item.itemsJSON\)/);assert.match(html,/appendRefundItems\(info,bill.itemsJSON\)/);});
+
+test('item toggle is compact, accessible and preserves the manual total',()=>{const html=fs.readFileSync('index.html','utf8');assert.match(html,/toggle.className='refund-items-toggle'/);assert.match(html,/manualAmount=amount.value/);assert.match(html,/else amount.value=manualAmount/);assert.match(html,/refund-items-toggle input\[type=checkbox\]/);assert.match(html,/refund-item-row\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);});
