@@ -13,7 +13,7 @@ test('recovery exit is valid only while the draft, account, workspace and writes
  const t=setup();t.ctx.localStorage.getItem=()=>{throw Error('unavailable')};assert.equal(t.ctx.recoveryOfflineExitStillSafe(t.exit),false);
 });
 test('active worker reports its cache version through an explicit message',()=>{
- const handlers={},self={addEventListener:(name,fn)=>handlers[name]=fn};vm.runInNewContext(worker,{self,URL});let answer;handlers.message({data:{type:'PONDO_GET_CACHE_VERSION'},ports:[{postMessage:x=>answer=x}]});assert.equal(answer.version,'pondo-v120');
+ const handlers={},self={addEventListener:(name,fn)=>handlers[name]=fn};vm.runInNewContext(worker,{self,URL});let answer;handlers.message({data:{type:'PONDO_GET_CACHE_VERSION'},ports:[{postMessage:x=>answer=x}]});assert.equal(answer.version,'pondo-v121');
 });
 test('recovery action is explicit, stays isolated, and preserves the draft',()=>{
  assert.match(html,/id="recoveryOfflineButton"[^>]*onclick="continueRecoveryOffline\(\)"/);assert.match(html,/offline tracker does not contain your team records/);assert.match(html,/localStorage\.getItem\(exit\.key\)===exit\.raw/);assert.match(html,/PONDO_RECOVERY_OFFLINE_INTENT/);assert.match(html,/sessionStorage\.removeItem\(PONDO_RECOVERY_OFFLINE_INTENT\)/);assert.match(html,/window\.pondoGuestMode\)return;/);
