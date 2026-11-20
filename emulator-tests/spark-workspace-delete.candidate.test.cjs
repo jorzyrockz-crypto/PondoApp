@@ -32,11 +32,12 @@ test('only the initiating owner can list and delete supported records; finalizat
  // The owner may remove only this org index and only while atomically
  // removing the member/request. No read or unrelated profile edits are granted.
  await assertFails(getDoc(doc(owner,'users/viewer')));
- await assertFails(updateDoc(doc(owner,'users/viewer'),{_workspaceCleanupOrg:orgId,orgMemberships:arrayRemove(orgId),displayName:'tampered'}));
+ await assertFails(updateDoc(doc(owner,'users/viewer'),{_workspaceCleanupOrg:orgId,orgMemberships:arrayRemove(orgId),activeOrganizationId:null,displayName:'tampered'}));
+ await assertFails(updateDoc(doc(owner,'users/viewer'),{_workspaceCleanupOrg:orgId,orgMemberships:arrayRemove(orgId)}));
  await assertFails(updateDoc(doc(owner,'users/viewer'),{_workspaceCleanupOrg:orgId,orgMemberships:['another-team','forged']}));
  await assertFails(updateDoc(doc(owner,'users/stranger'),{_workspaceCleanupOrg:orgId,orgMemberships:[]}));
- const remove=writeBatch(owner);remove.set(doc(owner,'users/viewer'),{_workspaceCleanupOrg:orgId,orgMemberships:arrayRemove(orgId)},{merge:true});remove.delete(doc(owner,'users/viewer/organizationRequests/'+orgId));remove.delete(doc(owner,root+'/members/viewer'));await assertSucceeds(remove.commit());
- await env.withSecurityRulesDisabled(async ctx=>{const profile=(await getDoc(doc(ctx.firestore(),'users/viewer'))).data();assert.deepEqual(profile.orgMemberships,['another-team']);assert.equal(profile.displayName,'Private Viewer');assert.equal(profile.activeOrganizationId,orgId)});
+ const remove=writeBatch(owner);remove.set(doc(owner,'users/viewer'),{_workspaceCleanupOrg:orgId,orgMemberships:arrayRemove(orgId),activeOrganizationId:null},{merge:true});remove.delete(doc(owner,'users/viewer/organizationRequests/'+orgId));remove.delete(doc(owner,root+'/members/viewer'));await assertSucceeds(remove.commit());
+ await env.withSecurityRulesDisabled(async ctx=>{const profile=(await getDoc(doc(ctx.firestore(),'users/viewer'))).data();assert.deepEqual(profile.orgMemberships,['another-team']);assert.equal(profile.displayName,'Private Viewer');assert.equal(profile.activeOrganizationId,null)});
  await assertFails(deleteDoc(doc(owner,root+'/hidden/private')));await assertFails(updateDoc(doc(owner,root),{deletionState:'deleted'}));await assertFails(deleteDoc(doc(owner,root)));
  const lock=await assertSucceeds(getDoc(doc(owner,root)));assert.equal(lock.data().deletionState,'deleting');
 });
@@ -49,15 +50,24 @@ test('experimental client resumes bounded cleanup against the candidate rules wi
  let last;for(let i=0;i<20;i++){last=await cleanup.clearNext('org~faculty fund test cleanup','owner');if(last.state==='awaiting-verification')break;}
  assert.equal(last.state,'awaiting-verification');assert.equal(last.finalized,false);
  assert.equal((await assertSucceeds(getDoc(doc(owner,root)))).data().deletionState,'deleting');
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,root+'/hidden/private'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/members/owner'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/data/snapshot'))).exists(),false);assert.equal((await getDoc(doc(admin,root+'/sparkDiscoveryPeople/p'))).exists(),false);const user=(await getDoc(doc(admin,'users/viewer'))).data();assert.deepEqual(user.orgMemberships,['another-team']);assert.equal((await getDoc(doc(admin,'users/viewer/organizationRequests/'+orgId))).exists(),false)});
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,root+'/hidden/private'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/members/owner'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/data/snapshot'))).exists(),false);assert.equal((await getDoc(doc(admin,root+'/sparkDiscoveryPeople/p'))).exists(),false);const user=(await getDoc(doc(admin,'users/viewer'))).data();assert.deepEqual(user.orgMemberships,['another-team']);assert.equal(user.activeOrganizationId,null);assert.equal((await getDoc(doc(admin,'users/viewer/organizationRequests/'+orgId))).exists(),false)});
 });
 
 
 test('cleanup of multiple members is chunked, preserves unrelated account fields and creates missing index profiles safely',async()=>{
  const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs');const api=require('firebase/firestore'),owner=db('owner');
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(let i=0;i<9;i++){await setDoc(doc(admin,root+'/members/m'+i),{uid:'m'+i,role:'reviewer'});if(i!==3)await setDoc(doc(admin,'users/m'+i),{orgMemberships:[orgId,'another-team'],displayName:'Member '+i});}});
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(let i=0;i<9;i++){await setDoc(doc(admin,root+'/members/m'+i),{uid:'m'+i,role:'reviewer'});if(i!==3)await setDoc(doc(admin,'users/m'+i),{orgMemberships:[orgId,'another-team'],displayName:'Member '+i,activeOrganizationId:i%2?orgId:'another-team',organizationId:i%3?orgId:'another-team'});}});
  const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');let memberBatches=0,last;
  for(let i=0;i<40;i++){last=await cleanup.clearNext(orgId,'owner');if(last.group==='members'){memberBatches++;assert.ok(last.removed<=4)}if(last.state==='awaiting-verification')break;}
  assert.equal(last.state,'awaiting-verification');assert.ok(memberBatches>=3);
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(let i=0;i<9;i++){const user=(await getDoc(doc(admin,'users/m'+i))).data();assert.deepEqual(user.orgMemberships,i===3?[]:['another-team']);if(i!==3)assert.equal(user.displayName,'Member '+i);assert.equal((await getDoc(doc(admin,root+'/members/m'+i))).exists(),false)}});
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(let i=0;i<9;i++){const user=(await getDoc(doc(admin,'users/m'+i))).data();assert.deepEqual(user.orgMemberships,i===3?[]:['another-team']);if(i!==3){assert.equal(user.displayName,'Member '+i);assert.equal(user.activeOrganizationId,i%2?null:'another-team');assert.equal(user.organizationId,i%3?null:'another-team');}assert.equal((await getDoc(doc(admin,root+'/members/m'+i))).exists(),false)}});
+});
+
+
+test('cleanup of the initiating owner’s join request preserves their unrelated active workspace',async()=>{
+ const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs'),api=require('firebase/firestore'),owner=db('owner');
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();await setDoc(doc(admin,'users/owner'),{orgMemberships:[orgId,'another-team'],activeOrganizationId:'another-team',organizationId:orgId,displayName:'Owner'});await setDoc(doc(admin,'users/owner/organizationRequests/'+orgId),{orgId});await setDoc(doc(admin,root+'/joinRequests/owner'),{uid:'owner',status:'approved'});});
+ const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');
+ for(let i=0;i<40;i++){const r=await cleanup.clearNext(orgId,'owner');if(r.state==='awaiting-verification')break;}
+ const profile=(await assertSucceeds(getDoc(doc(owner,'users/owner')))).data();assert.deepEqual(profile.orgMemberships,['another-team']);assert.equal(profile.activeOrganizationId,'another-team');assert.equal(profile.organizationId,null);assert.equal(profile.displayName,'Owner');
 });

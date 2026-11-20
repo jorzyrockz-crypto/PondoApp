@@ -101,9 +101,11 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['orgMemberships','_workspaceCleanupOrg'])
         && request.resource.data.orgMemberships == [];
       allow update: if cleanupTarget(cleanupOrg())
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['orgMemberships','_workspaceCleanupOrg'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['orgMemberships','_workspaceCleanupOrg','activeOrganizationId','organizationId'])
         && resource.data.get('orgMemberships', []) is list
-        && request.resource.data.orgMemberships == resource.data.get('orgMemberships', []).removeAll([cleanupOrg()]);
+        && request.resource.data.orgMemberships == resource.data.get('orgMemberships', []).removeAll([cleanupOrg()])
+        && request.resource.data.get('activeOrganizationId', null) == (resource.data.get('activeOrganizationId', null) == cleanupOrg() ? null : resource.data.get('activeOrganizationId', null))
+        && request.resource.data.get('organizationId', null) == (resource.data.get('organizationId', null) == cleanupOrg() ? null : resource.data.get('organizationId', null));
       match /organizationRequests/{orgId} {
         allow read, write: if signedIn() && uid() == userId;
         allow delete: if deletingOwner(orgId)
@@ -348,6 +350,8 @@ service cloud.firestore {
             && getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('_workspaceCleanupOrg', '') == orgId
             && getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('orgMemberships', []) is list
             && !getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('orgMemberships', []).hasAny([orgId])
+            && getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('activeOrganizationId', null) != orgId
+            && getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('organizationId', null) != orgId
             && !existsAfter(/databases/$(database)/documents/users/$(entryId)/organizationRequests/$(orgId))));
       }
 

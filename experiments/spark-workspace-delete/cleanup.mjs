@@ -33,16 +33,24 @@ export function createExperimentalSparkCleanup({db,api,getContext}){
   await checkOwner(orgId,uid);
   for(const group of [...DIRECT,'invites']){
    scope(orgId,uid);
-   const accountGroup=group==='members'||group==='joinRequests',pageSize=accountGroup?4:20;
+   const accountGroup=group==='members'||group==='joinRequests',pageSize=accountGroup?2:20;
    const source=group==='invites'?query(collection(db,'invites'),where('orgId','==',orgId),limit(pageSize)):query(collection(db,'organizations',orgId,group),limit(pageSize));
    const found=confirmed(await getDocsFromServer(source));scope(orgId,uid);
-   const entries=found.docs.filter(d=>group!=='members'||d.id!==uid);
+   const candidates=found.docs.filter(d=>group!=='members'||d.id!==uid),entries=accountGroup?candidates.slice(0,1):candidates;
    if(!entries.length)continue;
-   const batch=writeBatch(db);for(const entry of entries){
-    if(accountGroup){batch.set(doc(db,'users',entry.id),{orgMemberships:arrayRemove(orgId),_workspaceCleanupOrg:orgId},{merge:true});batch.delete(doc(db,'users',entry.id,'organizationRequests',orgId));}
-    batch.delete(entry.ref);
-   }
-   scope(orgId,uid);await batch.commit();scope(orgId,uid);
+   if(accountGroup){
+    const entry=entries[0],profile=doc(db,'users',entry.id);let attempts;
+    if(entry.id===uid){const own=confirmed(await getDocFromServer(profile));scope(orgId,uid);const p=own.exists()?own.data():{};attempts=[{active:p.activeOrganizationId===orgId,legacy:p.organizationId===orgId}];}
+    else attempts=[{active:false,legacy:false},{active:true,legacy:false},{active:false,legacy:true},{active:true,legacy:true}];
+    let done=false;
+    for(const {active,legacy} of attempts){
+     const batch=writeBatch(db),patch={orgMemberships:arrayRemove(orgId),_workspaceCleanupOrg:orgId,...(active?{activeOrganizationId:null}:{}),...(legacy?{organizationId:null}:{})};
+     batch.set(profile,patch,{merge:true});batch.delete(doc(db,'users',entry.id,'organizationRequests',orgId));batch.delete(entry.ref);scope(orgId,uid);
+     try{await batch.commit();scope(orgId,uid);done=true;break;}
+     catch(e){if(e?.code!=='permission-denied')throw e;await checkOwner(orgId,uid);}
+    }
+    if(!done)throw Error('Could not safely reconcile this member account. Cleanup remains incomplete.');
+   }else{const batch=writeBatch(db);for(const entry of entries)batch.delete(entry.ref);scope(orgId,uid);await batch.commit();scope(orgId,uid);}
    return {state:'in-progress',group,removed:entries.length};
   }
   return {state:'awaiting-verification',finalized:false};
