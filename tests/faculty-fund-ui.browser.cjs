@@ -19,7 +19,7 @@ async function main(){
   // Fund tabs are accessible and stay within the viewport at all sizes.
   for(const width of [320,390,1280]){
    await page.setViewportSize({width,height:844});
-   await page.locator('#fundTab-donations').click();assert.equal(await page.locator('#donationRegister').evaluate(el=>el.open),true);assert.equal(await page.locator('#fundView-regular').isVisible(),false);
+   await page.locator('#fundTab-donations').click();assert.equal(await page.locator('#donationRegister').isVisible(),true);assert.equal(await page.locator('#fundView-regular').isVisible(),false);
    const layout=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:innerWidth}));assert.ok(layout.doc<=layout.viewport+1,JSON.stringify(layout));
   }
   await page.locator('#fundTab-faculty').click();assert.match(await page.locator('#facultyViewStatus').innerText(),/Open Faculty Fund/);

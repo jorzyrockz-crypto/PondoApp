@@ -8,7 +8,7 @@ test('fund source and receipt workspaces are in accessible separate tabs',()=>{
  assert.match(section,/Regular funds referenced by older receipts stay under Regular Funds/);assert.match(section,/id="facultyFundRecoveryRoot"[^>]*hidden/);
 });
 test('secondary views are accessible, responsive, and preserve the Faculty Fund test warning',()=>{
- assert.match(html,/id="donationRegisterTitle" tabindex="0"/);
+ assert.match(html,/id="donationRegisterTitle" tabindex="-1"/);
  assert.match(html,/#tab-funds \.fund-extras-grid > \.faculty-fund\.is-open/);
  assert.match(html,/@media\(max-width:700px\)\{#tab-funds \.fund-extras/);
  assert.match(html,/body\.dark-mode #tab-funds \.fund-extras/);
