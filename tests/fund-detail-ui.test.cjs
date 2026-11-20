@@ -18,5 +18,5 @@ test('uncommitted balance excludes unspent project allocations without clamping'
  c.funds[0].initialAmount=0;assert.ok(c.fundAvailable('f')<0);
 });
 test('existing sections, color, edit, transaction and return handlers remain connected',()=>{
- for(const v of ['data-section="receipt"','data-section="allocations"','data-section="transactions"','detailTransactions(items,false)','detailFundSettings','openFundSettings(id)','detailFundTransaction',"openFundChild(id,()=>openFundTransaction(id))",'states[x.dataset.section]=x.open','No projects have allocations'])assert.ok(ui.includes(v),v);
+ for(const v of ['data-section="receipt"','data-section="allocations"','data-section="transactions"','detailTransactions(items,false,false,true)','detailFundSettings','openFundSettings(id)','detailFundTransaction',"openFundChild(id,()=>openFundTransaction(id))",'states[x.dataset.section]=x.open','No projects have allocations'])assert.ok(ui.includes(v),v);
 });
