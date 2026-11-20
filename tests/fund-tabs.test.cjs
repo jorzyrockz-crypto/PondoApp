@@ -7,3 +7,9 @@ test('fund tabs expose selected state, keyboard navigation and never save',()=>{
 test('Faculty Fund view uses only matching online service data and does not mix other funds',()=>{assert.match(ui,/const valid=!!\(c&&ok&&navigator.onLine&&loaded\?\.ledger\)/);assert.match(ui,/same\(c,loaded.ctx\)/);assert.match(ui,/Last loaded from the Faculty Fund service/);assert.match(ui,/TEST ONLY — fictitious data only/);assert.match(ui,/window\.selectFundView\?\.\('faculty'\)/);});
 
 test('donation list has the same enclosed card treatment and a search icon',()=>{assert.match(html,/#tab-funds #donationFundList\{margin-top:-16px;padding:0 20px 20px;border:/);assert.match(html,/#tab-funds #donationFundList \.source-card-stats>div\{padding:9px 10px/);assert.match(html,/body\.dark-mode #tab-funds #donationFundList/);assert.match(html,/Search donation funds<\/span><svg[^>]*aria-hidden="true"/);});
+
+test('fund colors rotate by unfiltered fund group without modifying saved colors',()=>{
+ const code=source('const CARD_COLORS=', 'function setDetailCardColor('), funds=Array.from({length:8},(_,i)=>({id:'r'+i,color:'rose'}));funds.splice(1,0,{id:'d1',donationFund:true,color:'rose'},{id:'d2',donationFund:true,color:'rose'});const before=JSON.stringify(funds),ctx={funds,isDonationFund:f=>f?.donationFund===true};vm.runInNewContext(code,ctx);const get=id=>ctx.fundCardColor(funds.find(f=>f.id===id)).hex;
+ assert.deepEqual(['r0','r1','r2','r3','r4','r5','r6'].map(get),['#059669','#2563eb','#7c3aed','#b76a08','#0d777a','#c02655','#059669']);assert.deepEqual(['d1','d2'].map(get),['#059669','#2563eb']);assert.equal(JSON.stringify(funds),before);
+ assert.doesNotMatch(html,/id="fundSettingsColor"|id="fabFundColor"/);assert.match(html,/#tab-funds #fundsList,#tab-funds #donationFundList\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important\}/);
+});
