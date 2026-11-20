@@ -43,7 +43,7 @@ test('empty donation shortcut matches rail empty states and remains keyboard acc
 });
 test('transaction filters distinguish donations, fundraising and Death Aid fund expenses',()=>{
  const {ctx}=setup();assert.equal(ctx.transactionTypeMatches({type:'IN',cashDonation:{}},'DONATION'),true);assert.equal(ctx.transactionTypeMatches({type:'OUT',deathAidPaymentId:'p'},'DEATH_AID'),true);assert.equal(ctx.transactionTypeMatches({type:'IN',contributionPaymentId:'p'},'RAISED'),true);assert.equal(ctx.transactionTypeMatches({type:'OUT',contributionPaymentId:'p'},'CONTRIBUTION'),true);assert.equal(ctx.transactionTypeMatches({type:'OUT',deathAidPaymentId:'p'},'PERSONAL'),false);assert.equal(ctx.transactionKind({type:'OUT',deathAidPaymentId:'p'}),'Death Aid · Fund expense');
- assert.match(html,/Personal Death Aid activity/);assert.match(html,/Personal payment · no fund impact/);assert.match(html,/#txList\[hidden\]/);
+ assert.match(html,/Tracking-only contributions/);assert.match(html,/Personal payment · no fund impact/);assert.match(html,/#txList\[hidden\]/);
 });
 
 test('multiple individual receipts can use a donation fund without mixing ordinary income',async()=>{
