@@ -41,6 +41,7 @@ jobs:
             node tests/offline-sync.browser.cjs
             node tests/offline-guest-workflow.browser.cjs
             node tests/team-draft-reconcile.browser.cjs
+            node tests/team-recovery-notice.browser.cjs
             node tests/refund-impact.browser.cjs
             node tests/member-refund.browser.cjs
             node tests/my-refunds.browser.cjs
