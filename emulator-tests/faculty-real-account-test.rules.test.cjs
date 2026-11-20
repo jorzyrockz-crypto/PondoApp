@@ -8,7 +8,8 @@ const {createIntegratedClient}=require('../faculty-fund-spark-client.js');
 const projectId='demo-pondo-security',testOrg='org~faculty fund test example',normalOrg='org~ordinary workspace';
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
 let env;
-test.before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.join(__dirname,'../firestore.faculty-test.rules'),'utf8')}})});
+const rulesFile=process.env.PONDO_TEST_RECOVERY==='1'?'firestore.faculty-test-recovery-candidate.rules':'firestore.faculty-test.rules';
+test.before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.join(__dirname,'..',rulesFile),'utf8')}})});
 test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{let db=c.firestore();for(const org of [testOrg,normalOrg])for(const [uid,role] of [['owner','owner'],['ao','disbursing'],['president','reviewer'],['reviewer','reviewer']])await api.setDoc(api.doc(db,`organizations/${org}/members/${uid}`),{uid,role});});});
 test.after(async()=>env&&env.cleanup());
 const db=uid=>env.authenticatedContext(uid).firestore();
@@ -115,4 +116,15 @@ test('scoped owner diagnostic export reads a reconciled snapshot and is not a re
  await client('owner').assignPresident('president','assignment');const ao=client('ao');await ao.createPerson('teacher','Sample');await ao.createPayment('p',{personId:'teacher',absenceDate:'2024-01-01',paymentDate:'2024-01-02',amountCents:25000});
  const make=(uid,role)=>createSparkApp({db:db(uid),api,getContext:()=>({uid,role,orgId:testOrg,memberConfirmed:true}),modules});const result=await make('owner','owner').export({orgId:testOrg});assert.match(result.notice,/not an authenticated backup/);assert.equal(result.payload.summary.receivedCents,25000);assert.equal(result.payload.records.payments[0].memberName,'Sample');assert.equal(await verifySparkDiagnosticExport(result),true);
  result.payload.records.payments[0].amountCents=1;assert.equal(await verifySparkDiagnosticExport(result),false);await assert.rejects(make('reviewer','reviewer').export({orgId:testOrg}),/owner/);
+});
+
+// Recovery candidate must remain inaccessible to normal workspaces and outsiders,
+// even when an administrator has provisioned a release marker there.
+test('recovery lock is scoped only to named test workspaces',async t=>{
+ if(process.env.PONDO_TEST_RECOVERY!=='1')return t.skip('Recovery review candidate only');
+ await env.withSecurityRulesDisabled(async c=>api.setDoc(api.doc(c.firestore(),`organizations/${normalOrg}/facultyFundRelease/current`),{enabled:true,schema:1}));
+ await assertFails(api.getDoc(ref('owner',normalOrg,'sparkRestoreProof/current')));
+ await assertFails(api.getDoc(ref('owner',normalOrg,'sparkDiscoveryConfig/current')));
+ await assertFails(api.getDoc(ref('outsider',testOrg,'sparkRestoreProof/current')));
+ assert.equal((await api.getDoc(ref('reviewer',testOrg,'sparkRestoreProof/current'))).exists(),false);
 });

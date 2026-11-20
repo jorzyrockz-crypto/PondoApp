@@ -498,3 +498,33 @@ older clients, accounting, incomplete-capture/locked-recovery procedures and
 rollout/rollback. A rules comparison and emulator success are not proof of
 production safety. Never assume the downloaded file independently protects
 against project-wide loss.
+
+### Test-only recovery rules review candidate
+
+`firestore.faculty-test-recovery-candidate.rules` is an **undeployed review
+candidate**, generated offline by `node scripts/generate-faculty-test-recovery-candidate.cjs`.
+It combines the configured baseline with the experimental recovery rules needed
+by the currently enabled recovery preview. Unlike the broader recovery candidate,
+it does not allow any ordinary workspace through a release marker. All matching
+`org~faculty fund test ...` workspaces, not just one workspace, are in scope;
+only confirmed members have access and role checks still apply. It is for
+fictitious data only. `firebase.json` still selects `firestore.rules`.
+
+The candidate is not approval to publish. Publishing Firestore rules replaces
+the ruleset for the **whole database**. Obtain a fresh published copy for the
+correct project and database, note its version and retrieval time, and compare
+and review every difference, including unrelated rules and overlapping matches:
+
+```
+node scripts/compare-faculty-rules.cjs /path/to/published.rules --test-recovery-diff
+```
+
+Run the full demo-project emulator suite before a deployment decision. The
+candidate-specific runs are included in `npm --prefix emulator-tests run
+test:firestore`; the existing account workflow and recovery suite also run
+against the test-only candidate. Passing those tests or matching text does not
+prove production security or backup safety. Coordinate an explicitly approved
+rollout and rollback with the database administrator; do not replace unknown
+published rules. An existing `sparkRestoreProof/current` can indicate an active
+recovery; do not delete it to clear an error. Recovery references depend on
+server copies and are not independent backups.

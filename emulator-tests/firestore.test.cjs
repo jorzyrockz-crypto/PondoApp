@@ -8,7 +8,7 @@ const PROJECT='demo-pondo-security';
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Refusing to run: start the local Firestore emulator first.');
 // Exercise the same ordinary-workspace security suite under each checked-in
 // rules variant. Never accept an arbitrary rules path from the environment.
-const variants={configured:'firestore.rules',facultyTest:'firestore.faculty-test.rules',recoveryCandidate:'firestore.faculty-recovery-candidate.rules'};
+const variants={configured:'firestore.rules',facultyTest:'firestore.faculty-test.rules',testRecovery:'firestore.faculty-test-recovery-candidate.rules',recoveryCandidate:'firestore.faculty-recovery-candidate.rules'};
 const variant=process.env.PONDO_ORGANIZATION_RULES||'configured';
 if(!Object.hasOwn(variants,variant))throw Error('Unknown organization rules variant');
 let env,createDirectory,organizationName;

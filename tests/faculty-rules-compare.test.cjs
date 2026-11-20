@@ -17,3 +17,7 @@ test('missing, malformed, oversized or unknown arguments fail without a comparis
  for(const args of [[],[path.join(dir,'missing')],['--diff'],['firestore.rules','--bad']]){const r=run(...args);assert.equal(r.status,2);assert.match(r.stderr,/Comparison failed/);assert.equal(r.stdout,'');}
  const file=path.join(dir,'bad');for(const data of [Buffer.alloc(0),Buffer.from([0xff]),Buffer.from('abc\0'),Buffer.alloc(2*1024*1024+1,65)]){fs.writeFileSync(file,data);const r=run(file);assert.equal(r.status,2);assert.equal(r.stdout,'');}
 }));
+
+test('test-only recovery comparison is explicitly selected without changing the original diff',()=>fixture(dir=>{
+ const file=path.join(dir,'published.rules');fs.copyFileSync('firestore.rules',file);const r=run(file,'--test-recovery-diff');assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/test-only recovery candidate.*DIFFERENT/);assert.match(r.stdout,/Test-only recovery candidate matches its generator: YES/);assert.match(r.stdout,/supplied file → test-only recovery candidate/);assert.doesNotMatch(r.stdout,/^\+.*facultyFundRelease/m);assert.match(r.stdout,/Do not deploy/);
+}));
