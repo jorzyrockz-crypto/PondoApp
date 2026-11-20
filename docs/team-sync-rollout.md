@@ -34,9 +34,9 @@ against malicious authorized editors.
    back rules reopens the old unconditional-write risk.
 4. A conflict or failed write stops sync rather than merging financial records.
    The device stores an unconfirmed draft in localStorage when possible. After
-   reload, Settings → Team offers a download and an explicit discard option.
-   Verify the downloaded draft before discarding it; reconcile its records
-   manually with the team copy. Browser storage may be unavailable or evicted;
+   reload, Team offers a download, a reviewed server-checked reconciliation,
+   and an explicit discard option. The review keeps a device-only draft copy;
+   download and verify an independent backup before discarding anything. Browser storage may be unavailable or evicted;
    this draft is not a substitute for an independent backup.
 
 Account isolation, actual Firebase rule enforcement, device recovery, and

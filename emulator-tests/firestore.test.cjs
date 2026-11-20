@@ -327,3 +327,16 @@ test('administrative inventory discovers an orphan nested document without chang
   await env.withSecurityRulesDisabled(async context=>assert.equal((await getDoc(ref(context.firestore(),orphan))).data().secret,'still here'));
  }finally{await deleteApp(app)}
 });
+
+test('draft reconciliation transaction checks actual membership and server revision',async()=>{
+ const {createTeamDraftReconciler}=await import('../team-draft-reconcile.mjs');const {fields,key}=require('../offline-sync.js');
+ const blank=()=>Object.fromEntries([['org',{name:'Team'}],...fields.map(k=>[k,[]])]),org='draft-reconcile',root='organizations/'+org,db=client('owner'),s={orgId:org,uid:'owner',role:'owner',recoveryLocked:true,online:true};
+ const base=blank();base.funds=[{id:'same',name:'Team'}];const draft=blank();draft.funds=[{id:'same',name:'Draft'},{id:'add',name:'Draft only'}];const raw=JSON.stringify(draft);
+ await seed({[root]:{name:'Team'},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/members/viewer']:{uid:'viewer',role:'reviewer'},[root+'/data/snapshot']:{...base,_syncRevision:1,updatedBy:'owner'}});
+ const stable=v=>JSON.stringify(v,(_k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,k)=>(o[k]=x[k],o),{}):x);
+ const sharedData=d=>{const {_syncRevision,updatedBy,updatedAt,writerClientId,...rest}=d;return rest};
+ const svc=createTeamDraftReconciler({db,api,getState:()=>s,getUser:()=>({uid:'owner'}),getDraft:()=>raw,validate:()=>{},stripSnapshot:x=>x,stableJSON:stable,sharedData,sharedRevision:d=>d?d._syncRevision||0:0,clientId:'test'});
+ const choices={[key('funds','same')]:'offline',[key('funds','add')]:'add'},review=await svc.review(org,'owner');await svc.commit(review,choices);let saved=(await getDoc(ref(db,root+'/data/snapshot'))).data();assert.equal(saved._syncRevision,2);assert.deepEqual(saved.funds.map(f=>f.name),['Draft','Draft only']);assert.equal(raw,JSON.stringify(draft));
+ const stale=await svc.review(org,'owner');await env.withSecurityRulesDisabled(async c=>updateDoc(ref(c.firestore(),root+'/data/snapshot'),{_syncRevision:3,updatedBy:'owner'}));await assert.rejects(svc.commit(stale,choices),/team copy changed/i);saved=(await getDoc(ref(db,root+'/data/snapshot'))).data();assert.equal(saved._syncRevision,3);
+ await env.withSecurityRulesDisabled(async c=>updateDoc(ref(c.firestore(),root+'/members/owner'),{role:'reviewer'}));await assert.rejects(svc.review(org,'owner'));assert.equal((await getDoc(ref(db,root+'/data/snapshot'))).data()._syncRevision,3);
+});
