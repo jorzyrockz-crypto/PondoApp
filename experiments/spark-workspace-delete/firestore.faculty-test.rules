@@ -339,6 +339,25 @@ service cloud.firestore {
           && request.resource.data.image.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$');
       }
 
+      // Recovery entry cleanup is scoped to known schemas and the initiating
+      // owner. Headers are deliberately read-only: the browser cannot prove
+      // unknown or orphaned descendants are absent before removing a parent.
+      function recoveryCleanupKind(kind) {
+        return kind in ['sparkDiscoveryPeople','sparkDiscoveryPayments','sparkDiscoveryPaymentSlots','sparkDiscoveryRemittances','sparkDiscoveryLines','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations','sparkDiscoveryCorrections','sparkDiscoveryPresidentHistory','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryConfig'];
+      }
+      match /sparkVerifiedBackups/{backup} {
+        allow get, list: if deletingOwner(orgId);
+        match /collections/{kind}/entries/{entryId} {
+          allow get, list, delete: if deletingOwner(orgId) && recoveryCleanupKind(kind);
+        }
+      }
+      match /sparkRestoreProofSessions/{session} {
+        allow get, list: if deletingOwner(orgId);
+      }
+      match /sparkRestoreProof/current/sessions/{session}/collections/{kind}/entries/{entryId} {
+        allow get, list, delete: if deletingOwner(orgId) && recoveryCleanupKind(kind);
+      }
+
       // Temporary cleanup authority, only for enumerated direct collections.
       // Owner membership stays until a future audited finalization protocol.
       match /{group}/{entryId} {
