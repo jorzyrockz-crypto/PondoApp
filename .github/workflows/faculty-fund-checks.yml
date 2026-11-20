@@ -38,6 +38,7 @@ jobs:
             node tests/refund-uncommitted.browser.cjs
             node tests/transactions-layout.browser.cjs
             node tests/sample-data.browser.cjs
+            node tests/offline-sync.browser.cjs
             node tests/refund-impact.browser.cjs
             node tests/member-refund.browser.cjs
             node tests/my-refunds.browser.cjs

@@ -6953,6 +6953,11 @@ body.dark-mode #tab-funds #fundsList .source-card-stats > div { background: #132
 #tab-report .report-overview .report-kpi strong { color: #1d355f !important; }
 #tab-report .report-preview-label { margin-top: 12px; color: #58709a !important; }
 #tab-report .report-paper { border: 1px solid #dbe4ef !important; box-shadow: 0 8px 22px rgb(22 42 78 / .05) !important; }
+#settings-data .offline-transfer-card {display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+#settings-data .offline-transfer-card h3{margin:0;font-size:16px}#settings-data .offline-transfer-card p{margin:0;font-size:12px;line-height:1.5;color:var(--ink2)}
+#settings-data #offlineTransferReview[hidden]{display:none}#settings-data #offlineTransferReview{display:grid;gap:10px;min-width:0}
+#settings-data .offline-transfer-destination{font-weight:800;color:var(--ink)!important}#offlineTransferRows{display:grid;gap:8px;max-height:480px;overflow:auto;min-width:0}
+.offline-transfer-row{padding:10px;border:1px solid var(--line);border-radius:10px;min-width:0}.offline-transfer-row summary{cursor:pointer;overflow-wrap:anywhere;font-weight:700;font-size:12px}.offline-transfer-row pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto;font:11px/1.5 monospace}.offline-transfer-row select{width:100%;margin-top:8px}.offline-transfer-row a{display:block;overflow-wrap:anywhere;font-size:12px}.offline-transfer-actions{display:flex;gap:8px;flex-wrap:wrap}.offline-transfer-actions .btn{height:auto;min-height:44px}
 #settings-data .sample-data-card { display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:20px;border:1px solid #cfd9f3;border-radius:18px;background:linear-gradient(135deg,#f7f5ff,#eef6ff); }
 #settings-data .sample-data-head {display:flex;align-items:flex-start;gap:13px;min-width:0}
 #settings-data .sample-data-head > div {min-width:0}
@@ -9283,6 +9288,18 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0">Storage</p><p style="font-size:12px; color:var(--ink2); margin:6px 0 0" id="storageInfo">Funds: 3 • Transactions: 6 • Projects: 0</p><p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:8px 0 0">Records and images are stored in this browser. Capacity varies and may be cleared; export a backup regularly.</p></div>
         <section class="sample-data-card" aria-labelledby="sampleDataTitle"><div class="sample-data-head"><span class="sample-data-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 13h3M7 16h6"/></svg></span><div><span class="sample-data-kicker">EXPLORE PONDO</span><h3 id="sampleDataTitle" class="sample-data-title">Preview with sample data</h3><p class="sample-data-copy">Explore example funds, projects, transactions, itemized refunds, contributions, donations and Death Aid.</p></div></div><div class="sample-data-status-row"><span class="sample-data-status-label">SAMPLE DATA</span><p id="sampleDataStatus" class="sample-data-status" role="status" aria-live="polite"></p></div><p class="sample-data-note">Samples affect totals, reports and backups and can sync to a team. By default the sample receipt stays on this device. Clearing is blocked if your records depend on samples.</p><label class="sample-data-note"><input id="sampleSharedReceipt" type="checkbox" disabled> Include a shared sample receipt (owner of a disposable workspace named “Pondo Sample Test …” only)</label><p class="sample-data-note">Shared test receipts remain in Firestore after clearing samples. Permanent workspace deletion is not available yet.</p><div class="sample-data-actions"><button id="loadSampleDataBtn" class="btn btn-emerald" type="button" onclick="loadSampleData()">Load sample data</button><button id="clearSampleDataBtn" class="btn btn-light" type="button" onclick="clearSampleData()">Clear sample data</button></div></section>
         <button class="btn btn-dark" style="width:100%; height:48px" onclick="exportJSONFull()">Export JSON Backup</button><p style="font-size:12px;line-height:1.5;color:var(--ink2)">Team refund request history and shared receipt images may not be included. Download shared receipts separately.</p>
+        <section class="offline-transfer-card" aria-labelledby="offlineTransferTitle">
+          <h3 id="offlineTransferTitle">Review offline data</h3>
+          <p>Copy records from this device’s separate offline tracker to the workspace you have open. Review additions and choose between conflicting versions before confirming.</p>
+          <p>Nothing is deleted automatically. Organization details and settings are not copied; records with different IDs may still be duplicates. Team changes need a connection and sync confirmation.</p>
+          <button class="btn btn-light" type="button" id="offlineTransferOpen" onclick="reviewOfflineTransfer()">Review offline changes</button>
+          <div id="offlineTransferReview" hidden>
+            <p id="offlineTransferDestination" class="offline-transfer-destination"></p>
+            <p id="offlineTransferStatus" role="status" aria-live="polite"></p>
+            <div id="offlineTransferRows"></div>
+            <div class="offline-transfer-actions"><button id="offlineTransferApply" type="button" class="btn btn-emerald" onclick="applyOfflineTransfer()" disabled>Confirm and copy</button><button type="button" class="btn btn-light" onclick="closeOfflineTransfer()">Cancel</button></div>
+          </div>
+        </section>
         <div style="padding:16px;border-radius:20px;border:1px solid var(--line)"><p style="font-size:14px;font-weight:600;margin:0 0 6px">Check a backup without restoring</p><p style="font-size:12px;color:var(--ink2);line-height:1.5;margin:0 0 10px">Select a saved JSON backup to check its structure and supported financial links. This does not change your records or prove it is complete or recoverable in every situation.</p><input type="file" id="verifyBackupFile" accept=".json,application/json" aria-label="Choose a JSON backup to check" onchange="handleImport(this,true)"></div><button class="btn btn-light" style="width:100%; height:48px" onclick="downloadCSV()">Export Funds CSV</button>
         <div style="padding:16px; border-radius:20px; border:1px solid var(--line)"><p style="font-size:14px; font-weight:600; margin:0 0 10px">Import JSON</p><input type="file" id="importFile" accept=".json" style="width:100%; font-size:13px" onchange="handleImport(this)"><div style="display:flex; gap:8px; margin-top:10px"><button class="btn btn-light" style="flex:1" onclick="setImportMode('merge')">Merge</button><button class="btn btn-light" style="flex:1" onclick="setImportMode('overwrite')">Overwrite</button></div><p style="font-size:11px; color:var(--ink2); margin:8px 0 0">Current: <span id="importModeLabel">Merge</span></p></div>
         <button class="btn" style="width:100%; height:48px; background:#fffbeb; color:#92400e" onclick="clearTransactionsOnly()">Clear Transactions Only</button>
@@ -9390,7 +9407,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 116</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 117</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9425,12 +9442,13 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 })();
 </script>
 <script src="./refund-items.js"></script>
+<script src="./offline-sync.js"></script>
 <script src="./faculty-fund-ui.js"></script>
 <script src="./faculty-fund-notifications.js"></script>
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='116', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='117', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -12994,6 +13012,96 @@ function validateCoreBackup(fundsIn,txsIn,projectsIn,sigsIn,allocsIn,billsIn,org
   total+=txsIn.filter(t=>t.payableId===bill.id).reduce((n,t)=>n+cents(t.amount),0);if(!Number.isSafeInteger(total)||total>cents(bill.amount))throw Error('Refund settlements exceed the payable amount.');
  }
  for(const f of fundsIn){let related=txsIn.filter(t=>t.fundId===f.id),sum=cents(f.initialAmount);for(const t of related){sum+=(t.type==='IN'?1:-1)*cents(t.amount);if(!Number.isSafeInteger(sum))throw Error('Fund totals exceed the supported amount.')}if(sum<0)throw Error('A fund has a negative cash balance.');let reserved=0;for(const a of allocsIn.filter(a=>a.fundId===f.id)){let spent=related.filter(t=>t.type==='OUT'&&t.projectId===a.projectId).reduce((v,t)=>v+cents(t.amount),0);if(!Number.isSafeInteger(spent)||spent>cents(a.amount))throw Error('Project spending exceeds its allocation.');reserved+=cents(a.amount)-spent;}if(!Number.isSafeInteger(reserved)||reserved>sum)throw Error('Fund reserves exceed its cash balance.');}
+}
+// Validate the complete reviewed merge with the same link and financial
+// checks used for backup imports; neither input is mutated by validation.
+function validateOfflineTransferSnapshot(snapshot){
+ const {funds:nf,txs:nt,projects:np,sigs:ns,allocations:na,payables:nb,contributionActivities:ca,contributors:cp,contributionPayments:cm,org:newOrg,auditLog:newAudit}=snapshot;
+  for(const t of nt.filter(t=>t.payableId)){let bill=nb.find(b=>b.id===t.payableId);if(!bill||t.type!=='OUT'||t.projectId!==bill.projectId||!nf.some(f=>f.id===t.fundId)||parseMoney(String(t.amount))===null||cents(t.amount)<=0)throw Error('A payment has a missing or invalid payable, project, fund, or amount.');}
+  for(const bill of nb)if(nt.filter(t=>t.payableId===bill.id).reduce((sum,t)=>sum+cents(t.amount),0)>cents(bill.amount))throw Error('A payable has payments exceeding its amount.');
+  for(const [label,arr] of [['activity',ca],['contributor',cp],['contribution payment',cm]])if(arr.some(x=>!x||!x.id)||new Set(arr.map(x=>x.id)).size!==arr.length)throw Error('Invalid or duplicate '+label+' ID.');
+  const validContribDate=d=>{if(typeof d!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(d))return false;let parsed=new Date(d+'T00:00:00Z');return !isNaN(parsed.valueOf())&&parsed.toISOString().slice(0,10)===d};
+  if(!validateDeathAidBackup(ca,cp,cm)||!validateDeathAidLinks(ca,nt,nf))throw Error('Invalid Death Aid records, fund payment or remittance links.');
+  if(ca.some(a=>typeof a.title!=='string'||!a.title.trim()||parseMoney(String(a.amount))===null||(!a.deathAid&&cents(a.amount)<=0)||(a.deathAid&&cents(a.amount)!==0)||(a.dueDate&&!validContribDate(a.dueDate))||(a.projectId&&!np.some(p=>p.id===a.projectId))||(a.fundraising===true&&!a.projectId)||(a.fundraising!==undefined&&typeof a.fundraising!=='boolean')))throw Error('Invalid contribution activity or missing linked project.');
+  if(ca.some(a=>a.monthlyPeriods!==undefined&&(!Array.isArray(a.monthlyPeriods)||!a.monthlyPeriods.length||a.monthlyPeriods.some((m,i)=>!validContributionMonth(m)||(i>0&&m<=a.monthlyPeriods[i-1])))))throw Error('Invalid monthly contribution periods.');
+  if(cp.some(p=>{let a=ca.find(a=>a.id===p.activityId);return a&&(monthlyContribution(a)?!a.monthlyPeriods.includes(p.period):p.period!=null)}))throw Error('A contributor has an invalid monthly period.');
+  if(cp.some(p=>typeof p.name!=='string'||!p.name.trim()||!ca.some(a=>a.id===p.activityId)||parseMoney(String(p.expected))===null||cents(p.expected)<=0))throw Error('Invalid contributor or missing activity.');
+  for(const m of cm){if(m.expectedAtPayment!=null&&(typeof m.expectedAtPayment!=='number'||parseMoney(String(m.expectedAtPayment))===null||cents(m.expectedAtPayment)<cents(m.amount)))throw Error('Invalid contribution payment expected amount snapshot.');if(!cp.some(p=>p.id===m.contributorId)||parseMoney(String(m.amount))===null||cents(m.amount)<=0||!validContribDate(m.date)||typeof m.receivedBy!=='string'||!m.receivedBy.trim()||!['personal','fund','raised'].includes(m.method))throw Error('Invalid contribution payment.');if(m.method==='fund'){let t=nt.find(t=>t.id===m.txId);if(!t||nt.filter(x=>x.id===m.txId).length!==1||cm.filter(x=>x.txId===m.txId).length!==1||t.contributionPaymentId!==m.id||t.type!=='OUT'||t.fundId!==m.fundId||cents(t.amount)!==cents(m.amount)||t.date!==m.date||t.projectId||!nf.some(f=>f.id===m.fundId)||(nf.find(f=>f.id===m.fundId).dateReceived&&m.date<nf.find(f=>f.id===m.fundId).dateReceived))throw Error('Fund-funded contribution and fund transaction must match.');}else if(m.method==='raised'){let t=nt.find(t=>t.id===m.txId),p=cp.find(p=>p.id===m.contributorId),a=ca.find(a=>a.id===p?.activityId);if(!a?.fundraising||a.projectId!==m.projectId||!np.some(x=>x.id===m.projectId)||!nf.some(x=>x.id===m.fundId)||!t||nt.filter(x=>x.id===m.txId).length!==1||cm.filter(x=>x.txId===m.txId).length!==1||t.contributionPaymentId!==m.id||t.type!=='IN'||t.fundId!==m.fundId||t.projectId!==m.projectId||cents(t.amount)!==cents(m.amount)||t.date!==m.date||(nf.find(f=>f.id===m.fundId).dateReceived&&m.date<nf.find(f=>f.id===m.fundId).dateReceived))throw Error('A fundraising receipt must match its project, fund and income transaction.');}else if(m.txId||m.fundId||m.projectId)throw Error('A personal contribution cannot have a fund transaction.');}
+  for(const m of cm.filter(m=>m.method==='raised')){const raised=cm.filter(x=>x.method==='raised'&&x.fundId===m.fundId&&x.projectId===m.projectId).reduce((n,x)=>n+cents(x.amount),0),allocated=na.filter(x=>x.fundId===m.fundId&&x.projectId===m.projectId).reduce((n,x)=>n+cents(x.amount),0);if(allocated<raised)throw Error('Fundraising receipts exceed their project allocation.');}
+  for(const t of nt.filter(t=>t.contributionPaymentId)){let m=cm.find(m=>m.id===t.contributionPaymentId);if(!m||!['fund','raised'].includes(m.method)||m.txId!==t.id)throw Error('A contribution transaction has no matching payment.');}
+  for(const person of cp)if(cm.filter(m=>m.contributorId===person.id).reduce((n,m)=>n+cents(m.amount),0)>cents(person.expected))throw Error('A contributor has payments exceeding the expected amount.');
+  validateCoreBackup(nf,nt,np,ns,na,nb,newOrg);
+  if(newAudit.some(x=>!x||typeof x!=='object'||Array.isArray(x)||typeof x.id!=='string'||!x.id.trim())||new Set(newAudit.map(x=>x.id)).size!==newAudit.length)throw Error('Invalid or duplicate history record.');
+}
+// A reviewed, one-way copy from this device's isolated offline tracker.
+let offlineTransfer=null,offlineTransferGeneration=0;
+const offlineTransferLabels={funds:'Fund',txs:'Transaction',sigs:'Signatory',projects:'Project',allocations:'Allocation',payables:'Refund / payable',auditLog:'History entry',contributionActivities:'Contribution / Death Aid',contributors:'Contributor',contributionPayments:'Contribution payment'};
+function offlineTransferScope(){const s=window.pondoTeamState;return JSON.stringify([window.pondoCurrentUser?.uid||null,s?.uid||null,s?.orgId||null,!!window.pondoGuestMode]);}
+function offlineTransferReady(){
+ const s=window.pondoTeamState,user=window.pondoCurrentUser;
+ if(window.pondoGuestMode||!user?.uid||!trackerDB||trackerFatal||trackerPending||document.body.classList.contains('role-reviewer'))return false;
+ if(!s?.orgId)return true;
+ return !!(s.uid===user.uid&&s.memberConfirmed&&s.baselineReady&&s.role&&s.role!=='reviewer'&&!s.recoveryLocked&&!s.syncError&&!s.listenerError&&!s.dirty&&!s.pushTimer&&!s.pushesInFlight&&s.online!==false&&navigator.onLine&&typeof window.pondoCloudSync?.push==='function');
+}
+async function readOfflineTransferSource(){const store=await TransactionalFundStore.open('fund-tracker-offline-guest-v1');try{return await store.load();}finally{store.close();}}
+function closeOfflineTransfer(){if(offlineTransfer?.busy)return;offlineTransferGeneration++;offlineTransfer=null;document.getElementById('offlineTransferReview').hidden=true;document.getElementById('offlineTransferRows').replaceChildren();document.getElementById('offlineTransferOpen').focus();}
+function offlineTransferSafeDetails(value,container){
+ const attachments=[];let json=JSON.stringify(value,(k,v)=>{if((k==='receiptImage'||k==='logoData')&&typeof v==='string'&&v.startsWith('data:')){attachments.push(v);return '[Local image '+attachments.length+': see link below]';}return v;},2);
+ const pre=document.createElement('pre');pre.textContent=json;container.appendChild(pre);
+ attachments.forEach((data,i)=>{if(/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(data)&&data.length<=3000000){const a=document.createElement('a');a.href=data;a.target='_blank';a.rel='noopener noreferrer';a.textContent='View local image '+(i+1);container.appendChild(a);}else{const note=document.createElement('p');note.textContent='Local image '+(i+1)+' cannot be displayed here.';container.appendChild(note);}});
+}
+function offlineTransferHasSharedRef(value){
+ if(!value||typeof value!=='object')return false;
+ if(Array.isArray(value))return value.some(offlineTransferHasSharedRef);
+ return !!(value.sharedReceiptDigest||value.receiptDigest||value.pendingApproval||value.pendingDeletion)||Object.values(value).some(offlineTransferHasSharedRef);
+}
+function updateOfflineTransferPlan(){
+ const m=offlineTransfer;if(!m||m.busy)return;const status=document.getElementById('offlineTransferStatus'),button=document.getElementById('offlineTransferApply');
+ try{
+  const result=PondoOfflineSync.plan(m.target,m.source,m.choices);m.plan=result;
+  if(result.unresolved){status.textContent=result.unresolved+' conflict(s) need your choice. '+result.changes.length+' record(s) currently selected for copying.';button.disabled=true;return;}
+  if(!result.changes.length){status.textContent='No records selected for copying. '+result.unchanged+' identical record(s) already exist.';button.disabled=true;return;}
+  if(result.changes.some(x=>offlineTransferHasSharedRef(x.offline)))throw Error('A selected record has a shared receipt or pending approval/deletion. It cannot be copied safely; keep the destination version or resolve it in the source.');
+  validateOfflineTransferSnapshot(result.merged);
+  status.textContent=result.changes.length+' record(s) will be added or replaced; '+result.unchanged+' identical record(s) already exist. Check each detail before confirming.';button.disabled=false;
+ }catch(e){m.plan=null;status.textContent='Cannot copy these choices: '+(e.message||'Invalid records.');button.disabled=true;}
+}
+function renderOfflineTransferRows(m){
+ const rows=document.getElementById('offlineTransferRows');rows.replaceChildren();const initial=PondoOfflineSync.plan(m.target,m.source,m.choices);
+ const addRow=(entry,isConflict)=>{
+  const box=document.createElement('div');box.className='offline-transfer-row';const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=(isConflict?'Conflict: ':'Add: ')+(offlineTransferLabels[entry.field]||entry.field)+' · '+entry.id;details.appendChild(summary);
+  if(isConflict){const title=document.createElement('strong');title.textContent='Current workspace';details.appendChild(title);offlineTransferSafeDetails(entry.destination,details);const next=document.createElement('strong');next.textContent='Offline tracker';details.appendChild(next);offlineTransferSafeDetails(entry.offline,details);}else offlineTransferSafeDetails(entry.offline,details);box.appendChild(details);
+  if(isConflict){const select=document.createElement('select');select.setAttribute('aria-label','Choose version for '+(offlineTransferLabels[entry.field]||entry.field)+' '+entry.id);for(const [value,label] of [['','Choose which version to keep'],['destination','Keep current workspace version'],['offline','Use offline version']]){const o=document.createElement('option');o.value=value;o.textContent=label;select.appendChild(o);}select.value=m.choices[entry.key]||'';select.onchange=()=>{m.choices[entry.key]=select.value;updateOfflineTransferPlan();};box.appendChild(select);}
+  rows.appendChild(box);
+ };
+ initial.changes.filter(x=>x.kind==='add').forEach(x=>addRow(x,false));initial.conflicts.forEach(x=>addRow(x,true));updateOfflineTransferPlan();
+}
+async function reviewOfflineTransfer(){
+ const token=++offlineTransferGeneration;offlineTransfer=null;const review=document.getElementById('offlineTransferReview'),status=document.getElementById('offlineTransferStatus');review.hidden=false;document.getElementById('offlineTransferRows').replaceChildren();document.getElementById('offlineTransferApply').disabled=true;
+ if(!offlineTransferReady()){status.textContent='Sign in and open a writable workspace. For a team, reconnect and wait for confirmed access and sync.';return;}
+ const scope=offlineTransferScope(),target=structuredClone(currentSnapshot()),revision=trackerRevision,team=window.pondoTeamState?.orgId||null,teamRevision=team?window.pondoTeamState.lastSyncedRevision:null,teamBaseline=team?window.pondoTeamState.lastSyncedJSON:null;
+ document.getElementById('offlineTransferDestination').textContent='Destination: '+(team?(window.pondoTeamState.orgName||team)+' (team)':'Personal (this device)');status.textContent='Reading the offline tracker on this device…';
+ try{const source=await readOfflineTransferSource();if(token!==offlineTransferGeneration)return;
+  if(!offlineTransferReady()||scope!==offlineTransferScope()||revision!==trackerRevision||JSON.stringify(target)!==JSON.stringify(currentSnapshot()))throw Error('The workspace or records changed. Review again.');
+  if(!source.snapshot){status.textContent='No offline tracker data found on this device.';return;}
+  const m={scope,target,revision,team,teamRevision,teamBaseline,source:source.snapshot,sourceRevision:source.revision,sourceJSON:JSON.stringify(source.snapshot),choices:Object.create(null),busy:false};
+  const counts=PondoOfflineSync.plan(m.target,m.source,m.choices);if(counts.changes.length+counts.conflicts.length>500)throw Error('This review supports up to 500 changes at a time. Export backups and seek help with a larger transfer.');offlineTransfer=m;renderOfflineTransferRows(m);
+ }catch(e){if(token===offlineTransferGeneration)status.textContent='Could not review offline data: '+(e.message||'Storage unavailable.');}
+}
+async function applyOfflineTransfer(){
+ const m=offlineTransfer;if(!m||m.busy||!m.plan||m.plan.unresolved||!m.plan.changes.length)return;const token=offlineTransferGeneration,choicesJSON=JSON.stringify(m.choices);
+ m.busy=true;document.querySelectorAll('#offlineTransferRows select').forEach(x=>x.disabled=true);document.getElementById('offlineTransferApply').disabled=true;
+ try{
+  if(!await appConfirm('Copy the reviewed '+m.plan.changes.length+' record(s) to '+(m.team?'this team workspace':'your personal tracker')+'? Selected offline versions replace matching destination records. The offline tracker stays unchanged. Export a backup first.'))return;
+  const source=await readOfflineTransferSource();
+  if(token!==offlineTransferGeneration||offlineTransfer!==m||JSON.stringify(m.choices)!==choicesJSON||!offlineTransferReady()||m.scope!==offlineTransferScope()||m.revision!==trackerRevision||JSON.stringify(m.target)!==JSON.stringify(currentSnapshot())||source.revision!==m.sourceRevision||JSON.stringify(source.snapshot)!==m.sourceJSON||(m.team&&(window.pondoTeamState.lastSyncedRevision!==m.teamRevision||window.pondoTeamState.lastSyncedJSON!==m.teamBaseline)))throw Error('The offline data, workspace, access or records changed. Review again.');
+  const plan=PondoOfflineSync.plan(m.target,m.source,m.choices);if(plan.unresolved||!plan.changes.length||plan.changes.some(x=>offlineTransferHasSharedRef(x.offline)))throw Error('Review the choices again.');validateOfflineTransferSnapshot(plan.merged);
+  applySnapshot(structuredClone(plan.merged));const ok=await saveAll();
+  if(!ok){appAlert('The copy could not be confirmed locally. Team sync may also be unconfirmed. Keep the offline tracker and export a backup before retrying.');return;}
+  if(m.scope!==offlineTransferScope()){appAlert('The copy was saved, but the workspace changed. Return to the destination and check its sync status.');return;}
+  renderAll(true);updateStorageInfo();m.busy=false;closeOfflineTransfer();appAlert(m.team?'Copied to this device. Wait for team sync to confirm the changes; if sync fails, use the team draft recovery and keep the offline tracker.':'Copied to your personal tracker on this device. The offline tracker is unchanged.');
+ }catch(e){appAlert('Copy stopped: '+(e.message||'Review again.'));}
+ finally{if(offlineTransfer===m){m.busy=false;document.querySelectorAll('#offlineTransferRows select').forEach(x=>x.disabled=false);updateOfflineTransferPlan();}}
 }
 function handleImport(input,verifyOnly=false){
  const file=input.files[0],mode=verifyOnly?'overwrite':importMode;if(!file)return;const reader=new FileReader();reader.onload=async e=>{try{
