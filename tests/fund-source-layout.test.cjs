@@ -1,15 +1,11 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const html=fs.readFileSync('index.html','utf8'),ui=fs.readFileSync('faculty-fund-ui.js','utf8');
-test('fund source list comes immediately after its header, before secondary views',()=>{
+test('fund source and receipt workspaces are in accessible separate tabs',()=>{
  const section=html.slice(html.indexOf('<!-- FUNDS -->'),html.indexOf('<!-- TRANSACTIONS -->'));
- assert.ok(section.indexOf('funds-list-heading')<section.indexOf('id="fundsList"'));
- assert.ok(section.indexOf('id="fundsList"')<section.indexOf('class="fund-extras no-print"'));
- assert.ok(section.indexOf('class="fund-extras no-print"')<section.indexOf('id="donationRegister"'));
- assert.ok(section.indexOf('id="donationRegister"')<section.indexOf('id="facultyFundRoot"'));
- assert.match(section,/Cash donations refer to fund-source receipts\. Faculty Fund is separate/);
- assert.match(section,/Search applies to these sources only/);
- assert.match(section,/id="facultyFundRecoveryRoot"[^>]*hidden/);
+ for(const id of ['regular','donations','faculty']){assert.match(section,new RegExp('id="fundTab-'+id+'" aria-controls="fundView-'+id+'"'));assert.match(section,new RegExp('id="fundView-'+id+'" role="tabpanel" aria-labelledby="fundTab-'+id+'"'));}
+ assert.ok(section.indexOf('id="fundsList"')<section.indexOf('id="donationFundList"'));assert.ok(section.indexOf('id="donationFundList"')<section.indexOf('id="donationRegister"'));assert.ok(section.indexOf('id="donationRegister"')<section.indexOf('id="facultyFundRoot"'));
+ assert.match(section,/Regular funds referenced by older receipts stay under Regular Funds/);assert.match(section,/id="facultyFundRecoveryRoot"[^>]*hidden/);
 });
 test('secondary views are accessible, responsive, and preserve the Faculty Fund test warning',()=>{
  assert.match(html,/id="donationRegisterTitle" tabindex="0"/);
