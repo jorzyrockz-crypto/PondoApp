@@ -51,6 +51,18 @@ export function createExperimentalSparkCleanup({db,api,getContext}){
   }
   return {state:'awaiting-verification',type,finalized:false};
  }
+ // Return a checkpoint only after a confirmed step. Replaying an earlier
+ // checkpoint is safe; a supplied cursor is not proof of a complete scan.
+ async function clearRecoveryNext(orgId,uid,checkpoint={type:'backup',cursor:null}){
+  if(!checkpoint||typeof checkpoint!=='object'||Object.keys(checkpoint).some(k=>!['type','cursor'].includes(k))||!Object.hasOwn(checkpoint,'type')||!Object.hasOwn(checkpoint,'cursor'))throw Error('Invalid recovery checkpoint.');
+  const {type,cursor}=checkpoint;const page=await listRecoveryParents(orgId,uid,{type,cursor});
+  if(!page.ids.length){
+   if(type==='backup')return {state:'in-progress',checkpoint:{type:'session',cursor:null}};
+   return {state:'awaiting-verification',finalized:false};
+  }
+  const parentId=page.ids[0],result=await clearRecoveryEntries(orgId,uid,{type,parentId});
+  return {state:'in-progress',type,parentId,removed:result.removed||0,checkpoint:{type,cursor:result.state==='awaiting-verification'?parentId:cursor}};
+ }
  // One bounded, retryable batch. A caller may repeat until the return value is
  // awaiting-verification, which is deliberately NOT a deletion confirmation.
  async function clearNext(orgId,uid){
@@ -87,5 +99,5 @@ export function createExperimentalSparkCleanup({db,api,getContext}){
   }
   return {state:'awaiting-verification',finalized:false};
  }
- return {freeze,clearNext,listRecoveryParents,clearRecoveryEntries};
+ return {freeze,clearNext,listRecoveryParents,clearRecoveryEntries,clearRecoveryNext};
 }

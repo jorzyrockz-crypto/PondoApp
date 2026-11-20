@@ -105,3 +105,14 @@ test('known recovery entries can be cleared only by the initiating owner, while 
  assert.equal((await cleanup.clearRecoveryEntries(orgId,'owner',{type:'session',parentId:'session'})).removed,1);await assert.rejects(cleanup.clearRecoveryEntries(orgId,'owner',{type:'backup',parentId:'missing'}),/inventory required/);
  await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,header))).exists(),true);assert.equal((await getDoc(doc(admin,session))).exists(),true);assert.equal((await getDoc(doc(admin,nested+'p0'))).exists(),false);assert.equal((await getDoc(doc(admin,claim))).exists(),false);assert.equal((await getDoc(doc(admin,unknown))).exists(),true);assert.equal((await getDoc(doc(admin,orphan))).exists(),true)});
 });
+
+
+test('recovery checkpoint workflow resumes through backups and sessions without finalizing',async()=>{
+ const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs'),api=require('firebase/firestore'),owner=db('owner');
+ const paths=[root+'/sparkVerifiedBackups/a',root+'/sparkVerifiedBackups/b',root+'/sparkRestoreProofSessions/s',root+'/sparkVerifiedBackups/a/collections/sparkDiscoveryPeople/entries/p',root+'/sparkVerifiedBackups/b/collections/sparkDiscoveryPayments/entries/q',root+'/sparkRestoreProof/current/sessions/s/collections/sparkDiscoveryLines/entries/r'];
+ await env.withSecurityRulesDisabled(async ctx=>{for(const p of paths)await setDoc(doc(ctx.firestore(),p),{sample:true});});
+ const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');let checkpoint={type:'backup',cursor:null},r;
+ for(let i=0;i<12;i++){r=await cleanup.clearRecoveryNext(orgId,'owner',checkpoint);if(r.state==='awaiting-verification')break;checkpoint=r.checkpoint;}
+ assert.deepEqual(r,{state:'awaiting-verification',finalized:false});
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(const p of paths.slice(0,3))assert.equal((await getDoc(doc(admin,p))).exists(),true);for(const p of paths.slice(3))assert.equal((await getDoc(doc(admin,p))).exists(),false);});
+});

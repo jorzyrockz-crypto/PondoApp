@@ -42,3 +42,15 @@ test('recovery cleanup pages parents and removes known nested entries before ret
  assert.equal((await t.cleanup.clearRecoveryEntries('o','u',{type:'session',parentId:'session00'})).removed,1);assert.ok(!t.docs.has(claim));assert.ok(t.docs.has(header));assert.ok(t.docs.has(session));assert.ok(t.docs.has(orphan));
  await assert.rejects(t.cleanup.clearRecoveryEntries('o','u',{type:'backup',parentId:'missing'}),/inventory required/);await assert.rejects(t.cleanup.clearRecoveryEntries('o','u',{type:'backup',parentId:'../bad'}),/Invalid/);await assert.rejects(t.cleanup.listRecoveryParents('o','u',{type:'unknown'}),/Unknown/);
 });
+
+test('recovery checkpoint workflow resumes safely, never finalizes and does not delete parents',async()=>{
+ const t=await setup(),root='organizations/o/';await t.cleanup.freeze('o','u');
+ for(const p of ['sparkVerifiedBackups/a','sparkVerifiedBackups/b','sparkRestoreProofSessions/s'])t.docs.set(root+p,{present:true});
+ const a=root+'sparkVerifiedBackups/a/collections/sparkDiscoveryPeople/entries/p',b=root+'sparkVerifiedBackups/b/collections/sparkDiscoveryPayments/entries/q',claim=root+'sparkRestoreProof/current/sessions/s/collections/sparkDiscoveryLines/entries/r';
+ for(const p of [a,b,claim])t.docs.set(p,{sample:true});
+ let checkpoint={type:'backup',cursor:null};t.fail(true);await assert.rejects(t.cleanup.clearRecoveryNext('o','u',checkpoint),/offline/);assert.ok(t.docs.has(a));t.fail(false);
+ const replay=checkpoint;let r=await t.cleanup.clearRecoveryNext('o','u',checkpoint);assert.equal(r.removed,1);assert.deepEqual(r.checkpoint,replay);r=await t.cleanup.clearRecoveryNext('o','u',replay);checkpoint=r.checkpoint;assert.equal(checkpoint.cursor,'a');
+ for(let i=0;i<12;i++){r=await t.cleanup.clearRecoveryNext('o','u',checkpoint);if(r.state==='awaiting-verification')break;checkpoint=r.checkpoint;}
+ assert.deepEqual(r,{state:'awaiting-verification',finalized:false});assert.ok(!t.docs.has(a)&&!t.docs.has(b)&&!t.docs.has(claim));for(const p of ['sparkVerifiedBackups/a','sparkVerifiedBackups/b','sparkRestoreProofSessions/s'])assert.ok(t.docs.has(root+p));
+ await assert.rejects(t.cleanup.clearRecoveryNext('o','u',{type:'backup',cursor:null,extra:true}),/Invalid/);
+});
