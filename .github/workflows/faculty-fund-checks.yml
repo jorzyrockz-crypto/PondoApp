@@ -34,6 +34,7 @@ jobs:
             node tests/faculty-spark-recovery.browser.cjs
             node tests/death-aid-modal.browser.cjs
             node tests/refund-suggestions.browser.cjs
+            node tests/refund-item-layout.browser.cjs
             node tests/refund-funding.browser.cjs
             node tests/refund-uncommitted.browser.cjs
             node tests/transactions-layout.browser.cjs
