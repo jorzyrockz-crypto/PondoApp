@@ -40,8 +40,16 @@ export function createExperimentalSparkCleanup({db,api,getContext}){
    if(!entries.length)continue;
    if(accountGroup){
     const entry=entries[0],profile=doc(db,'users',entry.id);let attempts;
-    if(entry.id===uid){const own=confirmed(await getDocFromServer(profile));scope(orgId,uid);const p=own.exists()?own.data():{};attempts=[{active:p.activeOrganizationId===orgId,legacy:p.organizationId===orgId}];}
-    else attempts=[{active:false,legacy:false},{active:true,legacy:false},{active:false,legacy:true},{active:true,legacy:true}];
+    if(entry.id===uid){
+     // Self-profile rules allow ordinary writes; use a transaction so another
+     // device changing the owner's selection cannot be overwritten by a stale read.
+     await runTransaction(db,async tx=>{
+      const own=await tx.get(profile);scope(orgId,uid);const p=own.exists()?own.data():{};
+      tx.set(profile,{orgMemberships:arrayRemove(orgId),_workspaceCleanupOrg:orgId,...(p.activeOrganizationId===orgId?{activeOrganizationId:null}:{}),...(p.organizationId===orgId?{organizationId:null}:{})},{merge:true});
+      tx.delete(doc(db,'users',uid,'organizationRequests',orgId));tx.delete(entry.ref);scope(orgId,uid);
+     });scope(orgId,uid);return {state:'in-progress',group,removed:entries.length};
+    }
+    attempts=[{active:false,legacy:false},{active:true,legacy:false},{active:false,legacy:true},{active:true,legacy:true}];
     let done=false;
     for(const {active,legacy} of attempts){
      const batch=writeBatch(db),patch={orgMemberships:arrayRemove(orgId),_workspaceCleanupOrg:orgId,...(active?{activeOrganizationId:null}:{}),...(legacy?{organizationId:null}:{})};
