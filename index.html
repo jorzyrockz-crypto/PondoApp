@@ -4742,7 +4742,7 @@ body.dark-mode .workspace-new-tag{background:#195b43;color:#d4fbe7}
 .pondo-notification-dismiss{flex:none;align-self:flex-start;width:44px;height:44px;border:0;background:transparent;color:inherit;font-size:23px;cursor:pointer}
 .pondo-notification-open:focus-visible,.pondo-notification-dismiss:focus-visible{outline:2px solid #fff;outline-offset:-3px;border-radius:10px}
 .notif-permission-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;margin:0 8px 6px;background:var(--surface2);border-radius:10px;font-size:11px;color:var(--ink2);line-height:1.4;}
-.notif-permission-row button{border:0;background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;}
+.notif-permission-row button{min-height:44px;min-width:64px;border:0;background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0;}
 .notif-empty{padding:28px 16px;text-align:center;font-size:12px;color:var(--ink2);}
 .notif-item{display:flex;gap:8px;align-items:flex-start;width:100%;border:0;border-radius:9px;background:transparent;color:var(--ink);padding:9px 12px;font-size:12px;text-align:left;cursor:pointer;}
 .notif-item:hover,.notif-item:focus-visible{background:var(--surface2);outline:none;}
@@ -7816,6 +7816,8 @@ body.dark-mode :is(.project-detail,.fund-detail) .project-status-paid { color:#a
 /* Fund-only cards use the same visual language as project details. */
 @media screen {
 .fund-detail .fund-detail-actions { grid-template-columns:minmax(0,250px); }
+.fund-detail .fund-overview-action { margin-top:14px; }
+body.role-reviewer .fund-detail .fund-overview-action { display:none!important; }
 .fund-detail .fund-opening-receipt, .fund-detail .fund-allocation-card { padding:12px; border:1px solid #dbe4ef; border-radius:12px; background:#f9fbfe; }
 .fund-detail .fund-opening-receipt { display:flex; align-items:center; gap:10px; }
 .fund-detail .fund-opening-receipt > div { flex:1; min-width:0; }
@@ -8710,6 +8712,12 @@ body.dark-mode #tab-dashboard .dashboard-action-buttons .dashboard-action-reject
  #tab-dashboard .dashboard-side-column .dashboard-action-buttons{width:100%;flex-wrap:nowrap}
  #tab-dashboard .dashboard-side-column .dashboard-action-buttons .btn{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}
 }
+/* Use the available workspace on landscape tablets without changing portrait
+   or other pages. Existing text scaling and touch target sizes are retained. */
+@media screen and (pointer:coarse) and (orientation:landscape) and (min-width:1000px) and (min-height:600px){
+ main.wrap:has(#tab-dashboard:not([style*="display: none"])) {max-width:1400px!important;width:calc(100% - 3rem)!important}
+ #tab-dashboard .dashboard-desktop-grid{grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr)}
+}
 /* Requester view: a read-only projection of the existing refund ledger. */
 #tab-refunds .my-refund-intro,#tab-refunds .my-refund-status{color:var(--ink2);font-size:12px;line-height:1.5;margin:10px 0}
 #tab-refunds .my-refund-list{display:grid;gap:10px;margin:12px 0}
@@ -9424,7 +9432,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 124</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-version"><div><strong>App version 125</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
     <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record separate cash donation funds, track their use and find them in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
@@ -9470,7 +9478,7 @@ body.dark-mode #tab-refunds .refund-impact-value.negative strong{color:#ffaaa5}
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='124', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='125', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9956,20 +9964,26 @@ function notificationActorPhotoURL(n){
   return '';
 }
 
+let notifPermissionPending=false,notifPermissionFeedback='';
 function renderNotifCenter(){
   const menu=document.getElementById('notifCenterMenu');
   if(!menu)return;
   const list=visibleNotifications();
-  const canAskPermission=('Notification' in window)&&Notification.permission==='default';
-  const permissionDenied=('Notification' in window)&&Notification.permission==='denied';
+  const supported=window.isSecureContext&&('Notification' in window)&&typeof Notification.requestPermission==='function';
+  const permission=supported?Notification.permission:'unsupported';
   let html='<div class="notif-center-head"><strong>Notifications</strong>'+(list.some(n=>!n.read)?'<button type="button" class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>':'')+'</div>';
   html+='<div class="notif-permission-row"><span>Most alerts are device-local. Workspace approvals and removal notices are delivered to your account when you open the app online. Older unscoped alerts are hidden for privacy.</span></div>';
   if(window.pondoRemovalInboxUnavailable)html+='<div class="notif-permission-row"><span>Workspace removal notices are unavailable. Check your connection and access.</span></div>';
-  if(canAskPermission){
-    html+='<div class="notif-permission-row"><span>Get alerts here even when this tab isn\u2019t focused.</span><button type="button" onclick="requestNotifPermission()">Enable</button></div>';
-  }else if(permissionDenied){
-    html+='<div class="notif-permission-row"><span>Browser notifications are blocked. Allow them in this site\u2019s browser settings to get alerts outside the app.</span></div>';
+  if(permission==='default'){
+    html+='<div class="notif-permission-row"><span>Allow browser alerts while Pondo is open or in the background.</span><button type="button" onclick="requestNotifPermission()"'+(notifPermissionPending?' disabled':'')+'>'+(notifPermissionPending?'Waiting…':'Enable')+'</button></div>';
+  }else if(permission==='denied'){
+    html+='<div class="notif-permission-row"><span>Browser notifications are blocked. Allow notifications in this site’s browser settings and check your device or app notification settings.</span></div>';
+  }else if(permission==='granted'){
+    html+='<div class="notif-permission-row"><span>Browser notifications are allowed. Device or app notification settings may still block alerts. Pondo must remain open or backgrounded.</span></div>';
+  }else{
+    html+='<div class="notif-permission-row"><span>Browser notifications are unavailable here. Open Pondo in a supported browser over HTTPS; in-app alerts still work while open.</span></div>';
   }
+  if(notifPermissionFeedback)html+='<div class="notif-permission-row" role="status"><span>'+escapeTeamText(notifPermissionFeedback)+'</span></div>';
   if(!list.length){
     html+='<div class="notif-empty">No notifications yet. Team activity and reminders will show up here.</div>';
   }else{
@@ -9980,7 +9994,9 @@ function renderNotifCenter(){
       return '<button type="button" class="notif-item'+(n.read?'':' unread')+'" data-notif-id="'+escapeTeamText(n.id)+'" onclick="openNotification(this.dataset.notifId)"><span class="notif-dot"></span>'+avatar+'<span class="notif-text"><span class="notif-title">'+icon+safeTitle+'</span>'+(safeBody?'<span class="notif-body">'+safeBody+'</span>':'')+'<span class="notif-time">'+notifTimeAgo(n.ts)+'</span></span></button>';
     }).join('');
   }
-  menu.innerHTML=html;
+  // Avoid replacing a button between touch-down and touch-up during routine
+  // refreshes. This also preserves focus when the visible content is unchanged.
+  if(menu._notifHTML===html)return;menu.innerHTML=html;menu._notifHTML=html;
   menu.querySelectorAll('.notif-avatar img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true},{once:true}));
 }
 window.renderNotifCenter=renderNotifCenter;
@@ -10064,9 +10080,20 @@ function refreshNotifCenterIfOpen(){const menu=document.getElementById('notifCen
 window.closeNotifCenter=closeNotifCenter;
 window.toggleNotifCenter=toggleNotifCenter;
 window.refreshNotifCenterIfOpen=refreshNotifCenterIfOpen;
-document.addEventListener('click',e=>{if(!e.target.closest('.header-bell-wrap'))closeNotifCenter()});
+document.addEventListener('click',e=>{const wrap=document.querySelector('.header-bell-wrap');if(!(e.composedPath?.().includes(wrap)||e.target.closest('.header-bell-wrap')))closeNotifCenter()});
 document.addEventListener('keydown',e=>{const m=document.getElementById('notifCenterMenu');if(e.key==='Escape'&&m&&!m.hidden){e.preventDefault();closeNotifCenter(true)}});
-function requestNotifPermission(){if(!('Notification' in window))return;Notification.requestPermission().then(()=>{renderNotifCenter()})}
+function requestNotifPermission(){
+ if(notifPermissionPending)return;
+ if(!window.isSecureContext||!('Notification' in window)||typeof Notification.requestPermission!=='function'){notifPermissionFeedback='Notifications cannot be requested here. Open Pondo in a supported browser over HTTPS.';renderNotifCenter();return;}
+ if(Notification.permission!=='default'){notifPermissionFeedback='';renderNotifCenter();return;}
+ // Call directly in the button gesture. Browsers can reject a permission
+ // request if it is deferred to a timer, another dialog or a microtask.
+ let result;try{result=Notification.requestPermission();}catch(e){notifPermissionFeedback='The browser could not open the permission request. Check browser and device notification settings, then try again.';renderNotifCenter();return;}
+ notifPermissionPending=true;notifPermissionFeedback='Waiting for the browser permission choice.';queueMicrotask(renderNotifCenter);
+ Promise.resolve(result).then(value=>{
+  notifPermissionFeedback=value==='granted'?'Browser permission granted. Check device settings if alerts do not appear.':value==='denied'?'Permission was denied. Change this site’s notification setting in your browser to enable it.':'No permission was granted. Try again, or check this site’s notification settings.';
+ },()=>{notifPermissionFeedback='The browser could not open the permission request. Check browser and device notification settings, then try again.';}).finally(()=>{notifPermissionPending=false;renderNotifCenter();});
+}
 window.requestNotifPermission=requestNotifPermission;
 function notificationDeliveryAllowed(entry){
   const uid=window.pondoCurrentUser?.uid,state=window.pondoTeamState;
@@ -11717,8 +11744,7 @@ function openFundDetails(id,refresh=false){activeProjectDetail=null;activeContri
   const states={};if(refresh)document.querySelectorAll('#detailBody .project-detail-section').forEach(x=>states[x.dataset.section]=x.open);
   function state(name,defaultOpen=false){return (refresh?states[name]:defaultOpen)?'open':''}
   let alloc=as.length?'<div class="fund-allocation-list">'+as.map(a=>{let p=projects.find(x=>x.id===a.projectId);return `<div class="fund-allocation-card"><div class="project-allocation-identity"><span class="project-allocation-icon" aria-hidden="true">${LICON('folder','#5b4ae8',19)}</span><strong>${escapeText(p?.name||'Unknown project')}</strong></div><div class="project-allocation-amounts"><div><span>Allocated</span><strong>${fmt(a.amount)}</strong></div><div><span>Cash paid</span><strong>${fmt(projectSpent(id,a.projectId)/100)}</strong></div><div><span>Unspent</span><strong>${fmt(allocationRemaining(id,a.projectId)/100)}</strong></div></div></div>`}).join('')+'</div>':'<p class="detail-empty">No projects have allocations from this fund yet.</p>';
-  const body=`<section class="project-overview" aria-label="Fund financial overview"><div class="project-overview-head"><div><span class="project-detail-kicker">FUND OVERVIEW</span><h3>Where the money stands</h3></div></div><div class="detail-stats project-overview-stats"><div class="detail-stat"><span>Total received</span><strong>${fmt(received/100)}</strong><small>Opening receipt and income</small></div><div class="detail-stat"><span>Cash paid</span><strong>${fmt(spent/100)}</strong><small>Outgoing transactions</small></div><div class="detail-stat"><span>Cash balance</span><strong>${fmt(fundCash(id)/100)}</strong><small>Received minus paid</small></div><div class="detail-stat"><span>Uncommitted</span><strong>${fmt(fundAvailable(id)/100)}</strong><small>Balance minus reserved</small></div></div><div class="project-unspent"><span>Reserved for projects</span><strong>${fmt(fundReserved(id)/100)}</strong><small>Unspent project allocations</small></div><p class="project-overview-note">The cash balance includes reserved amounts. Uncommitted cash can be spent or allocated to projects.</p></section>
-<section class="project-quick-actions" aria-label="Record fund activity"><div class="project-section-label"><span class="project-detail-kicker">QUICK ACTIONS</span><h3>Record fund activity</h3></div><div class="project-detail-actions fund-detail-actions"><button type="button" class="btn btn-emerald fund-tx-btn"><strong>+ Record transaction</strong><span>${isDonationFund(f)?'Record spending from this donation':'Add income or spending for this fund'}</span></button></div></section>
+  const body=`<section class="project-overview" aria-label="Fund financial overview"><div class="project-overview-head"><div><span class="project-detail-kicker">FUND OVERVIEW</span><h3>Where the money stands</h3></div></div><div class="detail-stats project-overview-stats"><div class="detail-stat"><span>Total received</span><strong>${fmt(received/100)}</strong><small>Opening receipt and income</small></div><div class="detail-stat"><span>Cash paid</span><strong>${fmt(spent/100)}</strong><small>Outgoing transactions</small></div><div class="detail-stat"><span>Cash balance</span><strong>${fmt(fundCash(id)/100)}</strong><small>Received minus paid</small></div><div class="detail-stat"><span>Uncommitted</span><strong>${fmt(fundAvailable(id)/100)}</strong><small>Balance minus reserved</small></div></div><div class="project-unspent"><span>Reserved for projects</span><strong>${fmt(fundReserved(id)/100)}</strong><small>Unspent project allocations</small></div><p class="project-overview-note">The cash balance includes reserved amounts. Uncommitted cash can be spent or allocated to projects.</p><div class="project-detail-actions fund-detail-actions fund-overview-action"><button type="button" class="btn btn-emerald fund-tx-btn"><strong>+ Record transaction</strong><span>${isDonationFund(f)?'Record spending from this donation':'Add income or spending for this fund'}</span></button></div></section>
 <div class="project-detail-workspace"><details class="project-detail-section" data-section="receipt" ${state('receipt',true)}><summary><span>Initial fund receipt</span></summary><p class="detail-section-intro">The opening amount recorded when this fund was created.</p><div class="fund-opening-receipt"><span class="fund-receipt-icon" aria-hidden="true">${LICON('wallet','#5b4ae8',19)}</span><div><strong>Opening receipt</strong><small>Received ${escapeText(f.dateReceived||'Date not recorded')}</small></div><strong class="fund-receipt-amount">+${fmt(f.initialAmount)}</strong></div></details>
 <details class="project-detail-section" data-section="allocations" ${state('allocations',true)}><summary><span>Project allocations <span class="project-section-count">${as.length}</span></span></summary><p class="detail-section-intro">${fmt(fundReserved(id)/100)} reserved in unspent allocations. Payments reduce the fund’s cash balance.</p>${alloc}</details>
 <details class="project-detail-section" data-section="transactions" ${state('transactions',true)}><summary><span>Transaction activity <span class="project-section-count">${items.length}</span></span></summary>${detailTransactions(items,false)}</details>
@@ -13601,7 +13627,7 @@ window.startTabGuard=(function(){
 // overwriting a team draft. Verify the same controlled offline shell and draft
 // immediately before leaving; failures do not clear or replace any records.
 const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
-const PONDO_RECOVERY_SHELL='pondo-v124';
+const PONDO_RECOVERY_SHELL='pondo-v125';
 let recoveryOfflineBusy=false;
 function recoveryOfflineExitStillSafe(exit){
  const s=window.pondoTeamState;

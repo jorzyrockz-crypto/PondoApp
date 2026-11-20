@@ -47,6 +47,7 @@ jobs:
             node tests/my-refunds.browser.cjs
             node tests/refund-transparency.browser.cjs
             node tests/notification-mobile.browser.cjs
+            node tests/tablet-dashboard-permission.browser.cjs
           ) > "$RUNNER_TEMP/browser-test.log" 2>&1
           result=$?
           cat "$RUNNER_TEMP/browser-test.log"

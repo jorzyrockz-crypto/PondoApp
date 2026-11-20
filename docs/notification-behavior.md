@@ -139,3 +139,10 @@ pending items may alert on first confirmed load, but historical decisions are
 not replayed on first load. These are best-effort alerts, not evidence of a
 handover or a replacement for checking the register. The Faculty Fund backend
 is disabled until separately deployed and explicitly enabled after testing.
+
+The bell's **Enable** button asks the browser for permission directly from the
+user's tap. The panel reports a granted, denied, dismissed, unsupported or failed
+request; a granted browser permission does not verify Android/iOS app settings
+or guarantee delivery. If blocked, check site permissions and the device's app
+notification settings. Some embedded browsers cannot show a permission prompt;
+use a supported browser over HTTPS. The app does not enable alerts silently.
