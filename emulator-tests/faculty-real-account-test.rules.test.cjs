@@ -5,7 +5,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing');
 const api=require('firebase/firestore');
 const {createIntegratedClient}=require('../faculty-fund-spark-client.js');
-const projectId='demo-pondo-security',testOrg='org~faculty fund test example',normalOrg='org~ordinary workspace';
+const projectId='demo-pondo-security',testOrg=process.env.PONDO_TEST_RECOVERY==='1'?'org~faculty fund test':'org~faculty fund test example',normalOrg='org~ordinary workspace';
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Start the loopback emulator first');
 let env;
 const rulesFile=process.env.PONDO_TEST_RECOVERY==='1'?'firestore.faculty-test-recovery-candidate.rules':'firestore.faculty-test.rules';
@@ -123,6 +123,8 @@ test('scoped owner diagnostic export reads a reconciled snapshot and is not a re
 test('recovery lock is scoped only to named test workspaces',async t=>{
  if(process.env.PONDO_TEST_RECOVERY!=='1')return t.skip('Recovery review candidate only');
  await env.withSecurityRulesDisabled(async c=>api.setDoc(api.doc(c.firestore(),`organizations/${normalOrg}/facultyFundRelease/current`),{enabled:true,schema:1}));
+ await env.withSecurityRulesDisabled(async c=>api.setDoc(api.doc(c.firestore(),'organizations/org~faculty fund test example/members/owner'),{uid:'owner',role:'owner'}));
+ assert.equal((await api.getDoc(ref('owner','org~faculty fund test example','sparkRestoreProof/current'))).exists(),false);
  await assertFails(api.getDoc(ref('owner',normalOrg,'sparkRestoreProof/current')));
  await assertFails(api.getDoc(ref('owner',normalOrg,'sparkDiscoveryConfig/current')));
  await assertFails(api.getDoc(ref('outsider',testOrg,'sparkRestoreProof/current')));

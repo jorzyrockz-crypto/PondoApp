@@ -43,6 +43,7 @@ test('President label follows only confirmed config and clears on workspace chan
  l.next(snap('viewer',true));assert.equal(t.ctx.presidentStatus().known,false);l.next(snap('viewer'));assert.equal(t.ctx.presidentStatus().uid,'viewer');assert.equal(t.ctx.presidentStatus().known,true);
  l.next(snap('other',true));assert.equal(t.ctx.presidentStatus().known,false);t.ctx.stopFacultyWatch();t.state.orgId='org~faculty fund test other';l.next(snap('viewer'));assert.equal(t.ctx.presidentStatus().uid,null);assert.equal(t.ctx.presidentStatus().known,false);
 });
+test('exact test workspace name starts the President config listener',()=>{const t=watchSetup();t.state.orgId='org~faculty fund test';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,4);assert.equal(t.listeners[3].path.at(-2),'sparkDiscoveryConfig')});
 test('normal workspaces never start the test-only President config listener',()=>{const t=watchSetup();t.state.orgId='org~normal school';t.ctx.startFacultyWatch(t.state.orgId,'owner');assert.equal(t.listeners.length,0)});
 
 test('test-mode revision listener only schedules confirmed updates for the current workspace',()=>{

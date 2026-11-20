@@ -9,7 +9,7 @@ function setup(projectId,realAccountTest){
 test('real-account test mode requires the project and gates scope to named test workspaces',async()=>{
  assert.throws(()=>setup('other',true),/wrong|demo Firebase/i);
  const {app,ctx}=setup('russapps-pondo',true);assert.equal(app.capabilities.mode,'firebase-test-only');assert.ok(app.getRecoveryContext());
- ctx.orgId='org~normal';assert.equal(app.getRecoveryContext(),null);ctx.orgId='org~faculty fund test';assert.equal(app.getRecoveryContext(),null);
+ ctx.orgId='org~normal';assert.equal(app.getRecoveryContext(),null);ctx.orgId='org~faculty fund test';assert.ok(app.getRecoveryContext());ctx.orgId='org~faculty fund testing';assert.equal(app.getRecoveryContext(),null);
  ctx.orgId='org~faculty fund test example';assert.match((await app.read({view:'memberReceipts'})).html,/TEST ONLY — NOT A REAL RECEIPT/);assert.match((await app.read({view:'csv'})).csv,/TEST ONLY/);
 });
 test('generated test rules keep existing rules and add only gated test collections',()=>{

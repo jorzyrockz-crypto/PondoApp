@@ -9,6 +9,7 @@ test('test-only recovery review candidate preserves configured rules and scopes 
  const body=normal.slice(normal.indexOf('// Firestore Security Rules for Pondo.'),-6);
  assert.ok(candidate.includes(body));
  assert.match(candidate,/o\.matches\('\^org~faculty fund test \.\+\$'\)/);
+ assert.match(candidate,/o == 'org~faculty fund test'/);
  assert.doesNotMatch(candidate,/facultyFundRelease/);
  assert.match(candidate,/function signed\(o\) \{ return recoveryMember\(o\) && !exists\(lock\(o\)\);/);
  assert.match(candidate,/TEST-WORKSPACE RECOVERY REVIEW CANDIDATE/);

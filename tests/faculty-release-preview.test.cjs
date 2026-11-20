@@ -31,6 +31,7 @@ test('preview is enabled in the shipped app but restricts projects',()=>{
 test('existing test workspace and ordinary workspace can coexist with their own scoped gates',async()=>{
  const f=fixture();const app=createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,releasePreview:true});
  f.setCtx({...f.ctx(),orgId:'org~faculty fund test old'});assert.equal(app.capabilities.mode,'firebase-test-only');await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('facultyFundRelease')).length,0);assert.match((await app.read({orgId:f.ctx().orgId,view:'memberReceipts'})).html,/TEST ONLY/);
+ f.setCtx({...f.ctx(),orgId:'org~faculty fund test'});assert.equal(app.capabilities.mode,'firebase-test-only');await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('facultyFundRelease')).length,0);
  f.setCtx({...f.ctx(),orgId:'org~ordinary school'});assert.equal(app.capabilities.mode,'release-preview-only');f.setMarker(null);await assert.rejects(app.transition({orgId:f.ctx().orgId}),/not enabled/);f.setMarker({enabled:true,schema:1});await app.transition({orgId:f.ctx().orgId});assert.equal(f.calls.filter(x=>x.includes('org~ordinary school/facultyFundRelease')).length,2);
 });
 test('local diagnostic checking is scoped to the confirmed owner and cancels on workspace reset',async()=>{

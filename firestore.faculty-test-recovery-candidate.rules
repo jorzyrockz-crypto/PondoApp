@@ -362,7 +362,7 @@ service cloud.firestore {
   function remit(o,r) { return /databases/$(database)/documents/organizations/$(o)/sparkDiscoveryRemittances/$(r); }
   function line(o,r,p) { return /databases/$(database)/documents/organizations/$(o)/sparkDiscoveryLines/$(r + '~' + p); }
   function correction(o,c) { return /databases/$(database)/documents/organizations/$(o)/sparkDiscoveryCorrections/$(c); }
-  function recoveryMember(o) { return o.matches('^org~faculty fund test .+$')
+  function recoveryMember(o) { return (o == 'org~faculty fund test' || o.matches('^org~faculty fund test .+$'))
     && request.auth != null && exists(member(o,request.auth.uid)); }
   function signed(o) { return recoveryMember(o) && !exists(lock(o)); }
   function recoveryOwner(o) { return recoveryMember(o) && get(member(o,request.auth.uid)).data.role == 'owner'; }

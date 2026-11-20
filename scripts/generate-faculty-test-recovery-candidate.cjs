@@ -21,7 +21,7 @@ function generate(){
    allow read: if id == 'current' && request.auth != null && exists(member(o,request.auth.uid));
    allow write: if false;
   }`;
- const scoped=`  function recoveryMember(o) { return o.matches('^org~faculty fund test .+$')
+ const scoped=`  function recoveryMember(o) { return (o == 'org~faculty fund test' || o.matches('^org~faculty fund test .+$'))
     && request.auth != null && exists(member(o,request.auth.uid)); }
   function signed(o) { return recoveryMember(o) && !exists(lock(o)); }
   function recoveryOwner(o) { return recoveryMember(o) && get(member(o,request.auth.uid)).data.role == 'owner'; }`;

@@ -14,7 +14,7 @@
   if(experimentalRestore&&!releasePreview&&(!demo||realAccountTest))throw Error('Experimental recovery requires a demo project or the disabled release preview');
   if(experimentalRestore&&['createCapture','createRestore','createOwnerRecovery','makeRecoveryFile','inspectRecoveryFile','verifyDiagnostic','verifyExport','planCapture','canonicalCapture','encodeCapture'].some(k=>typeof modules[k]!=='function'))throw Error('Experimental recovery setup is incomplete');
   let scope=0;
-  const testWorkspace=orgId=>typeof orgId==='string'&&/^org~faculty fund test .+/.test(orgId);
+  const testWorkspace=orgId=>typeof orgId==='string'&&(orgId==='org~faculty fund test'||/^org~faculty fund test .+/.test(orgId));
   function context(){const c=getContext();if(realAccountTest&&!releasePreview&&!testWorkspace(c?.orgId))return null;return c?{...c,scopeToken:scope}:null;}
   function sameScope(c){const n=context();return !!n&&n.memberConfirmed===true&&n.orgId===c.orgId&&n.uid===c.uid&&n.role===c.role&&n.scopeToken===c.scopeToken;}
   async function confirmRelease(orgId,expected){

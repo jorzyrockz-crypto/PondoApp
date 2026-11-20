@@ -505,10 +505,15 @@ against project-wide loss.
 candidate**, generated offline by `node scripts/generate-faculty-test-recovery-candidate.cjs`.
 It combines the configured baseline with the experimental recovery rules needed
 by the currently enabled recovery preview. Unlike the broader recovery candidate,
-it does not allow any ordinary workspace through a release marker. All matching
+it does not allow any ordinary workspace through a release marker. The exact registered ID `org~faculty fund test` and all matching
 `org~faculty fund test ...` workspaces, not just one workspace, are in scope;
 only confirmed members have access and role checks still apply. It is for
 fictitious data only. `firebase.json` still selects `firestore.rules`.
+
+A display name can be changed without changing the registered workspace ID;
+verify the actual ID before relying on this match. The app gate also requires
+the corresponding app update. Older `firestore.faculty-test.rules` and the
+broader recovery candidate do not grant this exact unsuffixed ID test access.
 
 The candidate is not approval to publish. Publishing Firestore rules replaces
 the ruleset for the **whole database**. Obtain a fresh published copy for the
