@@ -90,8 +90,24 @@ service cloud.firestore {
     // ---- user profiles: each user owns their own /users/{uid} subtree ----
     match /users/{userId} {
       allow read, write: if signedIn() && uid() == userId;
+      // Remove only this workspace from a known member/requester's index.
+      // No read of another user's profile or edit to unrelated fields is granted.
+      function cleanupOrg() { return request.resource.data.get('_workspaceCleanupOrg', ''); }
+      function cleanupTarget(orgId) {
+        return orgId is string && orgId.size() > 0 && deletingOwner(orgId)
+          && (exists(memberPath(orgId, userId)) || exists(joinPath(orgId, userId)));
+      }
+      allow create: if cleanupTarget(cleanupOrg())
+        && request.resource.data.keys().hasOnly(['orgMemberships','_workspaceCleanupOrg'])
+        && request.resource.data.orgMemberships == [];
+      allow update: if cleanupTarget(cleanupOrg())
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['orgMemberships','_workspaceCleanupOrg'])
+        && resource.data.get('orgMemberships', []) is list
+        && request.resource.data.orgMemberships == resource.data.get('orgMemberships', []).removeAll([cleanupOrg()]);
       match /organizationRequests/{orgId} {
         allow read, write: if signedIn() && uid() == userId;
+        allow delete: if deletingOwner(orgId)
+          && (exists(memberPath(orgId, userId)) || exists(joinPath(orgId, userId)));
       }
 
       // An owner can notify a removed member only in the same atomic write
@@ -324,9 +340,15 @@ service cloud.firestore {
       // Temporary cleanup authority, only for enumerated direct collections.
       // Owner membership stays until a future audited finalization protocol.
       match /{group}/{entryId} {
-        allow get, list: if group in ['data','presence','members','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts'] && deletingOwner(orgId);
-        allow delete: if group in ['data','presence','members','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts']
-          && !(group == 'members' && entryId == uid()) && deletingOwner(orgId);
+        allow get, list: if group in ['data','presence','members','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts','sparkDiscoveryRevision','sparkDiscoveryConfig','sparkDiscoveryPresidentHistory','sparkDiscoveryPeople','sparkDiscoveryPaymentSlots','sparkDiscoveryPayments','sparkDiscoveryRemittances','sparkDiscoveryCorrections','sparkDiscoveryLines','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations'] && deletingOwner(orgId);
+        allow delete: if group in ['data','presence','members','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts','sparkDiscoveryRevision','sparkDiscoveryConfig','sparkDiscoveryPresidentHistory','sparkDiscoveryPeople','sparkDiscoveryPaymentSlots','sparkDiscoveryPayments','sparkDiscoveryRemittances','sparkDiscoveryCorrections','sparkDiscoveryLines','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations']
+          && !(group == 'members' && entryId == uid()) && deletingOwner(orgId)
+          && (!(group in ['members','joinRequests']) || (
+            existsAfter(/databases/$(database)/documents/users/$(entryId))
+            && getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('_workspaceCleanupOrg', '') == orgId
+            && getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('orgMemberships', []) is list
+            && !getAfter(/databases/$(database)/documents/users/$(entryId)).data.get('orgMemberships', []).hasAny([orgId])
+            && !existsAfter(/databases/$(database)/documents/users/$(entryId)/organizationRequests/$(orgId))));
       }
 
       match /data/{docId} {

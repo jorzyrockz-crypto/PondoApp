@@ -1,10 +1,10 @@
 // EXPERIMENT ONLY. Not connected to the application or production rules.
 // This can clear known direct collections but cannot discover unknown nested
 // collections or finalize a permanent deletion. Do not use on real data.
-const DIRECT=['data','presence','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts','members'];
+const DIRECT=['data','presence','joinRequests','memberRefundRequests','refundReceipts','editorRefundReceipts','sparkDiscoveryRevision','sparkDiscoveryConfig','sparkDiscoveryPresidentHistory','sparkDiscoveryPeople','sparkDiscoveryPaymentSlots','sparkDiscoveryPayments','sparkDiscoveryRemittances','sparkDiscoveryCorrections','sparkDiscoveryLines','sparkDiscoveryMemberReceipts','sparkDiscoveryRemittanceReceipts','sparkDiscoveryWallets','sparkDiscoveryExpenseDrafts','sparkDiscoveryAllocations','members'];
 const validSegment=x=>typeof x==='string'&&x.length>0&&x.length<=150&&!x.includes('/')&&x!=='.'&&x!=='..';
 export function createExperimentalSparkCleanup({db,api,getContext}){
- const {doc,collection,query,where,limit,runTransaction,writeBatch,getDocFromServer,getDocsFromServer,serverTimestamp}=api;
+ const {doc,collection,query,where,limit,runTransaction,writeBatch,getDocFromServer,getDocsFromServer,serverTimestamp,arrayRemove}=api;
  function scope(orgId,uid){
   const c=getContext();if(!validSegment(orgId)||!validSegment(uid)||!c||c.orgId!==orgId||c.uid!==uid||c.currentUid!==uid||c.online!==true)throw Error('Workspace, account or connection changed.');
  }
@@ -33,11 +33,16 @@ export function createExperimentalSparkCleanup({db,api,getContext}){
   await checkOwner(orgId,uid);
   for(const group of [...DIRECT,'invites']){
    scope(orgId,uid);
-   const source=group==='invites'?query(collection(db,'invites'),where('orgId','==',orgId),limit(20)):query(collection(db,'organizations',orgId,group),limit(20));
+   const accountGroup=group==='members'||group==='joinRequests',pageSize=accountGroup?4:20;
+   const source=group==='invites'?query(collection(db,'invites'),where('orgId','==',orgId),limit(pageSize)):query(collection(db,'organizations',orgId,group),limit(pageSize));
    const found=confirmed(await getDocsFromServer(source));scope(orgId,uid);
    const entries=found.docs.filter(d=>group!=='members'||d.id!==uid);
    if(!entries.length)continue;
-   const batch=writeBatch(db);for(const entry of entries)batch.delete(entry.ref);scope(orgId,uid);await batch.commit();scope(orgId,uid);
+   const batch=writeBatch(db);for(const entry of entries){
+    if(accountGroup){batch.set(doc(db,'users',entry.id),{orgMemberships:arrayRemove(orgId),_workspaceCleanupOrg:orgId},{merge:true});batch.delete(doc(db,'users',entry.id,'organizationRequests',orgId));}
+    batch.delete(entry.ref);
+   }
+   scope(orgId,uid);await batch.commit();scope(orgId,uid);
    return {state:'in-progress',group,removed:entries.length};
   }
   return {state:'awaiting-verification',finalized:false};
