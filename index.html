@@ -10571,9 +10571,9 @@ function fillDonationFromTransaction(){
 }
 function cashDonationFormValues(){return JSON.stringify(['donationMode','donationExisting','donationFundSelect','donationDonor','donationAmount','donationDate','donationFundName','donationProject','donationReceipt','donationMethod','donationDpdsRef','donationDpdsStatus','donationNotes'].map(id=>document.getElementById(id).value).concat([document.getElementById('donationImage').files[0]?.name||'',document.getElementById('donationImageCamera').files[0]?.name||'']));}
 async function requestCloseFabSheet(){
- if(!cashDonationActive){closeFabSheet();return;}if(cashDonationBusy||cashDonationClosing)return;const context=cashDonationOpenContext,token=cashDonationFormToken;
+ if(!cashDonationActive){closeFabSheet();return;}if(cashDonationBusy||cashDonationClosing)return;const token=cashDonationFormToken;
  if(cashDonationInitial!==cashDonationFormValues()){cashDonationClosing=true;let discard;try{discard=await appConfirm('Discard unsaved donation details? Saved donations will remain.');}finally{cashDonationClosing=false;}if(!discard)return;}
- if(cashDonationActive&&token===cashDonationFormToken&&context===donationContext())closeFabSheet();
+ if(cashDonationActive&&token===cashDonationFormToken)closeFabSheet();
 }
 async function saveCashDonation(addAnother=false){
  const team=window.pondoTeamState;if(cashDonationSaveUncertain){appAlert('The previous donation save is unconfirmed. Export a backup and resolve the storage warning before recording another.');return;}if(cashDonationBusy||trackerFatal||!donationCanEdit()||(team?.orgId&&(!team.uid||team.uid!==window.pondoCurrentUser?.uid||team.listenerError)))return;
@@ -10593,7 +10593,7 @@ async function saveCashDonation(addAnother=false){
  }
  const token=cashDonationFormToken,context=donationContext(),before=target&&JSON.stringify(target),fields=['donationMode','donationExisting','donationFundSelect','donationDonor','donationAmount','donationDate','donationFundName','donationProject','donationReceipt','donationMethod','donationDpdsRef','donationDpdsStatus','donationNotes'],fingerprint=()=>JSON.stringify(fields.map(read));
  const matchingIncome=()=>txs.filter(t=>t.type==='IN'&&t.date===date&&cents(t.amount)===amount&&String(t.cashDonation?.donor||t.payee||'').trim().toLocaleLowerCase()===donation.donor.toLocaleLowerCase()).map(t=>t.id).sort().join('\n');
- const matches=mode==='new'?matchingIncome():'',captured=fingerprint(),file=document.getElementById('donationImage').files[0],cameraFile=document.getElementById('donationImageCamera').files[0],button=document.getElementById('fabSave-donation');cashDonationBusy=true;button.disabled=true;
+ const matches=mode==='new'?matchingIncome():'',captured=fingerprint(),file=document.getElementById('donationImage').files[0],cameraFile=document.getElementById('donationImageCamera').files[0],button=document.getElementById('fabSave-donation'),anotherButton=document.getElementById('donationSaveAnother');cashDonationBusy=true;button.disabled=true;if(anotherButton)anotherButton.disabled=true;
  try{
   if(mode==='new'&&matches){
    if(!await appConfirm('A matching income from this donor, on this date and for this amount, already exists. Link the existing income instead if it is the same donation. Create a separate income anyway?'))return;
@@ -10613,7 +10613,7 @@ async function saveCashDonation(addAnother=false){
    target.cashDonation=donation;if(mode==='link')funds.find(f=>f.id===target.fundId).donationFund=true;
   }
   const savedTask=saveAll();renderAll(true);const saved=await savedTask;if(!saved){cashDonationSaveUncertain=true;appAlert('The donation could not be safely saved. Export a backup and resolve the saving error before continuing; do not retry this donation.');return;}if(token!==cashDonationFormToken||context!==donationContext()||!donationCanRead())return;cashDonationInitial=cashDonationFormValues();closeFabSheet();soundEvent('add');if(addAnother&&mode==='new'&&donationCanEdit()){cashDonationBusy=false;openCashDonation(null,savedDonationFundId);}if(window.pondoTeamState?.orgId)appAlert('Donation saved on this device. Wait for team sync to confirm it.');
- }finally{cashDonationBusy=false;button.disabled=false;}
+ }finally{cashDonationBusy=false;button.disabled=false;if(anotherButton)anotherButton.disabled=false;}
 }
 function cashDonationRows(){
  if(!donationCanRead())return [];
@@ -11946,7 +11946,7 @@ function fundSettingsControlsBusy(busy){for(const id of ['fundSettingsName','fun
 function openFundSettings(id){
  const f=funds.find(x=>x.id===id),s=window.pondoTeamState;if(!f||activeFundDetail!==id||!donationCanEdit()||trackerFatal||(s?.orgId&&(!s.uid||s.uid!==window.pondoCurrentUser?.uid||s.listenerError))){appAlert(teamDataUnavailableMessage());return;}if(f.pendingDeletion){appAlert('A deletion request is pending; resolve it before editing this fund.');return;}
  const ctx=fundSettingsContext={id,fund:f,workspace:donationContext(),record:JSON.stringify(f),busy:false};document.getElementById('fundSettingsSubtitle').textContent=f.name;
- document.getElementById('fundSettingsName').value=f.name||'';document.getElementById('fundSettingsDescription').value=f.purpose||'';document.getElementById('fundSettingsDate').value=f.dateReceived||'';document.getElementById('fundSettingsAmount').value=String(f.initialAmount??0);document.getElementById('fundSettingsAmountHelp').textContent=isDonationFund(f)?'A cash donation fund has a zero opening amount; its donation is recorded separately.':'This is the original opening receipt, not a new income transaction.';
+ document.getElementById('fundSettingsName').value=f.name||'';document.getElementById('fundSettingsDescription').value=f.purpose||'';document.getElementById('fundSettingsDate').value=f.dateReceived||'';document.getElementById('fundSettingsAmount').value=String(f.initialAmount??0);document.getElementById('fundSettingsAmountHelp').textContent=isDonationFund(f)?'A cash donation fund has a zero opening amount; individual donations are recorded separately.':'This is the original opening receipt, not a new income transaction.';
  const color=document.getElementById('fundSettingsColor');color.innerHTML=colorOptions(cardColorKey(f));document.getElementById('fundSettingsStatus').textContent='';ctx.initial=fundSettingsValues();fundSettingsControlsBusy(false);detailDialog.inert=true;document.getElementById('fundSettingsOverlay').hidden=false;document.getElementById('fundSettingsName').focus();
 }
 async function closeFundSettings(force=false){
