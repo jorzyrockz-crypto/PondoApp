@@ -25,7 +25,7 @@ test('backup validation restricts donation metadata to valid income references',
  const {ctx}=setup(),good={donor:'A',project:'',dpdsRef:'',dpdsStatus:'checked',notes:''};assert.equal(ctx.validCashDonation(good,'IN'),true);assert.equal(ctx.validCashDonation(good,'OUT'),false);assert.equal(ctx.validCashDonation({...good,dpdsStatus:'submitted'},'IN'),false);assert.match(html,/t\.cashDonation!=null&&!validCashDonation\(t\.cashDonation,t\.type\)/);
 });
 test('dashboard access, manual DPDS language and signed filtered print remain available',()=>{
- assert.match(html,/id="recordCashDonation" onclick="openCashDonation\(\)"/);assert.match(html,/id="donationRegisterTitle" tabindex="0"[\s\S]*?<strong>Cash donations/);assert.match(html,/Not an automatic submission or confirmation/);assert.match(source,/function printCashDonations\(\)[\s\S]*cashDonationRows\(\)[\s\S]*signatorySection\(\)/);assert.match(source,/body\.classList\.contains\('role-reviewer'\)/);assert.match(html,/Attachments stay on this device/);
+ assert.match(html,/id="recordCashDonation" onclick="openCashDonation\(\)"/);assert.match(html,/id="donationRegisterTitle" tabindex="-1">Donation receipts/);assert.match(html,/Not an automatic submission or confirmation/);assert.match(source,/function printCashDonations\(\)[\s\S]*cashDonationRows\(\)[\s\S]*signatorySection\(\)/);assert.match(source,/body\.classList\.contains\('role-reviewer'\)/);assert.match(html,/Attachments stay on this device/);
 });
 
 test('linking cannot turn a mixed or fundraising fund into a donation source',async()=>{
@@ -43,7 +43,7 @@ test('empty donation shortcut matches rail empty states and remains keyboard acc
 });
 test('transaction filters distinguish donations, fundraising and Death Aid fund expenses',()=>{
  const {ctx}=setup();assert.equal(ctx.transactionTypeMatches({type:'IN',cashDonation:{}},'DONATION'),true);assert.equal(ctx.transactionTypeMatches({type:'OUT',deathAidPaymentId:'p'},'DEATH_AID'),true);assert.equal(ctx.transactionTypeMatches({type:'IN',contributionPaymentId:'p'},'RAISED'),true);assert.equal(ctx.transactionTypeMatches({type:'OUT',contributionPaymentId:'p'},'CONTRIBUTION'),true);assert.equal(ctx.transactionTypeMatches({type:'OUT',deathAidPaymentId:'p'},'PERSONAL'),false);assert.equal(ctx.transactionKind({type:'OUT',deathAidPaymentId:'p'}),'Death Aid · Fund expense');
- assert.match(html,/Personal Death Aid activity/);assert.match(html,/Personal payment · no fund impact/);assert.match(html,/#txList\[hidden\]/);
+ assert.match(html,/Tracking-only contributions/);assert.match(html,/Personal payment · no fund impact/);assert.match(html,/#txList\[hidden\]/);
 });
 
 test('multiple individual receipts can use a donation fund without mixing ordinary income',async()=>{
@@ -52,4 +52,12 @@ test('multiple individual receipts can use a donation fund without mixing ordina
 });
 test('pooled receipts reject earlier dates, pending deletion, unsafe totals and fund changes during async reads',async()=>{
  for(const change of ['date','pending','overflow','changed']){const {ctx,els,alerts}=setup();const f={id:'pool',name:'Community fund',initialAmount:0,dateReceived:'2026-05-01',donationFund:true};ctx.funds.push(f);els.donationFundSelect.value='pool';if(change==='date')els.donationDate.value='2026-01-01';if(change==='pending')f.pendingDeletion={};if(change==='overflow')ctx.txs.push({id:'large',type:'IN',fundId:'pool',date:'2026-05-01',amount:90071992547409,cashDonation:{donor:'A',project:'',dpdsRef:'',dpdsStatus:'not-checked',notes:''}});if(change==='changed'){let resolve;ctx.readReceipt=()=>new Promise(r=>resolve=r);const p=ctx.saveCashDonation();await Promise.resolve();f.pendingDeletion={};resolve(null);await p;}else await ctx.saveCashDonation();assert.equal(ctx.txs.some(t=>t.cashDonation?.donor==='Community Partner'),false,change);assert.ok(alerts.length,change);}
+});
+
+
+test('receipt register is a paginated table and printing uses the full filtered set',()=>{
+ const section=html.slice(html.indexOf('<section id="donationRegister"'),html.indexOf('<div id="fundView-faculty"'));
+ assert.match(section,/<table class="donation-receipts-table">/);assert.doesNotMatch(section,/id="donationSummary"|donation-receipts-note/);assert.doesNotMatch(section,/<details|openCashDonation\(\)/);assert.match(section,/onclick="printCashDonations\(\)"/);
+ for(const id of ['donationSearch','donationFrom','donationTo','donationFundFilter','donationProjectFilter'])assert.match(section,new RegExp('id="'+id+'"[^>]*donationFiltersChanged\\(\\)'));
+ assert.match(source,/const DONATION_PAGE_SIZE=20/);assert.match(source,/rows\.slice\(start,start\+DONATION_PAGE_SIZE\)/);assert.match(source,/function donationFiltersChanged\(\)\{donationPage=1/);assert.match(source,/function printCashDonations\(\)[\s\S]*?const rows=cashDonationRows\(\)/);assert.match(source,/edit\.hidden=!donationCanEdit\(\)/);assert.match(html,/\.donation-table-scroll\{[^}]*overflow-x:auto/);
 });

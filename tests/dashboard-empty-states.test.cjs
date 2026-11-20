@@ -8,7 +8,7 @@ test('activity empty states use distinct copy and decorative icons',()=>{
  const context=vm.createContext({});vm.runInContext(source,context);
  const payments=context.dashboardActivityEmpty('refundPayments'), transactions=context.dashboardActivityEmpty('transactions');
  assert.match(payments,/No refund payments yet/);assert.match(payments,/Recorded refund payments will appear here/);
- assert.match(transactions,/No transactions yet/);assert.match(transactions,/Income and expenses you record will appear here/);
+ assert.match(transactions,/No transactions yet/);assert.match(transactions,/Fund activity, contribution payments and refund requests will appear here/);
  assert.match(payments,/aria-hidden="true"/);assert.match(transactions,/aria-hidden="true"/);
  assert.match(html,/if\(!recent\.children\.length\) recent\.innerHTML=dashboardActivityEmpty\('transactions'\)/);
  assert.match(html,/if\(!recentRefund\.children\.length\) recentRefund\.innerHTML=dashboardActivityEmpty\('refundPayments'\)/);

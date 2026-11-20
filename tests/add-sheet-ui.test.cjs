@@ -3,7 +3,7 @@ const html=fs.readFileSync('index.html','utf8');
 const markup=html.slice(html.indexOf('<div id="fabSheet"'),html.indexOf('<button class="fab no-print"'));
 test('add sheet keeps labeled fields, all record actions and an accessible dialog',()=>{
  assert.match(markup,/aria-labelledby="fabSheetTitle"/);assert.match(markup,/aria-label="Close add record"/);assert.match(markup,/openRefundRequest\(\)/);
- for(const id of ['fabTxDesc','fabTxAmt','fabTxDate','fabTxType','fabTxFund','fabTxProject','fabTxCategory','fabTxPayee','fabTxReceipt','fabTxMethod','fabTxNotes','fabFundName','fabFundAmt','fabFundDate','fabFundPurpose','fabFundColor','fabProjectName','fabProjectSeries','fabProjectCycle','fabProjectDescription','fabProjectBudget','fabProjectStatus'])assert.match(markup,new RegExp('<label[^>]*>[^<]*(?:<span[^>]*>[^<]*</span>)?<(?:input|select) id="'+id+'"'),id);
+ for(const id of ['fabTxDesc','fabTxAmt','fabTxDate','fabTxType','fabTxFund','fabTxProject','fabTxCategory','fabTxPayee','fabTxReceipt','fabTxMethod','fabTxNotes','fabFundName','fabFundAmt','fabFundDate','fabFundPurpose','fabProjectName','fabProjectSeries','fabProjectCycle','fabProjectDescription','fabProjectBudget','fabProjectStatus'])assert.match(markup,new RegExp('<label[^>]*>[^<]*(?:<span[^>]*>[^<]*</span>)?<(?:input|select) id="'+id+'"'),id);
  assert.match(markup,/for="fabTxImage"/);assert.match(markup,/id="fabTxImage"/);
  for(const handler of ['fabSaveTx()','fabSaveFund()','fabSaveProject()'])assert.ok(markup.includes('onclick="'+handler+'"'));
  assert.match(markup,/class="fab-sheet-body"[\s\S]*<footer class="fab-footer">/);
