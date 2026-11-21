@@ -3115,26 +3115,7 @@ body{
 @media(max-width:600px){.dashboard-action-row{align-items:stretch;flex-direction:column}.dashboard-action-buttons{justify-content:flex-start}}
 @media print{.dashboard-actions-card{display:none!important}}
 
-.faculty-fund{margin:16px 0;padding:18px;border:1px solid #ced9e7;border-radius:16px;background:var(--surface,#fff);color:var(--ink,#1c3554)}
-.faculty-fund h3{margin:0 0 6px;font-size:18px}.faculty-fund p{font-size:13px;line-height:1.5;margin:8px 0;color:inherit}.faculty-header{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
-.faculty-fund button{border:1px solid #a9bbd1;border-radius:9px;background:#f4f7fb;color:#183455;padding:8px 11px;font-weight:700;cursor:pointer}.faculty-fund button:disabled{opacity:.5;cursor:not-allowed}.faculty-fund button:focus-visible,.faculty-fund input:focus-visible,.faculty-fund select:focus-visible{outline:3px solid #2a88e5;outline-offset:2px}
-.faculty-fund details{margin-top:10px;padding:12px;border:1px solid #d7e1ed;border-radius:10px}.faculty-fund summary{font-weight:700;cursor:pointer}.faculty-form{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-top:10px}.faculty-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;flex:1 1 160px}.faculty-form input,.faculty-form select{width:100%;min-height:40px;padding:8px;border:1px solid #a9bbd1;border-radius:8px;background:#fff;color:#173451}
-.faculty-list{display:grid;gap:8px;margin:10px 0}.faculty-list label,.faculty-item{padding:10px;border:1px solid #dbe4ee;border-radius:9px;overflow-wrap:anywhere}.faculty-item strong,.faculty-item small{display:block}.faculty-item small{font-size:12px;margin-top:4px}.faculty-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.faculty-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.faculty-metrics div{padding:10px;background:#eef5fb;border-radius:9px;font-size:12px;color:#183455}.faculty-metrics strong{display:block;font-size:16px}.faculty-warning{border:1px solid #dcaa38;background:#fff7dc;color:#5c4300;padding:10px;border-radius:9px;margin:8px 0}
-body.dark-mode .faculty-fund{background:#192d46;color:#e1ecf8;border-color:#3a526b}body.dark-mode .faculty-fund details,body.dark-mode .faculty-item,body.dark-mode .faculty-list label{border-color:#3a526b}
-
-/* The tab animation transforms its contents; suspend it while the fixed modal is open. */
-body.faculty-modal-open #tab-funds{animation:none!important;transform:none!important}
-/* Faculty Fund is a focused workspace; forms are grouped by task, not accordions. */
-.faculty-modal{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:24px;color:#183455}
-.faculty-modal-backdrop{position:absolute;inset:0;background:rgba(7,20,29,.66);backdrop-filter:blur(4px)}
-.faculty-dialog{position:relative;width:min(100%,960px);max-height:min(90dvh,850px);display:flex;flex-direction:column;overflow:hidden;background:#f7faf9;border:1px solid #d5e3df;border-radius:22px;box-shadow:0 24px 70px #071d174d}
-.faculty-dialog-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:#103f35;color:white;padding:22px 26px}.faculty-dialog-header span{font-size:10px;letter-spacing:.12em;font-weight:800;color:#a5d6c5}.faculty-dialog-header h2{font-family:'Fraunces',serif;font-size:28px;margin:4px 0}.faculty-dialog-header p{margin:0;color:#d1e9df}.faculty-dialog-header button{font-size:22px;line-height:1;min-width:40px;background:#ffffff18;color:#fff;border-color:#ffffff60}
-.faculty-dialog-body{overflow:auto;overscroll-behavior:contain;padding:20px 26px 28px}.faculty-dialog-body [hidden]{display:none!important}.faculty-dialog-body [data-status]:not(:empty){margin:0 0 12px;padding:10px;border-radius:10px;background:#e8f2ef}
-.faculty-nav{display:flex;gap:8px;overflow:auto;padding:4px 0 12px;margin:12px 0;border-bottom:1px solid #dae7e2}.faculty-nav button{white-space:nowrap;min-height:40px;background:#fff;color:#36564e;border-color:#d8e5df}.faculty-nav button[aria-pressed=true]{background:#087c5c;color:white;border-color:#087c5c}
-.faculty-section{margin:14px 0;padding:18px;border:1px solid #dce8e3;border-radius:15px;background:#fff}.faculty-section h3{font-size:16px;color:#163d32}.faculty-dialog .faculty-metrics{margin:16px 0}.faculty-dialog .faculty-metrics div{background:#e6f2ec;color:#164533}.faculty-dialog .faculty-warning{color:#5c4300}.faculty-dialog .faculty-form{margin-top:14px}.faculty-dialog .faculty-form button{min-height:40px}.faculty-dialog .faculty-list label{display:flex;gap:8px;align-items:center}
-body.dark-mode .faculty-dialog{background:#142521;color:#e6f3ed;border-color:#39564d}body.dark-mode .faculty-section{background:#1c302a;border-color:#3a564c}body.dark-mode .faculty-section h3{color:#e6f3ed}body.dark-mode .faculty-nav{border-color:#3a564c}body.dark-mode .faculty-nav button:not([aria-pressed=true]){background:#263d34;color:#e4f1e9;border-color:#48665b}body.dark-mode .faculty-dialog .faculty-metrics div{background:#28483b;color:#e6f5ed}body.dark-mode .faculty-dialog-body [data-status]:not(:empty){background:#28483b;color:#e6f5ed}
-@media(max-width:700px){.faculty-modal{padding:0;align-items:end}.faculty-dialog{width:100%;height:94dvh;max-height:94dvh;border-radius:22px 22px 0 0}.faculty-dialog-header{padding:18px 20px}.faculty-dialog-body{padding:16px 16px max(24px,env(safe-area-inset-bottom))}.faculty-section{padding:14px}.faculty-dialog .faculty-form label{flex-basis:100%}}
-@media print{.faculty-modal{display:none!important}}
+.tracker-scope-notice{font-size:12px;line-height:1.45;color:var(--ink2);margin:10px 0 14px}
 /* Unified history uses existing records; no financial data is stored here. */
 .ledger-filters{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px}.ledger-filters label{display:flex;flex:1 1 145px;min-width:0;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--ink2)}.ledger-filters .input{width:100%;min-width:0;height:42px}.ledger-totals{font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 16px}.ledger-scope{font-size:12px;line-height:1.5;color:var(--ink2);margin:8px 0 16px}.ledger-entry-meta{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px;overflow-wrap:anywhere}.ledger-entry .tx-primary{min-width:0}.ledger-entry .tx-amount{white-space:nowrap}.ledger-open{min-height:36px}.ledger-entry .tx-row{display:flex!important;justify-content:space-between;gap:12px}.ledger-entry .tx-title{overflow-wrap:anywhere}@media(max-width:500px){.ledger-filters label{flex-basis:calc(50% - 10px)}.ledger-entry .tx-row{flex-wrap:wrap}.ledger-entry .tx-amount{margin-left:auto}}
 /* Funds workspace tabs and their own scoped dashboards. */
@@ -8476,14 +8457,13 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
 #tab-funds .fund-extras-heading p:last-child{max-width:650px;margin:6px 0 0;color:#647994;font-size:12px;line-height:1.5}
 .fund-extras-badge{flex:none;padding:6px 9px;border:1px solid #d5e1ee;border-radius:999px;background:#fff;color:#637994;font-size:10px;font-weight:800;letter-spacing:.06em}
 .fund-extras-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
-#tab-funds .fund-extras-grid > .donation-register,#tab-funds .fund-extras-grid > .faculty-fund{min-width:0;margin:0;padding:18px;border:1px solid #dbe4ef;border-radius:16px;background:#fff;color:#1d355f;box-shadow:0 4px 14px #173d6509}
-#tab-funds .fund-extras-grid > .donation-register[open],#tab-funds .fund-extras-grid > .faculty-fund.is-open,#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{grid-column:1 / -1}
-#facultyFundRecoveryRoot[hidden]{display:none!important}
+#tab-funds .fund-extras-grid > .donation-register{min-width:0;margin:0;padding:18px;border:1px solid #dbe4ef;border-radius:16px;background:#fff;color:#1d355f;box-shadow:0 4px 14px #173d6509}
+#tab-funds .fund-extras-grid > .donation-register[open]{grid-column:1 / -1}
 #tab-funds .donation-register > summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer}
 #tab-funds .donation-register > summary::-webkit-details-marker{display:none}
 .register-symbol{width:46px;height:46px;display:grid;place-items:center;flex:none;border-radius:14px}
 .register-symbol svg{width:23px;height:23px}
-.donation-symbol{background:#fff1e7;color:#d26e32}.faculty-symbol{background:#e9f3ff;color:#2874bd}
+.donation-symbol{background:#fff1e7;color:#d26e32}
 .register-summary-text{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
 #tab-funds .register-label{display:block;color:#7186a1;font-size:10px;font-weight:800;letter-spacing:.08em;line-height:1.2}
 #tab-funds .donation-register > summary strong{display:block;color:#1d355f;font-size:16px;line-height:1.25}
@@ -8492,22 +8472,13 @@ body.dark-mode #pondoApp #fabSheet .fab-tabs-row button.fab-tab.active {
 .register-chevron{color:#71829b;font-size:22px;line-height:1;transition:transform .2s}
 .donation-register[open] .register-chevron{transform:rotate(180deg)}
 #tab-funds .donation-register-head{border-top:1px solid #edf1f6;margin-top:16px;padding-top:12px}
-#tab-funds .faculty-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 210px}
-#tab-funds .faculty-header{align-items:center;gap:16px}
-#tab-funds .faculty-header h3{margin:5px 0;color:#1d355f;font-size:16px}
-#tab-funds .faculty-header p{margin:0;color:#697e98;font-size:12px;line-height:1.4}
-#tab-funds .faculty-header button{min-height:40px;flex:none}
-#tab-funds .faculty-fund [data-status]:empty{display:none}
-#tab-funds .faculty-fund [data-status]:not(:empty){margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#f5f8fc;color:#435c7b}
-#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{margin-top:0}
 #tab-funds .fund-extras :focus-visible{outline:3px solid #2a88e5;outline-offset:3px}
 body.dark-mode #tab-funds .fund-extras{background:#101f35;border-color:#2b456b}
-body.dark-mode #tab-funds .fund-extras-heading h3,body.dark-mode #tab-funds .donation-register > summary strong,body.dark-mode #tab-funds .faculty-header h3{color:#f3f7ff}
-body.dark-mode #tab-funds .fund-extras-heading p:last-child,body.dark-mode #tab-funds .donation-register > summary small,body.dark-mode #tab-funds .faculty-header p,body.dark-mode #tab-funds .register-label{color:#b8c9e2}
-body.dark-mode #tab-funds .fund-extras-grid > .donation-register,body.dark-mode #tab-funds .fund-extras-grid > .faculty-fund{background:#172942;color:#e1ecf8;border-color:#2b456b}
-body.dark-mode #tab-funds .faculty-fund [data-status]:not(:empty){background:#223a59;color:#e1ecf8}
+body.dark-mode #tab-funds .fund-extras-heading h3,body.dark-mode #tab-funds .donation-register > summary strong{color:#f3f7ff}
+body.dark-mode #tab-funds .fund-extras-heading p:last-child,body.dark-mode #tab-funds .donation-register > summary small,body.dark-mode #tab-funds .register-label{color:#b8c9e2}
+body.dark-mode #tab-funds .fund-extras-grid > .donation-register{background:#172942;color:#e1ecf8;border-color:#2b456b}
 body.dark-mode .fund-extras-badge{background:#172942;color:#b8c9e2;border-color:#385579}
-@media(max-width:700px){#tab-funds .fund-extras{padding:16px;margin-top:20px}.fund-extras-grid{grid-template-columns:minmax(0,1fr)}#tab-funds .fund-extras-grid > .donation-register[open],#tab-funds .fund-extras-grid > .faculty-fund.is-open,#tab-funds .fund-extras-grid > #facultyFundRecoveryRoot{grid-column:auto}.fund-extras-badge{display:none}#tab-funds .faculty-header button{width:100%}}
+@media(max-width:700px){#tab-funds .fund-extras{padding:16px;margin-top:20px}.fund-extras-grid{grid-template-columns:minmax(0,1fr)}#tab-funds .fund-extras-grid > .donation-register[open]{grid-column:auto}.fund-extras-badge{display:none}}
 @media(prefers-reduced-motion:reduce){.register-chevron{transition:none}}
 
 }
@@ -8887,6 +8858,16 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 #detailDialog.ledger-detail{width:min(100%,620px)}#detailDialog.ledger-detail .detail-head{padding:15px 18px 13px}#detailDialog.ledger-detail .detail-head h2{font-size:18px;line-height:1.3}#detailDialog.ledger-detail .detail-sub{margin-top:4px}#detailDialog.ledger-detail .detail-body{padding:14px 18px 18px}#detailDialog.ledger-detail .detail-footer{display:none}
 #detailDialog.ledger-detail .ledger-modal-overview{padding:10px 12px;margin:0 0 12px;border:1px solid var(--line);border-radius:10px}#detailDialog.ledger-detail .ledger-modal-amount{font-size:18px}#detailDialog.ledger-detail .ledger-modal-fields{gap:0 18px}#detailDialog.ledger-detail .ledger-modal-fields>div{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0}#detailDialog.ledger-detail .ledger-modal-fields dd{margin:2px 0 0;line-height:1.4}#detailDialog.ledger-detail .ledger-modal-attachments{margin-top:12px}
 @media(max-width:600px){#detailDialog.ledger-detail{width:100%}#detailDialog.ledger-detail .detail-head{padding:4px 16px 12px}#detailDialog.ledger-detail .detail-body{padding:12px 16px 16px}#detailDialog.ledger-detail .detail-drag-handle{height:26px}}
+/* One Funds page, with separate fund dashboards and a shared history shortcut. */
+#tab-funds .funds-page-head{gap:14px;flex-wrap:wrap}
+#tab-funds .fund-history-link{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:9px 14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+#tab-funds .fund-history-link:hover{border-color:var(--accent);color:var(--accent)}
+#tab-funds .fund-history-link:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#tab-funds .fund-view-tabs{margin:14px 0 20px}
+#tab-funds .fund-view-heading{margin-bottom:14px}
+#tab-funds .funds-view-metrics>div{min-height:96px;padding:14px 16px 12px!important}
+#tab-funds .funds-list-heading{padding:15px 20px!important}
+@media(max-width:700px){#tab-funds .funds-page-head{align-items:flex-start!important}#tab-funds .fund-history-link{min-height:44px}#tab-funds .funds-view-metrics>div{min-height:88px}}
 </style>
 
 </head>
@@ -8968,11 +8949,12 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 <main class="wrap"><div id="rolePreviewBanner" class="data-safety-banner no-print" hidden><div><strong id="rolePreviewTitle"></strong><p>Preview only. No one is assigned, and everyone using this browser can still view and edit all records.</p></div></div><div id="starterDataWarning" class="data-safety-banner no-print" hidden><div><strong>Review possible older starter data</strong><p>Some records match examples bundled with an older version. They have not been removed or changed. Review fund sources, transactions, organization details and report signatories before sharing; keep anything that is yours.</p></div><div class="data-safety-actions"><button class="btn btn-light" type="button" onclick="switchTab('funds')">Review funds</button><button class="btn btn-light" type="button" onclick="dismissStarterWarning()">Dismiss</button></div></div><div id="futureDataWarning" class="data-safety-banner future-data-banner no-print" hidden><div><strong>Future-dated records are included in current totals</strong><p id="futureDataWarningText"></p></div></div><div id="installAppBanner" class="data-safety-banner install-app-banner no-print" hidden><div><strong>Install Pondo as an app</strong><p>Install Pondo for quicker access in its own window. Your signed-in session may carry over when using the same browser profile.</p><p id="installAppInstructions" class="install-app-instructions" hidden></p></div><img class="install-app-image" src="assets/branding/share-banner.jpg" alt="" width="1200" height="630" loading="lazy"><div class="data-safety-actions"><button class="btn btn-emerald" type="button" id="installAppBannerBtn">Install app</button><button class="btn btn-light" type="button" id="installAppBannerDismiss">Not now</button></div></div>
   <!-- DASHBOARD -->
   <section id="tab-dashboard" class="tab-section">
+    <p class="tracker-scope-notice">Figures and history include only records in this tracker. Separately stored records are not included.</p>
      <div class="dashboard-intro dashboard-page-head"><div><p class="eyebrow">Financial workspace</p><h1>Overview</h1><p>Your funds, all in one place.</p></div></div>
     <div class="dashboard-desktop-grid">
     <div class="dashboard-main-column">
     <div class="hero">
-      <div class="hero-label">Total Fund Balance</div>
+      <div class="hero-label" id="totalBalanceLabel">Total Fund Balance</div>
       <div class="hero-amount" id="totalRemaining">₱68,300</div>
       <div class="hero-sub" id="heroSub">Across 3 funds • 6 transactions • Period 2025-01-01 to 2025-12-31</div>
       <div class="hero-stats">
@@ -9007,11 +8989,11 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 
     <div class="grid-2">
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">Spending by Category</h4><span style="font-size:11px; color:var(--ink2)">Top categories</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">Spending by Category</h4><span style="font-size:11px; color:var(--ink2)">Regular &amp; donation funds</span></div>
         <div id="byCategory" style="margin-top:16px"></div>
       </div>
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">By Fund Source</h4><span style="font-size:11px; color:var(--ink2)">Where money went</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">By Fund Source</h4><span style="font-size:11px; color:var(--ink2)">Regular &amp; donation funds</span></div>
         <div id="byFund" style="margin-top:16px"></div>
       </div>
     </div>
@@ -9034,18 +9016,19 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 
   <!-- FUNDS -->
   <section id="tab-funds" class="tab-section" style="display:none">
-    <div class="fund-page-head funds-page-head"><div><p class="report-eyebrow">FUND MANAGEMENT</p><h2>Funds</h2><p>Choose a fund workspace to review its balance and activity.</p></div></div>
-    <div class="fund-view-tabs" role="tablist" aria-label="Fund workspaces" onkeydown="fundViewTabKey(event)"><button type="button" role="tab" id="fundTab-regular" aria-controls="fundView-regular" aria-selected="true" tabindex="0" onclick="selectFundView('regular')"><span aria-hidden="true">◈</span> Regular Funds</button><button type="button" role="tab" id="fundTab-donations" aria-controls="fundView-donations" aria-selected="false" tabindex="-1" onclick="selectFundView('donations')"><span aria-hidden="true">♡</span> Cash Donations</button><button type="button" role="tab" id="fundTab-faculty" aria-controls="fundView-faculty" aria-selected="false" tabindex="-1" onclick="selectFundView('faculty')"><span aria-hidden="true">◇</span> Faculty Fund</button></div>
+    <p class="tracker-scope-notice">Figures and history include only records in this tracker. Separately stored records are not included.</p>
+    <div class="fund-page-head funds-page-head"><div><p class="report-eyebrow">FUND MANAGEMENT</p><h2>Funds</h2><p>Choose a fund below. Each keeps its own balance and records.</p></div><button id="fundHistoryLink" type="button" class="fund-history-link" onclick="switchTab('transactions')">Transaction history <span aria-hidden="true">→</span></button></div>
+    <div class="fund-view-tabs" role="tablist" aria-label="Fund types" onkeydown="fundViewTabKey(event)"><button type="button" role="tab" id="fundTab-regular" aria-controls="fundView-regular" aria-selected="true" tabindex="0" onclick="selectFundView('regular')"><span aria-hidden="true">◈</span> Regular Funds</button><button type="button" role="tab" id="fundTab-donations" aria-controls="fundView-donations" aria-selected="false" tabindex="-1" onclick="selectFundView('donations')"><span aria-hidden="true">♡</span> Cash Donations</button></div>
     <div id="fundView-regular" role="tabpanel" aria-labelledby="fundTab-regular" tabindex="0">
-      <div class="fund-view-heading"><div><h3>Regular funds</h3><p>Money and activity in regular fund sources.</p></div><button class="btn btn-emerald" onclick="openFundModal()">+ Add fund</button></div>
+      <div class="fund-view-heading"><div><h3>Regular funds</h3><p>Review your fund sources and available cash.</p></div><button class="btn btn-emerald" onclick="openFundModal()">+ Add fund</button></div>
      <div class="fund-page-summary funds-page-summary funds-view-metrics"><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg><span>Fund sources</span><strong id="fundSourceCount">0</strong><small>Recorded sources</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M4 19h16"/></svg><span>Total received</span><strong id="fundSourceReceived">—</strong><small>Regular funds only</small></div><div><svg class="workspace-summary-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><path d="M15 10a6 6 0 1 1-5 5"/></svg><span>Cash balance</span><strong id="fundSourceBalance">—</strong><small>Includes reserved cash</small></div><div><span>Uncommitted</span><strong id="fundSourceAvailable">—</strong><small>Excludes project reserves</small></div></div>
-     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">SOURCE WORKSPACE</p><h3>Regular funds</h3><p>Excludes dedicated donation funds and Faculty Fund. Balances include linked transactions.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderFundSourceLists()"></label></div>
+     <p class="plain-terms funds-terms">Reserved: money set aside for projects. Uncommitted: money still available to spend or allocate.</p><div class="fund-list-heading funds-list-heading"><div><h3>Fund sources</h3><p>Open a fund to see its details and activity.</p></div><label class="fund-search-wrap"><span class="sr-only">Search fund sources</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="fundSearch" class="input" type="search" aria-label="Search fund sources" placeholder="Search funds" oninput="renderFundSourceLists()"></label></div>
     <div id="fundsList" style="display:flex; flex-direction:column; gap:10px"></div>
     </div>
     <div id="fundView-donations" role="tabpanel" aria-labelledby="fundTab-donations" tabindex="0" hidden>
-      <div class="fund-view-heading"><div><h3>Cash donations</h3><p>Individual receipts and their pooled donation funds.</p></div><button type="button" class="btn btn-emerald donation-edit" onclick="openCashDonation()">+ Record donation</button></div>
+      <div class="fund-view-heading"><div><h3>Cash donations</h3><p>Review donation funds and individual receipts.</p></div><button type="button" class="btn btn-emerald donation-edit" onclick="openCashDonation()">+ Record donation</button></div>
       <div class="fund-page-summary funds-view-metrics"><div><span>Donation receipts</span><strong id="donationViewCount">—</strong><small>Includes legacy references</small></div><div><span>Receipt total</span><strong id="donationViewReceived">—</strong><small>All recorded donation receipts</small></div><div><span>Donation fund balance</span><strong id="donationViewBalance">—</strong><small>All dedicated donation funds</small></div><div><span>Fund spending</span><strong id="donationViewSpent">—</strong><small>Fund-wide, not per donor</small></div></div>
-      <div class="fund-list-heading funds-list-heading"><div><p class="report-eyebrow">DONATION FUND SOURCES</p><h3>Donation funds</h3><p>Shared funds can contain multiple receipts. Regular funds referenced by older receipts stay under Regular Funds.</p></div><label class="fund-search-wrap"><span class="sr-only">Search donation funds</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="donationFundSearch" class="input" type="search" aria-label="Search donation funds" placeholder="Search donation funds" oninput="renderFundSourceLists()"></label></div><div id="donationFundList" class="fund-source-grid"></div>
+      <div class="fund-list-heading funds-list-heading"><div><h3>Donation funds</h3><p>Funds can contain multiple receipts. Regular funds referenced by older receipts stay under Regular Funds.</p></div><label class="fund-search-wrap"><span class="sr-only">Search donation funds</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><input id="donationFundSearch" class="input" type="search" aria-label="Search donation funds" placeholder="Search donation funds" oninput="renderFundSourceLists()"></label></div><div id="donationFundList" class="fund-source-grid"></div>
       <section id="donationRegister" class="donation-receipts no-print" aria-labelledby="donationRegisterTitle">
         <div class="donation-receipts-header"><div><span class="donation-receipts-eyebrow">RECEIPT REGISTER</span><h3 id="donationRegisterTitle" tabindex="-1">Donation receipts <span id="donationCount"></span></h3><p>Individual receipts, including legacy fund references.</p></div><button type="button" class="btn btn-light" onclick="printCashDonations()">Print summary</button></div>
         <div class="donation-filters"><label>Search<input id="donationSearch" class="input" type="search" placeholder="Donor or reference" oninput="donationFiltersChanged()"></label><label>From<input id="donationFrom" class="input" type="date" onchange="donationFiltersChanged()"></label><label>To<input id="donationTo" class="input" type="date" onchange="donationFiltersChanged()"></label><label>Fund<select id="donationFundFilter" class="input" onchange="donationFiltersChanged()"><option value="">All funds</option></select></label><label>Project<input id="donationProjectFilter" class="input" type="search" placeholder="Project name" oninput="donationFiltersChanged()"></label></div>
@@ -9053,16 +9036,11 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
         <div class="donation-pagination" aria-label="Donation receipt pages"><span id="donationPageInfo" role="status" aria-live="polite" tabindex="-1"></span><div><button id="donationPrevious" class="btn btn-light" type="button" onclick="changeDonationPage(-1)" aria-label="Previous donation receipt page">Previous</button><button id="donationNext" class="btn btn-light" type="button" onclick="changeDonationPage(1)" aria-label="Next donation receipt page">Next</button></div></div>
       </section>
     </div>
-    <div id="fundView-faculty" role="tabpanel" aria-labelledby="fundTab-faculty" tabindex="0" hidden>
-      <div class="fund-view-heading"><div><h3>Faculty Fund</h3><p>A separate fund with its own access, records and financial totals.</p></div></div>
-      <div class="fund-page-summary funds-view-metrics" id="facultyViewMetrics"><div><span>Collected</span><strong id="facultyViewReceived">—</strong><small>Separate fund</small></div><div><span>Spent</span><strong id="facultyViewSpent">—</strong><small>Confirmed expenses</small></div><div><span>Fund balance</span><strong id="facultyViewBalance">—</strong><small>Faculty Fund only</small></div><div><span>Not yet accepted</span><strong id="facultyViewPending">—</strong><small>Awaiting handover acceptance</small></div></div><p id="facultyViewStatus" class="fund-view-note" role="status">Open Faculty Fund to load its separate figures.</p>
-      <section id="facultyFundRoot" class="faculty-fund no-print" aria-label="Faculty Fund"></section>
-      <section id="facultyFundRecoveryRoot" class="faculty-fund no-print" aria-label="Faculty Fund recovery" hidden></section>
-    </div>
   </section>
 
   <!-- TRANSACTIONS -->
   <section id="tab-transactions" class="tab-section transactions-page" style="display:none">
+    <p class="tracker-scope-notice">Figures and history include only records in this tracker. Separately stored records are not included.</p>
      <div class="fund-page-head transactions-page-head"><div><p class="report-eyebrow">WORKSPACE HISTORY</p><h2>Transactions</h2><p>Review fund movements, contribution payments and refund requests in one history.</p></div><button class="btn btn-emerald" onclick="openTxModal()"><span aria-hidden="true">+</span> Add transaction</button></div>
      <div class="desktop-transactions-layout"><div class="desktop-transactions-main">
      <section class="transaction-filters-panel" aria-label="Transaction filters"><div class="filter-row transactions-filter-row"><div class="search-wrap" style="margin-bottom:14px;position:relative"><span class="search-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span><input id="txSearch" class="search-input" placeholder="Search transactions" aria-label="Search transactions" oninput="renderUnifiedLedger()"></div><select id="txTypeFilter" aria-label="Filter by transaction type" onchange="renderUnifiedLedger()"><option value="all">All types</option><option value="IN">Income</option><option value="OUT">Expenses</option><option value="DONATION">Cash donations</option><option value="DEATH_AID">Death Aid</option><option value="RAISED">Project fundraising</option><option value="CONTRIBUTION">Contributions</option><option value="PERSONAL">Tracking-only contributions</option><option value="REFUND">Refunds and requests</option><option value="VOID">Voided records</option><option value="CREDIT">Non-cash credits</option></select></div>
@@ -9070,7 +9048,7 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
     <p id="incomeOpeningNotice" class="transactions-opening-notice" hidden>Initial fund receipts are included here and in the dashboard’s Received total.</p>
     <div class="transactions-ledger-heading"><div><h3>Transaction ledger</h3><p>Newest first · Requests and tracking-only payments are not fund cash movements.</p></div><span id="transactionResultCount" aria-live="polite"></span></div>
     <div class="transactions-column-head" aria-hidden="true"><span>Transaction</span><span>Date &amp; fund</span><span>Amount</span></div>
-    <div id="txList" style="display:flex; flex-direction:column; gap:8px"></div><section id="facultyTransactions" class="faculty-fund no-print" hidden aria-label="Faculty Fund transactions"></section></div><details class="audit-panel"><summary>Audit and void history</summary><p class="transactions-audit-intro">Review recorded changes and voided entries.</p><div id="auditList"></div></details></div>
+    <div id="txList" style="display:flex; flex-direction:column; gap:8px"></div></div><details class="audit-panel"><summary>Audit and void history</summary><p class="transactions-audit-intro">Review recorded changes and voided entries.</p><div id="auditList"></div></details></div>
   </section>
 
   <!-- REFUND HISTORY -->
@@ -9106,8 +9084,8 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 
   <!-- REPORT -->
   <section id="tab-report" class="tab-section" style="display:none">
-    <div class="report-page-heading reports-page-head"><div><p class="report-eyebrow">REPORTING</p><h2>Financial report</h2><p>Choose a regular fund source and date range to prepare a cash report. Faculty Fund has a separate report.</p></div></div>
-    <div id="facultyReportNote" class="faculty-fund no-print" hidden></div>
+    <p class="tracker-scope-notice">Figures and history include only records in this tracker. Separately stored records are not included.</p>
+    <div class="report-page-heading reports-page-head"><div><p class="report-eyebrow">REPORTING</p><h2>Financial report</h2><p>Choose a fund source and date range to prepare a cash report.</p></div></div>
     <div class="desktop-report-layout"><div class="desktop-report-tools no-print">
     <div class="report-filters no-print"><label>Fund source<select id="reportFund" class="input"><option value="">All funds</option></select></label><label>From<input id="reportFrom" type="date" class="input"></label><label>To<input id="reportTo" type="date" class="input"></label><button class="btn btn-dark" type="button" onclick="applyReportFilters()">Apply filters</button><button class="btn btn-light" type="button" onclick="clearReportFilters()">Clear</button></div><p class="report-filter-help no-print">Opening and closing cash use recorded dates. Detailed project allocations and payables are hidden when a filter is active because their history is not dated.</p><div class="no-print report-actions">
       <button class="btn btn-light"  onclick="window.print()">Print report</button>
@@ -9130,7 +9108,7 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
         <div style="font-weight:600; margin-top:10px">Fund Transparency Report</div>
         <div style="font-size:12px; color:var(--ink2)" id="reportPeriod">2025-01-01 to 2025-12-31</div><div id="reportScopeNote" style="font-size:10px;color:var(--ink2);margin-top:3px">All recorded dates</div><div id="reportCurrentUncommitted" style="font-size:10px;color:var(--ink2);margin-top:4px"></div><div id="reportSetupNote" style="font-size:10px;color:var(--ink2);margin-top:4px"></div><div id="reportPreparedBy" style="font-size:10px;color:var(--ink2);margin-top:4px"></div>
       </div>
-      <div class="print-summary"><div><span>Received in period</span><strong id="printTotalReceived">—</strong></div><div><span>Paid in period</span><strong id="printTotalSpent">—</strong></div><div><span>Closing cash</span><strong id="printTotalRemaining">—</strong></div><div><span>Opening cash</span><strong id="printOutstandingPayables">—</strong></div></div>
+      <p>This report includes only records in this tracker. Separately stored records are not included.</p><div class="print-summary"><div><span>Received in period</span><strong id="printTotalReceived">—</strong></div><div><span>Paid in period</span><strong id="printTotalSpent">—</strong></div><div><span>Closing cash</span><strong id="printTotalRemaining">—</strong></div><div><span>Opening cash</span><strong id="printOutstandingPayables">—</strong></div></div>
       <h4 style="font-weight:700; font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin:0 0 12px">Fund balances through end date</h4>
       <p class="report-scroll-hint no-print">More columns →</p><div class="report-table-wrap" tabindex="0" role="region" aria-label="Funds summary table, scroll horizontally"><table><thead><tr><th>Fund</th><th>Received</th><th>Spent</th><th>Remaining</th><th>% Used</th></tr></thead><tbody id="reportFundsTable"></tbody></table></div>
       <div class="print-projects"><h4 style="font-weight:700; font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin:28px 0 12px">Project funding by source</h4><p class="report-scroll-hint no-print">More columns →</p><div class="report-table-wrap" tabindex="0" role="region" aria-label="Project funding table, scroll horizontally"><table><thead><tr><th>Project</th><th>Fund source</th><th>Allocated</th><th>Cash paid</th><th>Unspent</th><th>Status</th></tr></thead><tbody id="reportProjectTable"></tbody></table></div><p style="font-size:10px;color:var(--ink2);margin:6px 0">Allocations are commitments, not additional expenses.</p></div>
@@ -9334,12 +9312,11 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
             <div class="team-card" id="teamInviteCard" hidden>
               <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
               <label for="teamInviteRole" style="font-size:12px;font-weight:700;display:block;margin:0 0 6px">Role for this invite</label>
-              <select id="teamInviteRole" class="input" style="margin-bottom:10px" aria-describedby="teamFacultyRoleHelp">
+              <select id="teamInviteRole" class="input" style="margin-bottom:10px">
                 <option value="disbursing">Administrative Officer (AO) / Disbursing Officer — full edit access</option>
                 <option value="project-manager">Project Manager — full edit access</option>
                 <option value="reviewer">Viewer / Reviewer — view data, request refunds</option>
               </select>
-              <p id="teamFacultyRoleHelp" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px">Invite the President as a Viewer. Once they join, choose Faculty President beside their name in Members. For the AO, choose Administrative Officer (AO).</p>
               <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
               <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
                 <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
@@ -9347,8 +9324,7 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
               </div>
             </div>
             <div class="team-card">
-              <div class="team-heading"><strong>Members</strong><details class="team-info"><summary aria-label="About Faculty President">i</summary><div>Assign Faculty President beside a Viewer’s name. They keep Viewer access and can accept Faculty Fund handovers. To change Presidents, assign another Viewer.</div></details></div>
-              <p id="teamFacultyPresidentStatus" role="status" style="font-size:12px;line-height:1.5;color:var(--ink2);margin:0 0 10px"></p>
+              <div class="team-heading"><strong>Members</strong></div>
               <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
             </div>
             <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
@@ -9451,7 +9427,7 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
         <button class="btn" style="width:100%; height:48px; background:#fffbeb; color:#92400e" onclick="clearTransactionsOnly()">Clear Transactions Only</button>
         <button class="btn" style="width:100%; height:48px; background:#fef2f2; color:#dc2626" onclick="clearAllData()">Clear All Data — type DELETE</button>
       </div>
-      <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Role ideas · preview only</p><p>This preview does not assign a person or change their permissions. To manage actual team roles, use Team.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Administrative Officer (AO) / Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><p>To assign a Faculty President, go to Team settings and choose Faculty President beside a Viewer’s name.</p><button class="btn btn-light" type="button" onclick="closeSettings();openTeamModal()">Open Team</button></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
+      <div id="settings-about" class="settings-panel" style="display:none; flex-direction:column; gap:12px"><div class="role-preview-settings"><p class="role-preview-heading">Role ideas · preview only</p><p>This preview does not assign a person or change their permissions. To manage actual team roles, use Team.</p><label for="rolePreviewSelect">Role idea</label><select id="rolePreviewSelect" class="input" onchange="setRolePreview(this.value)"><option value="none">No role preview</option><option value="disbursing">Administrative Officer (AO) / Disbursing Officer</option><option value="reviewer">Reviewer</option><option value="project-manager">Project Manager</option></select><p id="rolePreviewDescription" role="status"></p><button class="btn btn-light" type="button" onclick="closeSettings();openTeamModal()">Open Team</button></div><div class="logo-upload"><span>Organization logo</span><div><label class="btn btn-light upload-button">Upload logo<input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload organization logo" onchange="uploadOrgLogo(this)"></label><button class="btn btn-light logo-remove" type="button" onclick="removeOrgLogo()">Remove</button></div><small>PNG, JPEG or WebP, up to 3 MB. Saved in this browser and included in backups.</small></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 10px">Organization</p><div style="display:flex; flex-direction:column; gap:8px"><input id="settingsOrgName" class="input" placeholder="Org Name"><input id="settingsOrgLoc" class="input" placeholder="Location"><div style="display:flex; gap:8px"><input id="settingsPeriodFrom" type="date" class="input" style="flex:1"><input id="settingsPeriodTo" type="date" class="input" style="flex:1"></div><button class="btn btn-dark" style="height:44px" onclick="saveOrgFromSettings()">Save Organization</button></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5"><p style="font-weight:600; font-size:14px; margin:0 0 8px">Signatories</p><div id="settingsSigs" style="display:flex; flex-direction:column; gap:8px"></div></div>
         <div style="padding:16px; border-radius:20px; background:#f7f7f5; font-size:12px; color:var(--ink2)"><p style="margin:0">Pondo · Fund tracking</p><p style="margin:6px 0 0">Financial data: transactional browser storage after upgrade; settings remain in browser storage.</p><p style="margin:6px 0 0">Last backup export in this workspace: <span id="lastBackup">Never</span></p></div>
@@ -9571,8 +9547,8 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 137</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Transactions has compact filters, cleaner rows and a streamlined details dialog.</li><li>Transaction names open full record details, with alternating row colors for easier scanning.</li><li>Fund cards use a compact layout and automatic rotating colors.</li><li>Donation receipts now have a searchable table with 20 receipts per page.</li><li>Donation fund cards now match the Funds page layout on desktop and mobile.</li><li>Funds now has dedicated Regular Funds, Cash Donations and Faculty Fund tabs with scoped overview cards.</li><li>Transactions brings fund activity, contribution payments and refund requests into a searchable history without changing balances.</li><li>Record individual cash donations in a chosen donation fund, save and add another, and review or print receipts.</li><li>Refund forms now distinguish personal reimbursements from unpaid supplier bills, with clearer itemized entries.</li><li>Edit the description, source and date of individual regular-fund income entries, with corrections kept in history.</li><li>Fund details now offer a Fund settings dialog for descriptions, opening details and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record cash donations in donation funds, track their use and find receipts in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 142</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Workspace and refund improvements</h4><ul><li>Funds has a simpler shared layout and a shortcut to transaction history, while keeping each fund separate.</li><li>Transactions has compact filters, cleaner rows and a streamlined details dialog.</li><li>Transaction names open full record details, with alternating row colors for easier scanning.</li><li>Fund cards use a compact layout and automatic rotating colors.</li><li>Donation receipts now have a searchable table with 20 receipts per page.</li><li>Donation fund cards now match the Funds page layout on desktop and mobile.</li><li>Transactions brings fund activity, contribution payments and refund requests into a searchable history without changing balances.</li><li>Record individual cash donations in a chosen donation fund, save and add another, and review or print receipts.</li><li>Refund forms now distinguish personal reimbursements from unpaid supplier bills, with clearer itemized entries.</li><li>Edit the description, source and date of individual regular-fund income entries, with corrections kept in history.</li><li>Fund details now offer a Fund settings dialog for descriptions, opening details and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record cash donations in donation funds, track their use and find receipts in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -9613,12 +9589,10 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 <script src="./refund-items.js"></script>
 <script src="./unified-ledger.js"></script>
 <script src="./offline-sync.js"></script>
-<script src="./faculty-fund-ui.js"></script>
-<script src="./faculty-fund-notifications.js"></script>
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='137', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='142', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -9881,7 +9855,7 @@ function syncMoreNavSelection(tab){
   document.querySelectorAll('#navMoreMenu button').forEach((button,index)=>{const selected=tabs[index]===tab;button.classList.toggle('active',selected);if(selected)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});
 }
 const pondoSwitchTab=switchTab;
-switchTab=function(tab){pondoSwitchTab(tab);syncMoreNavSelection(tab);if(tab==='transactions'||tab==='report')window.PondoFacultyFundUI?.refresh();};
+switchTab=function(tab){pondoSwitchTab(tab);syncMoreNavSelection(tab);};
 // Touch-only section navigation. Horizontal rails, inputs and modal content keep their own gestures.
 (function installSectionSwipe(){
  const order=['dashboard','funds','projects','contributions','transactions','refunds','report'];
@@ -9908,8 +9882,8 @@ function showKeyboardShortcuts(){appAlert('Keyboard shortcuts\n\nAlt + Shift + 1
  document.addEventListener('keydown',e=>{if(!window.trackerReady||trackerFatal||e.defaultPrevented||e.repeat||e.isComposing||e.getModifierState('AltGraph')||!e.altKey||!e.shiftKey||e.ctrlKey||e.metaKey)return;if(document.body.classList.contains('modal-open')||!document.getElementById('appDialogOverlay').hidden)return;let target=e.target instanceof Element?e.target:null;if(target?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]'))return;
   const match=/^Digit([1-6])$/.exec(e.code);if(match){e.preventDefault();const tab=tabs[Number(match[1])-1];switchTab(tab);let heading=document.querySelector('#tab-'+tab+' h1,#tab-'+tab+' h2');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true})}return}
   if(e.code==='KeyK'){e.preventDefault();closeNavMore();showKeyboardShortcuts();return}
-  if(e.code==='KeyN'){e.preventDefault();closeNavMore();let active=tabs.find(t=>document.getElementById('tab-'+t).style.display!=='none');if(active==='contributions')openContributionForm('activity');else if(active==='funds'&&activeFundView==='donations')openCashDonation();else if(active==='funds'&&activeFundView==='faculty')window.PondoFacultyFundUI?.open();else openFabSheet(active==='funds'?'fund':active==='projects'?'project':'tx');return}
-  if(e.code==='KeyF'){let active=tabs.find(t=>document.getElementById('tab-'+t).style.display!=='none'),field=document.getElementById(active==='funds'?(activeFundView==='donations'?'donationFundSearch':activeFundView==='faculty'?'':searches[active]):searches[active]||'');if(field){e.preventDefault();closeNavMore();field.focus()}}
+  if(e.code==='KeyN'){e.preventDefault();closeNavMore();let active=tabs.find(t=>document.getElementById('tab-'+t).style.display!=='none');if(active==='contributions')openContributionForm('activity');else if(active==='funds'&&activeFundView==='donations')openCashDonation();else openFabSheet(active==='funds'?'fund':active==='projects'?'project':'tx');return}
+  if(e.code==='KeyF'){let active=tabs.find(t=>document.getElementById('tab-'+t).style.display!=='none'),field=document.getElementById(active==='funds'?(activeFundView==='donations'?'donationFundSearch':searches[active]):searches[active]||'');if(field){e.preventDefault();closeNavMore();field.focus()}}
  });
  // F1 is the conventional "show help" key and needs no modifier chord, unlike
  // the Alt+Shift shortcuts above -- it still respects the same guards (app
@@ -10043,9 +10017,10 @@ function notificationStorageKey(){
 }
 function loadNotifications(){try{const key=notificationStorageKey(),raw=key&&localStorage.getItem(key);const list=raw?JSON.parse(raw):[];return Array.isArray(list)?list:[]}catch(e){return[]}}
 function saveNotifications(list){try{const key=notificationStorageKey();if(!key)return false;localStorage.setItem(key,JSON.stringify(list.slice(0,NOTIF_MAX)));return true}catch(e){return false}}
+function supportedNotificationAction(action){return !action || (typeof action==='object' && Object.keys(action).every(key=>['tab','activityId','period','audit','reviewQueue','memberRefundInbox','memberRefundHistory','myRefundId'].includes(key)));}
 function visibleNotifications(){
   const state=window.pondoTeamState, uid=window.pondoCurrentUser?.uid;
-  const local=loadNotifications().filter(n=>!!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
+  const local=loadNotifications().filter(n=>supportedNotificationAction(n.action) && !!n.recipientUid && uid===n.recipientUid && (state?.orgId||null)===(n.orgId||null) && (!n.orgId || !!state?.role) && (!n.approverOnly || ['owner','disbursing'].includes(state?.role)));
   const account=(window.pondoRemovalNotices||[]).filter(n=>uid&&n.recipientUid===uid);
   const approvals=(window.pondoWorkspaceApprovalItems||[]).filter(n=>uid&&n.recipientUid===uid).map(n=>({id:'approved:'+encodeURIComponent(n.orgId),kind:'workspaceApproval',type:'account',title:'Workspace request approved',body:'You joined '+n.name+'. Find it in your workspace menu.',ts:n.ts,read:n.read,recipientUid:uid,orgId:n.orgId,approvalKey:n.key}));
   const join=(window.pondoJoinNotices||[]).filter(n=>uid&&n.recipientUid===uid&&state?.orgId===n.orgId&&state.memberConfirmed&&state.role==='owner').map(n=>({...n,read:joinNoticeWasRead(n.id)}));
@@ -10072,11 +10047,6 @@ function pushNotification({type,title,body,action,recipientUid,orgId,approverOnl
   return entry;
 }
 window.pushNotification=pushNotification;
-// A non-blocking in-app notice complements the bell even without OS permission.
-let facultyNoticeTimer=null;
-window.clearFacultyNotice=()=>{clearTimeout(facultyNoticeTimer);document.getElementById('facultyNoticeToast')?.remove();};
-window.pondoFacultyNotice=title=>{window.clearFacultyNotice();const el=document.createElement('div');el.id='facultyNoticeToast';el.setAttribute('role','status');el.textContent=title+' · Check the notification bell';el.style.cssText='position:fixed;z-index:9501;top:max(16px,env(safe-area-inset-top));right:16px;max-width:min(360px,calc(100vw - 32px));padding:13px 16px;border-radius:12px;background:#153c2c;color:white;font:600 14px/1.4 system-ui;box-shadow:0 5px 24px #0005;pointer-events:none';document.body.appendChild(el);facultyNoticeTimer=setTimeout(()=>el.remove(),6000);};
-
 function markNotificationRead(id){if(id.startsWith('approved:')){const n=visibleNotifications().find(n=>n.id===id&&n.kind==='workspaceApproval');if(n)window.pondoMarkApprovalRead?.(n.orgId,n.approvalKey);return;}if(id.startsWith('join:')){markJoinNoticesRead([id]);return;}if(id.startsWith('removed:')){window.pondoMarkRemovalNoticeRead?.(id.slice(8));return;}const list=loadNotifications();const n=list.find(x=>x.id===id);if(n&&!n.read){n.read=true;saveNotifications(list);updateNotifBadge()}}
 function markAllNotificationsRead(){for(const n of visibleNotifications().filter(n=>n.kind==='workspaceApproval'&&!n.read))window.pondoMarkApprovalRead?.(n.orgId,n.approvalKey);markJoinNoticesRead(visibleNotifications().filter(n=>n.kind==='joinRequest').map(n=>n.id));for(const n of (window.pondoRemovalNotices||[])){if(!n.read&&n.recipientUid===window.pondoCurrentUser?.uid)window.pondoMarkRemovalNoticeRead?.(n.id.slice(8));}const list=loadNotifications(),visible=new Set(visibleNotifications().map(n=>n.id));let changed=false;list.forEach(n=>{if(visible.has(n.id)&&!n.read){n.read=true;changed=true}});if(changed){saveNotifications(list);updateNotifBadge();renderNotifCenter()}}
 window.markAllNotificationsRead=markAllNotificationsRead;
@@ -10141,6 +10111,7 @@ function renderNotifCenter(){
 }
 window.renderNotifCenter=renderNotifCenter;
 function notificationAction(n){
+  if(!supportedNotificationAction(n.action))return null;
   if(n.kind==='joinRequest')return {joinRequests:true};
   if(n.kind==='workspaceApproval')return {workspaceMenu:true};
   const allowed=['dashboard','funds','projects','contributions','transactions','refunds','report'];
@@ -10170,7 +10141,6 @@ function openNotification(id){
     if(action.workspaceMenu){if(window.matchMedia('(max-width:480px)').matches)toggleHeaderAvatarMenu();else toggleTeamSwitcher();return;}
     if(action.joinRequests){openTeamModal();document.getElementById('teamDiscoveryOwner')?.scrollIntoView({block:'start'});return;}
     switchTab(action.tab);
-    if(action.tab==='funds'&&action.facultyFund){window.selectFundView?.('faculty');window.PondoFacultyFundUI?.open(action.facultyPage==='handovers'||!action.facultyPage?'handovers':'overview');}
     if(action.reviewQueue) document.getElementById('dashboardActionsCard')?.scrollIntoView({block:'start'});
     if(typeof action.myRefundId==='string')openMyRefund(action.myRefundId);
     if(action.memberRefundInbox){const panel=document.getElementById('refundActiveSection');if(panel){panel.open=true;panel.scrollIntoView({block:'start'});}}
@@ -10253,8 +10223,6 @@ window.pondoValidateNotificationBanner=()=>{if(pondoNoticeEntry&&!notificationDe
 window.pondoPresentNotification=entry=>{
   if(document.visibilityState!=='visible'||!notificationDeliveryAllowed(entry))return;
   const now=Date.now();if(now-lastNoticeSound>=2000){lastNoticeSound=now;try{playSound();}catch(e){}}
-  // Faculty Fund already supplies its own in-app notice.
-  if(entry.action?.facultyFund)return;
   window.pondoClearNotificationBanner();pondoNoticeEntry=entry;
   const box=document.createElement('div'),button=document.createElement('button'),title=document.createElement('strong'),body=document.createElement('span'),dismiss=document.createElement('button');
   box.id='pondoNotificationBanner';box.className='pondo-notification-banner';box.setAttribute('role','status');
@@ -10591,9 +10559,9 @@ function eligibleDonationIncome(t){
 function eligiblePooledDonationFund(f){return !!(f&&isDonationFund(f)&&!f.pendingDeletion&&cents(f.initialAmount)===0&&txs.filter(t=>t.fundId===f.id&&t.type==='IN').every(t=>validCashDonation(t.cashDonation,t.type)));}
 function donationFundCanAccept(f,date,amount){if(!eligiblePooledDonationFund(f)||!Number.isSafeInteger(amount)||amount<=0||(f.dateReceived&&date<f.dateReceived))return false;let sum=cents(f.initialAmount),dates={};for(const t of txs.filter(t=>t.fundId===f.id)){const change=(t.type==='IN'?1:-1)*cents(t.amount);sum+=change;if(!Number.isSafeInteger(sum))return false;dates[t.date]=(dates[t.date]||0)+change;if(!Number.isSafeInteger(dates[t.date]))return false;}sum+=amount;if(!Number.isSafeInteger(sum))return false;dates[date]=(dates[date]||0)+amount;if(!Number.isSafeInteger(dates[date]))return false;let running=cents(f.initialAmount);for(const day of Object.keys(dates).sort()){running+=dates[day];if(!Number.isSafeInteger(running))return false;}return true;}
 let activeFundView='regular';
-function selectFundView(view,focus=false){if(!['regular','donations','faculty'].includes(view))return;activeFundView=view;for(const name of ['regular','donations','faculty']){const tab=document.getElementById('fundTab-'+name),panel=document.getElementById('fundView-'+name);if(tab){tab.setAttribute('aria-selected',String(name===view));tab.tabIndex=name===view?0:-1;}if(panel)panel.hidden=name!==view;}if(focus)document.getElementById('fundTab-'+view)?.focus();}
+function selectFundView(view,focus=false){if(!['regular','donations'].includes(view))return;activeFundView=view;for(const name of ['regular','donations']){const tab=document.getElementById('fundTab-'+name),panel=document.getElementById('fundView-'+name);if(tab){tab.setAttribute('aria-selected',String(name===view));tab.tabIndex=name===view?0:-1;}if(panel)panel.hidden=name!==view;}if(focus)document.getElementById('fundTab-'+view)?.focus();}
 window.selectFundView=selectFundView;
-function fundViewTabKey(event){const tabs=['regular','donations','faculty'],i=tabs.indexOf(activeFundView);let next;if(event.key==='ArrowRight')next=(i+1)%tabs.length;else if(event.key==='ArrowLeft')next=(i+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();selectFundView(tabs[next],true);}
+function fundViewTabKey(event){const tabs=['regular','donations'],i=tabs.indexOf(activeFundView);let next;if(event.key==='ArrowRight')next=(i+1)%tabs.length;else if(event.key==='ArrowLeft')next=(i+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();selectFundView(tabs[next],true);}
 function openCashDonationFunds(){
  if(!donationCanRead()){appAlert(teamDataUnavailableMessage());return;}
  switchTab('funds');selectFundView('donations');['donationSearch','donationFrom','donationTo','donationFundFilter','donationProjectFilter'].forEach(id=>document.getElementById(id).value='');donationPage=1;renderCashDonations();const register=document.getElementById('donationRegister');document.getElementById('donationRegisterTitle').focus();register.scrollIntoView({block:'start',behavior:'smooth'});
@@ -11899,7 +11867,7 @@ function renderFilteredReport(){const select=document.getElementById('reportFund
  let ledger=document.getElementById('reportTxTable');ledger.innerHTML='';d.entries.forEach(t=>{ledger.insertAdjacentHTML('beforeend',`<tr><td>${escapeText(t.date)}</td><td>${escapeText(funds.find(f=>f.id===t.fundId)?.name||'Unknown')}${t.projectId?'<br><small>'+escapeText(projects.find(p=>p.id===t.projectId)?.name||'Unknown project')+'</small>':''}</td><td>${escapeText(t.type)}</td><td>${escapeText(t.description)}</td><td>${escapeText(t.payee||'—')}</td><td>${escapeText([t.category,t.receiptNo?'Ref: '+t.receiptNo:'',t.method,t.notes].filter(Boolean).join(' · ')||'—')}</td><td>${fmt(t.amount)}</td></tr>`)});if(!d.entries.length)ledger.innerHTML='<tr><td colspan="7">No transactions in the selected period.</td></tr>';
 }
 function csvCell(v){let text=String(v??'');if(typeof v!=='number'&&(/^[\s\u0000-\u001f\u007f]*[=+@-]/.test(text)||/^[\t\r\n]/.test(text)))text="'"+text;return '"'+text.replace(/"/g,'""')+'"'}
-function downloadReportCSV(){const d=reportData(),rows=[...(currentUserDisplayName()?[['Prepared by',currentUserDisplayName(),'Date',new Date().toLocaleDateString('en-PH')]]:[]),...(futureRecordCount()?[['Warning','Current and unfiltered totals include existing future-dated records.']]:[]),['Report scope',reportFilter.fundId?(funds.find(f=>f.id===reportFilter.fundId)?.name||'Unknown'):'All funds'],['From',reportFilter.from||'Beginning','To',reportFilter.to||'Latest'],['Opening cash',d.opening/100,'Received',d.received/100,'Paid',d.paid/100,'Closing cash',d.closing/100],...(reportFilter.fundId?[['Current remaining allocations',fundReserved(reportFilter.fundId)/100,'Current uncommitted',fundAvailable(reportFilter.fundId)/100,'Current figures, not historical']]:[]),[],['Date','Fund','Project','Type','Category','Description','Payee','Reference','Method','Notes','Amount']];d.entries.forEach(t=>rows.push([t.date,funds.find(f=>f.id===t.fundId)?.name||'',projects.find(p=>p.id===t.projectId)?.name||'',t.type,t.category||'',t.description,t.payee||'',t.receiptNo||'',t.method||'',t.notes||'',t.amount]));let blob=new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='fund-report-detail.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function downloadReportCSV(){const d=reportData(),rows=[...(currentUserDisplayName()?[['Prepared by',currentUserDisplayName(),'Date',new Date().toLocaleDateString('en-PH')]]:[]),...(futureRecordCount()?[['Warning','Current and unfiltered totals include existing future-dated records.']]:[]),['Scope note','Only records in this tracker are included; separately stored records are excluded'],['Report scope',reportFilter.fundId?(funds.find(f=>f.id===reportFilter.fundId)?.name||'Unknown'):'All funds'],['From',reportFilter.from||'Beginning','To',reportFilter.to||'Latest'],['Opening cash',d.opening/100,'Received',d.received/100,'Paid',d.paid/100,'Closing cash',d.closing/100],...(reportFilter.fundId?[['Current remaining allocations',fundReserved(reportFilter.fundId)/100,'Current uncommitted',fundAvailable(reportFilter.fundId)/100,'Current figures, not historical']]:[]),[],['Date','Fund','Project','Type','Category','Description','Payee','Reference','Method','Notes','Amount']];d.entries.forEach(t=>rows.push([t.date,funds.find(f=>f.id===t.fundId)?.name||'',projects.find(p=>p.id===t.projectId)?.name||'',t.type,t.category||'',t.description,t.payee||'',t.receiptNo||'',t.method||'',t.notes||'',t.amount]));let blob=new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='fund-report-detail.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 
 let detailPreviousFocus=null,activeProjectDetail=null,activeContributionDetail=null,activeFundDetail=null,activeLedgerDetail=null,detailReturnProject=null,detailReturnFund=null,detailReturnScroll=0;
 const detailOverlay=document.getElementById('detailOverlay'),detailDialog=document.getElementById('detailDialog');
@@ -12857,7 +12825,7 @@ function renderAll(){
   renderFundViewSummaries();
   document.getElementById('txCount').innerText=txs.length;
   document.getElementById('spentPct').innerText=pct+'% used';
-  document.getElementById('heroSub').innerText='Across '+funds.length+' fund sources • '+txs.length+' fund transactions • Organization period: '+formatOrganizationPeriod(org.periodFrom,org.periodTo)+(window.pondoTeamState?.orgId?' • Faculty Fund is reported separately':'');
+  document.getElementById('heroSub').innerText='Across '+funds.length+' fund sources • '+txs.length+' fund transactions • Organization period: '+formatOrganizationPeriod(org.periodFrom,org.periodTo);
   document.getElementById('fundsCount').innerText=funds.length+' funds';
 
   let fundCards=document.getElementById('fundCards'), fundScroll=fundCards.scrollLeft; let fundCardsHtml='';
@@ -13295,7 +13263,7 @@ function moveSlide(i,dir){ let arr=appSettings.presentation.slideOrder; let j=i+
    projects.push(
      {id:p1,name:'School Supplies Drive',description:'Classroom replenishment for the second semester.',status:'Active',budget:28000,series:'Annual Programs',cycle:year,sampleData:true},
      {id:p2,name:'Community ICT Corner',description:'Shared devices and connectivity for learners.',status:'Planning',budget:42000,series:'Learning Access',cycle:year,sampleData:true},
-     {id:p3,name:'Faculty Wellness Week',description:'Staff wellbeing and community-building activities.',status:'Completed',budget:12000,series:'Annual Programs',cycle:year,sampleData:true}
+     {id:p3,name:'Staff Wellness Week',description:'Staff wellbeing and community-building activities.',status:'Completed',budget:12000,series:'Annual Programs',cycle:year,sampleData:true}
    );
    allocations.push(
      {id:sid('allocation-1'),fundId:f1,projectId:p1,amount:20000,sampleData:true},
@@ -13646,7 +13614,7 @@ async function resetAllSettings(){ if(await appConfirm('Reset ALL settings?')){
   location.reload();
 } }
 function syncRolePreview(){
- const roles={none:{name:'',description:'No role idea selected.'},disbursing:{name:'Administrative Officer (AO) / Disbursing Officer',description:'Preview only. The actual Disbursing Officer team role can edit fund activity.'},reviewer:{name:'Reviewer',description:'Preview only. The actual Reviewer team role can view regular team data and submit refund requests for approval. Faculty President is assigned separately.'},'project-manager':{name:'Project Manager',description:'Preview only. Manage the actual team role in Team settings.'}};
+ const roles={none:{name:'',description:'No role idea selected.'},disbursing:{name:'Administrative Officer (AO) / Disbursing Officer',description:'Preview only. The actual Disbursing Officer team role can edit fund activity.'},reviewer:{name:'Reviewer',description:'Preview only. The actual Reviewer team role can view regular team data and submit refund requests for approval.'},'project-manager':{name:'Project Manager',description:'Preview only. Manage the actual team role in Team settings.'}};
  const role=roles[appSettings.rolePreview]||roles.none,select=document.getElementById('rolePreviewSelect'),description=document.getElementById('rolePreviewDescription'),banner=document.getElementById('rolePreviewBanner');
  if(select)select.value=roles[appSettings.rolePreview]?appSettings.rolePreview:'none';if(description)description.textContent=role.description;if(banner){banner.hidden=!role.name;document.getElementById('rolePreviewTitle').textContent=role.name+' — role preview only'}
 }
@@ -13780,15 +13748,14 @@ function applyAppearance(){
 }
 
 function applyChartSettings(){ document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';}); }
-let countRun=0;
 function animateTotals(){
   if(window.__pondoSuppressFeedback) return;
-  const run=++countRun;
+  const run=window.__pondoBalanceCountRun=(window.__pondoBalanceCountRun||0)+1;
   if(!appSettings.animation.countUp || appSettings.motion.reduceMotion) return;
   const els=['totalReceived','totalSpent','totalRemaining'].map(id=>document.getElementById(id));
   const targets=els.map(el=>Number(el.textContent.replace(/[^0-9.-]/g,''))||0);
   const started=performance.now(), duration=Math.max(.1,appSettings.animation.countDuration)*1000;
-  function frame(now){if(run!==countRun)return; const t=Math.min(1,(now-started)/duration), eased=1-Math.pow(1-t,3); els.forEach((el,i)=>el.textContent=fmt(Math.round(targets[i]*eased))); if(t<1) requestAnimationFrame(frame); else soundEvent('countFinish');}
+  function frame(now){if(run!==window.__pondoBalanceCountRun)return; const t=Math.min(1,(now-started)/duration), eased=1-Math.pow(1-t,3); els.forEach((el,i)=>el.textContent=fmt(Math.round(targets[i]*eased))); if(t<1) requestAnimationFrame(frame); else soundEvent('countFinish');}
   requestAnimationFrame(frame);
 }
 let heroParallaxFrame=0;
@@ -13944,7 +13911,7 @@ window.startTabGuard=(function(){
 // overwriting a team draft. Verify the same controlled offline shell and draft
 // immediately before leaving; failures do not clear or replace any records.
 const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
-const PONDO_RECOVERY_SHELL='pondo-v137';
+const PONDO_RECOVERY_SHELL='pondo-v142';
 let recoveryOfflineBusy=false;
 function recoveryOfflineExitStillSafe(exit){
  const s=window.pondoTeamState;
@@ -13956,7 +13923,7 @@ async function recoveryOfflineShellReady(){
  const version=await new Promise(resolve=>{const channel=new MessageChannel();let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);channel.port1.close();resolve(value)};const timer=setTimeout(()=>finish(null),1500);channel.port1.onmessage=e=>finish(e.data?.version);try{worker.postMessage({type:'PONDO_GET_CACHE_VERSION'},[channel.port2])}catch(e){finish(null)}});
  if(version!==PONDO_RECOVERY_SHELL)return false;
  const cache=await caches.open(PONDO_RECOVERY_SHELL);
- for(const path of ['./index.html','./refund-items.js','./offline-sync.js','./faculty-fund-ui.js','./faculty-fund-notifications.js'])if(!await cache.match(new URL(path,location.href).href))return false;
+ for(const path of ['./index.html','./refund-items.js','./offline-sync.js'])if(!await cache.match(new URL(path,location.href).href))return false;
  return true;
 }
 async function continueRecoveryOffline(){
@@ -14263,7 +14230,6 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
   };
 })();
 </script>
-<script>window.PondoFacultyFundUI?.mount();</script>
 <script type="module">
 import { createOrganizationDirectory } from "./organization-firestore.mjs";
 import { createWorkspaceApprovalTracker } from "./workspace-approval.mjs";
@@ -14325,9 +14291,6 @@ const firebaseConfig = {
 
 // Analytics is intentionally not initialized; a measurement ID alone does not enable it.
 const firebaseApp = initializeApp(firebaseConfig);
-// Separate, disabled-by-default backend; this never writes the normal snapshot.
-const facultyCall=name=>async input=>{const {getFunctions,httpsCallable}=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js');return (await httpsCallable(getFunctions(firebaseApp),name)(input)).data;};
-window.pondoFacultyAPI={transition:facultyCall('facultyFundTransition'),read:facultyCall('facultyFundRead'),recovery:facultyCall('facultyFundRecovery'),export:facultyCall('facultyFundExport')};
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 // Offline support, part 2: the service worker (sw.js) caches the app shell
@@ -14350,44 +14313,6 @@ try {
 } catch (err) {
   console.warn('Firestore offline persistence unavailable, falling back to in-memory cache:', err);
   firestoreDb = getFirestore(firebaseApp);
-}
-
-// Real-account testing is restricted by both the app and separate test rules
-// to workspaces whose name starts "Faculty Fund Test ". Fictitious data only;
-// it is not a production ledger and has no protected backup or restore.
-const FACULTY_FUND_SPARK_DEMO = false;
-const FACULTY_FUND_REAL_ACCOUNT_TEST = true;
-// Opt-in existing-workspace preview. Requires the matching recovery rules.
-const FACULTY_FUND_RELEASE_PREVIEW = true;
-// Demo-only recovery experiment. Never enable this for real fund data.
-const FACULTY_FUND_RESTORE_DEMO = false;
-// Limited recovery experiment; matching recovery rules must be published first.
-const FACULTY_FUND_RECOVERY_PREVIEW = true;
-if(FACULTY_FUND_RESTORE_DEMO&&!FACULTY_FUND_SPARK_DEMO)throw Error('Demo recovery requires the demo project');
-if(FACULTY_FUND_RECOVERY_PREVIEW&&!FACULTY_FUND_RELEASE_PREVIEW)throw Error('Recovery preview requires release preview');
-if (FACULTY_FUND_SPARK_DEMO || FACULTY_FUND_REAL_ACCOUNT_TEST || FACULTY_FUND_RELEASE_PREVIEW) {
-  if (FACULTY_FUND_SPARK_DEMO && FACULTY_FUND_REAL_ACCOUNT_TEST) throw Error('Choose a demo or real-account project');
-  if (FACULTY_FUND_SPARK_DEMO && !/^demo-[a-z0-9-]+$/.test(firebaseConfig.projectId)) throw Error('Faculty Fund test mode requires a demo Firebase project');
-  if (FACULTY_FUND_REAL_ACCOUNT_TEST && firebaseConfig.projectId !== 'russapps-pondo') throw Error('Wrong Firebase project for Faculty Fund real-account testing');
-  await Promise.all([
-    './faculty-fund-spark-client.js','./faculty-fund-spark-read.js','./faculty-fund-spark-projection.js',
-    './faculty-fund-spark-read-adapter.js','./faculty-fund-spark-write-adapter.js','./faculty-fund-spark-receipts.js',
-    './faculty-fund-spark-report.js','./faculty-fund-spark-export.js','./faculty-fund-spark-verify.js','./faculty-fund-spark-capture.js','./faculty-fund-spark-restore.js','./faculty-fund-spark-backup-file.js','./faculty-fund-spark-owner-recovery.js','./faculty-fund-spark-pending-reader.js',
-    './faculty-fund-spark-pending.js','./faculty-fund-spark-discovery.js','./faculty-fund-spark-discovery-recovery.js',
-    './faculty-fund-spark-expense-resume.js','./faculty-fund-spark-paged-recovery.js','./faculty-fund-spark-recovery-ui.js',
-    './faculty-fund-spark-app.js','./faculty-fund-spark-activity.js','./faculty-fund-spark-activity-ui.js'
-  ].map(path=>import(path)));
-  const styles=document.createElement('link');styles.rel='stylesheet';styles.href='./faculty-fund-spark-recovery.css';document.head.append(styles);
-  const facultyContext=()=>{const s=window.pondoTeamState,u=window.pondoCurrentUser;if(!s?.orgId||!s.uid||s.uid!==u?.uid||!s.role||!s.memberConfirmed)return null;return {orgId:s.orgId,uid:s.uid,role:s.role,memberConfirmed:true,orgName:s.orgName,members:Array.isArray(s.members)?s.members:[]};};
-  window.pondoFacultyAPI=window.createFacultyFundSparkApp({db:firestoreDb,realAccountTest:FACULTY_FUND_REAL_ACCOUNT_TEST,releasePreview:FACULTY_FUND_RELEASE_PREVIEW,experimentalRestore:FACULTY_FUND_RESTORE_DEMO||FACULTY_FUND_RECOVERY_PREVIEW,api:{doc,collection,query,where,orderBy,documentId,startAfter,limit,getDocFromServer,getDocsFromServer,runTransaction,serverTimestamp},getContext:facultyContext,modules:{
-    createClient:window.createFacultyFundSparkClient,createReader:window.createFacultyFundSparkReader,project:window.projectFacultySpark,
-    createReadAdapter:window.createFacultyFundSparkReadAdapter,createWriteAdapter:window.createFacultyFundSparkWriteAdapter,
-    createReceipts:window.createFacultyFundSparkReceiptView,makeReport:window.FacultyFundSparkReport.makeReport,reportCsv:window.FacultyFundSparkReport.csv,makeExport:window.FacultyFundSparkExport.make,verifyExport:window.FacultyFundSparkExport.verify,verifyDiagnostic:window.verifyFacultyFundSparkDiagnostic,createCapture:window.createFacultySparkCapture,createRestore:window.createFacultySparkRestore,createOwnerRecovery:window.createFacultyOwnerRecovery,makeRecoveryFile:window.FacultySparkBackupFile.make,inspectRecoveryFile:window.FacultySparkBackupFile.inspect,planCapture:window.planFacultySparkCapture,canonicalCapture:window.canonicalFacultySparkCapture,encodeCapture:window.FacultyFundSparkExport.clean,
-    createPendingReader:window.createFacultyFundSparkPendingReader,createPendingInspector:window.createFacultyFundSparkPendingInspector,
-    createDiscovery:window.createFacultyFundSparkDiscovery,createResolver:window.createFacultyFundSparkDiscoveryRecovery,
-    createExpenseResumer:window.createFacultyFundSparkExpenseResumer,createPagedRecovery:window.createFacultyFundSparkPagedRecovery,createActivityPager:window.createFacultyFundSparkActivityPager
-  }});
-  window.PondoFacultyFundUI?.reset();
 }
 
 // Create/update a per-user profile document at /users/{uid}. This also
@@ -14678,7 +14603,7 @@ function updateHeaderTeamBadge() {
     text.textContent = hasOtherOrgs ? 'Personal · Switch' : 'Solo · Add team';
     }
   } else {
-    const roleLabel = facultyPresidentKnown && facultyPresidentUid===pondoTeamState.uid ? 'Faculty President' : (ROLE_LABELS[pondoTeamState.role] || '');
+    const roleLabel = ROLE_LABELS[pondoTeamState.role] || '';
     badge.title = (pondoTeamState.orgName || 'Team') + ' — Network status only, not proof of sync. Tap to switch workspace or manage members.';
     const teamIcons={diamond:'◆',star:'★',heart:'♥',sun:'☀',leaf:'✿',book:'▣'};
     text.textContent = pondoTeamState.membershipsLoading && !pondoTeamState.orgName ? 'Checking workspaces…' : (teamIcons[pondoTeamState.teamIcon]||teamIcons.diamond)+' '+(pondoTeamState.orgName || 'Team') + (roleLabel ? ' · ' + roleLabel : '');
@@ -14891,72 +14816,12 @@ function refreshMemberRefundWatch(){
 window.addEventListener('online',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();});window.addEventListener('offline',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();});
 
 
-// Faculty Fund is server-authoritative and separate from the regular snapshot.
-// Only confirmed member and server snapshots may generate best-effort alerts.
-let facultyStateUnsub=null,facultyConfigUnsub=null,facultyRemitUnsub=null,facultyCorrectionUnsub=null,facultyRestoreUnsub=null,facultyWatchGeneration=0,facultyLockGeneration=0;
-// Only server-confirmed config determines who is displayed as President.
-let facultyPresidentUid=null,facultyPresidentKnown=false;
-function stopFacultyDataWatch(){facultyWatchGeneration++;if(facultyStateUnsub)facultyStateUnsub();if(facultyConfigUnsub)facultyConfigUnsub();if(facultyRemitUnsub)facultyRemitUnsub();if(facultyCorrectionUnsub)facultyCorrectionUnsub();facultyStateUnsub=facultyConfigUnsub=facultyRemitUnsub=facultyCorrectionUnsub=null;facultyPresidentUid=null;facultyPresidentKnown=false;window.clearFacultyNotice?.();}
-function stopFacultyWatch(){facultyLockGeneration++;if(facultyRestoreUnsub)facultyRestoreUnsub();facultyRestoreUnsub=null;stopFacultyDataWatch();}
-function startFacultyWatch(orgId,uid){
- if(!orgId||!uid||!pondoTeamState.memberConfirmed)return;
- if(window.pondoFacultyAPI?.capabilities?.experimentalOwnerRecovery===true){
-  if(facultyRestoreUnsub)return;
-  const generation=++facultyLockGeneration,current=()=>generation===facultyLockGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
-  // Never show partial recovery state: only a confirmed absent lock enables
-  // the ordinary listeners. Keep watching the lock so they resume afterwards.
-  facultyRestoreUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'sparkRestoreProof','current'),{includeMetadataChanges:true},snap=>{
-   if(!current())return;
-   if(snap.metadata.fromCache||snap.metadata.hasPendingWrites||snap.exists()){stopFacultyDataWatch();renderTeamPanel();return;}
-   startFacultyDataWatch(orgId,uid);
-  },err=>{if(!current())return;console.warn('Faculty Fund recovery status unavailable:',err);stopFacultyDataWatch();renderTeamPanel();});
-  return;
- }
- startFacultyDataWatch(orgId,uid);
-}
-function startFacultyDataWatch(orgId,uid){
- if(facultyConfigUnsub||!orgId||!uid||!pondoTeamState.memberConfirmed)return;
- const mode=window.pondoFacultyAPI?.capabilities?.mode;
- if(mode==='firebase-test-only'&&!/^org~faculty fund test .+/.test(orgId))return;
- const isTest=mode==='firebase-test-only'||mode==='emulator-test-only'||mode==='release-preview-only';
- const generation=++facultyWatchGeneration;let facultyState=null,facultyConfig=null,gotState=false,gotConfig=false,sparkRemits=null,sparkCorrections=null;
- const current=()=>generation===facultyWatchGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
- const deliver=()=>{if(!current()||!gotState||!gotConfig)return;try{window.processFacultyNotifications?.(facultyState||{remittances:[]},pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification,toast:window.pondoFacultyNotice});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
- const deliverSpark=()=>{if(!current()||!gotConfig||!sparkRemits||!sparkCorrections)return;try{window.processSparkFacultyNotifications?.(sparkRemits,sparkCorrections,pondoTeamState,facultyConfig||{},{storage:localStorage,push:window.pushNotification,toast:window.pondoFacultyNotice});}catch(err){console.warn('Faculty Fund notifications unavailable:',err);}};
- const failed=err=>{if(!current())return;console.warn('Faculty Fund updates unavailable:',err);stopFacultyWatch();renderTeamPanel();window.PondoFacultyFundUI?.reset();};
- const noticeFailed=err=>{if(current())console.warn('Faculty Fund notifications unavailable:',err);};
- if(!isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'facultyFund','state'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;facultyState=snap.exists()?snap.data():null;gotState=true;deliver();window.PondoFacultyFundUI?.refresh();},failed);
- // Test-mode writes atomically advance this marker. Only use confirmed changes
- // as an invalidation signal; the UI still performs its guarded server read.
- if(isTest)facultyStateUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,'sparkDiscoveryRevision','current'),{includeMetadataChanges:true},snap=>{if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;const revision=snap.exists()?snap.data().revision:0;window.PondoFacultyFundUI?.notifyRevision?.(revision);window.PondoFacultyFundUI?.scheduleLiveRefresh?.(revision);},failed);
- // Separate bounded, server-confirmed listeners keep the bell active even
- // with the modal closed, without rereading all financial collections.
- if(isTest){
-  const watchNotices=(path,assign)=>onSnapshot(query(collection(firestoreDb,'organizations',orgId,path),limit(1001)),{includeMetadataChanges:true},snap=>{
-   if(!current()||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return;
-   if(snap.size>1000){assign(null);console.warn('Faculty Fund notification history exceeds the safe limit.');return;}
-   const rows=[];snap.forEach(d=>rows.push({...d.data(),id:d.id}));assign(rows);deliverSpark();
-  },noticeFailed);
-  facultyRemitUnsub=watchNotices('sparkDiscoveryRemittances',rows=>{sparkRemits=rows;});
-  facultyCorrectionUnsub=watchNotices('sparkDiscoveryCorrections',rows=>{sparkCorrections=rows;});
- }
-
- const configPath=isTest?['sparkDiscoveryConfig','current']:['facultyFund','config'];
- facultyConfigUnsub=onSnapshot(doc(firestoreDb,'organizations',orgId,...configPath),{includeMetadataChanges:true},snap=>{
-  if(!current())return;
-  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){gotConfig=false;facultyPresidentKnown=false;facultyPresidentUid=null;renderTeamPanel();return;}
-  facultyConfig=snap.exists()?snap.data():null;
-  const valid=!facultyConfig||(typeof facultyConfig.presidentUid==='string'&&!!facultyConfig.presidentUid);
-  facultyPresidentKnown=valid;facultyPresidentUid=valid?facultyConfig?.presidentUid||null:null;
-  gotConfig=true;deliver();if(isTest)deliverSpark();renderTeamPanel();
- },failed);
-}
 function teardownOrgSubscriptions() {
-  window.pondoClearNotificationBanner?.();window.clearFacultyNotice?.();
+  window.pondoClearNotificationBanner?.();
   stopMemberRefundWatch();
-  stopFacultyWatch();
+
   stopJoinRequestWatch();
-  window.PondoFacultyFundUI?.reset();
+
   stopTeamPresence();
   if (pondoTeamState.unsubMembers) { pondoTeamState.unsubMembers(); pondoTeamState.unsubMembers = null; }
   if (pondoTeamState.unsubOrgDoc) { pondoTeamState.unsubOrgDoc(); pondoTeamState.unsubOrgDoc = null; }
@@ -14968,7 +14833,7 @@ function handleTeamListenerError(orgId, label, err) {
   if (pondoTeamState.orgId !== orgId) return;
   const firstFailure = !pondoTeamState.listenerError;
   pondoTeamState.listenerError = true;
-  if(label==='Members'){pondoTeamState.memberConfirmed=false;window.pondoValidateNotificationBanner?.();stopFacultyWatch();stopJoinRequestWatch();stopTeamPresence();applyRoleUI();window.refreshNotifCenterIfOpen?.();window.PondoFacultyFundUI?.reset();}
+  if(label==='Members'){pondoTeamState.memberConfirmed=false;window.pondoValidateNotificationBanner?.();stopJoinRequestWatch();stopTeamPresence();applyRoleUI();window.refreshNotifCenterIfOpen?.();}
   setSyncBadge('error');
   if (firstFailure) notify('Team updates are unavailable. Your data may be out of date. Export a backup and check your connection and access.');
 }
@@ -15029,7 +14894,7 @@ function subscribeToOrg(orgId) {
     const memberConfirmed = !snap.metadata.fromCache && !snap.metadata.hasPendingWrites;
     pondoTeamState.memberConfirmed = memberConfirmed;
     window.pondoValidateNotificationBanner?.();
-    if(!memberConfirmed){stopFacultyWatch();stopJoinRequestWatch();window.PondoFacultyFundUI?.reset();}
+    if(!memberConfirmed){stopJoinRequestWatch();}
     snap.forEach((d) => members.push(d.data()));
     // Notify about teammates joining/leaving/changing role -- but only once
     // we've already seen a members list for this org in this session, so the
@@ -15065,12 +14930,9 @@ function subscribeToOrg(orgId) {
     if (!mine) { if(memberConfirmed) handleRemovedFromOrg(); else renderHeaderTeamPresence(); return; }
     if(memberConfirmed)startTeamPresence(orgId,pondoTeamState.uid);
     else if(presenceUnsubscribe)stopTeamPresence();
-    const previousFacultyRole = pondoTeamState.role;
     pondoTeamState.role = mine.role;
     window.pondoValidateNotificationBanner?.();
     if(memberConfirmed&&mine.role==='owner')startJoinRequestWatch(orgId,pondoTeamState.uid);else stopJoinRequestWatch();
-    if(previousFacultyRole && previousFacultyRole !== mine.role) window.PondoFacultyFundUI?.reset();
-    if(memberConfirmed)startFacultyWatch(orgId,pondoTeamState.uid);
     if (window.refreshDescriptionSuggestions && pondoTeamState.baselineReady) window.refreshDescriptionSuggestions();
     if (memberConfirmed && window.processMemberRoleNotification) window.processMemberRoleNotification(pondoTeamState);
     applyRoleUI();
@@ -15477,20 +15339,6 @@ async function selectMemberRole(uid, role) {
   if(!current()||expected.role!=='owner')return;
   const member=s.members.find(m=>m.uid===uid);
   if(!member)return;
-  if(role==='faculty-president'){
-    if(member.role!=='reviewer'){notify('Choose a Viewer / Reviewer to assign as Faculty President.');return;}
-    if(!facultyPresidentKnown){notify('Faculty President status is unavailable. Check that the Faculty Fund test rules are published and this is a Faculty Fund Test workspace.');return;}
-    if(facultyPresidentUid===uid)return;
-    if(!await confirmAction('Assign '+(member.displayName||member.email||'this member')+' as Faculty President? This replaces the current President. Their Viewer access stays the same.')){if(current())renderTeamPanel();return;}
-    if(!current()||!s.members.some(m=>m.uid===uid&&m.role==='reviewer')){if(current())renderTeamPanel();return;}
-    try{
-      if(!window.PondoFacultyFundUI?.assignPresident)throw Error('Faculty Fund assignment is unavailable.');
-      await window.PondoFacultyFundUI.assignPresident(uid,expected);
-      if(current())notify('Assignment submitted. The President label appears when the server confirms it.');
-    }catch(err){if(current())notify(err?.message||'Could not assign Faculty President.');}
-    if(current())renderTeamPanel();return;
-  }
-  if(facultyPresidentKnown&&facultyPresidentUid===uid){notify('Assign another Faculty President before changing this member’s team role.');renderTeamPanel();return;}
   await changeMemberRole(uid,role);
   if(current())renderTeamPanel();
 }
@@ -15501,7 +15349,6 @@ async function removeMember(uid) {
   const current=()=>scoped()&&s.role==='owner'&&s.memberConfirmed;
   const member=s.members.find(m=>m.uid===uid);
   if (!orgId || !current() || uid===actor || !member) return;
-  if (facultyPresidentKnown&&facultyPresidentUid===uid) {notify('Assign another Faculty President and resolve any pending handovers before removing this member.');return;}
   if (!navigator.onLine) {notify('Connect to the internet before removing a member.');return;}
   if (!await confirmAction('Remove this member from this workspace? They will lose access and receive an in-app notice when they next open Pondo online.')) return;
   if (!current() || !s.members.some(m=>m.uid===uid)) return;
@@ -15620,9 +15467,7 @@ function renderTeamPanel() {
   const appearance=document.getElementById('teamAppearanceOwner');if(appearance)appearance.hidden=pondoTeamState.role!=='owner';
   const nameInput=document.getElementById('teamDisplayName');if(nameInput&&document.activeElement!==nameInput)nameInput.value=pondoTeamState.orgName||'';
   const roleLabels = { owner: 'Owner', disbursing: 'Administrative Officer (AO) / Disbursing Officer', reviewer: 'Viewer / Reviewer (view data; request refunds)', 'project-manager': 'Project Manager' };
-  document.getElementById('teamMyRole').textContent = (facultyPresidentKnown&&facultyPresidentUid===pondoTeamState.uid?'Faculty President · ':'') + (roleLabels[pondoTeamState.role] || pondoTeamState.role || '—');
-  const presidentStatus=document.getElementById('teamFacultyPresidentStatus');
-  if(presidentStatus){const member=pondoTeamState.members.find(m=>m.uid===facultyPresidentUid);presidentStatus.textContent=facultyPresidentKnown?(facultyPresidentUid?'Faculty President: '+(member?.displayName||member?.email||'not a current team member'):'Faculty President: not assigned'):'Faculty President status unavailable until the test workspace and rules are ready.';}
+  document.getElementById('teamMyRole').textContent = (roleLabels[pondoTeamState.role] || pondoTeamState.role || '—');
   window.updateReconciledDraftDownload?.();
   const draftRecovery = document.getElementById('teamDraftRecovery');
   if (draftRecovery) draftRecovery.hidden = !pondoTeamState.recoveryLocked;
@@ -15663,7 +15508,7 @@ function renderTeamPanel() {
       name.textContent = m.displayName || m.email || m.uid;
       const meta = document.createElement('div');
       meta.className = 'tm-meta';
-      meta.textContent = (m.uid === pondoTeamState.uid ? 'You' : (m.email || '')) + (facultyPresidentKnown&&m.uid===facultyPresidentUid?' · Faculty President · '+(roleLabels[m.role]||m.role):'');
+      meta.textContent = (m.uid === pondoTeamState.uid ? 'You' : (m.email || ''));
       info.append(name, meta);
       identity.appendChild(info);
       row.appendChild(identity);
@@ -15671,13 +15516,11 @@ function renderTeamPanel() {
       if (pondoTeamState.role === 'owner' && m.uid !== pondoTeamState.uid) {
         const select = document.createElement('select');
         select.setAttribute('aria-label', 'Team role for ' + (m.displayName || m.email || 'member'));
-        const assigned=facultyPresidentKnown&&facultyPresidentUid===m.uid;
         [['owner', 'Owner'], ['disbursing', 'Administrative Officer (AO) / Disbursing Officer'], ['project-manager', 'Project Manager'], ['reviewer', 'Viewer / Reviewer']].forEach(([val, label]) => {
           const opt = document.createElement('option');
-          opt.value = val; opt.textContent = label; opt.selected = !assigned && m.role === val;
+          opt.value = val; opt.textContent = label; opt.selected = m.role === val;
           select.appendChild(opt);
         });
-        if(m.role==='reviewer'||assigned){const opt=document.createElement('option');opt.value='faculty-president';opt.textContent='Faculty President';opt.selected=assigned;select.appendChild(opt);}
         select.addEventListener('change', async () => {const choice=select.value;select.disabled=true;try{await selectMemberRole(m.uid,choice);}catch(err){notify(err?.message||'Could not change role.');}finally{select.disabled=false;renderTeamPanel();}});
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';

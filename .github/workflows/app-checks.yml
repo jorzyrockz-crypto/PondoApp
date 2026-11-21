@@ -1,4 +1,4 @@
-name: Faculty Fund and app checks
+name: App checks
 on:
   pull_request:
   workflow_dispatch:
@@ -12,26 +12,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: faculty-fund-functions/package-lock.json
-      - name: Install isolated Faculty Fund backend dependencies
-        run: npm ci --prefix faculty-fund-functions --ignore-scripts --no-audit --no-fund
-      - name: Verify callable codebase loads
-        run: GCLOUD_PROJECT=demo-pondo-security node -e "const f=require('./faculty-fund-functions'); if(Object.keys(f).length!==4) process.exit(1)"
-      - name: Run app and Faculty Fund unit tests
+      - name: Run app unit tests
         run: node --test tests/*.test.cjs
       - name: Install browser test dependency
-        run: npm install --prefix "$RUNNER_TEMP/faculty-browser" playwright-core --no-audit --no-fund
-      - name: Run synthetic Faculty Fund browser workflow
+        run: npm install --prefix "$RUNNER_TEMP/app-browser" playwright-core --no-audit --no-fund
+      - name: Run app browser workflows
         run: |
           set +e
           (
             set -e
-            export NODE_PATH="$RUNNER_TEMP/faculty-browser/node_modules"
+            export NODE_PATH="$RUNNER_TEMP/app-browser/node_modules"
             export CHROMIUM_PATH="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
             test -n "$CHROMIUM_PATH"
-            node tests/faculty-fund-ui.browser.cjs
-            node tests/faculty-spark-recovery.browser.cjs
             node tests/death-aid-modal.browser.cjs
             node tests/cash-donation-workflow.browser.cjs
             node tests/refund-suggestions.browser.cjs

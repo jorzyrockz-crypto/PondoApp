@@ -20,7 +20,7 @@ test('pending inbox and voided ledger records are represented without fabricatin
  const rows=build([],[],[{action:'void payable',record:b('v'),reason:'Cancelled'}],[{id:'p',uid:'m',status:'pending',reimburseToUid:'m',amountCents:100}]);assert.equal(rows.find(x=>x.id==='p').requesterIsRecipient,true);assert.equal(rows.find(x=>x.id==='p').status,'Pending review');assert.equal(rows.find(x=>x.id==='v').status,'Voided');assert.equal(rows.find(x=>x.id==='v').requesterIsRecipient,true);
 });
 test('all bundled rule variants support optional member ID while retaining legacy request shape',()=>{
- for(const f of ['firestore.rules','firestore.faculty-test.rules','firestore.faculty-release-candidate.rules','firestore.faculty-recovery-candidate.rules']){const rules=fs.readFileSync(f,'utf8');assert.match(rules,/exists\(memberPath\(orgId, request\.resource\.data\.reimburseToUid\)\)/);assert.match(rules,/!\('reimburseToUid' in request\.resource\.data\)/);}
+ for(const f of ['firestore.rules']){const rules=fs.readFileSync(f,'utf8');assert.match(rules,/exists\(memberPath\(orgId, request\.resource\.data\.reimburseToUid\)\)/);assert.match(rules,/!\('reimburseToUid' in request\.resource\.data\)/);}
 });
 test('inbox and ledger status changes wait for the two listeners to agree',()=>{
  const bill=b('x');const [row]=build([bill],[],[],[{id:'x',uid:'a',status:'pending',reimburseToUid:'a'}]);assert.equal(row.conflict,true);assert.equal(row.status,'Details awaiting confirmation');assert.equal(row.requesterIsRecipient,false);

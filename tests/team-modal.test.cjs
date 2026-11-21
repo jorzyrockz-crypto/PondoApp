@@ -17,7 +17,7 @@ test('shared appearance saves only for a confirmed online owner and bounds value
 test('member removal cannot cross workspaces during confirmation',async()=>{
  const src=html.slice(html.indexOf('async function removeMember(uid)'),html.indexOf('\nasync function leaveOrganization()',html.indexOf('async function removeMember(uid)')));
  const state={orgId:'one',uid:'owner',role:'owner',memberConfirmed:true,members:[{uid:'member'}]},deleted=[];
- const c={pondoTeamState:state,window:{pondoCurrentUser:{uid:'owner'}},navigator:{onLine:true},facultyPresidentKnown:true,facultyPresidentUid:null,confirmAction:async()=>{state.orgId='two';return true},notify(){},firestoreDb:{},doc:(_,...args)=>args,deleteDoc:async x=>deleted.push(x)};vm.runInNewContext(src,c);await c.removeMember('member');assert.equal(deleted.length,0);
+ const c={pondoTeamState:state,window:{pondoCurrentUser:{uid:'owner'}},navigator:{onLine:true},confirmAction:async()=>{state.orgId='two';return true},notify(){},firestoreDb:{},doc:(_,...args)=>args,deleteDoc:async x=>deleted.push(x)};vm.runInNewContext(src,c);await c.removeMember('member');assert.equal(deleted.length,0);
 });
 test('workspace display name is owner-only, scoped, and explicitly separate from the registered search name',async()=>{
  const src=html.slice(html.indexOf('async function saveTeamDisplayName()'),html.indexOf('\nasync function saveTeamAppearance()'));
