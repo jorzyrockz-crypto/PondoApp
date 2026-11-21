@@ -10,14 +10,14 @@
   function context(orgId){const c=getContext();if(!c||c.memberConfirmed!==true||!c.orgId||!c.uid||!['owner','disbursing','project-manager','reviewer'].includes(c.role)||c.orgId!==orgId||!['string','number'].includes(typeof c.scopeToken))fail('Open a confirmed team workspace');return {...c};}
   function current(old){const c=getContext();return !!c&&c.memberConfirmed===true&&c.orgId===old.orgId&&c.uid===old.uid&&c.role===old.role&&c.scopeToken===old.scopeToken;}
   async function load(c){const snapshot=await makeReader(c,()=>current(c)).read();if(!current(c))fail('Workspace changed while loading');return snapshot;}
-  function stateView(snapshot,c){
+  function stateView(snapshot,c,historyOnly=false){
    const {records:r,projection:p}=snapshot;
    // This old UI cannot yet resume multi-step operations from another device.
-   if(p.pendingWork.some(x=>['remittance-draft','expense-draft','expense-cancelling','expense-voiding'].includes(x.kind)))fail('An unfinished Faculty Fund operation needs recovery before opening this view');
+   if(!historyOnly&&p.pendingWork.some(x=>['remittance-draft','expense-draft','expense-cancelling','expense-voiding'].includes(x.kind)))fail('An unfinished Faculty Fund operation needs recovery before opening this view');
    const members=Array.isArray(c.members)?c.members:[],name=uid=>{const m=members.find(x=>x.uid===uid);return m?.displayName||m?.email||'Team member'},marks=new Map(r.memberReceipts.map(x=>[x.id,x])),remitMarks=new Map(r.remittanceReceipts.map(x=>[x.id,x])),corrections=new Map(r.corrections.map(x=>[x.id,x]));
    const payments=r.payments.map(x=>({...x,receivedByUid:x.createdBy,receivedByName:name(x.createdBy),createdAt:timestamp(x.createdAt),voidedAt:timestamp(x.voidedAt),memberReceiptPrintedAt:timestamp(marks.get(x.remittanceId+'~'+x.id)?.printedAt)}));
    const remittances=r.remittances.map(x=>{const correction=x.correctionId?corrections.get(x.correctionId):null;return {...x,submittedByUid:x.createdBy,submittedByName:name(x.createdBy),submittedAt:timestamp(x.submittedAt||x.createdAt),acceptedByUid:x.acceptedBy||null,acceptedByName:x.acceptedBy?name(x.acceptedBy):null,acceptedAt:timestamp(x.acceptedAt),declinedAt:timestamp(x.declinedAt),declineReason:x.status==='declined'?x.reason:null,voidedAt:timestamp(x.voidedAt),receiptPrintedAt:timestamp(remitMarks.get(x.id)?.printedAt),voidRequest:correction?.status==='pending'?{requestedByUid:correction.requestedBy,requestedAt:timestamp(correction.requestedAt),reason:correction.reason}:null};});
-   const expenses=r.expenses.filter(x=>['recorded','voided'].includes(x.status)).map(x=>({...x,date:manilaDay(x.occurredAt),occurredAt:timestamp(x.occurredAt),createdAt:timestamp(x.createdAt),voidedAt:timestamp(x.voidedAt),recordedByUid:x.createdBy,recordedByName:name(x.createdBy)}));
+   const expenses=r.expenses.filter(x=>historyOnly||['recorded','voided'].includes(x.status)).map(x=>({...x,date:manilaDay(x.occurredAt),occurredAt:timestamp(x.occurredAt),createdAt:timestamp(x.createdAt),voidedAt:timestamp(x.voidedAt),recordedByUid:x.createdBy,recordedByName:name(x.createdBy)}));
    const audit=[];function event(kind,id,actorUid,at,reason,details={}){if(at)audit.push({kind,id,actorUid,at:timestamp(at),...(reason?{reason}:{}),...details});}
    for(const x of r.presidentHistory)event('president-assigned',x.id,x.assignedBy,x.assignedAt,null,{entityId:x.id,presidentUid:x.presidentUid});
    for(const x of r.people)event('faculty-person-added',x.id,x.createdBy,x.createdAt);
@@ -32,7 +32,7 @@
    return {state:{people:r.people,payments,remittances,expenses,audit},config:snapshot.config,revision:snapshot.revision,ledger:{...p,rows},role:c.role};
   }
   async function read(input){const c=context(input?.orgId),snapshot=await load(c);let output;
-   if(input.view==='state')output=stateView(snapshot,c);
+   if(input.view==='state'||input.view==='history')output=stateView(snapshot,c,input.view==='history');
    else if(input.view==='memberReceipts'||input.view==='remittanceReceipt'){
     if(!['owner','disbursing'].includes(c.role))fail('Only an authorized collector can print receipts');const view=makeReceipts(snapshot,{organizationName:c.orgName||'Faculty Fund',members:c.members||[]});output={html:input.view==='memberReceipts'?view.membersHtml(input.paymentIds):view.remittanceHtml(input.remittanceId)};
    }else if(input.view==='report'||input.view==='csv'){const report=makeReport(snapshot,{from:input.from||'',to:input.to||''});output=input.view==='csv'?{csv:reportCsv(report)}:{report};}

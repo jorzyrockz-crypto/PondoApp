@@ -533,3 +533,24 @@ rollout and rollback with the database administrator; do not replace unknown
 published rules. An existing `sparkRestoreProof/current` can indicate an active
 recovery; do not delete it to clear an error. Recovery references depend on
 server copies and are not independent backups.
+
+### Unified transaction history (test preview)
+
+The Transactions page can request a read-only, revision-checked Faculty history
+view, then display its payments, expenses and handovers alongside other rows.
+Handovers are shown as no-cash-movement records rather than duplicating income;
+voided and unfinished entries do not become completed cash movements. For an
+expense being reversed, only the still-allocated amount is displayed as current
+cash impact. Faculty entries remain stored in the protected Faculty system; this
+is not a migration to the regular editable snapshot and does not alter its
+President acceptance requirement. Scope changes, unconfirmed access and recovery
+locks clear or suppress the history. The history is refreshed on entering the
+page and on confirmed revision updates.
+
+The experimental reconciliation reader is bounded to 1,000 documents per
+collection; if this limit, a lock, missing permissions, offline access, or any
+other read failure prevents a confirmed view, the page explicitly warns that
+Faculty entries are not shown. The dated activity pager is a separate partial
+browser, not a complete replacement for unified history. This change does not
+solve the large-history limit, publish rules, establish production readiness,
+or make the Faculty fund work with the currently published baseline rules.
