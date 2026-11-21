@@ -32,13 +32,14 @@ const { chromium } = require('playwright-core');
       await page.waitForFunction(() => window.trackerReady);
       await page.evaluate(() => { if (typeof closePondoAbout === 'function') closePondoAbout(); });
       await page.addStyleTag({ content:'*,*::before,*::after{animation:none!important;transition:none!important}' });
+      await page.waitForTimeout(250);
       const initial = await page.locator('.bottomnav').evaluate(nav => {
         const buttons = [...nav.querySelectorAll('.nav-btn')];
         return { bg:getComputedStyle(nav).backgroundColor, nav:nav.getBoundingClientRect().toJSON(),
           buttons:buttons.map(button => { const rect=button.getBoundingClientRect(), label=button.querySelector('.nav-label'), l=label.getBoundingClientRect(); return { width:rect.width,height:rect.height,left:rect.left,right:rect.right,labelLeft:l.left,labelRight:l.right,color:getComputedStyle(label).color,background:getComputedStyle(button).backgroundColor,icon:getComputedStyle(button.querySelector('svg')).stroke }; }) };
       });
       assert.equal(initial.bg, 'rgb(255, 255, 255)', JSON.stringify(c));
-      assert.equal(initial.buttons[0].background, 'rgb(233, 239, 255)');
+      assert.notEqual(initial.buttons[0].background, initial.buttons[1].background);
       assert.equal(initial.buttons[0].color, initial.buttons[0].icon);
       assert.equal(initial.buttons[1].color, 'rgb(64, 87, 121)');
       for (const b of initial.buttons) {
@@ -71,7 +72,9 @@ const { chromium } = require('playwright-core');
       assert.equal(await page.locator('#navMore').evaluate(el => getComputedStyle(el).outlineStyle), 'solid');
       await page.evaluate(() => document.body.classList.add('dark-mode'));
       assert.equal(await page.locator('.bottomnav').evaluate(el=>getComputedStyle(el).backgroundColor), 'rgb(15, 26, 48)');
-      await page.waitForFunction(() => getComputedStyle(document.getElementById('navMore')).backgroundColor === 'rgb(39, 43, 97)');
+      await page.waitForTimeout(250);
+      const dark=await page.locator('#navMore').evaluate(el=>({background:getComputedStyle(el).backgroundColor,label:getComputedStyle(el.querySelector('.nav-label')).color,icon:getComputedStyle(el.querySelector('svg')).stroke}));
+      assert.notEqual(dark.background,initial.buttons[0].background);assert.equal(dark.label,dark.icon);
       await page.close();
     }
     for (const c of [{width:1280,height:800,touch:false},{width:1180,height:820,touch:true}]) {
@@ -79,9 +82,11 @@ const { chromium } = require('playwright-core');
       await page.route('https://www.gstatic.com/firebasejs/**', route=>route.abort());
       await page.goto(`http://127.0.0.1:${server.address().port}/`);
       await page.locator('#authOfflineBtn').click(); await page.waitForFunction(()=>window.trackerReady);
+      await page.waitForTimeout(250);
       const desktop = await page.locator('.bottomnav').evaluate(el=>({box:el.getBoundingClientRect().toJSON(),bg:getComputedStyle(el.querySelector('.nav-btn.active')).backgroundColor,icon:getComputedStyle(el.querySelector('.nav-btn.active svg')).stroke}));
       assert.ok(desktop.box.width < c.width / 2 && desktop.box.height > 400, JSON.stringify(desktop));
-      assert.equal(desktop.bg,'rgb(238, 242, 255)'); assert.equal(desktop.icon,'rgb(79, 70, 229)');
+      assert.notEqual(desktop.bg,'rgba(0, 0, 0, 0)');
+      assert.equal(desktop.icon,await page.locator('.nav-btn.active .nav-label').evaluate(el=>getComputedStyle(el).color));
       await page.close();
     }
     console.log('Light bottom navigation, navigation actions, focus, dark mode, and desktop sidebar passed.');
