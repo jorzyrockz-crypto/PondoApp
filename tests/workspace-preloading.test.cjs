@@ -42,7 +42,7 @@ test('initial preload shows loading and does not subscribe after account changes
  const work=c.initCollaboration({uid:'u'});assert.equal(state.membershipsLoading,true);assert.equal(state.initialWorkspacePending,true);state.uid='v';c.window.pondoCurrentUser={uid:'v'};profile.resolve(snap({orgMemberships:['a'],activeOrganizationId:'a'}));await work;assert.ok(!calls.includes('subscribe'));assert.ok(!calls.includes('approval'));assert.equal(state.orgMemberships.length,0);
 });
 test('header menus display loading and avoid replacing identical markup',()=>{
- const source=html.slice(html.indexOf('function renderTeamSwitcherMenu()'),html.indexOf('\nfunction closeTeamSwitcher('))+'\n'+html.slice(html.indexOf('function renderHeaderAvatarMenu()'),html.indexOf('\nfunction closeHeaderAvatarMenu('));
+ const source=html.slice(html.indexOf('const workspaceIcons='),html.indexOf('\nfunction closeWorkspaceMenu('))+'\n'+html.slice(html.indexOf('function renderHeaderAvatarMenu()'),html.indexOf('\nfunction closeHeaderAvatarMenu('));
  const elements={teamSwitcherMenu:{},headerAvatarMenu:{}};let updates=0;for(const el of Object.values(elements))Object.defineProperty(el,'innerHTML',{set(v){this.value=v;updates++},get(){return this.value}});
  const state={orgId:null,memberships:[],membershipsLoading:true};const window={pondoTeamState:state,pondoCurrentUser:{uid:'u'},ROLE_LABELS:{}};
  const c={window,document:{getElementById:id=>elements[id]},escapeTeamText:s=>String(s)};vm.runInNewContext(source,c);c.renderTeamSwitcherMenu();c.renderHeaderAvatarMenu();assert.match(elements.teamSwitcherMenu.value,/Checking workspaces/);assert.match(elements.headerAvatarMenu.value,/Checking workspaces/);c.renderTeamSwitcherMenu();c.renderHeaderAvatarMenu();assert.equal(updates,2);
