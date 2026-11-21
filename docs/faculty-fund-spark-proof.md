@@ -554,3 +554,22 @@ Faculty entries are not shown. The dated activity pager is a separate partial
 browser, not a complete replacement for unified history. This change does not
 solve the large-history limit, publish rules, establish production readiness,
 or make the Faculty fund work with the currently published baseline rules.
+
+### Faculty Fund in the Overview total
+
+The Overview combines the regular/donation snapshot totals with the separately
+reconciled Faculty ledger when a confirmed history snapshot is available. It
+adds the Faculty ledger's cash received, spent and remaining once; handovers do
+not add cash a second time. Unaccepted receipts are included in the total cash
+balance, but remain unspendable until President acceptance. The Faculty card
+opens the existing protected workflow; it does not create an editable regular
+fund or move any data.
+
+When the Faculty ledger is not confirmed (including offline, permission denial,
+recovery lock, failed reconciliation or the 1,000-document reader limit), the
+Overview displays the regular/donation subtotal under an explicit partial label
+and states that Faculty is not included. Regular financial reports and charts
+retain their existing scopes. The Faculty reader may require 12 bounded
+collection reads plus revision and lock checks on a refresh. This is not a
+production-ready migration or deployment; historical regular-fund copies are
+not automatically reconciled against Faculty records.

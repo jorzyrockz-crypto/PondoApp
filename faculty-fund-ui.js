@@ -28,7 +28,7 @@
  // History is read separately: incomplete multi-step work must still appear,
  // while the regular action view remains fail-closed during recovery.
  function historyView(){const c=context();const team=window.pondoTeamState;if(!c||!navigator.onLine||team?.recoveryLocked||team?.listenerError||team?.syncError)return {status:'unavailable',data:null};if(historyLoaded&&same(c,historyLoaded.ctx))return {status:'ready',data:historyLoaded.data};return {status:same(c,historyContext)?historyStatus:'unavailable',data:null};}
- function updateHistory(){if(document.getElementById('tab-transactions')?.style.display==='block')window.renderUnifiedLedger?.();}
+ function updateHistory(){window.renderDashboardFundSummary?.();if(document.getElementById('tab-transactions')?.style.display==='block')window.renderUnifiedLedger?.();}
  async function refreshHistory(){const c=context(),g=++historyGeneration;historyLoaded=null;historyContext=c;historyStatus=c&&navigator.onLine&&api()?.read?'loading':'unavailable';updateHistory();if(historyStatus!=='loading')return;
   try{const data=await api().read({orgId:c.orgId,view:'history'});if(g!==historyGeneration||!same(c,context())||!navigator.onLine)return;if(!data?.state||!Array.isArray(data.state.payments)||!Array.isArray(data.state.expenses)||!Array.isArray(data.state.remittances))throw Error('History unavailable');historyLoaded={ctx:c,data};historyStatus='ready';}
   catch(e){if(g!==historyGeneration||!same(c,context()))return;historyLoaded=null;historyStatus='unavailable';}updateHistory();
@@ -176,7 +176,7 @@
  let liveTimer=null,liveRunning=false,livePending=false,liveEpoch=0,liveRevision=null,liveForce=false;
  function cancelLiveRefresh(){liveEpoch++;clearTimeout(liveTimer);liveTimer=null;liveRunning=false;livePending=false;liveRevision=null;liveForce=false;}
  function scheduleLiveRefresh(revision){
-  if(typeof document!=='undefined'&&document.getElementById('tab-transactions')?.style.display==='block'){invalidateHistory();historyTimer=setTimeout(()=>{historyTimer=null;void refreshHistory();},300);}
+  if(typeof document!=='undefined'&&['tab-transactions','tab-dashboard'].some(id=>{const el=document.getElementById(id);return el&&el.style.display!=='none'})){invalidateHistory();historyTimer=setTimeout(()=>{historyTimer=null;void refreshHistory();},300);}
   if(!opened)return;
   // A known revision is only a hint. Unknown/malformed signals force a full
   // server read. Never use a local or incomplete snapshot as a substitute.

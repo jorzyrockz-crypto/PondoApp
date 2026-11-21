@@ -28,5 +28,15 @@
  }
  function matches(row,filters){const {query='',type='all',impact='all',fund='',from='',to=''}=filters||{},date=String(row.date||'').slice(0,10),q=query.trim().toLocaleLowerCase();if(from&&(!date||date<from)||to&&(!date||date>to))return false;if(fund&&row.fundId!==fund)return false;if(impact!=='all'&&row.impact!==impact)return false;let typeMatch=type==='all'||type===row.type||type==='PERSONAL'&&row.impact==='TRACKING'||type==='DONATION'&&!!row.transaction?.cashDonation||type==='DEATH_AID'&&!!row.transaction?.deathAidPaymentId||type==='RAISED'&&row.transaction?.type==='IN'&&!!row.transaction?.contributionPaymentId||type==='CONTRIBUTION'&&!!row.transaction?.contributionPaymentId||type==='REFUND'&&!!row.refundId;if(!typeMatch)return false;return !q||[row.title,row.kind,row.status,row.fundName,...row.details.map(([,value])=>value)].some(x=>String(x||'').toLocaleLowerCase().includes(q));}
  function totals(rows){const result={IN:0,OUT:0,TRACKING:0};for(const r of rows){if(!(r.impact in result))continue;const amount=Math.round(Number(r.amount)*100);if(!Number.isSafeInteger(amount)||!Number.isSafeInteger(result[r.impact]+amount))result[r.impact]=null;else if(result[r.impact]!==null)result[r.impact]+=amount;}return result;}
- return {build,matches,totals};
+ function combineDashboard({funds=[],transactions=[],faculty=null}){
+  // Integer cents prevent handover records from being added as cash twice.
+  const money=v=>{const n=Math.round(Number(v)*100);return Number.isSafeInteger(n)?n:null;},sum=values=>values.reduce((a,b)=>a===null||b===null||!Number.isSafeInteger(a+b)?null:a+b,0);
+  const received=sum([...funds.map(f=>money(f.initialAmount)),...transactions.filter(t=>t.type==='IN').map(t=>money(t.amount))]);
+  const spent=sum(transactions.filter(t=>t.type==='OUT').map(t=>money(t.amount)));
+  if(received===null||spent===null||!Number.isSafeInteger(received-spent))return null;
+  let rec=received,out=spent,count=transactions.length;
+  if(faculty){const l=faculty.ledger;if(!l||![l.receivedCents,l.spentCents,l.balanceCents].every(Number.isSafeInteger)||l.receivedCents<0||l.spentCents<0||l.receivedCents-l.spentCents!==l.balanceCents||!Array.isArray(l.rows))return null;rec=sum([rec,l.receivedCents]);out=sum([out,l.spentCents]);count+=l.rows.length;if(rec===null||out===null||!Number.isSafeInteger(rec-out)||!Number.isSafeInteger(count))return null;}
+  return {receivedCents:rec,spentCents:out,balanceCents:rec-out,transactionCount:count};
+ }
+ return {build,matches,totals,combineDashboard};
 });

@@ -14,3 +14,10 @@ test('Faculty history refuses late results after a workspace change and clears o
  const old=ui.refreshHistory();assert.equal(ui.historyView().status,'loading');window.pondoTeamState={...window.pondoTeamState,orgId:'two'};finish({state:{payments:[{id:'private'}],expenses:[],remittances:[]}});await old;assert.equal(ui.historyView().data,null);assert.equal(ui.historyView().status,'unavailable');
  const next=ui.refreshHistory();finish({state:{payments:[],expenses:[],remittances:[]}});await next;assert.equal(ui.historyView().status,'ready');ui.invalidateHistory();assert.equal(ui.historyView().data,null);assert.equal(ui.historyView().status,'unavailable');
 });
+test('combined dashboard counts Faculty cash once, including unaccepted amounts, without changing the fund records',()=>{
+ const funds=[{id:'regular',initialAmount:1000},{id:'donation',initialAmount:100}],transactions=[{id:'in',type:'IN',amount:100},{id:'out',type:'OUT',amount:50}],faculty={ledger:{receivedCents:25000,spentCents:10000,balanceCents:15000,unremittedCents:5000,rows:[{id:'p',type:'IN'},{id:'e',type:'OUT'}]}};
+ const before=JSON.stringify({funds,transactions,faculty});const result=ledger.combineDashboard({funds,transactions,faculty});assert.deepEqual(result,{receivedCents:145000,spentCents:15000,balanceCents:130000,transactionCount:4});assert.equal(JSON.stringify({funds,transactions,faculty}),before);assert.deepEqual(ledger.combineDashboard({funds,transactions}),{receivedCents:120000,spentCents:5000,balanceCents:115000,transactionCount:2});
+});
+test('dashboard refuses inconsistent, missing or overflowing Faculty amounts',()=>{
+ for(const faculty of [{ledger:{receivedCents:2,spentCents:1,balanceCents:2,rows:[]}},{ledger:{receivedCents:1,spentCents:0,balanceCents:1}},{ledger:{receivedCents:Number.MAX_SAFE_INTEGER,spentCents:0,balanceCents:Number.MAX_SAFE_INTEGER,rows:[]}}])assert.equal(ledger.combineDashboard({funds:[{initialAmount:1}],faculty}),null);
+});

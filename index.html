@@ -8982,7 +8982,7 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
     <div class="dashboard-desktop-grid">
     <div class="dashboard-main-column">
     <div class="hero">
-      <div class="hero-label">Total Fund Balance</div>
+      <div class="hero-label" id="totalBalanceLabel">Total Fund Balance</div>
       <div class="hero-amount" id="totalRemaining">₱68,300</div>
       <div class="hero-sub" id="heroSub">Across 3 funds • 6 transactions • Period 2025-01-01 to 2025-12-31</div>
       <div class="hero-stats">
@@ -9017,11 +9017,11 @@ body.dark-mode #tab-transactions .transaction-filters-panel{background:#172942;b
 
     <div class="grid-2">
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">Spending by Category</h4><span style="font-size:11px; color:var(--ink2)">Top categories</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">Spending by Category</h4><span style="font-size:11px; color:var(--ink2)">Regular &amp; donation funds</span></div>
         <div id="byCategory" style="margin-top:16px"></div>
       </div>
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">By Fund Source</h4><span style="font-size:11px; color:var(--ink2)">Where money went</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center"><h4 style="font-weight:600; font-size:14px; margin:0">By Fund Source</h4><span style="font-size:11px; color:var(--ink2)">Regular &amp; donation funds</span></div>
         <div id="byFund" style="margin-top:16px"></div>
       </div>
     </div>
@@ -9891,7 +9891,7 @@ function syncMoreNavSelection(tab){
   document.querySelectorAll('#navMoreMenu button').forEach((button,index)=>{const selected=tabs[index]===tab;button.classList.toggle('active',selected);if(selected)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});
 }
 const pondoSwitchTab=switchTab;
-switchTab=function(tab){pondoSwitchTab(tab);syncMoreNavSelection(tab);if(tab==='transactions')window.PondoFacultyFundUI?.refreshHistory?.();else if(tab==='report')window.PondoFacultyFundUI?.refresh();};
+switchTab=function(tab){pondoSwitchTab(tab);syncMoreNavSelection(tab);if(tab==='transactions'||tab==='dashboard')window.PondoFacultyFundUI?.refreshHistory?.();else if(tab==='report')window.PondoFacultyFundUI?.refresh();};
 // Touch-only section navigation. Horizontal rails, inputs and modal content keep their own gestures.
 (function installSectionSwipe(){
  const order=['dashboard','funds','projects','contributions','transactions','refunds','report'];
@@ -12851,6 +12851,28 @@ function renderFundSourceLists(){
  }
 }
 
+// This is a read-only dashboard projection; it never changes a fund or makes
+// unaccepted Faculty cash available for spending. Reports retain their own scope.
+function renderDashboardFundSummary(){
+ if(!window.PondoUnifiedLedger?.combineDashboard)return;
+ const team=!!window.pondoTeamState?.orgId,faculty=window.PondoFacultyFundUI?.historyView?.(),ready=!!(team&&donationCanRead()&&faculty?.status==='ready'&&faculty.data);
+ const base=window.PondoUnifiedLedger.combineDashboard({funds,transactions:txs}),combined=ready?window.PondoUnifiedLedger.combineDashboard({funds,transactions:txs,faculty:faculty.data}):null;
+ const result=combined||base,label=document.getElementById('totalBalanceLabel'),note=document.getElementById('heroSub');
+ label.textContent=team&&!combined?'Regular & donation balance':'Total Fund Balance';
+ for(const [id,key] of [['totalReceived','receivedCents'],['totalSpent','spentCents'],['totalRemaining','balanceCents']])document.getElementById(id).innerText=result?fmt(result[key]/100):'—';
+ document.getElementById('txCount').innerText=result?String(result.transactionCount):'—';
+ document.getElementById('spentPct').innerText=result?(result.receivedCents>0?Math.round(result.spentCents/result.receivedCents*100):0)+'% used':'—';
+ const period='Organization period: '+formatOrganizationPeriod(org.periodFrom,org.periodTo);
+ note.innerText=!team?period:combined?period+' · Includes Faculty Fund. Cash awaiting President acceptance cannot be spent.':period+(faculty?.status==='loading'?' · Loading Faculty Fund; not included yet.':' · Faculty Fund unavailable; not included.');
+ const count=document.getElementById('fundsCount');if(count)count.textContent=funds.length+' funds'+(team?' · Faculty Fund':'');
+ const rail=document.getElementById('fundCards');if(!rail)return;
+ let card=rail.querySelector('.faculty-dashboard-fund-card');if(!team){card?.remove();requestAnimationFrame(updateFundRailHint);return;}
+ if(!card){card=document.createElement('div');card.className='card fund-card faculty-dashboard-fund-card';card.style.setProperty('--card-color','#2563eb');card.setAttribute('role','button');card.tabIndex=0;card.setAttribute('aria-label','View Faculty Fund');const open=()=>{switchTab('funds');selectFundView('faculty')};card.addEventListener('click',open);card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});rail.appendChild(card);}
+ const ledger=combined&&faculty.data.ledger;
+ card.innerHTML=`<div class="fund-top"><div style="display:flex;gap:12px;align-items:flex-start"><span class="fund-icon" style="background:#e9f3ff;color:#2563eb">${LICON('wallet','#2563eb',22)}</span><div><div class="fund-name">Faculty Fund</div><div class="fund-purpose">${ledger?'President acceptance required':'Balance unavailable'}</div></div></div></div><div class="fund-amounts"><div class="fund-amount">Received<b>${ledger?fmt(ledger.receivedCents/100):'—'}</b></div><div class="fund-amount">Spent<b>${ledger?fmt(ledger.spentCents/100):'—'}</b></div><div class="fund-amount">Remaining<b>${ledger?fmt(ledger.balanceCents/100):'—'}</b></div></div><div class="card-open-hint">View Faculty Fund →</div>`;
+ requestAnimationFrame(updateFundRailHint);
+}
+window.renderDashboardFundSummary=renderDashboardFundSummary;
 function renderAll(){
   renderDashboardActions();
   refreshDescriptionSuggestions();
@@ -12859,18 +12881,12 @@ function renderAll(){
   let totalSpent = txs.filter(t=>t.type==='OUT').reduce((s,t)=>s+t.amount,0);
   let remaining = totalRec-totalSpent;
   let pct = totalRec>0 ? Math.round(totalSpent/totalRec*100) : 0;
-  document.getElementById('totalReceived').innerText=fmt(totalRec);
-  document.getElementById('totalSpent').innerText=fmt(totalSpent);
-  document.getElementById('totalRemaining').innerText=fmt(remaining);
   document.getElementById('reportTotalReceived').textContent=fmt(totalRec);
   document.getElementById('reportTotalSpent').textContent=fmt(totalSpent);
   document.getElementById('reportTotalRemaining').textContent=fmt(remaining);
 
   document.getElementById('printTotalReceived').textContent=fmt(totalRec); document.getElementById('printTotalSpent').textContent=fmt(totalSpent); document.getElementById('printTotalRemaining').textContent=fmt(remaining);
   renderFundViewSummaries();
-  document.getElementById('txCount').innerText=txs.length;
-  document.getElementById('spentPct').innerText=pct+'% used';
-  document.getElementById('heroSub').innerText='Across '+funds.length+' fund sources • '+txs.length+' fund transactions • Organization period: '+formatOrganizationPeriod(org.periodFrom,org.periodTo)+(window.pondoTeamState?.orgId?' • Faculty Fund is reported separately':'');
   document.getElementById('fundsCount').innerText=funds.length+' funds';
 
   let fundCards=document.getElementById('fundCards'), fundScroll=fundCards.scrollLeft; let fundCardsHtml='';
@@ -12886,7 +12902,7 @@ function renderAll(){
   else fundCardsHtml+=`<div class="card fund-card cash-donation-fund-card" style="--card-color:#e11d48" role="button" tabindex="0" aria-label="View cash donation funds"><div class="fund-top"><div style="display:flex;gap:12px;align-items:flex-start"><span class="fund-icon" style="background:#fff1f2;color:#e11d48">${LICON('heart','#e11d48',22)}</span><div><div class="fund-name">Cash Donations</div><div class="fund-purpose">${donationFunds.length} donation fund${donationFunds.length===1?'':'s'}</div></div></div></div><div class="fund-amounts"><div class="fund-amount">Received<b>${fmt(donationReceipts/100)}</b></div><div class="fund-amount">Spent<b>${fmt(donationSpent/100)}</b></div><div class="fund-amount">Remaining<b>${fmt(donationBalance/100)}</b></div></div><div class="card-open-hint">View cash donations →</div></div>`;
   fundCards.innerHTML=fundCardsHtml; fundCards.scrollLeft=fundScroll;
   fundCards.querySelectorAll('.fund-card, .cash-donation-empty').forEach(card=>{const open=()=>card.classList.contains('cash-donation-fund-card')?openCashDonationFunds():openFundDetails(card.dataset.fundId);card.addEventListener('click',open);card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});
-  requestAnimationFrame(updateFundRailHint);
+  renderDashboardFundSummary();
   let byCat=Object.create(null); txs.filter(t=>t.type==='OUT').forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
   let catDiv=document.getElementById('byCategory'); let catDivHtml='';
   let maxCat=Math.max(...Object.values(byCat),1);
@@ -14901,7 +14917,7 @@ function refreshMemberRefundWatch(){
  const org=s.orgId,uid=s.uid,generation=memberRefundWatchGeneration;memberRefundWatchKey=key;memberRefundUnsub=window.memberRefundService.watch(org,uid,view=>{if(generation===memberRefundWatchGeneration&&memberRefundWatchKey===key&&s.orgId===org&&s.uid===uid)window.memberRefundSetView?.({...view,org,uid});});
  memberRefundPendingUnsub=window.memberRefundService.watchPending(org,uid,view=>{if(generation===memberRefundWatchGeneration&&memberRefundWatchKey===key&&s.orgId===org&&s.uid===uid)window.memberRefundSetPendingView?.({...view,org,uid});});
 }
-window.addEventListener('online',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();if(document.getElementById('tab-transactions')?.style.display==='block')window.PondoFacultyFundUI?.refreshHistory?.();});window.addEventListener('offline',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();window.PondoFacultyFundUI?.invalidateHistory?.();});
+window.addEventListener('online',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();if(['tab-transactions','tab-dashboard'].some(id=>{const el=document.getElementById(id);return el&&el.style.display!=='none'}))window.PondoFacultyFundUI?.refreshHistory?.();});window.addEventListener('offline',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();window.PondoFacultyFundUI?.invalidateHistory?.();});
 
 
 // Faculty Fund is server-authoritative and separate from the regular snapshot.
@@ -14913,6 +14929,7 @@ function stopFacultyDataWatch(){facultyWatchGeneration++;if(facultyStateUnsub)fa
 function stopFacultyWatch(){facultyLockGeneration++;if(facultyRestoreUnsub)facultyRestoreUnsub();facultyRestoreUnsub=null;stopFacultyDataWatch();}
 function startFacultyWatch(orgId,uid){
  if(!orgId||!uid||!pondoTeamState.memberConfirmed)return;
+ if(typeof document!=='undefined'&&!facultyRestoreUnsub&&!facultyConfigUnsub&&document.getElementById('tab-dashboard')&&document.getElementById('tab-dashboard').style.display!=='none')window.PondoFacultyFundUI?.refreshHistory?.();
  if(window.pondoFacultyAPI?.capabilities?.experimentalOwnerRecovery===true){
   if(facultyRestoreUnsub)return;
   const generation=++facultyLockGeneration,current=()=>generation===facultyLockGeneration&&pondoTeamState.orgId===orgId&&pondoTeamState.uid===uid&&pondoTeamState.memberConfirmed;
