@@ -592,3 +592,20 @@ voids. Historical duplicates entered independently in both ledgers cannot be
 automatically recognized and need manual reconciliation before relying on a
 combined report. This read-only integration does not migrate data or add
 regular project allocations to the protected Faculty ledger.
+
+### Regular Funds and transaction entry
+
+The Regular Funds source list includes a read-only, searchable Faculty card for
+confirmed team members, alongside the dedicated Faculty tab. Its summary cash
+is included in the regular-fund overview only after a confirmed read; a clear
+warning labels the subtotal when Faculty is unavailable. Faculty cash shown as
+available for expenses is only the President-accepted, unspent amount, not the
+whole balance. It is not an allocation authority. On the ordinary transaction
+form, choosing Faculty Fund offers a shortcut to the protected collection or
+expense workflow. Form details are explicitly not transferred, and ordinary
+snapshot saving is disabled for Faculty. Faculty project allocations, receipt
+attachments, generic income and other regular-fund actions are still not
+implemented. A write attempt invalidates the read-only projection until a fresh
+confirmed read; uncertain requests keep the existing idempotency/retry flow.
+These changes neither copy nor migrate records, bypass rules, publish rules, nor
+make this experimental Faculty system ready for real financial data.

@@ -28,7 +28,7 @@
  // History is read separately: incomplete multi-step work must still appear,
  // while the regular action view remains fail-closed during recovery.
  function historyView(){const c=context();const team=window.pondoTeamState;if(!c||!navigator.onLine||team?.recoveryLocked||team?.listenerError||team?.syncError)return {status:'unavailable',data:null};if(historyLoaded&&same(c,historyLoaded.ctx))return {status:'ready',data:historyLoaded.data};return {status:same(c,historyContext)?historyStatus:'unavailable',data:null};}
- function updateHistory(){window.renderDashboardFundSummary?.();const report=document.getElementById('tab-report');if(report&&report.style.display!=='none')window.renderFilteredReport?.();if(document.getElementById('tab-transactions')?.style.display==='block')window.renderUnifiedLedger?.();}
+ function updateHistory(){window.renderDashboardFundSummary?.();if(typeof document==='undefined')return;const funds=document.getElementById('tab-funds');if(funds&&funds.style.display!=='none'){window.renderFundViewSummaries?.();window.renderFundSourceLists?.();}const report=document.getElementById('tab-report');if(report&&report.style.display!=='none')window.renderFilteredReport?.();if(document.getElementById('tab-transactions')?.style.display==='block')window.renderUnifiedLedger?.();}
  async function refreshHistory(){const c=context(),g=++historyGeneration;historyLoaded=null;historyContext=c;historyStatus=c&&navigator.onLine&&api()?.read?'loading':'unavailable';updateHistory();if(historyStatus!=='loading')return;
   try{const data=await api().read({orgId:c.orgId,view:'history'});if(g!==historyGeneration||!same(c,context())||!navigator.onLine)return;if(!data?.state||!Array.isArray(data.state.payments)||!Array.isArray(data.state.expenses)||!Array.isArray(data.state.remittances))throw Error('History unavailable');historyLoaded={ctx:c,data};historyStatus='ready';}
   catch(e){if(g!==historyGeneration||!same(c,context()))return;historyLoaded=null;historyStatus='unavailable';}updateHistory();
@@ -36,10 +36,11 @@
  function invalidateHistory(){historyGeneration++;historyLoaded=null;historyContext=null;historyStatus='unavailable';clearTimeout(historyTimer);historyTimer=null;updateHistory();}
  async function send(c,record){
   const channel=record.channel||'transition';if(!same(c,context())||!navigator.onLine||!api()?.[channel])throw Error('Return to this team workspace and connect to the internet to retry.');
+  if(typeof document!=='undefined')invalidateHistory(); // Do not retain a balance through an in-flight mutation.
   busy=record.requestId;render();
   try{const {channel:ignored,...payload}=record;const result=await api()[channel]({orgId:c.orgId,...payload});clearPending(c,record);if(same(c,context())){await read();message(result?.backupId&&record.operation==='saveBackup'?'Recovery point saved. Keep this ID securely: '+result.backupId:result?.status?'Server status: '+String(result.status)+'.':'Saved and confirmed by the server.')}return result;}
   catch(e){if(definitive(e))clearPending(c,record);if(same(c,context())){render();message(definitive(e)?(e.message||'The change was not accepted.'):'The result is unconfirmed. Retry the same request before making another change.');}throw e}
-  finally{if(busy===record.requestId)busy=false;if(livePending)queueLiveRefresh();if(same(c,context()))render();}
+  finally{if(busy===record.requestId)busy=false;if(livePending)queueLiveRefresh();if(same(c,context())){render();if(typeof document!=='undefined'&&['tab-transactions','tab-dashboard','tab-report','tab-funds'].some(id=>{const el=document.getElementById(id);return el&&el.style.display!=='none'}))void refreshHistory();}}
  }
  async function mutate(operation,fields,channel='transition',expected=null){const c=context();if(expected&&!same(expected,c))throw Error('Workspace changed; review the action again.');if(!c)throw Error('A confirmed team workspace is required.');if(pending(c))throw Error('Retry the unconfirmed request before making another change.');const record={channel,operation,...fields,requestId:token()};persist(c,record);return await send(c,record);}
  const field=(form,name)=>form.elements.namedItem(name)?.value?.trim()||'';
@@ -108,7 +109,7 @@
   container.append(nav,...Object.values(panels));selectPage(activePage);
  }
  function selectPage(page){
-  const nav=root?.querySelector('[data-faculty-nav="'+page+'"]');activePage=nav?page:'overview';
+  const nav=root?.querySelector('[data-faculty-nav="'+page+'"]');activePage=nav||!root?.querySelector('[data-faculty-nav]')?page:'overview';
   root?.querySelectorAll('[data-faculty-page]').forEach(el=>el.hidden=el.dataset.facultyPage!==activePage);
   root?.querySelectorAll('[data-faculty-nav]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.facultyNav===activePage)));
  }
@@ -176,7 +177,7 @@
  let liveTimer=null,liveRunning=false,livePending=false,liveEpoch=0,liveRevision=null,liveForce=false;
  function cancelLiveRefresh(){liveEpoch++;clearTimeout(liveTimer);liveTimer=null;liveRunning=false;livePending=false;liveRevision=null;liveForce=false;}
  function scheduleLiveRefresh(revision){
-  if(typeof document!=='undefined'&&['tab-transactions','tab-dashboard','tab-report'].some(id=>{const el=document.getElementById(id);return el&&el.style.display!=='none'})){invalidateHistory();historyTimer=setTimeout(()=>{historyTimer=null;void refreshHistory();},300);}
+  if(typeof document!=='undefined'&&['tab-transactions','tab-dashboard','tab-report','tab-funds'].some(id=>{const el=document.getElementById(id);return el&&el.style.display!=='none'})){invalidateHistory();historyTimer=setTimeout(()=>{historyTimer=null;void refreshHistory();},300);}
   if(!opened)return;
   // A known revision is only a hint. Unknown/malformed signals force a full
   // server read. Never use a local or incomplete snapshot as a substitute.
@@ -198,7 +199,7 @@
  }
  function close(){if(!opened)return;opened=false;cancelLiveRefresh();generation++;activityScreen?.reset();activityScreen=null;activityRoot=null;recoveryScreen?.reset();if(recoveryRoot)recoveryRoot.hidden=true;document.body.classList.remove('modal-open','faculty-modal-open');render();if(returnFocus?.isConnected)returnFocus.focus();else root?.querySelector('[data-action=toggle]')?.focus();returnFocus=null;}
  function reset(){invalidateHistory();cancelLiveRefresh();generation++;activityScreen?.reset();activityScreen=null;activityRoot=null;recoveryScreen?.reset();recoveryScreen=null;if(recoveryRoot)recoveryRoot.hidden=true;api()?.resetScope?.();loaded=null;if(opened)document.body.classList.remove('modal-open','faculty-modal-open');opened=false;busy=false;status='';lastBatchPreview=null;activePage='overview';returnFocus=null;render();}
- async function open(page='overview'){window.selectFundView?.('faculty');const target=page==='handovers'?'handovers':'overview';if(opened){selectPage(target);return;}returnFocus=document.activeElement;opened=true;activePage=target;status='';document.body.classList.add('modal-open','faculty-modal-open');render();root.querySelector('.faculty-dialog-header button')?.focus();await read();}
+ async function open(page='overview'){window.selectFundView?.('faculty');const target=['overview','collections','handovers','expenses','history','settings'].includes(page)?page:'overview';if(opened){selectPage(target);return;}returnFocus=document.activeElement;opened=true;activePage=target;status='';document.body.classList.add('modal-open','faculty-modal-open');render();root.querySelector('.faculty-dialog-header button')?.focus();await read();}
  // Team settings uses the same protected, retry-safe assignment as the Fund
  // screen. It must never store a President flag on an editable member record.
  async function assignPresident(presidentUid,expected){
