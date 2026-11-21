@@ -1,3 +1,5 @@
+> **Retired:** Faculty Fund is no longer active in the app. This document is historical; see [retirement and data preservation](faculty-fund-retirement.md) for scope and remaining deployment considerations.
+
 # Faculty Fund on the free Firebase plan: security proof
 
 **Experimental preview: not a complete or standalone backup.**

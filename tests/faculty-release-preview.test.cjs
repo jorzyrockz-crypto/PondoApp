@@ -23,8 +23,8 @@ test('scope changes and pager resets invalidate checks in flight',async()=>{
  f.setCtx({...f.ctx(),uid:'owner'});begun=started();const activity=f.app.createActivity({orgId,from:'2025-01-01',to:'2025-01-01'}),next=activity.next('payments');await begun;activity.reset();resume();await assert.rejects(next,/Workspace changed/);assert.equal(f.calls.includes('activity'),false);
  begun=started();const recovery=f.app.createRecovery(),list=recovery.list({orgId});await begun;recovery.reset();resume();await assert.rejects(list,/Workspace changed/);assert.equal(f.calls.includes('list'),false);
 });
-test('preview is enabled in the shipped app but restricts projects',()=>{
- const f=fixture(),html=fs.readFileSync('index.html','utf8');assert.match(html,/const FACULTY_FUND_RELEASE_PREVIEW = true/);assert.match(html,/releasePreview:FACULTY_FUND_RELEASE_PREVIEW/);
+test('archived preview is not loaded by the shipped app and restricts projects',()=>{
+ const f=fixture(),html=fs.readFileSync('index.html','utf8');assert.doesNotMatch(html,/FACULTY_FUND_RELEASE_PREVIEW|createFacultyFundSparkApp/);
  assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'some-other-project'}}},api:f.api,getContext:f.ctx,modules:f.modules,releasePreview:true}),/test mode/);
 });
 
@@ -44,7 +44,7 @@ test('local diagnostic checking is scoped to the confirmed owner and cancels on 
  const checking=app.verifyDiagnostic({orgId,content:'{}'});await ready;app.resetScope();resume();await assert.rejects(checking,/Workspace changed/);assert.equal(f.calls.length,0);
 });
 test('experimental owner recovery requires release preview on the real project',()=>{
- const f=fixture(),html=fs.readFileSync('index.html','utf8');assert.match(html,/const FACULTY_FUND_RESTORE_DEMO = false/);assert.equal(f.app.capabilities.experimentalOwnerRecovery,false);assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,experimentalRestore:true}),/requires a demo project or the disabled release preview/);
+ const f=fixture(),html=fs.readFileSync('index.html','utf8');assert.doesNotMatch(html,/FACULTY_FUND_RESTORE_DEMO/);assert.equal(f.app.capabilities.experimentalOwnerRecovery,false);assert.throws(()=>createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,experimentalRestore:true}),/requires a demo project or the disabled release preview/);
 });
 test('demo-only owner recovery wiring is opt-in and requests a guarded normal reader',async()=>{
  const f=fixture(),calls=[];Object.assign(f.modules,{createCapture:({makeReader})=>({capture:async()=>{makeReader(f.ctx(),()=>true);return {}}}),createRestore:({makeReader})=>({restore:async()=>{makeReader(f.ctx(),()=>true);return {}}}),createOwnerRecovery:({capture,restore})=>({download:capture,importFile:restore,abandonCapture(){}}),makeRecoveryFile(){},inspectRecoveryFile(){},verifyDiagnostic(){},verifyExport(){},planCapture(){},canonicalCapture(){},encodeCapture(){},createReader:opts=>{calls.push(opts);return {}}});
@@ -58,5 +58,5 @@ test('demo recovery lock blocks transitions, inspection and activity until serve
 });
 test('existing-workspace recovery preview requires the server release marker',async()=>{
  const f=fixture(),calls=[];Object.assign(f.modules,{createCapture:()=>({capture(){}}),createRestore:()=>({restore(){}}),createOwnerRecovery:()=>({download:async()=>{calls.push('backup');return {}},importFile:async()=>{calls.push('restore');return {}},abandonCapture(){}}),makeRecoveryFile(){},inspectRecoveryFile(){},verifyDiagnostic(){},verifyExport(){},planCapture(){},canonicalCapture(){},encodeCapture(){}});
- const html=fs.readFileSync('index.html','utf8');assert.match(html,/const FACULTY_FUND_RECOVERY_PREVIEW = true/);const app=createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,releasePreview:true,experimentalRestore:true}),orgId=f.ctx().orgId;assert.equal(app.capabilities.mode,'release-preview-only');f.setMarker(null);await assert.rejects(app.downloadRecovery({orgId}),/not enabled/);await assert.rejects(app.restoreRecovery({orgId,content:'{}'}),/not enabled/);assert.deepEqual(calls,[]);f.setMarker({enabled:true,schema:1});await app.downloadRecovery({orgId});await app.restoreRecovery({orgId,content:'{}'});assert.deepEqual(calls,['backup','restore']);
+ const html=fs.readFileSync('index.html','utf8');assert.doesNotMatch(html,/FACULTY_FUND_RECOVERY_PREVIEW/);const app=createSparkApp({db:{app:{options:{projectId:'russapps-pondo'}}},api:f.api,getContext:f.ctx,modules:f.modules,realAccountTest:true,releasePreview:true,experimentalRestore:true}),orgId=f.ctx().orgId;assert.equal(app.capabilities.mode,'release-preview-only');f.setMarker(null);await assert.rejects(app.downloadRecovery({orgId}),/not enabled/);await assert.rejects(app.restoreRecovery({orgId,content:'{}'}),/not enabled/);assert.deepEqual(calls,[]);f.setMarker({enabled:true,schema:1});await app.downloadRecovery({orgId});await app.restoreRecovery({orgId,content:'{}'});assert.deepEqual(calls,['backup','restore']);
 });

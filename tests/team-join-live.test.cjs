@@ -11,5 +11,5 @@ test('join-request listener receives confirmed identities, filters stale updates
 });
 test('request actions are scoped after confirmation and suggestions remain optional',()=>{
  assert.match(html,/teamSearchSuggestions/);assert.match(html,/if\(pondoTeamState\.orgId!==orgId\|\|pondoTeamState\.uid!==uid\|\|pondoTeamState\.role!=='owner'\|\|!pondoTeamState\.memberConfirmed\)return/);
- assert.match(html,/Suggestions are unavailable\. Search by the full registered name instead/);assert.match(html,/function notificationAction\(n\)\{\s*if\(n\.kind==='joinRequest'\)/);
+ assert.match(html,/Suggestions are unavailable\. Search by the full registered name instead/);assert.match(html,/function notificationAction\(n\)\{[\s\S]*?if\(n\.kind==='joinRequest'\)/);
 });

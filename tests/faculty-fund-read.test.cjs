@@ -8,5 +8,5 @@ test('report reads use server state and only collectors can print',async()=>{
  const e=setup();e.data.set(e.root+'/facultyFund/state',{payments:[],expenses:[],remittances:[],audit:[]});e.data.set(e.root+'/facultyFund/control',{revision:1});const report=await e.read({auth:{uid:'reviewer'},input:{orgId:'school',view:'report',state:{payments:[{amountCents:5}]}}});assert.equal(report.report.closingCents,0);await assert.rejects(e.read({auth:{uid:'reviewer'},input:{orgId:'school',view:'memberReceipts',paymentIds:['fake']}}),x=>x.code==='permission-denied');
 });
 test('callable entry is a separate disabled-by-default codebase',()=>{
- const fs=require('node:fs'),config=JSON.parse(fs.readFileSync('firebase.json')),source=fs.readFileSync('faculty-fund-functions/index.cjs','utf8');assert.equal(config.functions[0].source,'faculty-fund-functions');assert.equal(config.functions[0].codebase,'faculty-fund');assert.match(source,/PONDO_FACULTY_FUND_ENABLED!==\x27true\x27/);assert.doesNotMatch(source,/publicReport/);
+ const fs=require('node:fs'),config=JSON.parse(fs.readFileSync('firebase.json')),source=fs.readFileSync('faculty-fund-functions/index.cjs','utf8');assert.equal(config.functions,undefined);assert.match(source,/PONDO_FACULTY_FUND_ENABLED!==\x27true\x27/);assert.doesNotMatch(source,/publicReport/);
 });

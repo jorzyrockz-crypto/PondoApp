@@ -30,7 +30,7 @@ jobs:
             export NODE_PATH="$RUNNER_TEMP/faculty-browser/node_modules"
             export CHROMIUM_PATH="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
             test -n "$CHROMIUM_PATH"
-            node tests/faculty-fund-ui.browser.cjs
+            node tests/faculty-retirement.browser.cjs
             node tests/faculty-spark-recovery.browser.cjs
             node tests/death-aid-modal.browser.cjs
             node tests/cash-donation-workflow.browser.cjs

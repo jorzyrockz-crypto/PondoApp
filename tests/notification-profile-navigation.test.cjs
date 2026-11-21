@@ -40,6 +40,6 @@ test('snapshot routing identifies only unambiguous activities and periods',()=>{
 test('notification markup uses native button, escaped IDs and photo error fallback',()=>{
  assert.match(html,/data-notif-id="'\+escapeTeamText\(n.id\)/);assert.match(html,/openNotification\(this.dataset.notifId\)/);assert.match(html,/img.addEventListener\('error',\(\)=>\{img.hidden=true\}/);assert.match(html,/actorUid:typeof updatedBy==='string'\?updatedBy:null/);
 });
-test('Faculty Fund notification opens the fund workspace and its dedicated section',()=>{
- const {ctx,events,n}=env();n.action={tab:'funds',facultyFund:true};ctx.window.PondoFacultyFundUI={open:page=>events.push(['faculty',page])};ctx.openNotification('n');assert.ok(events.some(e=>e[0]==='tab'&&e[1]==='funds'));assert.ok(events.some(e=>e[0]==='faculty'&&e[1]==='handovers'));
+test('retired Faculty notification has no navigation target',()=>{
+ const {ctx,events,n}=env();n.action={tab:'funds',facultyFund:true};assert.equal(ctx.notificationAction(n),null);ctx.openNotification('n');assert.ok(!events.some(e=>e[0]==='tab'||e[0]==='faculty'));
 });

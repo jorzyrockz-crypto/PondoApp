@@ -1,3 +1,5 @@
+> **Retired:** Faculty Fund is no longer active in the app. This document is historical; see [retirement and data preservation](faculty-fund-retirement.md) for scope and remaining deployment considerations.
+
 # Faculty Fund — implementation and rollout status
 
 **Not production-ready or deployed.** The repository contains an in-app
