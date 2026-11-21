@@ -3123,6 +3123,7 @@ body{
 body.role-reviewer #dashboardOtherFunds,body.role-reviewer .other-payment-edit{display:none!important}
 #fundView-other .donation-receipts-table tbody tr:nth-child(even){background:var(--surface2,#f5f7f5)}
 #fundView-other .other-payment-actions{display:flex;gap:4px;align-items:center;white-space:nowrap}#fundView-other .other-payment-actions .death-icon-button{flex:none}
+
 </style>
 <style>
 :root{
@@ -9260,6 +9261,19 @@ body.dark-mode :is(#otherPaymentOverlay,#otherHandoverOverlay) .other-payment-di
  @media(max-width:480px){#tab-dashboard .dashboard-rail-heading{gap:2px}#tab-dashboard .dashboard-rail-actions{margin-left:auto}#tab-dashboard .dashboard-rail-title h2{font-size:18px}}
 }
 
+/* Collaboration reference styling; controls and permissions retain their existing behavior. */
+.team-dialog{width:min(920px,100%);background:#f1f4f7;color:#17243d;border:1px solid #dfe7f0;border-radius:20px}
+.team-modal-header{padding:26px 28px;background:linear-gradient(115deg,#075742,#087c60)}
+.team-modal-header h2,.team-org-name{font-family:inherit;font-weight:800;letter-spacing:-.035em}
+.team-modal-header h2{font-size:28px}.team-modal-header .team-kicker:before{content:'●';margin-right:7px;color:#70e1b8}.team-close{border-radius:50%;width:36px;height:36px;font-size:24px}
+.team-modal-content{padding:20px}.team-panel{gap:16px}#teamSignedInPanel{gap:16px}#teamActiveOrgPanel{gap:16px}
+.team-modal .team-card{padding:20px;border-color:#dfe7f0;box-shadow:0 2px 5px #233a560a;border-radius:17px}.team-modal .team-heading{gap:6px;margin-bottom:14px}.team-modal .team-info summary{width:13px;height:13px;font-size:9px;color:#8fa1ba;border-color:#9aaec6}.team-modal .input{background:#f6f9fc;border:1px solid #dce5f1;border-radius:12px;color:#17243d;min-height:42px}.team-modal .btn-dark{background:#006f53!important;color:white;box-shadow:0 4px 10px #00856a30!important;border:0}.team-modal .btn-light{background:#fff;border:1px solid #dce5f1;color:#263852}.team-modal .btn{font-weight:700}.team-modal .team-copy:empty{display:none}
+.team-name-controls{margin:18px 0 16px;flex-wrap:nowrap}.team-name-controls label{color:#465771;min-width:0}.team-name-controls button{white-space:nowrap;min-height:42px}.team-appearance-fields{display:grid;grid-template-columns:1fr;gap:16px}.team-choice-title{display:flex;justify-content:space-between;gap:12px;color:#465771;font-size:12px;font-weight:700;margin-bottom:10px}.team-choice-title span:last-child{color:#078360}.team-native-choice{position:absolute!important;width:1px!important;height:1px!important;opacity:0;pointer-events:none}.team-choices{display:flex;flex-wrap:wrap;gap:8px}.team-choices label{position:relative}.team-choices input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0}.team-choice{display:flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid #dce5f1;border-radius:999px;background:#f6f9fc;color:#52627b;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer}.team-choice i{width:12px;height:12px;border-radius:50%;flex:none}.team-choices input:checked+.team-choice{border-color:#00a979;background:#ecfdf4;color:#075f47;box-shadow:0 0 0 1px #00a979}.team-choices input:focus-visible+.team-choice{outline:3px solid #42bfa1;outline-offset:2px}.team-appearance-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e2e9f1;margin-top:16px;padding-top:12px}.team-save-appearance{margin:0;white-space:nowrap}.team-appearance-footer .team-copy{margin:0;text-align:right;color:#8296b2}
+.team-discovery-head,.team-members-head,.team-invite-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.team-discovery-head .team-heading,.team-members-head .team-heading{margin:0}.team-reconnect{min-height:32px;font-size:11px;padding:6px 10px}.team-count,.team-access-badge{border-radius:999px;background:#eef3f8;color:#53637b;font-size:11px;font-weight:700;padding:4px 8px;white-space:nowrap}.team-discovery-body{border-top:1px solid #e2e9f1;margin-top:14px;padding-top:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.team-discovery-label{display:flex;align-items:center;gap:8px;font-size:13px;color:#41516b}.team-discovery-label input{accent-color:#009b70}.team-discovery-body #teamJoinRequests{font-size:12px;color:#7187a5;min-width:0}.team-discovery-body #teamJoinRequests:not(:empty){line-height:1.5}.team-invite-heading{margin-bottom:16px}.team-invite-heading h3{font-size:16px;margin:0}.team-access-badge{font-weight:600}
+.team-modal .team-members-card{padding:0;overflow:hidden}.team-members-head{padding:18px 20px;border-bottom:1px solid #e2e9f1}.team-members-head>span{font-size:11px;color:#899db7}.team-modal #teamMembersList .team-member-row{background:transparent;border:0;border-bottom:1px solid #e2e9f1;border-radius:0;padding:15px 20px;gap:12px}.team-modal #teamMembersList .team-member-row:last-child{border:0}.team-modal #teamMembersList select{background:#f6f9fc;border-color:#dce5f1;min-height:34px;color:#42536d}.team-modal .tm-role-badge{border-radius:999px;padding:6px 10px;background:#ecfdf4;border:1px solid #a7edcf;color:#087551;font-size:11px;font-weight:700}.team-leave-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;background:#fff6f6;border:1px solid #ffd1d6;border-radius:16px;color:#a40c31;font-size:13px}.team-leave-card p{margin:5px 0 0;color:#e23d5e;font-size:12px;line-height:1.5}.team-modal .team-leave-card .btn{color:#c91239;border-color:#ffc5ce;white-space:nowrap}.team-storage-note{padding:14px 20px;margin:0;color:#6b81a0;font-size:12px;line-height:1.5;border-top:1px solid #dfe7f0}
+body.dark-mode .team-dialog{background:#111b23;color:#e5f2ec}body.dark-mode .team-modal .team-card{background:#1c2930;border-color:#384954}body.dark-mode .team-modal .input,body.dark-mode .team-choice,body.dark-mode .team-modal #teamMembersList select{background:#22323a;color:#e5f2ec;border-color:#435761}body.dark-mode .team-choices input:checked+.team-choice,body.dark-mode .team-modal .tm-role-badge{background:#164334;color:#bdf4dc}body.dark-mode .team-modal .btn-light{background:#25363e;color:#e5f2ec;border-color:#435761}body.dark-mode .team-choice-title,body.dark-mode .team-discovery-label{color:#bed0dc}body.dark-mode .team-leave-card{background:#3b252c;border-color:#70404a}body.dark-mode .team-leave-card p{color:#ffa5b6}
+@media(max-width:700px){.team-modal-header{padding:20px}.team-modal-content{padding:14px 12px max(20px,env(safe-area-inset-bottom))}.team-modal .team-card{padding:18px}.team-modal .team-members-card{padding:0}.team-appearance-footer,.team-leave-card{flex-wrap:wrap}.team-appearance-footer .team-copy{text-align:left}.team-discovery-head{align-items:flex-start;flex-wrap:wrap}.team-modal #teamMembersList .team-member-row>div:last-child{max-width:100%;flex-wrap:wrap}.team-storage-note{padding:12px 4px}}
+
 </style>
 
 </head>
@@ -9698,42 +9712,40 @@ body.dark-mode :is(#otherPaymentOverlay,#otherHandoverOverlay) .other-payment-di
             <div class="team-card team-customize" id="teamAppearanceOwner" hidden>
               <p class="team-kicker">MAKE IT YOURS</p><div class="team-heading"><h3 class="team-card-title">Workspace settings</h3><details class="team-info"><summary aria-label="About workspace settings">i</summary><div>The display name, color and icon are shared with your team. The original registered name remains the search name; financial report names and existing links do not change.</div></details></div>
               <div class="team-name-controls"><label for="teamDisplayName">Workspace display name<input id="teamDisplayName" class="input" maxlength="120" autocomplete="off"></label><button type="button" class="btn btn-light" onclick="pondoTeam.saveDisplayName()">Save name</button></div><p id="teamNameStatus" role="status" class="team-copy"></p>
-              <div class="team-appearance-fields"><label>Team color<select id="teamColor" class="input"><option value="emerald">Emerald</option><option value="ocean">Ocean</option><option value="violet">Violet</option><option value="rose">Rose</option><option value="amber">Amber</option><option value="slate">Slate</option></select></label>
-              <label>Team icon<select id="teamIcon" class="input"><option value="diamond">◆ Diamond</option><option value="star">★ Star</option><option value="heart">♥ Heart</option><option value="sun">☀ Sun</option><option value="leaf">✿ Flower</option><option value="book">▣ Book</option></select></label></div>
-              <button type="button" class="btn btn-dark team-save-appearance" onclick="pondoTeam.saveAppearance()">Save team appearance</button><p id="teamAppearanceStatus" role="status" class="team-copy"></p>
-              <p class="team-copy">Permanent workspace deletion is not yet available.</p>
+              <div class="team-appearance-fields"><div class="team-choice-field"><div class="team-choice-title"><span>Team color</span><span id="teamColorCurrent"></span></div><select aria-label="Team color" id="teamColor" class="input"><option value="emerald">Emerald</option><option value="ocean">Ocean</option><option value="violet">Violet</option><option value="rose">Rose</option><option value="amber">Amber</option><option value="slate">Slate</option></select><div id="teamColorChoices" class="team-choices" role="group" aria-label="Team color"></div></div>
+              <div class="team-choice-field"><div class="team-choice-title"><span>Team icon</span><span id="teamIconCurrent"></span></div><select aria-label="Team icon" id="teamIcon" class="input"><option value="diamond">◆ Diamond</option><option value="star">★ Star</option><option value="heart">♥ Heart</option><option value="sun">☀ Sun</option><option value="leaf">✿ Flower</option><option value="book">▣ Book</option></select><div id="teamIconChoices" class="team-choices" role="group" aria-label="Team icon"></div></div></div>
+              <div class="team-appearance-footer"><button type="button" class="btn btn-dark team-save-appearance" onclick="pondoTeam.saveAppearance()">✓ &nbsp;Save team appearance</button>
+              <p class="team-copy">Permanent workspace deletion is not yet available.</p></div><p id="teamAppearanceStatus" role="status" class="team-copy"></p>
             </div>
             <div class="team-card" id="teamDiscoveryOwner" hidden>
-              <div class="team-heading"><strong>Organization discovery</strong><details class="team-info"><summary aria-label="About discovery">i</summary><div>Only the original registered name is searchable. Financial records stay private. Verify requesters before approval; existing invite links still grant their assigned role.</div></details></div>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px"><input id="teamDiscoverable" type="checkbox" onchange="pondoTeam.setDiscovery(this.checked)"> Make this organization searchable</label>
-
-              <button type="button" class="btn btn-light" onclick="pondoTeam.loadJoinRequests()">Reconnect requests</button>
-              <div id="teamJoinRequests" aria-live="polite" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>
+              <div class="team-discovery-head"><div class="team-heading"><strong>Organization discovery</strong><details class="team-info"><summary aria-label="About discovery">i</summary><div>Only the original registered name is searchable. Financial records stay private. Verify requesters before approval; existing invite links still grant their assigned role.</div></details></div><button type="button" class="btn btn-light team-reconnect" onclick="pondoTeam.loadJoinRequests()">↻ &nbsp;Reconnect requests <span id="teamRequestCount" class="team-count" aria-label="Pending requests">—</span></button></div>
+              <div class="team-discovery-body"><label class="team-discovery-label"><input id="teamDiscoverable" type="checkbox" onchange="pondoTeam.setDiscovery(this.checked)"> Make this organization searchable</label>
+              <div id="teamJoinRequests" aria-live="polite"></div></div>
             </div>
             <div class="team-card" id="teamInviteCard" hidden>
-              <p style="font-weight:700;font-size:14px;margin:0 0 8px">Invite a collaborator</p>
+              <div class="team-invite-heading"><div><p class="team-kicker">TEAM ACCESS</p><h3>Invite a collaborator</h3></div><span class="team-access-badge">♧ &nbsp;Role-based access</span></div>
               <label for="teamInviteRole" style="font-size:12px;font-weight:700;display:block;margin:0 0 6px">Role for this invite</label>
               <select id="teamInviteRole" class="input" style="margin-bottom:10px">
                 <option value="disbursing">Administrative Officer (AO) / Disbursing Officer — full edit access</option>
                 <option value="project-manager">Project Manager — full edit access</option>
                 <option value="reviewer">Viewer / Reviewer — view data, request refunds</option>
               </select>
-              <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">Generate invite link</button>
+              <button class="btn btn-dark" style="width:100%;height:44px" onclick="pondoTeam.generateInvite()">♧ &nbsp;Generate invite link</button>
               <div id="teamInviteResult" hidden style="margin-top:10px;padding:10px;border-radius:12px;background:#f7f7f5">
                 <input id="teamInviteLink" class="input" readonly style="font-size:11px;margin-bottom:8px">
                 <button class="btn btn-light" style="width:100%;height:38px" onclick="pondoTeam.copyInviteLink()">Copy link</button><p style="font-size:12px;line-height:1.5;margin:8px 0 0;color:var(--ink2)">Send privately. Ask your teammate to open the link in Chrome or Safari rather than inside Messenger, then sign in with Google.</p>
               </div>
             </div>
-            <div class="team-card">
-              <div class="team-heading"><strong>Members</strong></div>
-              <div id="teamMembersList" style="display:flex;flex-direction:column;gap:8px"></div>
+            <div class="team-card team-members-card">
+              <div class="team-members-head"><div class="team-heading"><strong>Members</strong><span id="teamMemberCount" class="team-count"></span></div><span>Active access</span></div>
+              <div id="teamMembersList"></div>
             </div>
-            <button class="btn btn-light" style="width:100%;height:46px" onclick="pondoTeam.leaveOrganization()">Leave organization</button>
+            <div class="team-leave-card"><div><strong>Leave organization</strong><p>Revokes your shared access to this workspace. Local backups remain on your device.</p></div><button class="btn btn-light" type="button" onclick="pondoTeam.leaveOrganization()">↪ &nbsp;Leave organization</button></div>
           </div>
           <div class="team-card">
             <div class="team-heading"><strong>Create an organization</strong><details class="team-info"><summary aria-label="About creating an organization">i</summary><div>The registered name must be unique and starts private. Names ignore ASCII case and extra spaces; other Unicode lookalikes can differ. This search name is separate from the financial report name. Team members share funds, transactions, projects and payables.</div></details></div>
             <input id="teamNewOrgName" class="input" aria-label="Unique organization name" placeholder="Organization name" maxlength="120">
-            <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">Create Organization</button>
+            <button class="btn btn-dark" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.createOrganization()">⊕ &nbsp;Create Organization</button>
           </div>
           <div class="team-card">
             <div class="team-heading"><strong>Find an organization</strong><details class="team-info"><summary aria-label="About finding an organization">i</summary><div>Search using the original registered name. Only teams that opted in appear. An owner must approve your request.</div></details></div>
@@ -9750,7 +9762,7 @@ body.dark-mode :is(#otherPaymentOverlay,#otherHandoverOverlay) .other-payment-di
             <button class="btn btn-light" style="width:100%;height:46px;margin-top:10px" onclick="pondoTeam.joinWithPastedInput()">Join Organization</button>
           </div>
         </div>
-        <p style="font-size:11px;color:var(--ink2);line-height:1.5;margin:0">Refund receipt images sync when a team refund is confirmed. Other receipt attachments and the organization logo remain on this device.</p>
+        <p class="team-storage-note">♧ &nbsp; Refund receipt images sync when a team refund is confirmed. Other receipt attachments and the organization logo remain on this device.</p>
       </div>
 </div>
   </section>
@@ -9975,8 +9987,8 @@ body.dark-mode :is(#otherPaymentOverlay,#otherHandoverOverlay) .other-payment-di
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 157</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Workspace and appearance improvements</h4><ul><li>Browse fund and contribution cards with new rail controls and compact summaries on Overview.</li><li>Overview has clearer balance, period and recent-activity cards; totals still include all recorded dates.</li><li>Switch workspaces with a clearer, keyboard-friendly menu and a confirmation after a successful switch.</li><li>Reuse saved Other Funds purposes and explore receipt summaries by purpose on Overview and the Other Funds page.</li><li>Accent colors now personalize navigation, controls and previews with improved contrast in light and dark modes.</li><li>Present a clearer workspace overview with separate donation and Other Funds balances, refund and contribution summaries, and scoped fund slides.</li><li>Existing sample sets can add missing Other Funds examples without clearing other records.</li><li>Sample data now includes multiple examples across the available financial forms, including Other Funds.</li><li>Record Other Funds teacher payments separately and request a two-person, account-confirmed handover with a printable acknowledgment.</li><li>Funds has a simpler shared layout and a shortcut to transaction history, while keeping each fund separate.</li><li>Transactions has compact filters, cleaner rows and a streamlined details dialog.</li><li>Transaction names open full record details, with alternating row colors for easier scanning.</li><li>Fund cards use a compact layout and automatic rotating colors.</li><li>Donation receipts now have a searchable table with 20 receipts per page.</li><li>Donation fund cards now match the Funds page layout on desktop and mobile.</li><li>Transactions brings fund activity, contribution payments and refund requests into a searchable history without changing balances.</li><li>Record individual cash donations in a chosen donation fund, save and add another, and review or print receipts.</li><li>Refund forms now distinguish personal reimbursements from unpaid supplier bills, with clearer itemized entries.</li><li>Edit the description, source and date of individual regular-fund income entries, with corrections kept in history.</li><li>Fund details now offer a Fund settings dialog for descriptions, opening details and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record cash donations in donation funds, track their use and find receipts in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 158</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Workspace and appearance improvements</h4><ul><li>Team collaboration settings have a clearer layout for workspace appearance, discovery, invitations and members.</li><li>Browse fund and contribution cards with new rail controls and compact summaries on Overview.</li><li>Overview has clearer balance, period and recent-activity cards; totals still include all recorded dates.</li><li>Switch workspaces with a clearer, keyboard-friendly menu and a confirmation after a successful switch.</li><li>Reuse saved Other Funds purposes and explore receipt summaries by purpose on Overview and the Other Funds page.</li><li>Accent colors now personalize navigation, controls and previews with improved contrast in light and dark modes.</li><li>Present a clearer workspace overview with separate donation and Other Funds balances, refund and contribution summaries, and scoped fund slides.</li><li>Existing sample sets can add missing Other Funds examples without clearing other records.</li><li>Sample data now includes multiple examples across the available financial forms, including Other Funds.</li><li>Record Other Funds teacher payments separately and request a two-person, account-confirmed handover with a printable acknowledgment.</li><li>Funds has a simpler shared layout and a shortcut to transaction history, while keeping each fund separate.</li><li>Transactions has compact filters, cleaner rows and a streamlined details dialog.</li><li>Transaction names open full record details, with alternating row colors for easier scanning.</li><li>Fund cards use a compact layout and automatic rotating colors.</li><li>Donation receipts now have a searchable table with 20 receipts per page.</li><li>Donation fund cards now match the Funds page layout on desktop and mobile.</li><li>Transactions brings fund activity, contribution payments and refund requests into a searchable history without changing balances.</li><li>Record individual cash donations in a chosen donation fund, save and add another, and review or print receipts.</li><li>Refund forms now distinguish personal reimbursements from unpaid supplier bills, with clearer itemized entries.</li><li>Edit the description, source and date of individual regular-fund income entries, with corrections kept in history.</li><li>Fund details now offer a Fund settings dialog for descriptions, opening details and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refund History.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record cash donations in donation funds, track their use and find receipts in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -10020,7 +10032,7 @@ body.dark-mode :is(#otherPaymentOverlay,#otherHandoverOverlay) .other-payment-di
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='157', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='158', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -14462,7 +14474,7 @@ window.startTabGuard=(function(){
 // overwriting a team draft. Verify the same controlled offline shell and draft
 // immediately before leaving; failures do not clear or replace any records.
 const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
-const PONDO_RECOVERY_SHELL='pondo-v157';
+const PONDO_RECOVERY_SHELL='pondo-v158';
 let recoveryOfflineBusy=false;
 function recoveryOfflineExitStillSafe(exit){
  const s=window.pondoTeamState;
@@ -14870,6 +14882,14 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
     const banner=document.getElementById('installAppBanner');
     if(banner) banner.hidden=false;
   };
+})();
+</script>
+<script>
+(function setupTeamAppearanceChoices(){
+ const colorMap={emerald:'#059669',ocean:'#2563a8',violet:'#6d43a6',rose:'#e11d48',amber:'#f59e0b',slate:'#334155'};
+ function sync(id){const select=document.getElementById(id),group=document.getElementById(id+'Choices'),current=document.getElementById(id+'Current');if(!select||!group)return;const selected=select.selectedOptions[0];current.textContent=selected?selected.textContent.replace(/^[^A-Za-z]+/,''):'';group.querySelectorAll('input').forEach(input=>{input.checked=input.value===select.value});}
+ window.syncTeamAppearanceChoices=()=>{sync('teamColor');sync('teamIcon')};
+ for(const id of ['teamColor','teamIcon']){const select=document.getElementById(id),group=document.getElementById(id+'Choices');for(const opt of select.options){const label=document.createElement('label'),input=document.createElement('input'),visual=document.createElement('span');input.type='radio';input.name=id+'Choice';input.value=opt.value;visual.className='team-choice';if(id==='teamColor'){const dot=document.createElement('i');dot.style.background=colorMap[opt.value];visual.appendChild(dot)}visual.append(document.createTextNode(opt.textContent));label.append(input,visual);group.appendChild(label);input.addEventListener('change',()=>{select.value=input.value;select.dispatchEvent(new Event('change',{bubbles:true}));sync(id)});}select.hidden=true;select.addEventListener('change',()=>sync(id));sync(id);}
 })();
 </script>
 <script type="module">
@@ -15540,7 +15560,7 @@ function subscribeToOrg(orgId) {
     pondoTeamState.teamColor=colors.includes(snap.data().teamColor)?snap.data().teamColor:'emerald';
     pondoTeamState.teamIcon=icons.includes(snap.data().teamIcon)?snap.data().teamIcon:'diamond';
     const color=document.getElementById('teamColor'),icon=document.getElementById('teamIcon');
-    if(color&&icon&&!document.getElementById('teamAppearanceOwner')?.contains(document.activeElement)){color.value=pondoTeamState.teamColor;icon.value=pondoTeamState.teamIcon;}
+    if(color&&icon&&!document.getElementById('teamAppearanceOwner')?.contains(document.activeElement)){color.value=pondoTeamState.teamColor;icon.value=pondoTeamState.teamIcon;window.syncTeamAppearanceChoices?.();}
     renderTeamPanel();
   }, (err) => {if(subscriptionCurrent())handleTeamListenerError(orgId, 'Organization', err);});
 
@@ -16142,6 +16162,7 @@ function renderTeamPanel() {
   const inviteCard = document.getElementById('teamInviteCard');
   if (inviteCard) inviteCard.hidden = pondoTeamState.role !== 'owner';
 
+  const memberCount=document.getElementById('teamMemberCount');if(memberCount)memberCount.textContent=pondoTeamState.members.length+' member'+(pondoTeamState.members.length===1?'':'s');
   const list = document.getElementById('teamMembersList');
   if (list) {
     list.innerHTML = '';
@@ -16195,7 +16216,7 @@ function renderTeamPanel() {
         row.appendChild(actions);
       } else {
         const badge = document.createElement('span');
-        badge.className = 'tm-meta';
+        badge.className = 'tm-role-badge';
         badge.textContent = roleLabels[m.role] || m.role;
         row.appendChild(badge);
       }
@@ -16279,25 +16300,25 @@ async function searchOrganization() {
 let joinRequestUnsub=null,joinRequestGeneration=0;
 function stopJoinRequestWatch(){
  joinRequestGeneration++;if(joinRequestUnsub)joinRequestUnsub();joinRequestUnsub=null;
- window.pondoJoinNotices=[];const output=document.getElementById('teamJoinRequests');if(output)output.replaceChildren();
+ window.pondoJoinNotices=[];const output=document.getElementById('teamJoinRequests');if(output)output.replaceChildren();const count=document.getElementById('teamRequestCount');if(count)count.textContent='—';
  window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();
 }
 function startJoinRequestWatch(orgId,uid){
  const state=pondoTeamState;if(joinRequestUnsub||!orgId||!uid||state.role!=='owner'||!state.memberConfirmed)return;
- const generation=++joinRequestGeneration,output=document.getElementById('teamJoinRequests');output.textContent='Loading requests…';
+ const generation=++joinRequestGeneration,output=document.getElementById('teamJoinRequests');document.getElementById('teamRequestCount').textContent='—';output.textContent='Loading requests…';
  const current=()=>generation===joinRequestGeneration&&state.orgId===orgId&&state.uid===uid&&state.role==='owner'&&state.memberConfirmed;
  joinRequestUnsub=onSnapshot(query(collection(firestoreDb,'organizations',orgId,'joinRequests'),where('status','==','pending'),limit(100)),{includeMetadataChanges:true},snap=>{
   if(!current())return;
-  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){output.textContent='Waiting for server-confirmed requests…';window.pondoJoinNotices=[];window.pondoValidateNotificationBanner?.();window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();return;}
+  if(snap.metadata.fromCache||snap.metadata.hasPendingWrites){document.getElementById('teamRequestCount').textContent='—';output.textContent='Waiting for server-confirmed requests…';window.pondoJoinNotices=[];window.pondoValidateNotificationBanner?.();window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();return;}
   const requests=[];snap.forEach(d=>{const data=d.data();if(data.status==='pending')requests.push({uid:d.id,displayName:data.displayName,email:data.email,requestedAt:data.requestedAt?.toMillis?.()||0});});
   renderJoinRequests(requests,orgId,uid);
   window.pondoJoinNotices=requests.map(r=>({id:'join:'+encodeURIComponent(r.uid)+':'+r.requestedAt,kind:'joinRequest',type:'team',title:'Request to join',body:(r.displayName||r.email||'Someone')+' requested to join '+(state.orgName||'your workspace')+'.',ts:r.requestedAt,recipientUid:uid,orgId}));
   window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();window.pondoValidateNotificationBanner?.();window.pondoAnnounceSpecialNotices?.();
- },err=>{if(current()){console.warn('Join requests unavailable:',err);output.textContent='Could not load requests. Check your connection and owner permissions, then reconnect.';window.pondoJoinNotices=[];window.pondoValidateNotificationBanner?.();window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();}});
+ },err=>{if(current()){console.warn('Join requests unavailable:',err);document.getElementById('teamRequestCount').textContent='—';output.textContent='Could not load requests. Check your connection and owner permissions, then reconnect.';window.pondoJoinNotices=[];window.pondoValidateNotificationBanner?.();window.updateNotifBadge?.();window.refreshNotifCenterIfOpen?.();}});
 }
 function loadJoinRequests(){stopJoinRequestWatch();startJoinRequestWatch(pondoTeamState.orgId,pondoTeamState.uid);}
 function renderJoinRequests(requests,orgId,uid){
- const output=document.getElementById('teamJoinRequests');output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
+ const output=document.getElementById('teamJoinRequests'),count=document.getElementById('teamRequestCount');if(count)count.textContent=String(requests.length)+(requests.length===100?'+':'');output.replaceChildren();if(!requests.length){output.textContent='No pending requests.';return;}
  const verifyNote=document.createElement('p');verifyNote.textContent='Verify each requester through a trusted channel; displayed names and emails can be entered by the requester.';output.appendChild(verifyNote);
  if(requests.length===100){const note=document.createElement('p');note.textContent='Showing up to 100 pending requests. Review these to see more.';output.appendChild(note);}
  requests.forEach(request=>{
