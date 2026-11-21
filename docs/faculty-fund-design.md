@@ -52,15 +52,17 @@ one cash IN; an actual activity expense is one cash OUT. A remittance is a
 handover, not a second receipt or an expense. Integer centavos and date/time
 checks prevent double counting and spending unaccepted cash.
 
-Faculty Fund entries appear in a separate section of Transactions. The Faculty
-Fund has its own CSV report and audit history. **Regular Pondo dashboard totals,
-fund sources, project allocations and financial reports exclude Faculty Fund**;
-the UI labels this separation. Its expenses do not allocate money to existing
-Pondo projects. Do not manually duplicate the same payment as a regular fund
-transaction. There is no opening-balance import: confirm a migration and
-reconciliation plan before using this for an existing fund. Non-cash refund
-credits never create a cash receipt; the treatment of a credit in an actual
-Faculty Fund remittance has not been established.
+In this branch, confirmed Faculty cash appears once in Overview, the regular
+fund-source list, unified Transactions and the cash financial report, while
+Faculty remains in its protected ledger. Unavailable data is explicitly
+excluded and labeled. The Faculty Fund also retains its own report and audit.
+Project allocations, payables, generic income and other normal-fund actions
+still cannot use this protected Faculty ledger. Do not manually duplicate the
+same payment as a regular-fund transaction. There is no opening-balance import:
+confirm a migration and reconciliation plan before using this for an existing
+fund. Non-cash refund credits never create a cash receipt; their treatment in
+an actual Faculty Fund remittance has not been established. The test feature
+and candidate rules are not a production deployment.
 
 ## Security, reliability and limitations
 
