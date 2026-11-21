@@ -13,3 +13,13 @@ test('fund colors rotate by unfiltered fund group without modifying saved colors
  assert.deepEqual(['r0','r1','r2','r3','r4','r5','r6'].map(get),['#059669','#2563eb','#7c3aed','#b76a08','#0d777a','#c02655','#059669']);assert.deepEqual(['d1','d2'].map(get),['#059669','#2563eb']);assert.equal(JSON.stringify(funds),before);
  assert.doesNotMatch(html,/id="fundSettingsColor"|id="fabFundColor"/);assert.match(html,/#tab-funds #fundsList,#tab-funds #donationFundList\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important\}/);
 });
+
+test('Funds presents one navigation and a shared transaction shortcut without mixing balances',()=>{
+ const funds=source('  <!-- FUNDS -->','  <!-- TRANSACTIONS -->');
+ assert.match(funds,/Choose a fund below\. Each keeps its own balance and records/);
+ assert.match(funds,/id="fundHistoryLink"[^>]*onclick="switchTab\('transactions'\)"/);
+ assert.match(funds,/aria-label="Fund types"/);
+ for(const name of ['regular','donations','faculty'])assert.match(funds,new RegExp(`id="fundView-${name}" role="tabpanel"`));
+ assert.match(funds,/id="fundSourceBalance"/);assert.match(funds,/id="donationViewBalance"/);assert.match(funds,/id="facultyViewBalance"/);
+ assert.match(funds,/Regular funds referenced by older receipts stay under Regular Funds/);
+});
