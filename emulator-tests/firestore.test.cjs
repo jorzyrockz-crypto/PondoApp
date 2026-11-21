@@ -303,3 +303,77 @@ test('draft reconciliation transaction checks actual membership and server revis
  const stale=await svc.review(org,'owner');await env.withSecurityRulesDisabled(async c=>updateDoc(ref(c.firestore(),root+'/data/snapshot'),{_syncRevision:3,updatedBy:'owner'}));await assert.rejects(svc.commit(stale,choices),/team copy changed/i);saved=(await getDoc(ref(db,root+'/data/snapshot'))).data();assert.equal(saved._syncRevision,3);
  await env.withSecurityRulesDisabled(async c=>updateDoc(ref(c.firestore(),root+'/members/owner'),{role:'reviewer'}));await assert.rejects(svc.review(org,'owner'));assert.equal((await getDoc(ref(db,root+'/data/snapshot'))).data()._syncRevision,3);
 });
+
+test('old snapshot clients cannot remove the Other Funds register after it is introduced',async()=>{
+ const root='organizations/other-funds-protection',db=client('owner'),path=root+'/data/snapshot';
+ await seed({[root]:{name:'Team'},[root+'/members/owner']:{uid:'owner',role:'owner'},[path]:{_syncRevision:1,updatedBy:'owner',otherPayments:[{id:'payment'}]}});
+ await assertFails(setDoc(ref(db,path),{_syncRevision:2,updatedBy:'owner'}));
+ await assertFails(setDoc(ref(db,path),{_syncRevision:2,updatedBy:'owner',otherPayments:null}));
+ await assertSucceeds(setDoc(ref(db,path),{_syncRevision:2,updatedBy:'owner',otherPayments:[{id:'payment'}]}));
+});
+
+test('Other Funds handovers require two participants and an unchanged payment',async()=>{
+ const org='handover-secure',root='organizations/'+org,path=root+'/otherFundHandovers/payment';
+ const payment={id:'payment',paidBy:'Teacher',receivedBy:'Alice',purpose:'Leave',amount:250,date:'2026-01-01'};
+ await seed({[root]:{name:'Team'},[root+'/members/alice']:{uid:'alice',role:'owner'},[root+'/members/bob']:{uid:'bob',role:'reviewer'},[root+'/members/charlie']:{uid:'charlie',role:'project-manager'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'alice',otherPayments:[payment]}});
+ const alice=client('alice'),bob=client('bob'),charlie=client('charlie'),outsider=client('outsider');
+ const request={payment,senderUid:'alice',receiverUid:'bob',initiatorUid:'alice',handoverDate:'2026-01-01',notes:'',status:'pending',createdAt:serverTimestamp(),history:[]};
+ await assertFails(getDoc(ref(outsider,path)));
+ await assertFails(setDoc(ref(alice,path),{...request,receiverUid:'outsider'}));
+ await assertFails(setDoc(ref(alice,path),{...request,receiverUid:'alice'}));
+ await assertFails(setDoc(ref(charlie,path),{...request,initiatorUid:'charlie'}));
+ await assertFails(setDoc(ref(alice,path),{...request,payment:{...payment,amount:251}}));
+ await assertFails(setDoc(ref(alice,path),{...request,status:'confirmed'}));
+ await assertSucceeds(setDoc(ref(alice,path),request));
+ await assertFails(updateDoc(ref(alice,path),{status:'confirmed',decidedBy:'alice',decidedAt:serverTimestamp()}));
+ await assertFails(updateDoc(ref(charlie,path),{status:'confirmed',decidedBy:'charlie',decidedAt:serverTimestamp()}));
+ await assertFails(updateDoc(ref(bob,path),{status:'confirmed',decidedBy:'bob',decidedAt:serverTimestamp(),notes:'tampered'}));
+ await assertSucceeds(updateDoc(ref(bob,path),{status:'confirmed',decidedBy:'bob',decidedAt:serverTimestamp()}));
+ await assertFails(updateDoc(ref(bob,path),{status:'declined',decidedBy:'bob',decidedAt:serverTimestamp()}));
+ await assertFails(deleteDoc(ref(alice,path)));
+ const recorded=(await getDoc(ref(alice,path))).data();assert.equal(recorded.status,'confirmed');assert.equal(recorded.decidedBy,'bob');
+});
+
+test('declined handovers can be retried only with complete immutable history',async()=>{
+ const org='handover-retry',root='organizations/'+org,path=root+'/otherFundHandovers/payment',payment={id:'payment',paidBy:'Teacher',receivedBy:'A',purpose:'Leave',amount:10,date:'2026-01-01'};
+ await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'reviewer'},[root+'/members/b']:{uid:'b',role:'owner'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'b',otherPayments:[payment]}});
+ const a=client('a'),b=client('b');const base={payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'Original',status:'pending',createdAt:serverTimestamp(),history:[]};
+ await assertSucceeds(setDoc(ref(a,path),base));
+ await seed({[root+'/data/snapshot']:{_syncRevision:2,updatedBy:'b',otherPayments:[{...payment,amount:11}]}});
+ await assertFails(updateDoc(ref(b,path),{status:'confirmed',decidedBy:'b',decidedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(ref(b,path),{status:'declined',decidedBy:'b',decidedAt:serverTimestamp()}));
+ const old=(await getDoc(ref(a,path))).data(),history=[{payment:old.payment,senderUid:old.senderUid,receiverUid:old.receiverUid,initiatorUid:old.initiatorUid,handoverDate:old.handoverDate,notes:old.notes,status:old.status,createdAt:old.createdAt,decidedBy:old.decidedBy,decidedAt:old.decidedAt}],retry={...base,payment:{...payment,amount:11},initiatorUid:'b',notes:'Retry',createdAt:serverTimestamp(),history};
+ await assertFails(setDoc(ref(b,path),{...retry,history:[]}));await assertSucceeds(setDoc(ref(b,path),retry));
+ await assertFails(updateDoc(ref(b,path),{status:'confirmed',decidedBy:'b',decidedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(ref(a,path),{status:'confirmed',decidedBy:'a',decidedAt:serverTimestamp()}));
+ assert.equal((await getDoc(ref(a,path))).data().history[0].status,'declined');
+});
+
+test('handover confirmation cannot accompany a changed payment in the same batch',async()=>{
+ const org='handover-atomic-edit',root='organizations/'+org,path=root+'/otherFundHandovers/p',payment={id:'p',paidBy:'Teacher',receivedBy:'A',purpose:'Leave',amount:10,date:'2026-01-01'};
+ await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'owner'},[root+'/members/b']:{uid:'b',role:'owner'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'a',otherPayments:[payment]}});
+ const a=client('a'),b=client('b');await assertSucceeds(setDoc(ref(a,path),{payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'',status:'pending',createdAt:serverTimestamp(),history:[]}));
+ const batch=writeBatch(b);batch.update(ref(b,path),{status:'confirmed',decidedBy:'b',decidedAt:serverTimestamp()});batch.set(ref(b,root+'/data/snapshot'),{_syncRevision:2,updatedBy:'b',otherPayments:[{...payment,amount:15}]});await assertFails(batch.commit());
+ assert.equal((await getDoc(ref(a,path))).data().status,'pending');
+});
+
+test('removed initiator prevents confirmation but the remaining participant can decline',async()=>{
+ const org='handover-member-removed',root='organizations/'+org,path=root+'/otherFundHandovers/p',payment={id:'p',paidBy:'Teacher',receivedBy:'A',purpose:'Leave',amount:10,date:'2026-01-01'};
+ await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'reviewer'},[root+'/members/b']:{uid:'b',role:'owner'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'b',otherPayments:[payment]}});
+ const a=client('a'),b=client('b');await assertSucceeds(setDoc(ref(a,path),{payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'',status:'pending',createdAt:serverTimestamp(),history:[]}));
+ await assertSucceeds(deleteDoc(ref(b,root+'/members/a')));await assertFails(updateDoc(ref(b,path),{status:'confirmed',decidedBy:'b',decidedAt:serverTimestamp()}));await assertSucceeds(updateDoc(ref(b,path),{status:'declined',decidedBy:'b',decidedAt:serverTimestamp()}));
+});
+
+test('competing handover requests have one winner and only the counterparty can decide',async()=>{
+ const org='handover-concurrent',root='organizations/'+org,path=root+'/otherFundHandovers/p',payment={id:'p',paidBy:'Teacher',receivedBy:'A',purpose:'Leave',amount:10,date:'2026-01-01'};
+ await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'owner'},[root+'/members/b']:{uid:'b',role:'reviewer'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'a',otherPayments:[payment]}});
+ const {createOtherFundHandoverService}=await import('../other-fund-handover.mjs');
+ const make=uid=>createOtherFundHandoverService({db:client(uid),api,getState:()=>({orgId:org,uid,role:'owner',memberConfirmed:true,baselineReady:true,online:true}),getUser:()=>({uid})}),a=make('a'),b=make('b'),values={senderUid:'a',receiverUid:'b',handoverDate:'2026-01-01',notes:''};
+ const results=await Promise.allSettled([a.submit(org,'a',payment,values),b.submit(org,'b',payment,values)]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);const saved=(await getDoc(ref(client('a'),path))).data(),winner=saved.initiatorUid,other=winner==='a'?'b':'a';await assert.rejects((winner==='a'?a:b).decide(org,winner,'p','confirmed'));await (other==='a'?a:b).decide(org,other,'p','confirmed');assert.equal((await getDoc(ref(client('a'),path))).data().decidedBy,other);
+});
+
+test('a marked fictional payment cannot create an account-confirmed handover',async()=>{
+ const org='handover-sample',root='organizations/'+org,path=root+'/otherFundHandovers/p',payment={id:'p',paidBy:'[Sample] Teacher',receivedBy:'[Sample] A',purpose:'Leave',amount:10,date:'2026-01-01',sampleData:true};
+ await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'owner'},[root+'/members/b']:{uid:'b',role:'reviewer'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'a',otherPayments:[payment]}});
+ const a=client('a');await assertFails(setDoc(ref(a,path),{payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'',status:'pending',createdAt:serverTimestamp(),history:[]}));
+});

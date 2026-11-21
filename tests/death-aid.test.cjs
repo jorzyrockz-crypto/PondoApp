@@ -36,7 +36,7 @@ test('public projection excludes private Death Aid data',()=>{
  const {buildPublicReport}=require('../functions/projection.js'),a=activity('a','Private individual',50);a.deathAid.payments.push(pay('p','m','Member',50));const snapshot={funds:[],txs:[],projects:[],allocations:[],contributors:[],contributionPayments:[],contributionActivities:[a]};const output=buildPublicReport(snapshot,{contributions:true});assert.equal(output.contributions.length,0);assert.ok(!JSON.stringify(output).includes('Private individual'));
 });
 test('dashboard shortcut sits after cash donations and opens the protected Death Aid form',()=>{
- assert.match(html,/id="recordCashDonation"[\s\S]*?id="dashboardRecordDeathAid" onclick="openDashboardDeathAid\(\)" aria-label="Record Death Aid">\+ Aid Record/);
+ assert.match(html,/id="recordCashDonation"[\s\S]*?id="dashboardRecordDeathAid" onclick="openDashboardDeathAid\(\)" aria-label="Record Death Aid">\+ Death Aid/);
  assert.match(html,/body\.role-reviewer #dashboardRecordDeathAid \{display:none!important\}/);
  const {ctx:c}=setup(),calls=[];c.switchTab=tab=>calls.push(tab);c.showDeathAidCreate=()=>calls.push('form');c.openDashboardDeathAid();assert.deepEqual(calls,['form']);c.window.pondoTeamState={orgId:'team',role:'reviewer',memberConfirmed:true,baselineReady:true};c.openDashboardDeathAid();assert.deepEqual(calls,['form']);
 });
