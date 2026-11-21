@@ -21,3 +21,12 @@ test('combined dashboard counts Faculty cash once, including unaccepted amounts,
 test('dashboard refuses inconsistent, missing or overflowing Faculty amounts',()=>{
  for(const faculty of [{ledger:{receivedCents:2,spentCents:1,balanceCents:2,rows:[]}},{ledger:{receivedCents:1,spentCents:0,balanceCents:1}},{ledger:{receivedCents:Number.MAX_SAFE_INTEGER,spentCents:0,balanceCents:Number.MAX_SAFE_INTEGER,rows:[]}}])assert.equal(ledger.combineDashboard({funds:[{initialAmount:1}],faculty}),null);
 });
+test('Faculty report reconciles cash rows and applies date scopes without handovers',()=>{
+ const data={ledger:{receivedCents:30000,spentCents:8000,balanceCents:22000,pendingWork:[],rows:[{id:'p',type:'IN',date:'2026-01-01',amountCents:20000},{id:'q',type:'IN',date:'2026-02-01',amountCents:10000},{id:'e',type:'OUT',date:'2026-02-02',amountCents:8000}]}};
+ const r=ledger.facultyCashReport(data,{from:'2026-02-01',to:'2026-02-28'});assert.deepEqual([r.opening,r.received,r.paid,r.closing,r.throughIn,r.throughOut],[20000,10000,8000,22000,30000,8000]);assert.deepEqual(r.entries.map(x=>x.id),['q','e']);assert.equal(ledger.facultyCashReport(data,{to:'2026-01-31'}).closing,20000);
+});
+test('Faculty report fails closed on unfinished, malformed, inconsistent or overdrawn cash history',()=>{
+ const valid={ledger:{receivedCents:100,spentCents:0,balanceCents:100,pendingWork:[],rows:[{id:'p',type:'IN',date:'2026-01-02',amountCents:100}]}};
+ for(const alter of [d=>d.ledger.pendingWork.push({kind:'expense-voiding'}),d=>d.ledger.balanceCents=101,d=>d.ledger.rows[0].date='2026-02-30',d=>d.ledger.rows.push({type:'OUT',date:'2026-01-01',amountCents:1}),d=>d.ledger.rows[0].amountCents=Infinity]){const d=structuredClone(valid);alter(d);assert.equal(ledger.facultyCashReport(d),null);}
+ assert.equal(ledger.facultyCashReport(valid,{from:'2026-03-01',to:'2026-02-01'}),null);
+});

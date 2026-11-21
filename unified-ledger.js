@@ -38,5 +38,17 @@
   if(faculty){const l=faculty.ledger;if(!l||![l.receivedCents,l.spentCents,l.balanceCents].every(Number.isSafeInteger)||l.receivedCents<0||l.spentCents<0||l.receivedCents-l.spentCents!==l.balanceCents||!Array.isArray(l.rows))return null;rec=sum([rec,l.receivedCents]);out=sum([out,l.spentCents]);count+=l.rows.length;if(rec===null||out===null||!Number.isSafeInteger(rec-out)||!Number.isSafeInteger(count))return null;}
   return {receivedCents:rec,spentCents:out,balanceCents:rec-out,transactionCount:count};
  }
- return {build,matches,totals,combineDashboard};
+ function facultyCashReport(data,{from='',to=''}={}){
+  const ledger=data?.ledger,validDay=v=>{if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const d=new Date(v+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===v;};
+  if(!ledger||!Array.isArray(ledger.rows)||(ledger.pendingWork!==undefined&&(!Array.isArray(ledger.pendingWork)||ledger.pendingWork.length))||![ledger.receivedCents,ledger.spentCents,ledger.balanceCents].every(Number.isSafeInteger)||from&&!validDay(from)||to&&!validDay(to)||from&&to&&from>to)return null;
+  let allIn=0,allOut=0,opening=0,received=0,paid=0,throughIn=0,throughOut=0;const days=new Map(),entries=[];
+  const add=(a,b)=>{const n=a+b;if(!Number.isSafeInteger(n))throw Error('overflow');return n;};
+  try{
+   for(const r of ledger.rows){if(!r||!['IN','OUT'].includes(r.type)||!Number.isSafeInteger(r.amountCents)||r.amountCents<=0||!validDay(r.date))return null;const n=r.amountCents,sign=r.type==='IN'?1:-1;days.set(r.date,add(days.get(r.date)||0,sign*n));if(sign===1)allIn=add(allIn,n);else allOut=add(allOut,n);if(to&&r.date>to)continue;if(sign===1)throughIn=add(throughIn,n);else throughOut=add(throughOut,n);if(from&&r.date<from)opening=add(opening,sign*n);else{if(sign===1)received=add(received,n);else paid=add(paid,n);entries.push(r);}}
+   if(allIn!==ledger.receivedCents||allOut!==ledger.spentCents||add(allIn,-allOut)!==ledger.balanceCents)return null;
+   let balance=0;for(const date of [...days.keys()].sort()){balance=add(balance,days.get(date));if(balance<0)return null;}
+   return {opening,received,paid,closing:add(add(opening,received),-paid),throughIn,throughOut,entries};
+  }catch(e){return null;}
+ }
+ return {build,matches,totals,combineDashboard,facultyCashReport};
 });

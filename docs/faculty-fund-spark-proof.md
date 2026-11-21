@@ -568,8 +568,27 @@ fund or move any data.
 When the Faculty ledger is not confirmed (including offline, permission denial,
 recovery lock, failed reconciliation or the 1,000-document reader limit), the
 Overview displays the regular/donation subtotal under an explicit partial label
-and states that Faculty is not included. Regular financial reports and charts
-retain their existing scopes. The Faculty reader may require 12 bounded
+and states that Faculty is not included. The Financial report can also include confirmed Faculty cash; charts and
+project commitments retain their existing regular/donation scopes. The Faculty reader may require 12 bounded
 collection reads plus revision and lock checks on a refresh. This is not a
 production-ready migration or deployment; historical regular-fund copies are
 not automatically reconciled against Faculty records.
+
+### Combined financial report
+
+The Financial report offers all funds or Faculty Fund as a source. Confirmed
+Faculty cash rows are reconciled with ledger totals, grouped by recorded day,
+and included once in the period opening, received, paid, closing and cash
+ledger, including CSV and print. Handover tracking is not another cash entry.
+The report refuses the Faculty projection if dates, sums, day balances or
+unfinished work are unsafe. In that case an all-funds report explicitly warns
+that Faculty is excluded, and a Faculty-only report shows unavailable totals
+and blocks CSV export. The view is invalidated on offline or scope changes and
+reloaded on report navigation and revision notifications. Faculty cash awaiting
+acceptance is included as cash, not as authorized spending. Project funding and
+payables remain regular-fund-only, and their historical filters remain disabled.
+A report uses the current corrected ledger, not a point-in-time audit of later
+voids. Historical duplicates entered independently in both ledgers cannot be
+automatically recognized and need manual reconciliation before relying on a
+combined report. This read-only integration does not migrate data or add
+regular project allocations to the protected Faculty ledger.
