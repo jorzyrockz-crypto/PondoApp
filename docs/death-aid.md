@@ -1,6 +1,6 @@
 # Death Aid contributions
 
-On the Dashboard choose **+ Aid Record**, or on Contributions choose **Record
+On the Dashboard choose **+ Death Aid**, or on Contributions choose **Record
 Death Aid**. Step 1 searches existing records by deceased person's name. Select
 a suggestion explicitly to add to that record; otherwise enter a new person's
 name and optional details, date of death and voluntary suggested amount.

@@ -6,7 +6,7 @@ const roles=new Set(['owner','disbursing','project-manager']);
 export function reviewTeamDraftPlan(target,draft,choices={}){
  const initial=planner.plan(target,draft,{}), additions=initial.changes.filter(x=>x.kind==='add');
  const missing=additions.filter(x=>!['add','skip'].includes(choices[planner.key(x.field,x.id)]));
- const filtered={...draft};for(const field of planner.fields)filtered[field]=draft[field].filter(x=>{const k=planner.key(field,x.id);return target[field].some(t=>t.id===x.id)||choices[k]==='add';});
+ const filtered={...draft};for(const field of planner.fields)filtered[field]=(draft[field]||[]).filter(x=>{const k=planner.key(field,x.id);return (target[field]||[]).some(t=>t.id===x.id)||choices[k]==='add';});
  const plan=planner.plan(target,filtered,choices);
  return {...plan,additions,unresolved:plan.unresolved+missing.length,skipped:additions.filter(x=>choices[planner.key(x.field,x.id)]==='skip').length};
 }

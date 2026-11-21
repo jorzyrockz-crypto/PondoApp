@@ -1,0 +1,9 @@
+# Slide presentation
+
+Use **Present** to choose a workspace overview, a single fund or a project. The presentation captures the current workspace when started; close and reopen it to refresh. The organization period is a label, not a date filter: slides include all recorded dates, and warnings identify future-dated or sample records.
+
+The workspace overview separates regular-fund cash received, paid, balance, project reservations and uncommitted cash from donation funds and the Other Funds payment register. Donation receipt totals may include older receipts recorded in regular funds; they are not added to fund cash again. Other Funds is the sum of recorded payments, not proof of custody or handover. Contributions and Death Aid distinguish personal tracking from fund-paid amounts and fundraising deposits, which are already reflected in fund cash. Refund/payable totals exclude pending snapshot approvals and explicitly do not claim to include all separate team member requests. Project slides use the existing project figures, which include refund requests awaiting approval in incurred and outstanding amounts.
+
+Fund, source, category and signatory lists are split across slides; recent activity shows at most six records and labels tracking and non-cash entries. Single-fund presentations show only that fund's cash and transactions. Signatory names are not signatures or approvals. Settings → Presentation can include or omit the new separate-funds, refund and contribution summaries and reorder the slides. Existing custom orders are preserved when new slide names are added.
+
+Presentation content may contain sensitive names or financial details, especially in recent activity and signatories. Review the slides and inclusion settings before screen sharing. Changing workspace or losing confirmed team access closes the presentation instead of leaving the prior workspace's figures visible. This feature does not modify records or balances.
