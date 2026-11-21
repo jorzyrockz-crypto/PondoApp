@@ -14,7 +14,7 @@
  const key=c=>'ft_faculty_pending_v1:'+encodeURIComponent(c.uid)+':'+encodeURIComponent(c.orgId);
  const same=(a,b)=>!!a&&!!b&&a.orgId===b.orgId&&a.uid===b.uid&&a.role===b.role;
  let root,txRoot,reportRoot,recoveryRoot,recoveryScreen,activityRoot,activityScreen,loaded=null,opened=false,generation=0,busy=false,status='',lastBatchPreview=null,activePage='overview',returnFocus=null;
- let historyLoaded=null,historyGeneration=0,historyStatus='unavailable',historyTimer=null;
+ let historyLoaded=null,historyContext=null,historyGeneration=0,historyStatus='unavailable',historyTimer=null;
  const alertUser=m=>window.appAlert?window.appAlert(m):window.alert(m);
  const ask=async m=>window.appPrompt?await window.appPrompt(m):window.prompt(m);
  const confirmAction=async m=>window.appConfirm?await window.appConfirm(m):window.confirm(m);
@@ -27,13 +27,13 @@
  async function read(){const c=context(),g=++generation;if(!c||!navigator.onLine||!api()?.read){loaded=null;render();return;}try{const result=await api().read({orgId:c.orgId,view:'state'});if(g!==generation||!same(c,context()))return;loaded={ctx:c,...result};render();}catch(e){if(g!==generation||!same(c,context()))return;loaded=null;render();message(e?.message==='Faculty Fund exceeds the safe loading limit; no data was deleted'?'Faculty Fund reached its safe loading limit. No records were deleted. The balance and financial actions are unavailable until the data is safely handled.':'Faculty Fund is unavailable or not enabled. Check the connection and setup; no data was changed.');}}
  // History is read separately: incomplete multi-step work must still appear,
  // while the regular action view remains fail-closed during recovery.
- function historyView(){const c=context();const team=window.pondoTeamState;if(!c||!navigator.onLine||team?.recoveryLocked||team?.listenerError||team?.syncError)return {status:'unavailable',data:null};if(historyLoaded&&same(c,historyLoaded.ctx))return {status:'ready',data:historyLoaded.data};return {status:historyStatus,data:null};}
+ function historyView(){const c=context();const team=window.pondoTeamState;if(!c||!navigator.onLine||team?.recoveryLocked||team?.listenerError||team?.syncError)return {status:'unavailable',data:null};if(historyLoaded&&same(c,historyLoaded.ctx))return {status:'ready',data:historyLoaded.data};return {status:same(c,historyContext)?historyStatus:'unavailable',data:null};}
  function updateHistory(){if(document.getElementById('tab-transactions')?.style.display==='block')window.renderUnifiedLedger?.();}
- async function refreshHistory(){const c=context(),g=++historyGeneration;historyLoaded=null;historyStatus=c&&navigator.onLine&&api()?.read?'loading':'unavailable';updateHistory();if(historyStatus!=='loading')return;
+ async function refreshHistory(){const c=context(),g=++historyGeneration;historyLoaded=null;historyContext=c;historyStatus=c&&navigator.onLine&&api()?.read?'loading':'unavailable';updateHistory();if(historyStatus!=='loading')return;
   try{const data=await api().read({orgId:c.orgId,view:'history'});if(g!==historyGeneration||!same(c,context())||!navigator.onLine)return;if(!data?.state||!Array.isArray(data.state.payments)||!Array.isArray(data.state.expenses)||!Array.isArray(data.state.remittances))throw Error('History unavailable');historyLoaded={ctx:c,data};historyStatus='ready';}
   catch(e){if(g!==historyGeneration||!same(c,context()))return;historyLoaded=null;historyStatus='unavailable';}updateHistory();
  }
- function invalidateHistory(){historyGeneration++;historyLoaded=null;historyStatus='unavailable';clearTimeout(historyTimer);historyTimer=null;updateHistory();}
+ function invalidateHistory(){historyGeneration++;historyLoaded=null;historyContext=null;historyStatus='unavailable';clearTimeout(historyTimer);historyTimer=null;updateHistory();}
  async function send(c,record){
   const channel=record.channel||'transition';if(!same(c,context())||!navigator.onLine||!api()?.[channel])throw Error('Return to this team workspace and connect to the internet to retry.');
   busy=record.requestId;render();

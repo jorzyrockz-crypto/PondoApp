@@ -14901,7 +14901,7 @@ function refreshMemberRefundWatch(){
  const org=s.orgId,uid=s.uid,generation=memberRefundWatchGeneration;memberRefundWatchKey=key;memberRefundUnsub=window.memberRefundService.watch(org,uid,view=>{if(generation===memberRefundWatchGeneration&&memberRefundWatchKey===key&&s.orgId===org&&s.uid===uid)window.memberRefundSetView?.({...view,org,uid});});
  memberRefundPendingUnsub=window.memberRefundService.watchPending(org,uid,view=>{if(generation===memberRefundWatchGeneration&&memberRefundWatchKey===key&&s.orgId===org&&s.uid===uid)window.memberRefundSetPendingView?.({...view,org,uid});});
 }
-window.addEventListener('online',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();});window.addEventListener('offline',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();});
+window.addEventListener('online',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();if(document.getElementById('tab-transactions')?.style.display==='block')window.PondoFacultyFundUI?.refreshHistory?.();});window.addEventListener('offline',()=>{refreshMemberRefundWatch();window.memberRefundRecheck?.();window.PondoFacultyFundUI?.invalidateHistory?.();});
 
 
 // Faculty Fund is server-authoritative and separate from the regular snapshot.
