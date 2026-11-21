@@ -12854,6 +12854,7 @@ function renderFundSourceLists(){
 // This is a read-only dashboard projection; it never changes a fund or makes
 // unaccepted Faculty cash available for spending. Reports retain their own scope.
 function renderDashboardFundSummary(){
+ window.__pondoBalanceCountRun=(window.__pondoBalanceCountRun||0)+1; // Cancel any animation holding an older or unconfirmed total.
  if(!window.PondoUnifiedLedger?.combineDashboard)return;
  const team=!!window.pondoTeamState?.orgId,faculty=window.PondoFacultyFundUI?.historyView?.(),ready=!!(team&&donationCanRead()&&faculty?.status==='ready'&&faculty.data);
  const base=window.PondoUnifiedLedger.combineDashboard({funds,transactions:txs}),combined=ready?window.PondoUnifiedLedger.combineDashboard({funds,transactions:txs,faculty:faculty.data}):null;
@@ -13809,15 +13810,14 @@ function applyAppearance(){
 }
 
 function applyChartSettings(){ document.querySelectorAll('.bar-row').forEach((el,i)=>{el.style.animationDelay=(i*appSettings.animation.chartStagger)+'ms';}); }
-let countRun=0;
 function animateTotals(){
   if(window.__pondoSuppressFeedback) return;
-  const run=++countRun;
+  const run=window.__pondoBalanceCountRun=(window.__pondoBalanceCountRun||0)+1;
   if(!appSettings.animation.countUp || appSettings.motion.reduceMotion) return;
   const els=['totalReceived','totalSpent','totalRemaining'].map(id=>document.getElementById(id));
   const targets=els.map(el=>Number(el.textContent.replace(/[^0-9.-]/g,''))||0);
   const started=performance.now(), duration=Math.max(.1,appSettings.animation.countDuration)*1000;
-  function frame(now){if(run!==countRun)return; const t=Math.min(1,(now-started)/duration), eased=1-Math.pow(1-t,3); els.forEach((el,i)=>el.textContent=fmt(Math.round(targets[i]*eased))); if(t<1) requestAnimationFrame(frame); else soundEvent('countFinish');}
+  function frame(now){if(run!==window.__pondoBalanceCountRun)return; const t=Math.min(1,(now-started)/duration), eased=1-Math.pow(1-t,3); els.forEach((el,i)=>el.textContent=fmt(Math.round(targets[i]*eased))); if(t<1) requestAnimationFrame(frame); else soundEvent('countFinish');}
   requestAnimationFrame(frame);
 }
 let heroParallaxFrame=0;
