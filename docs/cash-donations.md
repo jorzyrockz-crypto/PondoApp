@@ -1,6 +1,6 @@
 # Cash donation funds
 
-Use **Record Cash Donation** on the Dashboard for money actually received and
+Use **+ Donation** on the Dashboard for money actually received and
 handled under applicable rules. Each new donation creates its own fund with a
 zero opening balance and exactly one income transaction. The transaction is the
 receipt, so the money is counted once. Give the fund an optional name; otherwise

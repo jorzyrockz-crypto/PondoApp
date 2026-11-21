@@ -42,6 +42,10 @@ jobs:
             node tests/refund-transparency.browser.cjs
             node tests/notification-mobile.browser.cjs
             node tests/tablet-dashboard-permission.browser.cjs
+            node tests/dashboard-quick-actions.browser.cjs
+            node tests/other-funds.browser.cjs
+            node tests/other-handover.browser.cjs
+            node tests/presentation-content.browser.cjs
             node tests/fund-transaction.browser.cjs
             node tests/fund-tabs.browser.cjs
             node tests/fund-settings.browser.cjs

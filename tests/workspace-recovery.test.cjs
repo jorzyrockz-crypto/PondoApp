@@ -38,7 +38,7 @@ test('flush waits for outstanding local save and detects fatal storage errors', 
 });
 
 test('workspace switch refuses pending cloud saves and failed local cache writes', async () => {
-  const source = app.slice(app.indexOf('async function switchActiveWorkspace(key)'), app.indexOf('// Looks up name + role'));
+  const source = app.slice(app.indexOf('async function switchActiveWorkspace(key, announce = false)'), app.indexOf('// Looks up name + role'));
   let messages = [], applied = false, cacheSaved = false;
   const state = { orgId: 'team', pushTimer: null, pushesInFlight: 1 };
   const ctx = { pondoTeamState: state, notify: m => messages.push(m), window: {
@@ -63,7 +63,7 @@ test('unreadable or malformed destination cache is rejected without switching', 
   assert.throws(() => invalid.api.load('team'), /Invalid workspace cache/);
   const missing = workspace({ getItem: () => null });
   assert.equal(missing.api.load('team'), null);
-  const source = app.slice(app.indexOf('async function switchActiveWorkspace(key)'), app.indexOf('// Looks up name + role'));
+  const source = app.slice(app.indexOf('async function switchActiveWorkspace(key, announce = false)'), app.indexOf('// Looks up name + role'));
   let messages = [], saved = false;
   const state = { orgId: null, pushTimer: null, pushesInFlight: 0 };
   const ctx = { pondoTeamState: state, notify: m => messages.push(m), window: {
@@ -75,4 +75,18 @@ test('unreadable or malformed destination cache is rejected without switching', 
   assert.match(messages[0], /destination workspace cache could not be read/);
   assert.equal(saved, false);
   assert.equal(state.orgId, null);
+});
+
+test('menu switch announces only after local switch, without waiting for profile sync', async () => {
+  const source = app.slice(app.indexOf('async function switchActiveWorkspace(key, announce = false)'), app.indexOf('// Looks up name + role'));
+  const state = { orgId: null, uid: 'user', memberships:[{orgId:'team',name:'School',role:'owner'}], pushTimer:null, pushesInFlight:0, dirty:false };
+  const events=[], messages=[], hold=new Promise(()=>{});
+  const ctx = { pondoTeamState:state, notify:m=>messages.push(m), document:{getElementById:()=>null}, setTimeout:()=>0, firestoreDb:{}, doc:()=>({}),setDoc:()=>{events.push('profile-write');return hold},
+    teardownOrgSubscriptions(){}, applyRoleUI(){}, subscribeToOrg(id){state.orgName=state.memberships.find(m=>m.orgId===id)?.name;events.push('subscribe')},setSyncBadge(){},renderTeamPanel(){events.push('panel')},updateHeaderTeamBadge(){events.push('badge')},
+    window:{pondoWorkspace:{flush:async()=>true,load:()=>null,save:()=>true,blank:()=>({})},applySnapshot(){events.push('snapshot')},renderAll(){events.push('render')},closeTeamSwitcher(){events.push('close')},closeHeaderAvatarMenu(){},showWorkspaceSwitchToast:name=>events.push('toast:'+name)} };
+  vm.runInNewContext(source,ctx);
+  const switchPromise=ctx.switchActiveWorkspace('team',true);await new Promise(r=>setImmediate(r));
+  assert.equal(state.orgId,'team');assert.ok(events.indexOf('badge')<events.indexOf('toast:School'));assert.ok(events.indexOf('toast:School')<events.indexOf('profile-write'));assert.deepEqual(messages,[]);
+  state.pushesInFlight=1;await ctx.switchActiveWorkspace('personal',true);assert.match(messages.pop(),/awaiting confirmation/);assert.equal(events.filter(x=>x.startsWith('toast:')).length,1);assert.equal(state.orgId,'team');
+  void switchPromise;
 });

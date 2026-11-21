@@ -42,5 +42,5 @@ test('account changes and stopped trackers reject late callbacks',async()=>{
 });
 test('UI has account-scoped notices and one-time tags in both switchers',()=>{
  const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
- assert.equal((html.match(/class="workspace-new-tag"/g)||[]).length,2);assert.match(html,/pondoMarkVisibleWorkspaceNewsSeen/);assert.match(html,/kind:'workspaceApproval'/);assert.match(html,/uid&&n.recipientUid===uid/);assert.match(html,/approvalTracker\.start\(user\.uid\)/);assert.match(sw,/\.\/workspace-approval\.mjs/);
+ assert.equal((html.match(/class="workspace-new-tag"/g)||[]).length,1);assert.equal((html.match(/workspaceRowsHtml\(state\)/g)||[]).length,3);assert.match(html,/pondoMarkVisibleWorkspaceNewsSeen/);assert.match(html,/kind:'workspaceApproval'/);assert.match(html,/uid&&n.recipientUid===uid/);assert.match(html,/approvalTracker\.start\(user\.uid\)/);assert.match(sw,/\.\/workspace-approval\.mjs/);
 });
