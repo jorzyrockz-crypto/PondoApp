@@ -345,8 +345,28 @@ test('declined handovers can be retried only with complete immutable history',as
  const old=(await getDoc(ref(a,path))).data(),history=[{payment:old.payment,senderUid:old.senderUid,receiverUid:old.receiverUid,initiatorUid:old.initiatorUid,handoverDate:old.handoverDate,notes:old.notes,status:old.status,createdAt:old.createdAt,decidedBy:old.decidedBy,decidedAt:old.decidedAt}],retry={...base,payment:{...payment,amount:11},initiatorUid:'b',notes:'Retry',createdAt:serverTimestamp(),history};
  await assertFails(setDoc(ref(b,path),{...retry,history:[]}));await assertSucceeds(setDoc(ref(b,path),retry));
  await assertFails(updateDoc(ref(b,path),{status:'confirmed',decidedBy:'b',decidedAt:serverTimestamp()}));
- await assertSucceeds(updateDoc(ref(a,path),{status:'confirmed',decidedBy:'a',decidedAt:serverTimestamp()}));
- assert.equal((await getDoc(ref(a,path))).data().history[0].status,'declined');
+ await assertSucceeds(updateDoc(ref(a,path),{status:'declined',decidedBy:'a',decidedAt:serverTimestamp()}));
+ const second=(await getDoc(ref(a,path))).data(),archived={payment:second.payment,senderUid:second.senderUid,receiverUid:second.receiverUid,initiatorUid:second.initiatorUid,handoverDate:second.handoverDate,notes:second.notes,status:second.status,createdAt:second.createdAt,decidedBy:second.decidedBy,decidedAt:second.decidedAt};
+ const next={...retry,initiatorUid:'a',notes:'Retry again',createdAt:serverTimestamp(),history:[...second.history,archived]};
+ await assertFails(setDoc(ref(a,path),{...next,history:[archived,second.history[0]]}));
+ await assertFails(setDoc(ref(a,path),{...next,history:[{...second.history[0],notes:'rewritten'},archived]}));
+ await assertFails(setDoc(ref(a,path),{...next,history:[second.history[0],second.history[0]]}));
+ await assertSucceeds(setDoc(ref(a,path),next));
+ await assertSucceeds(updateDoc(ref(b,path),{status:'confirmed',decidedBy:'b',decidedAt:serverTimestamp()}));
+ const final=(await getDoc(ref(a,path))).data();assert.equal(final.history.length,2);assert.equal(final.history[0].status,'declined');assert.equal(final.history[1].notes,'Retry');
+});
+
+test('handover retry history preserves its final prefix entry and enforces the 20 attempt limit',async()=>{
+ const org='handover-history-limit',root='organizations/'+org,path=root+'/otherFundHandovers/p',payment={id:'p',paidBy:'Teacher',receivedBy:'A',purpose:'Leave',amount:10,date:'2026-01-01'};
+ const attempt={payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'old',status:'declined',createdAt:new Date('2026-01-01'),decidedBy:'b',decidedAt:new Date('2026-01-02')};
+ const history=Array.from({length:19},(_,i)=>({...attempt,notes:'attempt '+i}));
+ await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'owner'},[root+'/members/b']:{uid:'b',role:'reviewer'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'a',otherPayments:[payment]},[path]:{...attempt,history}});
+ const a=client('a'),b=client('b'),saved=(await getDoc(ref(a,path))).data();const archived={payment:saved.payment,senderUid:saved.senderUid,receiverUid:saved.receiverUid,initiatorUid:saved.initiatorUid,handoverDate:saved.handoverDate,notes:saved.notes,status:saved.status,createdAt:saved.createdAt,decidedBy:saved.decidedBy,decidedAt:saved.decidedAt};
+ const retry={payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'last',status:'pending',createdAt:serverTimestamp(),history:[...saved.history,archived]};
+ const forged=[...retry.history];forged[18]={...forged[18],notes:'changed'};await assertFails(setDoc(ref(a,path),{...retry,history:forged}));
+ await assertSucceeds(setDoc(ref(a,path),retry));await assertSucceeds(updateDoc(ref(b,path),{status:'declined',decidedBy:'b',decidedAt:serverTimestamp()}));
+ const last=(await getDoc(ref(a,path))).data(),lastArchived={payment:last.payment,senderUid:last.senderUid,receiverUid:last.receiverUid,initiatorUid:last.initiatorUid,handoverDate:last.handoverDate,notes:last.notes,status:last.status,createdAt:last.createdAt,decidedBy:last.decidedBy,decidedAt:last.decidedAt};
+ await assertFails(setDoc(ref(a,path),{...retry,createdAt:serverTimestamp(),history:[...last.history,lastArchived]}));
 });
 
 test('handover confirmation cannot accompany a changed payment in the same batch',async()=>{

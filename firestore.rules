@@ -274,6 +274,33 @@ service cloud.firestore {
             'initiatorUid':resource.data.initiatorUid,'handoverDate':resource.data.handoverDate,'notes':resource.data.notes,
             'status':resource.data.status,'createdAt':resource.data.createdAt,'decidedBy':resource.data.decidedBy,'decidedAt':resource.data.decidedAt};
         }
+        // Rules do not support list concatenation. Compare the bounded prefix
+        // position by position so duplicates and order cannot be rewritten.
+        function validRetryHistory() {
+          return resource.data.history is list && request.resource.data.history is list
+            && resource.data.history.size() < 20
+            && request.resource.data.history.size() == resource.data.history.size() + 1
+            && (resource.data.history.size() <= 0 || request.resource.data.history[0] == resource.data.history[0])
+            && (resource.data.history.size() <= 1 || request.resource.data.history[1] == resource.data.history[1])
+            && (resource.data.history.size() <= 2 || request.resource.data.history[2] == resource.data.history[2])
+            && (resource.data.history.size() <= 3 || request.resource.data.history[3] == resource.data.history[3])
+            && (resource.data.history.size() <= 4 || request.resource.data.history[4] == resource.data.history[4])
+            && (resource.data.history.size() <= 5 || request.resource.data.history[5] == resource.data.history[5])
+            && (resource.data.history.size() <= 6 || request.resource.data.history[6] == resource.data.history[6])
+            && (resource.data.history.size() <= 7 || request.resource.data.history[7] == resource.data.history[7])
+            && (resource.data.history.size() <= 8 || request.resource.data.history[8] == resource.data.history[8])
+            && (resource.data.history.size() <= 9 || request.resource.data.history[9] == resource.data.history[9])
+            && (resource.data.history.size() <= 10 || request.resource.data.history[10] == resource.data.history[10])
+            && (resource.data.history.size() <= 11 || request.resource.data.history[11] == resource.data.history[11])
+            && (resource.data.history.size() <= 12 || request.resource.data.history[12] == resource.data.history[12])
+            && (resource.data.history.size() <= 13 || request.resource.data.history[13] == resource.data.history[13])
+            && (resource.data.history.size() <= 14 || request.resource.data.history[14] == resource.data.history[14])
+            && (resource.data.history.size() <= 15 || request.resource.data.history[15] == resource.data.history[15])
+            && (resource.data.history.size() <= 16 || request.resource.data.history[16] == resource.data.history[16])
+            && (resource.data.history.size() <= 17 || request.resource.data.history[17] == resource.data.history[17])
+            && (resource.data.history.size() <= 18 || request.resource.data.history[18] == resource.data.history[18])
+            && request.resource.data.history[resource.data.history.size()] == archivedAttempt();
+        }
         allow read: if isMember(orgId);
         allow create: if isMember(orgId) && validStart(request.resource.data) && request.resource.data.history.size() == 0;
         allow update: if isMember(orgId) && (
@@ -286,7 +313,7 @@ service cloud.firestore {
             && request.resource.data.decidedBy == uid() && request.resource.data.decidedAt == request.time
             && (request.resource.data.status == 'declined' || (validParticipant(resource.data.initiatorUid) && paymentStillExists(resource.data))))
           || (resource.data.status == 'declined' && validStart(request.resource.data)
-            && request.resource.data.history == resource.data.history + [archivedAttempt()])
+            && validRetryHistory())
         );
         allow delete: if false;
       }
