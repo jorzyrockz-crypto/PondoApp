@@ -12,7 +12,7 @@ the recipient received funds.
 ## Alerts while Pondo is open
 
 New eligible bell entries show a temporary, dismissible in-app banner while the
-page is visible. The Faculty Fund retains its own notice. The banner opens the
+page is visible. The banner opens the
 existing bell destination and does not independently approve or pay anything.
 When several alerts arrive together, the newest banner replaces the previous
 one; all remain in the bell. A best-effort sound uses the app's configured
@@ -127,18 +127,6 @@ unit tests use mocks and do not substitute for Firestore emulator or browser
 multi-device tests. Firestore rules do not independently enforce the app's
 financial approval checks; see `team-sync-rollout.md`. Do not deploy the
 incomplete public-report backend.
-
-## Faculty Fund (requires matching deployed backend and rules)
-
-In a confirmed team workspace, server-confirmed Faculty Fund snapshots can
-notify the addressed President of a pending remittance or correction, and the
-submitting AO of a subsequent acceptance or decline. Messages are generic and
-omit names, amounts and absence dates. Clicking one opens the Faculty Fund in
-the same workspace. Cursor state is local to the account/workspace; existing
-pending items may alert on first confirmed load, but historical decisions are
-not replayed on first load. These are best-effort alerts, not evidence of a
-handover or a replacement for checking the register. The Faculty Fund backend
-is disabled until separately deployed and explicitly enabled after testing.
 
 The bell's **Enable** button asks the browser for permission directly from the
 user's tap. The panel reports a granted, denied, dismissed, unsupported or failed

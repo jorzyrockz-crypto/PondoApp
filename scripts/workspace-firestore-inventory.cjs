@@ -62,8 +62,8 @@ async function main(argv){
  if(!/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(projectId))throw Error('Invalid Firebase project ID.');
  workspaceId(orgId);
  let adminApp,adminFirestore;
- try{adminApp=require('../faculty-fund-functions/node_modules/firebase-admin/app');adminFirestore=require('../faculty-fund-functions/node_modules/firebase-admin/firestore');}
- catch(e){throw Error('Install administrative dependencies first: npm ci --prefix faculty-fund-functions --ignore-scripts');}
+ try{adminApp=require('../emulator-tests/node_modules/firebase-admin/app');adminFirestore=require('../emulator-tests/node_modules/firebase-admin/firestore');}
+ catch(e){throw Error('Install administrative dependencies first: npm ci --prefix emulator-tests --ignore-scripts');}
  const app=adminApp.initializeApp({projectId},'pondo-readonly-inventory');
  try{const db=adminFirestore.getFirestore(app),result=await inventoryWorkspace({db,orgId});console.log(JSON.stringify({projectId,workspaceId:orgId,...result},null,2));}
  finally{await adminApp.deleteApp(app);}

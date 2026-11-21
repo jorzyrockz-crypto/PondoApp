@@ -4,13 +4,13 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {initializeTestEnvironment,assertFails,assertSucceeds}=require('@firebase/rules-unit-testing');
 const {doc,collection,getDoc,getDocs,setDoc,updateDoc,deleteDoc,query,where,writeBatch,serverTimestamp,arrayRemove}=require('firebase/firestore');
 if(!/^127\.0\.0\.1:\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST||''))throw Error('Local emulator required.');
-let env;const projectId='demo-pondo-security',orgId='org~faculty fund test cleanup',root='organizations/'+orgId,variant=process.env.PONDO_SPARK_DELETE_RULES||'ordinary';
-const variants={ordinary:'firestore.rules',facultyTest:'firestore.faculty-test.rules',facultyRelease:'firestore.faculty-release-candidate.rules',facultyRecovery:'firestore.faculty-recovery-candidate.rules'};
+let env;const projectId='demo-pondo-security',orgId='org~workspace cleanup test',root='organizations/'+orgId,variant=process.env.PONDO_SPARK_DELETE_RULES||'ordinary';
+const variants={ordinary:'firestore.rules'};
 if(!Object.hasOwn(variants,variant))throw Error('Invalid candidate variant.');
 test.before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.join(__dirname,'../experiments/spark-workspace-delete',variants[variant]),'utf8')}})});
 test.beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async ctx=>{const db=ctx.firestore(),rows={
  [root]:{name:'Cleanup',createdBy:'owner',discoverable:true},[root+'/members/owner']:{uid:'owner',role:'owner'},[root+'/members/otherowner']:{uid:'otherowner',role:'owner'},[root+'/members/editor']:{uid:'editor',role:'project-manager'},[root+'/members/viewer']:{uid:'viewer',role:'reviewer'},
- ['users/stranger']:{orgMemberships:['another-team'],displayName:'Stranger'},['users/viewer']:{orgMemberships:[orgId,'another-team'],displayName:'Private Viewer',activeOrganizationId:orgId},['users/viewer/organizationRequests/'+orgId]:{orgId},[root+'/sparkDiscoveryRevision/current']:{revision:1,updatedBy:'owner'},[root+'/sparkDiscoveryPeople/p']:{name:'Sample'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'owner',payables:[]},[root+'/refundReceipts/request']:{uid:'viewer',digest:'a'.repeat(64),image:'data:image/jpeg;base64,YWJj'},[root+'/hidden/private']:{secret:true},'invites/INVITE':{orgId:'org~faculty fund test cleanup',role:'reviewer',revoked:false,expiresAt:null,maxUses:null,usedCount:0,createdBy:'owner'}
+ ['users/stranger']:{orgMemberships:['another-team'],displayName:'Stranger'},['users/viewer']:{orgMemberships:[orgId,'another-team'],displayName:'Private Viewer',activeOrganizationId:orgId},['users/viewer/organizationRequests/'+orgId]:{orgId},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'owner',payables:[]},[root+'/refundReceipts/request']:{uid:'viewer',digest:'a'.repeat(64),image:'data:image/jpeg;base64,YWJj'},[root+'/hidden/private']:{secret:true},'invites/INVITE':{orgId:'org~workspace cleanup test',role:'reviewer',revoked:false,expiresAt:null,maxUses:null,usedCount:0,createdBy:'owner'}
  };for(const [p,v] of Object.entries(rows))await setDoc(doc(db,p),v)})});test.after(async()=>{if(env)await env.cleanup()});
 const db=uid=>env.authenticatedContext(uid).firestore(),freeze=()=>({deletionState:'deleting',deletingBy:'owner',deletingAt:serverTimestamp(),discoverable:false});
 test('only a current owner can freeze; the freeze immediately blocks normal reads, writes and invitations',async()=>{
@@ -19,15 +19,15 @@ test('only a current owner can freeze; the freeze immediately blocks normal read
  // A write prepared before the lock must still be evaluated against the lock.
  const stale=writeBatch(editor);stale.update(doc(editor,root+'/data/snapshot'),{_syncRevision:2,updatedBy:'editor'});
  await assertSucceeds(updateDoc(doc(owner,root),freeze()));await assertFails(stale.commit());
- await assertFails(getDoc(doc(viewer,root+'/data/snapshot')));await assertFails(getDoc(doc(viewer,root+'/sparkDiscoveryPeople/p')));await assertFails(setDoc(doc(editor,root+'/sparkDiscoveryRevision/current'),{revision:2,updatedBy:'editor',updatedAt:serverTimestamp()}));await assertFails(getDoc(doc(editor,root+'/refundReceipts/request')));await assertFails(getDoc(doc(outsider,'invites/INVITE')));
- await assertFails(setDoc(doc(owner,'invites/NEW'),{orgId:'org~faculty fund test cleanup',role:'reviewer',createdBy:'owner',usedCount:0,revoked:false,maxUses:null,expiresAt:null}));
+ await assertFails(getDoc(doc(viewer,root+'/data/snapshot')));await assertFails(getDoc(doc(editor,root+'/refundReceipts/request')));await assertFails(getDoc(doc(outsider,'invites/INVITE')));
+ await assertFails(setDoc(doc(owner,'invites/NEW'),{orgId:'org~workspace cleanup test',role:'reviewer',createdBy:'owner',usedCount:0,revoked:false,maxUses:null,expiresAt:null}));
  const redeem=writeBatch(outsider);redeem.set(doc(outsider,root+'/members/outsider'),{uid:'outsider',role:'reviewer',inviteCode:'INVITE'});redeem.update(doc(outsider,'invites/INVITE'),{usedCount:1});await assertFails(redeem.commit());
  await assertFails(updateDoc(doc(db('otherowner'),root),{discoverable:true}));
 });
 test('only the initiating owner can list and delete supported records; finalization and unknown data remain forbidden',async()=>{
  const owner=db('owner'),other=db('otherowner'),viewer=db('viewer');await assertSucceeds(updateDoc(doc(owner,root),freeze()));
  await assertSucceeds(getDocs(collection(owner,root+'/refundReceipts')));await assertFails(getDocs(collection(other,root+'/refundReceipts')));await assertFails(getDocs(collection(viewer,root+'/refundReceipts')));
- await assertSucceeds(getDocs(query(collection(owner,'invites'),where('orgId','==','org~faculty fund test cleanup'))));await assertFails(getDocs(query(collection(viewer,'invites'),where('orgId','==','org~faculty fund test cleanup'))));
+ await assertSucceeds(getDocs(query(collection(owner,'invites'),where('orgId','==','org~workspace cleanup test'))));await assertFails(getDocs(query(collection(viewer,'invites'),where('orgId','==','org~workspace cleanup test'))));
  await assertFails(deleteDoc(doc(other,root+'/data/snapshot')));await assertSucceeds(deleteDoc(doc(owner,root+'/data/snapshot')));await assertSucceeds(deleteDoc(doc(owner,root+'/refundReceipts/request')));await assertSucceeds(deleteDoc(doc(owner,'invites/INVITE')));
  await assertFails(deleteDoc(doc(owner,root+'/members/owner')));await assertFails(deleteDoc(doc(owner,root+'/members/viewer')));
  // The owner may remove only this org index and only while atomically
@@ -45,13 +45,13 @@ test('only the initiating owner can list and delete supported records; finalizat
 
 test('experimental client resumes bounded cleanup against the candidate rules without claiming completion',async()=>{
  const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs');
- const api=require('firebase/firestore'),owner=db('owner'),context={orgId:'org~faculty fund test cleanup',uid:'owner',currentUid:'owner',online:true};
+ const api=require('firebase/firestore'),owner=db('owner'),context={orgId:'org~workspace cleanup test',uid:'owner',currentUid:'owner',online:true};
  const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>context});
- assert.equal(await cleanup.freeze('org~faculty fund test cleanup','owner'),'frozen');
- let last;for(let i=0;i<20;i++){last=await cleanup.clearNext('org~faculty fund test cleanup','owner');if(last.state==='awaiting-verification')break;}
+ assert.equal(await cleanup.freeze('org~workspace cleanup test','owner'),'frozen');
+ let last;for(let i=0;i<20;i++){last=await cleanup.clearNext('org~workspace cleanup test','owner');if(last.state==='awaiting-verification')break;}
  assert.equal(last.state,'awaiting-verification');assert.equal(last.finalized,false);
  assert.equal((await assertSucceeds(getDoc(doc(owner,root)))).data().deletionState,'deleting');
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,root+'/hidden/private'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/members/owner'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/data/snapshot'))).exists(),false);assert.equal((await getDoc(doc(admin,root+'/sparkDiscoveryPeople/p'))).exists(),false);const user=(await getDoc(doc(admin,'users/viewer'))).data();assert.deepEqual(user.orgMemberships,['another-team']);assert.equal(user.activeOrganizationId,null);assert.equal((await getDoc(doc(admin,'users/viewer/organizationRequests/'+orgId))).exists(),false)});
+ await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,root+'/hidden/private'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/members/owner'))).exists(),true);assert.equal((await getDoc(doc(admin,root+'/data/snapshot'))).exists(),false);const user=(await getDoc(doc(admin,'users/viewer'))).data();assert.deepEqual(user.orgMemberships,['another-team']);assert.equal(user.activeOrganizationId,null);assert.equal((await getDoc(doc(admin,'users/viewer/organizationRequests/'+orgId))).exists(),false)});
 });
 
 
@@ -71,48 +71,4 @@ test('cleanup of the initiating owner’s join request preserves their unrelated
  const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');
  for(let i=0;i<40;i++){const r=await cleanup.clearNext(orgId,'owner');if(r.state==='awaiting-verification')break;}
  const profile=(await assertSucceeds(getDoc(doc(owner,'users/owner')))).data();assert.deepEqual(profile.orgMemberships,['another-team']);assert.equal(profile.activeOrganizationId,'another-team');assert.equal(profile.organizationId,null);assert.equal(profile.displayName,'Owner');
-});
-
-
-test('activated Faculty and recovery control paths are frozen without pretending to erase backups', {skip: !['facultyRelease','facultyRecovery'].includes(variant)}, async()=>{
- const actualOrg='org~activated faculty',actualRoot='organizations/'+actualOrg,owner=db('owner'),viewer=db('viewer');
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(const [p,v] of Object.entries({
-  [actualRoot]:{name:'Activated Faculty',createdBy:'owner',discoverable:true},[actualRoot+'/members/owner']:{uid:'owner',role:'owner'},[actualRoot+'/members/viewer']:{uid:'viewer',role:'reviewer'},
-  [actualRoot+'/facultyFundRelease/current']:{enabled:true,schema:1},[actualRoot+'/sparkDiscoveryPeople/p']:{name:'Sample'},[actualRoot+'/sparkDiscoveryRevision/current']:{revision:1,updatedBy:'owner'},
-  [actualRoot+'/sparkVerifiedBackups/backup']:{manifest:[],revision:1},[actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p']:{name:'Archived'},[actualRoot+'/sparkRestoreProof/current']:{remaining:0},[actualRoot+'/sparkRestoreProofSessions/session']:{state:'active'}
- }))await setDoc(doc(admin,p),v);});
- await assertSucceeds(getDoc(doc(viewer,actualRoot+'/facultyFundRelease/current')));
- if(variant==='facultyRelease')await assertSucceeds(getDoc(doc(viewer,actualRoot+'/sparkDiscoveryPeople/p')));
- if(variant==='facultyRecovery'){await assertSucceeds(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup')));await assertSucceeds(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p')));}
- await assertSucceeds(updateDoc(doc(owner,actualRoot),freeze()));
- await assertFails(getDoc(doc(viewer,actualRoot+'/facultyFundRelease/current')));await assertFails(getDoc(doc(viewer,actualRoot+'/sparkDiscoveryPeople/p')));
- await assertFails(getDoc(doc(owner,actualRoot+'/facultyFundRelease/current')));await assertFails(deleteDoc(doc(owner,actualRoot+'/facultyFundRelease/current')));
- await assertSucceeds(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup')));await assertSucceeds(getDoc(doc(owner,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p')));await assertFails(getDoc(doc(viewer,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p')));
- await assertFails(getDoc(doc(owner,actualRoot+'/sparkRestoreProof/current')));await assertFails(updateDoc(doc(owner,actualRoot+'/sparkRestoreProofSessions/session'),{state:'completed'}));
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,actualRoot+'/facultyFundRelease/current'))).exists(),true);assert.equal((await getDoc(doc(admin,actualRoot+'/sparkVerifiedBackups/backup/collections/sparkDiscoveryPeople/entries/p'))).exists(),true)});
-});
-
-
-test('known recovery entries can be cleared only by the initiating owner, while parents and unknown data remain',async()=>{
- const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs'),api=require('firebase/firestore'),owner=db('owner'),viewer=db('viewer'),other=db('otherowner');
- const header=root+'/sparkVerifiedBackups/backup',session=root+'/sparkRestoreProofSessions/session';
- const nested=header+'/collections/sparkDiscoveryPeople/entries/',claim=root+'/sparkRestoreProof/current/sessions/session/collections/sparkDiscoveryPayments/entries/p',unknown=header+'/collections/unknown/entries/p',orphan=root+'/sparkVerifiedBackups/missing/collections/sparkDiscoveryPeople/entries/p';
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();await setDoc(doc(admin,header),{manifest:[]});for(let i=0;i<21;i++)await setDoc(doc(admin,root+'/sparkVerifiedBackups/z'+String(i).padStart(2,'0')),{manifest:[]});await setDoc(doc(admin,session),{state:'completed'});for(let i=0;i<25;i++)await setDoc(doc(admin,nested+'p'+i),{name:'Person'});for(const p of [claim,unknown,orphan])await setDoc(doc(admin,p),{sample:true});});
- const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');
- await assertFails(getDocs(collection(viewer,nested.slice(0,-1))));await assertFails(getDocs(collection(other,root+'/sparkVerifiedBackups')));await assertFails(deleteDoc(doc(other,nested+'p0')));await assertFails(setDoc(doc(owner,nested+'p-new'),{name:'new'}));await assertFails(updateDoc(doc(owner,nested+'p0'),{name:'changed'}));await assertFails(deleteDoc(doc(owner,unknown)));await assertFails(deleteDoc(doc(owner,header)));await assertFails(deleteDoc(doc(owner,session)));
- const first=await cleanup.listRecoveryParents(orgId,'owner',{type:'backup'}),second=await cleanup.listRecoveryParents(orgId,'owner',{type:'backup',cursor:first.nextCursor});assert.equal(first.ids.length,20);assert.equal(second.ids.length,2);assert.equal(new Set([...first.ids,...second.ids]).size,22);assert.equal(second.nextCursor,null);assert.equal(first.completeInventory,false);assert.deepEqual((await cleanup.listRecoveryParents(orgId,'owner',{type:'session'})).ids,['session']);
- assert.equal((await cleanup.clearRecoveryEntries(orgId,'owner',{type:'backup',parentId:'backup'})).removed,20);assert.equal((await cleanup.clearRecoveryEntries(orgId,'owner',{type:'backup',parentId:'backup'})).removed,5);assert.equal((await cleanup.clearRecoveryEntries(orgId,'owner',{type:'backup',parentId:'backup'})).state,'awaiting-verification');
- assert.equal((await cleanup.clearRecoveryEntries(orgId,'owner',{type:'session',parentId:'session'})).removed,1);await assert.rejects(cleanup.clearRecoveryEntries(orgId,'owner',{type:'backup',parentId:'missing'}),/inventory required/);
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();assert.equal((await getDoc(doc(admin,header))).exists(),true);assert.equal((await getDoc(doc(admin,session))).exists(),true);assert.equal((await getDoc(doc(admin,nested+'p0'))).exists(),false);assert.equal((await getDoc(doc(admin,claim))).exists(),false);assert.equal((await getDoc(doc(admin,unknown))).exists(),true);assert.equal((await getDoc(doc(admin,orphan))).exists(),true)});
-});
-
-
-test('recovery checkpoint workflow resumes through backups and sessions without finalizing',async()=>{
- const {createExperimentalSparkCleanup}=await import('../experiments/spark-workspace-delete/cleanup.mjs'),api=require('firebase/firestore'),owner=db('owner');
- const paths=[root+'/sparkVerifiedBackups/a',root+'/sparkVerifiedBackups/b',root+'/sparkRestoreProofSessions/s',root+'/sparkVerifiedBackups/a/collections/sparkDiscoveryPeople/entries/p',root+'/sparkVerifiedBackups/b/collections/sparkDiscoveryPayments/entries/q',root+'/sparkRestoreProof/current/sessions/s/collections/sparkDiscoveryLines/entries/r'];
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(const p of paths)await setDoc(doc(admin,p),{sample:true});});
- const cleanup=createExperimentalSparkCleanup({db:owner,api,getContext:()=>({orgId,uid:'owner',currentUid:'owner',online:true})});await cleanup.freeze(orgId,'owner');let checkpoint={type:'backup',cursor:null},r;
- for(let i=0;i<12;i++){r=await cleanup.clearRecoveryNext(orgId,'owner',checkpoint);if(r.state==='awaiting-verification')break;checkpoint=r.checkpoint;}
- assert.deepEqual(r,{state:'awaiting-verification',finalized:false});
- await env.withSecurityRulesDisabled(async ctx=>{const admin=ctx.firestore();for(const p of paths.slice(0,3))assert.equal((await getDoc(doc(admin,p))).exists(),true);for(const p of paths.slice(3))assert.equal((await getDoc(doc(admin,p))).exists(),false);});
 });

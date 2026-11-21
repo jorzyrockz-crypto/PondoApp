@@ -1,7 +1,0 @@
-# Faculty Fund retirement
-
-Faculty Fund is retired from the Pondo app. Its screens, transaction projections, report integration, role assignment, notifications, and background listeners are no longer active. Regular funds, cash donations, contribution and refund workflows remain separate.
-
-**Existing Faculty Fund balances and history have not been deleted or migrated.** They are stored in a separate ledger and are excluded from the app's ordinary totals, reports, transaction history, and ordinary snapshot JSON exports. Those figures are therefore not a complete accounting of any existing Faculty Fund cash. Recovering or reviewing that data requires an authorized administrator to use an appropriate independent, verified access or recovery procedure; the retired app UI does not provide one. Do not recreate balances in regular funds without a deliberate, reconciled migration.
-
-The old Faculty Fund source and its tests are retained for reference and potential recovery, not as an active app feature. The Firebase configuration no longer selects the Faculty Functions codebase for a future deployment. This repository change does **not** delete or disable already deployed callable functions, change or publish Firestore rules, revoke existing permissions, or alter stored records. Independently deployed services and security rules must be reviewed separately by an authorized administrator. No deployment was performed as part of retirement.

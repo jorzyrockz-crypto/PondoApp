@@ -12,7 +12,7 @@ test('organization names preserve Unicode and canonicalize whitespace and case',
 });
 test('the app uses Firestore rather than organization callable functions',()=>{
  const app=fs.readFileSync('index.html','utf8'),rules=fs.readFileSync('firestore.rules','utf8');
- assert.match(app,/createOrganizationDirectory/);assert.doesNotMatch(app,/httpsCallable\([^,]+,\s*['"]org(?:Create|Search|RequestJoin|DecideRequest)/);assert.doesNotMatch(app,/facultyCall\('facultyFundTransition'\)/);
+ assert.match(app,/createOrganizationDirectory/);assert.doesNotMatch(app,/httpsCallable\([^,]+,\s*['"]org(?:Create|Search|RequestJoin|DecideRequest)/);
  assert.match(rules,/orgId == 'org~' \+ name\.lower\(\)/);assert.match(rules,/getAfter\(memberPath\(orgId, uid\(\)\)\)/);
  assert.match(rules,/match \/joinRequests\/\{requester\}/);assert.match(rules,/allow list: if isOwner\(orgId\)/);
 });

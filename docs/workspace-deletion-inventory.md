@@ -7,7 +7,7 @@ The tool enumerates workspace descendant collection IDs using administrative Fir
 ## Run by a Firebase project administrator
 
 1. Confirm the exact Firebase project and workspace ID in the Firebase console. The workspace ID can contain spaces; quote it in the shell. Use synthetic staging data first.
-2. Install Node 22 and the local dependencies: `npm ci --prefix faculty-fund-functions --ignore-scripts`. Authenticate locally using Google Application Default Credentials with **read-only** permission to inspect the intended Firestore project. Do not paste credentials, tokens, or service account keys into chat or source files.
+2. Install Node 22 and the local dependencies: `npm ci --prefix emulator-tests --ignore-scripts`. Authenticate locally using Google Application Default Credentials with **read-only** permission to inspect the intended Firestore project. Do not paste credentials, tokens, or service account keys into chat or source files.
 3. Run `node scripts/workspace-firestore-inventory.cjs 'YOUR_PROJECT_ID' 'YOUR_WORKSPACE_ID'`. The tool refuses to run when the Firestore emulator environment variable is set, to avoid confusing an emulator result with the live project.
 4. Inspect the aggregate counts. An error or exceeded limit means the inventory is incomplete. A successful result is a point-in-time observation only; it does not lock the workspace against concurrent writes. Keep output private: even collection names and counts can reveal operational details.
 

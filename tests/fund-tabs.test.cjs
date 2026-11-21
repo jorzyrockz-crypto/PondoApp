@@ -18,6 +18,6 @@ test('Funds presents one navigation and a shared transaction shortcut without mi
  assert.match(funds,/id="fundHistoryLink"[^>]*onclick="switchTab\('transactions'\)"/);
  assert.match(funds,/aria-label="Fund types"/);
  for(const name of ['regular','donations'])assert.match(funds,new RegExp(`id="fundView-${name}" role="tabpanel"`));
- assert.match(funds,/id="fundSourceBalance"/);assert.match(funds,/id="donationViewBalance"/);assert.doesNotMatch(funds,/id="facultyViewBalance"/);
+ assert.match(funds,/id="fundSourceBalance"/);assert.match(funds,/id="donationViewBalance"/);
  assert.match(funds,/Regular funds referenced by older receipts stay under Regular Funds/);
 });

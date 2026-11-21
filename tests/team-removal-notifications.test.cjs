@@ -4,7 +4,7 @@ const html=fs.readFileSync('index.html','utf8');
 function removal(){
  const src=html.slice(html.indexOf('async function removeMember(uid)'),html.indexOf('\nasync function leaveOrganization()',html.indexOf('async function removeMember(uid)')));
  const state={orgId:'org',orgName:'School',uid:'owner',role:'owner',memberConfirmed:true,members:[{uid:'member',displayName:'Alice'}]},ops=[],messages=[],pushed=[],pending=new Set();
- const c={pondoTeamState:state,window:{pondoCurrentUser:{uid:'owner'},pushNotification:n=>pushed.push(n)},navigator:{onLine:true},facultyPresidentKnown:true,facultyPresidentUid:null,pendingTeamRemovals:pending,confirmAction:async()=>true,notify:m=>messages.push(m),firestoreDb:{},doc:(...args)=>args.length===1?['generated','notice']:args.slice(1),collection:(_,...args)=>args,serverTimestamp:()=>'<server>',setTimeout(){},runTransaction:async(_db,fn)=>fn({get:async ref=>({exists:()=>true,data:()=>({name:'School'})}),set:(ref,data)=>ops.push(['set',ref,data]),delete:ref=>ops.push(['delete',ref])})};
+ const c={pondoTeamState:state,window:{pondoCurrentUser:{uid:'owner'},pushNotification:n=>pushed.push(n)},navigator:{onLine:true},pendingTeamRemovals:pending,confirmAction:async()=>true,notify:m=>messages.push(m),firestoreDb:{},doc:(...args)=>args.length===1?['generated','notice']:args.slice(1),collection:(_,...args)=>args,serverTimestamp:()=>'<server>',setTimeout(){},runTransaction:async(_db,fn)=>fn({get:async ref=>({exists:()=>true,data:()=>({name:'School'})}),set:(ref,data)=>ops.push(['set',ref,data]),delete:ref=>ops.push(['delete',ref])})};
  vm.runInNewContext(src,c);return {c,state,ops,messages,pushed,pending};
 }
 test('confirmed owner removal atomically writes a notice and revokes membership',async()=>{

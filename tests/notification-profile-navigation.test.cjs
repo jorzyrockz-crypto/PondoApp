@@ -5,7 +5,7 @@ function env(){
  const state={orgId:'org',memberConfirmed:true,baselineReady:true,role:'owner',members:[{uid:'actor',displayName:'Leonard Fuentes',photoURL:'https://lh3.googleusercontent.com/a/photo'}]};
  const events=[],n={id:'n',type:'team',orgId:'org',actorUid:'actor',body:'1 new contribution payment',action:{tab:'contributions',activityId:'a',period:'2026-11'}};
  const ctx=vm.createContext({window:{pondoTeamState:state},URL,document:{body:{classList:{contains:()=>false}},getElementById:()=>null,querySelector:()=>null},visibleNotifications:()=>[n],markNotificationRead:id=>events.push(['read',id]),renderNotifCenter:()=>events.push(['render']),closeNotifCenter:()=>events.push(['close']),switchTab:t=>events.push(['tab',t]),openContributionDetails:id=>events.push(['details',id]),appAlert:msg=>events.push(['alert',msg]),contributionActivities:[{id:'a',monthlyPeriods:['2026-10','2026-11']}],contributionSelectedPeriod:{}});
- vm.runInContext(source('function escapeTeamText(', '\nfunction ',)+'\n'+source('function notifActorAvatar(', '\nfunction renderNotifCenter(')+source('function notificationAction(', '\nwindow.openNotification='),ctx);
+ vm.runInContext(source('function escapeTeamText(', '\nfunction ',)+'\n'+source('function notifActorAvatar(', '\nfunction renderNotifCenter(')+source('function supportedNotificationAction(', '\nfunction visibleNotifications(')+source('function notificationAction(', '\nwindow.openNotification='),ctx);
  return {ctx,state,events,n};
 }
 test('team avatar resolves only confirmed current workspace members and safely falls back',()=>{
@@ -22,7 +22,7 @@ test('missing activity, unsynced or different workspace never opens a specific r
 });
 test('legacy summaries route usefully while existing actions stay intact',()=>{
  const {ctx}=env();for(const [body,tab] of [['1 new contribution payment','contributions'],['1 new contribution activity','contributions'],['1 cash donation','transactions'],['2 new projects','projects'],['1 new fund','funds'],['Shared records were updated.','dashboard']])assert.equal(ctx.notificationAction({type:'team',body}).tab,tab);
- assert.equal(ctx.notificationAction({type:'team',body:'1 new contribution payment',action:{tab:'transactions',audit:true}}).tab,'transactions');assert.equal(ctx.notificationAction({type:'reminder',action:{tab:'contributions'}}).tab,'contributions');assert.equal(ctx.notificationAction({type:'reminder'}),null);assert.equal(ctx.notificationAction({type:'team',action:{tab:'malicious'}}).tab,'dashboard');
+ assert.equal(ctx.notificationAction({type:'team',body:'1 new contribution payment',action:{tab:'transactions',audit:true}}).tab,'transactions');assert.equal(ctx.notificationAction({type:'reminder',action:{tab:'contributions'}}).tab,'contributions');assert.equal(ctx.notificationAction({type:'reminder'}),null);assert.equal(ctx.notificationAction({type:'team',action:{tab:'refunds',memberRefundHistory:true}}).memberRefundHistory,true);assert.equal(ctx.notificationAction({type:'team',action:{tab:'malicious'}}).tab,'dashboard');
 });
 test('modal defers navigation and read state; hidden notification is ignored',()=>{
  const {ctx,events}=env();ctx.document.body.classList.contains=()=>true;ctx.openNotification('n');assert.equal(events[0][0],'alert');assert.ok(!events.some(e=>e[0]==='read'));events.length=0;ctx.openNotification('unknown');assert.equal(events.length,0);
@@ -40,6 +40,6 @@ test('snapshot routing identifies only unambiguous activities and periods',()=>{
 test('notification markup uses native button, escaped IDs and photo error fallback',()=>{
  assert.match(html,/data-notif-id="'\+escapeTeamText\(n.id\)/);assert.match(html,/openNotification\(this.dataset.notifId\)/);assert.match(html,/img.addEventListener\('error',\(\)=>\{img.hidden=true\}/);assert.match(html,/actorUid:typeof updatedBy==='string'\?updatedBy:null/);
 });
-test('retired Faculty notification has no navigation target',()=>{
- const {ctx,events,n}=env();n.action={tab:'funds',facultyFund:true};assert.equal(ctx.notificationAction(n),null);ctx.openNotification('n');assert.ok(!events.some(e=>e[0]==='tab'||e[0]==='faculty'));
+test('notifications with unsupported action fields have no navigation target',()=>{
+ const {ctx,events,n}=env();n.action={tab:'funds',unknownDestination:true};assert.equal(ctx.notificationAction(n),null);ctx.openNotification('n');assert.ok(!events.some(e=>e[0]==='tab'));
 });
