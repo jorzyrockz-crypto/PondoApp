@@ -1,8 +1,8 @@
 /* Quick actions route to existing workflows; no financial records are written here. */
 (function(){
  'use strict';
- const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),suggestion=$('quickActionSuggestion'),next=$('quickActionNext'),status=$('quickActionStatus'),requirements=$('quickActionRequirements');
- let previousFocus=null,scope=null,selected=null,closing=false,timer=null,matches=[],matchIndex=0,matchKind='exact';
+ const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),list=$('quickActionList'),status=$('quickActionStatus');
+ let previousFocus=null,scope=null,closing=false,timer=null,matches=[],matchKind='exact',stage='actions',chosenActivity='',chosenMonth='';
  const items=[
   {id:'fund',title:'Add a fund',description:'Create a regular fund source.',keywords:'fund new create source'},
   {id:'project',title:'Add a project',description:'Create a project for the workspace.',keywords:'project new create'},
@@ -69,49 +69,49 @@
   return editable();
  }
  function activeActivities(){return contributionActivities.filter(a=>a&&!a.deathAid&&!a.archived&&!a.pendingDeletion);}
- function options(select,placeholder,values){select.replaceChildren();const first=document.createElement('option');first.value='';first.textContent=placeholder;select.appendChild(first);for(const [value,label] of values){const option=document.createElement('option');option.value=value;option.textContent=label;select.appendChild(option)}}
- function activity(){return activeActivities().find(a=>a.id===$('quickActionActivity').value);}
- function refreshPeople(){
-  const a=activity(),period=$('quickActionPeriod').value,person=$('quickActionPerson');
-  options(person,'Choose a contributor',a?contributionPeopleForMonth(a,monthlyContribution(a)?period:null).filter(p=>!p.pendingDeletion&&contributionBalance(p)>0).map(p=>[p.id,p.name]):[]);
-  $('quickActionPersonHint').textContent=a?(person.options.length===1?'No contributors with an outstanding balance in this activity and period.':'Choose the contributor whose payment you are recording.'):'Choose an activity first.';
-  updateNext();
+ function activity(){return activeActivities().find(a=>a.id===chosenActivity);}
+ function accessibleSelection(id,activityId,personId,month){
+  if(!sameContext()||!allowed(id))return false;
+  if(id!=='contribution')return true;
+  const a=activeActivities().find(x=>x.id===activityId);
+  return !!(a&&(!monthlyContribution(a)||a.monthlyPeriods.includes(month))&&contributionPeopleForMonth(a,monthlyContribution(a)?month:null).some(p=>p.id===personId&&!p.pendingDeletion&&contributionBalance(p)>0));
  }
- function refreshActivity(){
-  const a=activity(),period=$('quickActionPeriod'),periodWrap=$('quickActionPeriodWrap');periodWrap.hidden=!a||!monthlyContribution(a);
-  options(period,'Choose a month',a&&monthlyContribution(a)?a.monthlyPeriods.map(m=>[m,m]):[]);
-  if(a&&monthlyContribution(a))period.value=selectedContributionMonth(a)||'';
-  refreshPeople();
+ function launch(id,activityId='',personId='',month=''){
+  if(closing)return;
+  if(!accessibleSelection(id,activityId,personId,month)){status.textContent='Selection or workspace access changed. Choose an available action again.';return;}
+  const originalScope=scope;close(()=>openSelection(id,activityId,personId,month,originalScope));
  }
- function selectedValid(){
-  if(!selected||!allowed(selected)||!sameContext())return false;
-  if(selected!=='contribution')return true;
-  const a=activity(),month=$('quickActionPeriod').value,person=$('quickActionPerson').value;
-  return !!(a&&(!monthlyContribution(a)||a.monthlyPeriods.includes(month))&&contributionPeopleForMonth(a,monthlyContribution(a)?month:null).some(p=>p.id===person&&!p.pendingDeletion&&contributionBalance(p)>0));
+ function addChoice(title,description,handler){
+  const button=document.createElement('button'),name=document.createElement('strong'),detail=document.createElement('span');
+  button.type='button';button.className='quick-action-choice';name.textContent=title;detail.textContent=description;button.append(name,detail);button.addEventListener('click',handler);list.appendChild(button);
  }
- function updateNext(){next.disabled=!selectedValid();}
- function choose(id){
-  const item=matches.find(x=>x.id===id);
-  if(closing||!item||!allowed(id)||!sameContext())return;
-  selected=id;query.value=item.title;suggestion.hidden=true;$('quickActionGhost').replaceChildren();
-  requirements.hidden=id!=='contribution';
-  if(id==='contribution'){options($('quickActionActivity'),'Choose an activity',activeActivities().map(a=>[a.id,a.title]));refreshActivity()}
-  updateNext();status.textContent=item.title+' selected. '+(id==='contribution'?'Choose an activity and contributor.':'Select Next to continue.');
+ function selectAction(id){
+  if(closing||!matches.some(i=>i.id===id)||!sameContext()||!allowed(id)){status.textContent='Selection or workspace access changed. Search again.';return;}
+  if(id==='contribution'){stage='activity';chosenActivity='';chosenMonth='';showStage();return;}
+  launch(id);
  }
- function showSuggestion(){
-  const item=matches[matchIndex];suggestion.hidden=!item;
-  $('quickActionGhost').replaceChildren();
-  if(!item)return;
-  $('quickActionSuggestionButton').textContent=item.title;
-  $('quickActionSuggestionButton').setAttribute('aria-label','Use suggestion: '+item.title);
-  $('quickActionSuggestionDescription').textContent=matchKind==='fallback'?'No matching action was found. You can record a payment in the separate Other Funds register instead.':matchKind==='closest'?'Closest keyword match. '+item.description:item.description;
-  $('quickActionSuggestionCount').textContent=(matchIndex+1)+' of '+matches.length;
-  $('quickActionPrevious').disabled=matches.length<2;$('quickActionFollowing').disabled=matches.length<2;
-  if(item.title.toLocaleLowerCase().startsWith(query.value.toLocaleLowerCase())&&query.value.length<item.title.length){
-   const typed=document.createElement('span');typed.textContent=query.value;typed.className='quick-action-ghost-typed';
-   $('quickActionGhost').append(typed,document.createTextNode(item.title.slice(query.value.length)));
+ function showStage(){
+  list.replaceChildren();$('quickActionSearchArea').hidden=stage!=='actions';$('quickActionBack').hidden=stage==='actions';
+  if(stage==='actions'){
+   for(const item of matches)addChoice(item.title,matchKind==='fallback'?'No matching action. This is a separate Other Funds payment.':(matchKind==='closest'?'Closest keyword match. ':'')+item.description,()=>selectAction(item.id));
+   status.textContent=matches.length?(matchKind==='fallback'?'No matching action. Choose the Other Funds alternative if appropriate.':matchKind==='closest'?'Closest keyword matches. Choose an action.':matches.length+' available action'+(matches.length===1?'':'s')+'. Choose one to open it.'):query.value.trim()?'No available action matches. Try another phrase or check workspace access.':'No actions are currently available.';
+   return;
   }
-  status.textContent=(matchKind==='fallback'?'No matching action. Suggested alternative: ':matchKind==='closest'?'Closest keyword match: ':'Suggestion '+(matchIndex+1)+' of '+matches.length+': ')+item.title+'. Press Enter or use the suggestion button to select.'+(matches.length>1?' Use arrow keys to browse.':'');
+  if(!sameContext()||!allowed('contribution')){status.textContent='Workspace access changed. Go back and search again.';return;}
+  const a=activity();
+  if(stage==='activity'){
+   status.textContent='Choose a contribution activity.';for(const item of activeActivities())addChoice(item.title,'Choose this activity',()=>{if(!sameContext()||!allowed('contribution')||!activeActivities().some(x=>x.id===item.id)){status.textContent='This activity or workspace is no longer available.';return;}chosenActivity=item.id;chosenMonth='';stage=monthlyContribution(item)?'period':'person';showStage();});
+   if(!list.childElementCount)status.textContent='No active contribution activities are available. Go back to create one.';
+  }else if(!a){status.textContent='This activity is no longer available. Go back and choose another.';}
+  else if(stage==='period'){
+   status.textContent='Choose a month for '+a.title+'.';for(const month of a.monthlyPeriods)addChoice(month,'Choose this month',()=>{if(!sameContext()||!allowed('contribution')||!activity()?.monthlyPeriods?.includes(month)){status.textContent='This month or workspace is no longer available.';return;}chosenMonth=month;stage='person';showStage()});
+   if(!list.childElementCount)status.textContent='No months are available for this activity.';
+  }else if(stage==='person'){
+   status.textContent='Choose a contributor for '+a.title+(chosenMonth?' · '+chosenMonth:'')+'.';
+   for(const person of contributionPeopleForMonth(a,monthlyContribution(a)?chosenMonth:null).filter(p=>!p.pendingDeletion&&contributionBalance(p)>0))addChoice(person.name,'Open contribution payment',()=>launch('contribution',a.id,person.id,chosenMonth));
+   if(!list.childElementCount)status.textContent='No contributors with an outstanding balance for this activity and month.';
+  }
+  const first=list.querySelector('button');if(first)first.focus();else $('quickActionBack').focus();
  }
  // Only suggest meaningful keyword or small typo matches; never silently choose
  // an action or route to a financial form based on an unrecognized phrase.
@@ -141,10 +141,13 @@
    else if(allowed('other')){matchKind='fallback';matches=items.filter(i=>i.id==='other');}
   }
   if(matchKind==='exact'){const normalized=phraseKey(text),rank=i=>phraseKey(i.title)===normalized?3:(synonyms[i.id]||[]).some(p=>phraseKey(p)===normalized)?2:i.title.toLocaleLowerCase().startsWith(text)?1:0;matches.sort((a,b)=>rank(b)-rank(a));}
-  matchIndex=0;selected=null;requirements.hidden=true;updateNext();showSuggestion();
-  if(!matches.length)status.textContent=terms.length?'No available action matches. Try another phrase or check workspace access.':'Start typing to see an action suggestion.';
+  if(!terms.length)matches=items.filter(i=>allowed(i.id));
+  stage='actions';showStage();
  }
- function browse(step){if(!matches.length)return;matchIndex=(matchIndex+step+matches.length)%matches.length;showSuggestion()}
+ window.pondoQuickActionValidate=function(){
+  if(overlay.hidden||stage==='actions')return;
+  if(!sameContext()||!allowed('contribution')){list.replaceChildren();stage='actions';$('quickActionSearchArea').hidden=false;$('quickActionBack').hidden=true;query.value='';status.textContent='Workspace access changed. Close and reopen Quick Action.';if($('appDialogOverlay').hidden)query.focus({preventScroll:true});}
+ };
  function availableToOpen(){return window.trackerReady&&!trackerFatal&&!$('pondoApp').inert&&!document.body.classList.contains('modal-open')&&$('appDialogOverlay').hidden&&$('presentation').style.display==='none'&&$('presentModal').style.display==='none'&&$('authGate').style.display==='none';}
  window.openQuickAction=function(){
   if(!overlay.hidden||!availableToOpen())return;
@@ -155,6 +158,7 @@
  };
  function reduced(){return matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.classList.contains('reduce-motion')||appSettings?.motion?.reduceMotion;}
  function finishClose(proceed){
+  if(proceed&&!$('appDialogOverlay').hidden){overlay.classList.remove('is-closing');closing=false;status.textContent='Close the open message, then choose the action again.';return;}
   overlay.hidden=true;overlay.classList.remove('is-closing');document.body.classList.remove('modal-open');closing=false;
   if(!$('appDialogOverlay').hidden){previousFocus=null;return;}
   if(proceed){focusEntry();proceed();}
@@ -184,11 +188,9 @@
   if(id==='member-balance'||id==='member-statement'){switchTab('report');focusEntry();window.openAccountStatement();}
  }
  query.addEventListener('input',render);
- query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){if(matches.length&&!selected){e.preventDefault();browse(e.key==='ArrowDown'?1:-1)}}else if((e.key==='Enter'||e.key==='Tab')&&!selected&&matches.length){e.preventDefault();choose(matches[matchIndex].id);if(e.key==='Tab'&&!next.disabled)next.focus()}});
- $('quickActionSuggestionButton').addEventListener('click',()=>{if(matches[matchIndex]){choose(matches[matchIndex].id);query.focus()}});
- $('quickActionPrevious').addEventListener('click',()=>browse(-1));$('quickActionFollowing').addEventListener('click',()=>browse(1));
- $('quickActionActivity').addEventListener('change',refreshActivity);$('quickActionPeriod').addEventListener('change',refreshPeople);$('quickActionPerson').addEventListener('change',updateNext);
- next.addEventListener('click',()=>{if(!selectedValid()){status.textContent='Selection or workspace access changed. Choose an available action again.';updateNext();query.focus();return;}const id=selected,a=$('quickActionActivity').value,p=$('quickActionPerson').value,m=$('quickActionPeriod').value,originalScope=scope;close(()=>openSelection(id,a,p,m,originalScope));});
+ query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'){const first=list.querySelector('button');if(first){e.preventDefault();first.focus()}}else if(e.key==='Enter'&&stage==='actions'){const first=list.querySelector('button');if(first){e.preventDefault();first.click()}}});
+ list.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key))return;const buttons=[...list.querySelectorAll('button')],index=buttons.indexOf(document.activeElement);if(index<0||!buttons.length)return;e.preventDefault();buttons[(index+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length].focus()});
+ $('quickActionBack').addEventListener('click',()=>{if(stage==='person'&&activity()&&monthlyContribution(activity()))stage='period';else if(stage==='person'||stage==='period')stage='activity';else stage='actions';showStage();if(stage==='actions')query.focus()});
  $('quickActionClose').addEventListener('click',()=>close());$('quickActionCancel').addEventListener('click',()=>close());overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
  overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return;}if(e.key==='Tab'){const nodes=[...dialog.querySelectorAll('button:not([disabled]):not([tabindex="-1"]),input:not([disabled]),select:not([disabled])')].filter(x=>x.getClientRects().length);if(!nodes.length){e.preventDefault();return;}if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes[nodes.length-1].focus()}else if(!e.shiftKey&&document.activeElement===nodes[nodes.length-1]){e.preventDefault();nodes[0].focus()}}});
  document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.defaultPrevented||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey||!overlay.hidden||!availableToOpen())return;const target=e.target instanceof Element?e.target:null;if(!target||target.closest('button,a,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[role="button"],[role="link"],[role="tab"],[role="option"],[role="checkbox"],[role="radio"],[role="switch"],[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"],[role="slider"],[role="spinbutton"],[role="textbox"],[role="combobox"],[role="treeitem"],audio[controls],video[controls],[tabindex]:not([tabindex="-1"]),.topbar,.bottomnav'))return;if(!$('navMoreMenu').hidden||!$('headerMoreMenu').hidden||$('teamHeaderBadge').getAttribute('aria-expanded')==='true'||$('headerAvatarBtn').getAttribute('aria-expanded')==='true'||$('notifBellBtn').getAttribute('aria-expanded')==='true')return;e.preventDefault();window.openQuickAction()});
