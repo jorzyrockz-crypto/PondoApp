@@ -6,7 +6,7 @@ class Element{
  appendChild(child){this.children.push(child)} replaceChildren(...children){this.children=children;this.value=''} focus(){this.focused=true}
 }
 function setup(){
- const ids={};for(const name of ['fabTxType','txDescriptionSuggestions','payableDescriptionSuggestions','refundPayerSuggestions','payableSupplierSuggestions','payableCategorySuggestions','projectNameSuggestions','projectDescriptionSuggestions','activityTitleSuggestions','activityDescriptionSuggestionLabel','activityDescriptionSuggestion','cActivityDescription'])ids[name]=new Element();ids.fabTxType.value='OUT';
+ const ids={};for(const name of ['fabTxType','txDescriptionSuggestions','incomeDescriptionSuggestions','txPayeeSuggestions','payableDescriptionSuggestions','refundPayerSuggestions','payableSupplierSuggestions','payableCategorySuggestions','projectNameSuggestions','projectDescriptionSuggestions','activityTitleSuggestions','activityDescriptionSuggestionLabel','activityDescriptionSuggestion','cActivityDescription'])ids[name]=new Element();ids.fabTxType.value='OUT';
  const state={orgId:null};const ctx=vm.createContext({window:{pondoTeamState:state,pondoCurrentUser:{uid:'user'}},document:{getElementById:id=>ids[id]||null,createElement:()=>new Element()},txs:[],payables:[],projects:[],contributionActivities:[],payableContext:{kind:'advance'},appConfirm:async()=>true});vm.runInContext(source,ctx);return {ctx,ids,state};
 }
 const values=el=>el.children.map(o=>o.value);
@@ -42,4 +42,9 @@ test('form hooks and workspace lifecycle keep suggestions current without persis
  for(const id of ['txDescriptionSuggestions','payableDescriptionSuggestions','refundPayerSuggestions','payableSupplierSuggestions','payableCategorySuggestions','projectNameSuggestions','projectDescriptionSuggestions','activityTitleSuggestions'])assert.ok(html.includes('list="'+id+'"'));
  assert.match(html,/function renderAll\(\)\{\s*renderDashboardActions\(\);\s*refreshDescriptionSuggestions\(\)/);assert.match(html,/window\.clearDescriptionSuggestions\) window\.clearDescriptionSuggestions\(\)/);assert.match(html,/payableContext=\{projectId:p\?p\.id:null,payableId:null,kind\}/);
  assert.doesNotMatch(source,/saveAll\(|localStorage|pondoCloudSync/);
+});
+
+test('income and payee suggestions are workspace scoped and never copy financial values',()=>{
+ const {ctx:c,ids,state}=setup();c.txs.push({type:'IN',description:'Membership',payee:'Alice',amount:100,receiptNo:'secret'}, {type:'OUT',description:'Paper',payee:'Printer'});c.refreshDescriptionSuggestions();assert.deepEqual(values(ids.incomeDescriptionSuggestions),['Membership']);assert.deepEqual(values(ids.txPayeeSuggestions),['Printer','Alice']);assert.ok(!values(ids.txPayeeSuggestions).includes('secret'));
+ Object.assign(state,{orgId:'loading',role:'owner',memberConfirmed:false,baselineReady:false});c.refreshDescriptionSuggestions();assert.deepEqual(values(ids.incomeDescriptionSuggestions),[]);assert.deepEqual(values(ids.txPayeeSuggestions),[]);c.clearDescriptionSuggestions();assert.deepEqual(values(ids.txPayeeSuggestions),[]);
 });
