@@ -5,7 +5,7 @@ test('team has its own accessible modal and preserves collaboration controls',()
  assert.match(html,/id="teamModal" class="team-modal no-print" hidden/);assert.match(html,/role="dialog" aria-modal="true" aria-labelledby="teamModalTitle"/);
  assert.ok(html.indexOf('id="teamPanel"')<html.indexOf('id="settingsModal"'));assert.doesNotMatch(html,/data-stab="team"/);
  for(const id of ['teamWorkspaceList','teamMembersList','teamJoinRequests','teamInviteRole','teamSearchOrg','teamNewOrgName','teamColor','teamIcon'])assert.ok(html.includes(`id="${id}"`),id);
- assert.match(html,/@media\(max-width:700px\).*?\.team-dialog/s);assert.match(html,/stopImmediatePropagation\(\);closeTeamModal/);
+ assert.match(html,/@media\(max-width:700px\).*?\.team-dialog/s);assert.match(html,/stopImmediatePropagation\(\);if\(activeOverlay===actionOverlay\)closeTeamAction\(\);else closeTeamModal/);
 });
 test('shared appearance saves only for a confirmed online owner and bounds values',async()=>{
  const src=html.slice(html.indexOf('async function saveTeamAppearance()'),html.indexOf('\nwindow.pondoTeam = {',html.indexOf('async function saveTeamAppearance()')));
