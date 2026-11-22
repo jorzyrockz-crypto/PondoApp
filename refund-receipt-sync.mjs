@@ -1,4 +1,4 @@
-import { refundReceiptDigest } from './member-refund-service.mjs';
+import { refundReceiptDigest } from './member-refund-service.mjs?v=175';
 // Plan only newly introduced editor receipt references. Never publish a
 // pointer whose image cannot be verified. Existing references stay immutable.
 export async function planEditorRefundReceipts(snapshot, baselineJSON) {
