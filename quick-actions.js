@@ -1,8 +1,8 @@
 /* Quick actions route to existing workflows; no financial records are written here. */
 (function(){
  'use strict';
- const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),list=$('quickActionList'),next=$('quickActionNext'),status=$('quickActionStatus'),requirements=$('quickActionRequirements');
- let previousFocus=null,scope=null,selected=null,closing=false,timer=null;
+ const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),suggestion=$('quickActionSuggestion'),next=$('quickActionNext'),status=$('quickActionStatus'),requirements=$('quickActionRequirements');
+ let previousFocus=null,scope=null,selected=null,closing=false,timer=null,matches=[],matchIndex=0;
  const items=[
   {id:'income',title:'Record income',description:'Add money received by a fund.',keywords:'income received money deposit fund'},
   {id:'expense',title:'Record an expense',description:'Record a payment from a fund.',keywords:'expense spent payment pay purchase out'},
@@ -48,14 +48,37 @@
   return !!(a&&(!monthlyContribution(a)||a.monthlyPeriods.includes(month))&&contributionPeopleForMonth(a,monthlyContribution(a)?month:null).some(p=>p.id===person&&!p.pendingDeletion&&contributionBalance(p)>0));
  }
  function updateNext(){next.disabled=!selectedValid();}
- function choose(id){if(closing||!items.some(x=>x.id===id)||!allowed(id))return;selected=id;for(const b of list.querySelectorAll('[role=radio]')){const checked=b.dataset.action===id;b.setAttribute('aria-checked',String(checked));b.tabIndex=checked?0:-1;}requirements.hidden=id!=='contribution';if(id==='contribution'){options($('quickActionActivity'),'Choose an activity',activeActivities().map(a=>[a.id,a.title]));refreshActivity()}updateNext();status.textContent=items.find(i=>i.id===id).title+' selected. '+(id==='contribution'?'Choose an activity and contributor.':'Select Next to continue.');}
+ function choose(id){
+  const item=matches.find(x=>x.id===id);
+  if(closing||!item||!allowed(id)||!sameContext())return;
+  selected=id;query.value=item.title;suggestion.hidden=true;$('quickActionGhost').replaceChildren();
+  requirements.hidden=id!=='contribution';
+  if(id==='contribution'){options($('quickActionActivity'),'Choose an activity',activeActivities().map(a=>[a.id,a.title]));refreshActivity()}
+  updateNext();status.textContent=item.title+' selected. '+(id==='contribution'?'Choose an activity and contributor.':'Select Next to continue.');
+ }
+ function showSuggestion(){
+  const item=matches[matchIndex];suggestion.hidden=!item;
+  $('quickActionGhost').replaceChildren();
+  if(!item)return;
+  $('quickActionSuggestionButton').textContent=item.title;
+  $('quickActionSuggestionButton').setAttribute('aria-label','Use suggestion: '+item.title);
+  $('quickActionSuggestionDescription').textContent=item.description;
+  $('quickActionSuggestionCount').textContent=(matchIndex+1)+' of '+matches.length;
+  $('quickActionPrevious').disabled=matches.length<2;$('quickActionFollowing').disabled=matches.length<2;
+  if(item.title.toLocaleLowerCase().startsWith(query.value.toLocaleLowerCase())&&query.value.length<item.title.length){
+   const typed=document.createElement('span');typed.textContent=query.value;typed.className='quick-action-ghost-typed';
+   $('quickActionGhost').append(typed,document.createTextNode(item.title.slice(query.value.length)));
+  }
+  status.textContent='Suggestion '+(matchIndex+1)+' of '+matches.length+': '+item.title+'. Press Enter or use the suggestion button to select.'+(matches.length>1?' Use arrow keys to browse.':'');
+ }
  function render(){
   const words=query.value.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[],terms=words.filter(w=>!['a','an','the','for','to','my','i','want','would','like','what','do','please'].includes(w));
-  const matches=items.filter(i=>allowed(i.id)&&terms.every(term=>(i.title+' '+i.description+' '+i.keywords).toLocaleLowerCase().includes(term)));
-  list.replaceChildren();selected=null;requirements.hidden=true;updateNext();
-  for(const [index,item] of matches.entries()){const button=document.createElement('button');button.type='button';button.tabIndex=index===0?0:-1;button.className='quick-action-option';button.dataset.action=item.id;button.setAttribute('role','radio');button.setAttribute('aria-checked','false');const text=document.createElement('span');const title=document.createElement('strong'),desc=document.createElement('small');title.textContent=item.title;desc.textContent=item.description;text.append(title,desc);const arrow=document.createElement('span');arrow.className='quick-action-arrow';arrow.setAttribute('aria-hidden','true');arrow.textContent='→';button.append(text,arrow);button.addEventListener('click',()=>choose(item.id));list.appendChild(button)}
-  status.textContent=matches.length?matches.length+' action'+(matches.length===1?'':'s')+' available. Select one to continue.':'No available actions match. Try another phrase or check workspace access.';
+  matches=terms.length?items.filter(i=>allowed(i.id)&&terms.every(term=>(i.title+' '+i.description+' '+i.keywords).toLocaleLowerCase().includes(term))):[];
+  const text=query.value.toLocaleLowerCase();matches.sort((a,b)=>Number(b.title.toLocaleLowerCase().startsWith(text))-Number(a.title.toLocaleLowerCase().startsWith(text)));
+  matchIndex=0;selected=null;requirements.hidden=true;updateNext();showSuggestion();
+  if(!matches.length)status.textContent=terms.length?'No available action matches. Try another phrase or check workspace access.':'Start typing to see an action suggestion.';
  }
+ function browse(step){if(!matches.length)return;matchIndex=(matchIndex+step+matches.length)%matches.length;showSuggestion()}
  function availableToOpen(){return window.trackerReady&&!trackerFatal&&!$('pondoApp').inert&&!document.body.classList.contains('modal-open')&&$('appDialogOverlay').hidden&&$('presentation').style.display==='none'&&$('presentModal').style.display==='none'&&$('authGate').style.display==='none';}
  window.openQuickAction=function(){
   if(!overlay.hidden||!availableToOpen())return;
@@ -91,8 +114,9 @@
   if(id==='member-balance'||id==='member-statement'){switchTab('report');$('quickActionOpen').focus({preventScroll:true});window.openAccountStatement();}
  }
  query.addEventListener('input',render);
- query.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){const first=list.querySelector('[role=radio]');if(first){e.preventDefault();first.focus()}}else if(e.key==='Enter'){e.preventDefault();const available=list.querySelectorAll('[role=radio]');if(available.length===1){choose(available[0].dataset.action);if(!next.disabled)next.focus()}}});
- list.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key))return;const buttons=[...list.querySelectorAll('[role=radio]')],i=buttons.indexOf(document.activeElement);if(i<0||!buttons.length)return;e.preventDefault();const target=buttons[(i+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length];choose(target.dataset.action);target.focus()});
+ query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){if(matches.length&&!selected){e.preventDefault();browse(e.key==='ArrowDown'?1:-1)}}else if((e.key==='Enter'||e.key==='Tab')&&!selected&&matches.length){e.preventDefault();choose(matches[matchIndex].id);if(e.key==='Tab'&&!next.disabled)next.focus()}});
+ $('quickActionSuggestionButton').addEventListener('click',()=>{if(matches[matchIndex]){choose(matches[matchIndex].id);query.focus()}});
+ $('quickActionPrevious').addEventListener('click',()=>browse(-1));$('quickActionFollowing').addEventListener('click',()=>browse(1));
  $('quickActionActivity').addEventListener('change',refreshActivity);$('quickActionPeriod').addEventListener('change',refreshPeople);$('quickActionPerson').addEventListener('change',updateNext);
  next.addEventListener('click',()=>{if(!selectedValid()){status.textContent='Selection or workspace access changed. Choose an available action again.';updateNext();query.focus();return;}const id=selected,a=$('quickActionActivity').value,p=$('quickActionPerson').value,m=$('quickActionPeriod').value,originalScope=scope;close(()=>openSelection(id,a,p,m,originalScope));});
  $('quickActionClose').addEventListener('click',()=>close());$('quickActionCancel').addEventListener('click',()=>close());overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
