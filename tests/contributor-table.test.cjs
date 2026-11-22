@@ -4,7 +4,7 @@ const ui=html.slice(html.indexOf('function openContributionDetails('),html.index
 const css=html.slice(html.indexOf('/* Tabular contributor ledger;'),html.indexOf('/* Financial reports print on paper'));
 test('contributor data has semantic headers, current amounts and labeled actions',()=>{
  assert.match(ui,/<table class="contrib-table" role="table" aria-label="Contributors">/);
- for(const name of ['Contributor','Expected','Paid','Balance','Status','Action'])assert.ok(ui.includes(`</span>${name}</th>`),name);
+ for(const name of ['Contributor','Expected','Paid','Balance','Status','Action'])assert.ok(ui.includes(`>${name}</th>`),name);
  for(const value of ['scope="row"','escapeText(p.name)','fmt(p.expected)','fmt(contributionPaid(p.id)/100)','fmt(contributionBalance(p)/100)','contrib-status','aria-label="Record payment for ${attr(p.name)}"','aria-label="Payment history and options for ${attr(p.name)}"'])assert.ok(ui.includes(value),value);
 });
 test('the table keeps the current month, filters, expansion, history and editing controls',()=>{
