@@ -13,8 +13,8 @@ test('phone workspace layout reserves readable space without touching desktop or
 test('secondary navigation exposes the current page and updates it when switching',()=>{
  const source=html.slice(html.indexOf('function syncMoreNavSelection(tab)'),html.indexOf('const pondoSwitchTab=switchTab;'));
  const buttons=[node(),node(),node()];const context={document:{querySelectorAll:()=>buttons}};vm.runInNewContext(source,context);
- context.syncMoreNavSelection('refunds');assert.equal(buttons[1].attrs['aria-current'],'page');assert.equal(buttons[0].attrs['aria-current'],undefined);
- context.syncMoreNavSelection('transactions');assert.equal(buttons[0].attrs['aria-current'],'page');assert.equal(buttons[1].attrs['aria-current'],undefined);
+ context.syncMoreNavSelection('refunds');assert.equal(buttons[0].attrs['aria-current'],'page');assert.equal(buttons[1].attrs['aria-current'],undefined);
+ context.syncMoreNavSelection('transactions');assert.equal(buttons[1].attrs['aria-current'],'page');assert.equal(buttons[0].attrs['aria-current'],undefined);
  assert.match(html,/class="nav-btn active" aria-current="page" data-tab="dashboard"/);
  assert.match(html,/if\(b\.dataset\.tab===tab\)b\.setAttribute\('aria-current','page'\);else b\.removeAttribute\('aria-current'\)/);
 });

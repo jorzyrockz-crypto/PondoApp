@@ -30,3 +30,9 @@ test('hero skin defaults to classic and preserves valid saved choices',()=>{
  assert.equal(normalize({appearance:{heroSkin:'vibrant'}}).appearance.heroSkin,'vibrant');
  assert.equal(normalize({appearance:{heroSkin:'unexpected'}}).appearance.heroSkin,'classic');
 });
+
+ test('true black remains an optional saved mode without changing existing choices',()=>{
+  const saved=normalize({appearance:{mode:'black',background:'softWave'},version:4});
+  assert.equal(saved.appearance.mode,'black');assert.equal(saved.appearance.background,'softWave');
+  assert.match(html,/data-mode="black"/);assert.match(html,/classList\.toggle\('oled-mode',a\.mode==='black'\)/);
+ });

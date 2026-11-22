@@ -55,7 +55,7 @@ const { chromium } = require('playwright-core');
       await page.locator('#navMore').click();
       assert.equal(await page.locator('#navMore').getAttribute('aria-expanded'), 'true');
       assert.equal(await page.locator('#navMoreMenu').isVisible(), true);
-      for (const [label,tab] of [['Transactions','transactions'],['Refund History','refunds'],['Reports','report']]) {
+      for (const [label,tab] of [['Transactions','transactions'],['Refunds','refunds'],['Reports','report']]) {
         if (!(await page.locator('#navMoreMenu').isVisible())) await page.locator('#navMore').click();
         await page.locator('#navMoreMenu button').filter({hasText:label}).click();
         assert.equal(await page.locator(`#tab-${tab}`).isVisible(), true);
