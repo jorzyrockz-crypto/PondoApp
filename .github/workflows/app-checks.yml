@@ -47,6 +47,12 @@ jobs:
             node tests/notification-mobile.browser.cjs
             node tests/tablet-dashboard-permission.browser.cjs
             node tests/dashboard-quick-actions.browser.cjs
+            node tests/quick-actions.browser.cjs
+            node tests/quick-action-matching.browser.cjs
+            node tests/quick-action-synonyms.browser.cjs
+            node tests/quick-action-input-mode.browser.cjs
+            node tests/quick-action-enter.browser.cjs
+            node tests/quick-action-purpose.browser.cjs
             node tests/other-funds.browser.cjs
             node tests/other-handover.browser.cjs
             node tests/presentation-content.browser.cjs
