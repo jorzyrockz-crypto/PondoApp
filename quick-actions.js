@@ -2,13 +2,13 @@
 (function(){
  'use strict';
  const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),suggestion=$('quickActionSuggestion'),next=$('quickActionNext'),status=$('quickActionStatus'),requirements=$('quickActionRequirements');
- let previousFocus=null,scope=null,selected=null,closing=false,timer=null,matches=[],matchIndex=0;
+ let previousFocus=null,scope=null,selected=null,closing=false,timer=null,matches=[],matchIndex=0,matchKind='exact';
  const items=[
   {id:'fund',title:'Add a fund',description:'Create a regular fund source.',keywords:'fund new create source'},
   {id:'project',title:'Add a project',description:'Create a project for the workspace.',keywords:'project new create'},
   {id:'activity',title:'Create a contribution activity',description:'Set up an activity for contributions.',keywords:'contribution activity new create dues'},
-  {id:'income',title:'Record income',description:'Add money received by a fund.',keywords:'income received money deposit fund'},
-  {id:'expense',title:'Record an expense',description:'Record a payment from a fund.',keywords:'expense spent payment pay purchase out'},
+  {id:'income',title:'Record income',description:'Add money received by a fund.',keywords:'income received money deposit fund transaction'},
+  {id:'expense',title:'Record an expense',description:'Record a payment from a fund.',keywords:'expense spent payment pay purchase out transaction'},
   {id:'refund',title:'Request or record a refund',description:'Start a reimbursement request or record.',keywords:'refund reimburse reimbursement request advance'},
   {id:'donation',title:'Record a cash donation',description:'Add or link a donation receipt.',keywords:'donation donor gift cash received'},
   {id:'contribution',title:'Record a contribution payment',description:'Choose an activity and contributor.',keywords:'contribution dues member payment collection'},
@@ -82,19 +82,41 @@
   if(!item)return;
   $('quickActionSuggestionButton').textContent=item.title;
   $('quickActionSuggestionButton').setAttribute('aria-label','Use suggestion: '+item.title);
-  $('quickActionSuggestionDescription').textContent=item.description;
+  $('quickActionSuggestionDescription').textContent=matchKind==='fallback'?'No matching action was found. You can record a payment in the separate Other Funds register instead.':matchKind==='closest'?'Closest keyword match. '+item.description:item.description;
   $('quickActionSuggestionCount').textContent=(matchIndex+1)+' of '+matches.length;
   $('quickActionPrevious').disabled=matches.length<2;$('quickActionFollowing').disabled=matches.length<2;
   if(item.title.toLocaleLowerCase().startsWith(query.value.toLocaleLowerCase())&&query.value.length<item.title.length){
    const typed=document.createElement('span');typed.textContent=query.value;typed.className='quick-action-ghost-typed';
    $('quickActionGhost').append(typed,document.createTextNode(item.title.slice(query.value.length)));
   }
-  status.textContent='Suggestion '+(matchIndex+1)+' of '+matches.length+': '+item.title+'. Press Enter or use the suggestion button to select.'+(matches.length>1?' Use arrow keys to browse.':'');
+  status.textContent=(matchKind==='fallback'?'No matching action. Suggested alternative: ':matchKind==='closest'?'Closest keyword match: ':'Suggestion '+(matchIndex+1)+' of '+matches.length+': ')+item.title+'. Press Enter or use the suggestion button to select.'+(matches.length>1?' Use arrow keys to browse.':'');
+ }
+ // Only suggest meaningful keyword or small typo matches; never silently choose
+ // an action or route to a financial form based on an unrecognized phrase.
+ const searchStop=new Set(['a','an','the','for','to','my','i','want','would','like','what','do','please']);
+ const broadWords=new Set(['record','create','new','add','payment','transaction','action','request','view','print','make','enter']);
+ function tokens(text){return text.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[];}
+ function typoDistance(a,b,limit){
+  if(Math.abs(a.length-b.length)>limit)return limit+1;
+  let previous=Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){const current=[i];let min=i;for(let j=1;j<=b.length;j++){current[j]=Math.min(current[j-1]+1,previous[j]+1,previous[j-1]+(a[i-1]===b[j-1]?0:1));min=Math.min(min,current[j]);}if(min>limit)return limit+1;previous=current;}
+  return previous[b.length];
+ }
+ function closeScore(item,terms){
+  const vocabulary=tokens(item.title+' '+item.description+' '+item.keywords),meaningful=terms.filter(t=>t.length>=3&&t.length<=32&&!broadWords.has(t));let score=0;
+  for(const term of meaningful){let best=0;for(const word of vocabulary){if(word===term)best=Math.max(best,4);else if(term.length>=3&&word.startsWith(term)&&term.length>=3)best=Math.max(best,3);else if(term.length>=4&&word.length>=4&&word.length<=32&&Math.abs(term.length-word.length)<=1&&typoDistance(term,word,term.length>=8?2:1)<=(term.length>=8?2:1))best=Math.max(best,2);}score+=best;}
+  return score;
  }
  function render(){
-  const words=query.value.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[],terms=words.filter(w=>!['a','an','the','for','to','my','i','want','would','like','what','do','please'].includes(w));
-  matches=terms.length?items.filter(i=>allowed(i.id)&&terms.every(term=>(i.title+' '+i.description+' '+i.keywords).toLocaleLowerCase().includes(term))):[];
-  const text=query.value.toLocaleLowerCase();matches.sort((a,b)=>Number(b.title.toLocaleLowerCase().startsWith(text))-Number(a.title.toLocaleLowerCase().startsWith(text)));
+  const terms=tokens(query.value.slice(0,160)).filter(w=>!searchStop.has(w)).slice(0,12),text=query.value.toLocaleLowerCase();
+  const exact=terms.length?items.filter(i=>terms.every(term=>(i.title+' '+i.description+' '+i.keywords).toLocaleLowerCase().includes(term))):[];
+  matchKind='exact';matches=exact.filter(i=>allowed(i.id));
+  if(!exact.length&&terms.length){
+   const ranked=items.map(item=>({item,score:closeScore(item,terms)})),best=Math.max(0,...ranked.map(x=>x.score));
+   if(best){matchKind='closest';matches=ranked.filter(x=>x.score===best&&allowed(x.item.id)).map(x=>x.item);}
+   else if(allowed('other')){matchKind='fallback';matches=items.filter(i=>i.id==='other');}
+  }
+  if(matchKind==='exact')matches.sort((a,b)=>Number(b.title.toLocaleLowerCase().startsWith(text))-Number(a.title.toLocaleLowerCase().startsWith(text)));
   matchIndex=0;selected=null;requirements.hidden=true;updateNext();showSuggestion();
   if(!matches.length)status.textContent=terms.length?'No available action matches. Try another phrase or check workspace access.':'Start typing to see an action suggestion.';
  }
