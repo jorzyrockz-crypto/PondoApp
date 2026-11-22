@@ -18,6 +18,23 @@
   {id:'cash-report',title:'Print a cash financial report',description:'Review fund and date filters before printing.',keywords:'print financial statement report cash pdf'},
   {id:'member-statement',title:'Print an individual account statement',description:'Review a member’s matching records before printing.',keywords:'print financial statement individual member pdf'}
  ];
+ // A browser cannot reliably enumerate attached keyboards. Infer physical-keyboard
+ // use from key events, and restore the button when touch is used. Ignore ordinary
+ // text from a touch-only on-screen keyboard; hardware Tab/Escape/modifiers still count.
+ const touchUsed=()=>document.body.classList.remove('pondo-keyboard-active');
+ document.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')touchUsed()},true);
+ document.addEventListener('touchstart',touchUsed,{capture:true,passive:true});
+ document.addEventListener('keydown',e=>{
+  if(e.isComposing||e.key==='Unidentified'||e.key==='Process')return;
+  const target=e.target instanceof Element?e.target:null,editing=target?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]');
+  if(editing&&!matchMedia('(any-hover: hover) and (any-pointer: fine)').matches&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&!['Tab','Escape'].includes(e.key))return;
+  document.body.classList.add('pondo-keyboard-active');
+ },true);
+ function focusEntry(){
+  const fab=$('fab');if(fab?.getClientRects().length){fab.focus({preventScroll:true});return;}
+  const active=[...document.querySelectorAll('.tab-section')].find(el=>el.getClientRects().length);
+  if(active){active.tabIndex=-1;active.focus({preventScroll:true});}
+ }
  const state=()=>window.pondoTeamState;
  const sameContext=()=>scope===donationContext();
  function readable(){const s=state();return donationCanRead()&&(!s?.orgId||(s.uid&&s.uid===window.pondoCurrentUser?.uid&&!s.listenerError&&typeof s.lastSyncedJSON==='string'));}
@@ -94,9 +111,8 @@
  function finishClose(proceed){
   overlay.hidden=true;overlay.classList.remove('is-closing');document.body.classList.remove('modal-open');closing=false;
   if(!$('appDialogOverlay').hidden){previousFocus=null;return;}
-  if(proceed){$('fab').focus({preventScroll:true});proceed();}
-  else if(previousFocus?.isConnected&&previousFocus.getClientRects().length)previousFocus.focus({preventScroll:true});
-  else $('fab').focus({preventScroll:true});
+  if(proceed){focusEntry();proceed();}
+  else {if(previousFocus?.isConnected&&previousFocus.getClientRects().length)previousFocus.focus({preventScroll:true});if(!previousFocus||document.activeElement!==previousFocus)focusEntry();}
   previousFocus=null;
  }
  function close(proceed){if(overlay.hidden||closing)return;closing=true;overlay.classList.add('is-closing');timer=setTimeout(()=>finishClose(proceed),reduced()?0:180);}
@@ -106,18 +122,18 @@
    const a=activeActivities().find(x=>x.id===activityId),p=a&&contributionPeopleForMonth(a,monthlyContribution(a)?month:null).find(x=>x.id===personId&&!x.pendingDeletion&&contributionBalance(x)>0);
    if(!a||!p||(monthlyContribution(a)&&!a.monthlyPeriods.includes(month))){appAlert('That activity or contributor is no longer available. Open Quick action again.');return;}
    if(monthlyContribution(a))contributionSelectedPeriod[a.id]=month;
-   switchTab('contributions');$('fab').focus({preventScroll:true});openContributionForm('payment',a.id,p.id);return;
+   switchTab('contributions');focusEntry();openContributionForm('payment',a.id,p.id);return;
   }
   if(id==='fund'){openFundModal();return;}
   if(id==='project'){openProjectModal();return;}
-  if(id==='activity'){switchTab('contributions');$('fab').focus({preventScroll:true});openContributionForm('activity');return;}
+  if(id==='activity'){switchTab('contributions');focusEntry();openContributionForm('activity');return;}
   if(id==='income'||id==='expense'){openTxModal();$('fabTxType').value=id==='income'?'IN':'OUT';syncTxProjectChoices();return;}
   if(id==='refund'){openRefundRequest();return;}
   if(id==='donation'){openCashDonation();return;}
   if(id==='other'){openOtherPayment();return;}
   if(id==='fund-balance'){switchTab('dashboard');const hero=$('totalRemaining');hero.tabIndex=-1;hero.focus({preventScroll:true});hero.scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});return;}
   if(id==='cash-report'){switchTab('report');$('reportFund').focus({preventScroll:true});$('reportFund').scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});return;}
-  if(id==='member-balance'||id==='member-statement'){switchTab('report');$('fab').focus({preventScroll:true});window.openAccountStatement();}
+  if(id==='member-balance'||id==='member-statement'){switchTab('report');focusEntry();window.openAccountStatement();}
  }
  query.addEventListener('input',render);
  query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){if(matches.length&&!selected){e.preventDefault();browse(e.key==='ArrowDown'?1:-1)}}else if((e.key==='Enter'||e.key==='Tab')&&!selected&&matches.length){e.preventDefault();choose(matches[matchIndex].id);if(e.key==='Tab'&&!next.disabled)next.focus()}});
