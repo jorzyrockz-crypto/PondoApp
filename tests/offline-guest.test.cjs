@@ -19,7 +19,7 @@ test('offline reopens only the separate guest snapshot',async()=>{
  const snapshot={guest:'previous offline data'},t=await runGuard(snapshot);assert.deepEqual(t.names,['fund-tracker-offline-guest-v1']);assert.equal(t.snapshots[0],snapshot);
 });
 test('offline control is independent of Firebase and clearly describes limitations',()=>{
- assert.match(html,/id="authOfflineBtn"/);assert.match(html,/not your signed-in personal or team workspaces/);
+ assert.match(html,/id="authOfflineBtn"/);assert.match(html,/separate from signed-in workspaces/);
  assert.ok(html.indexOf("getElementById('authOfflineBtn').addEventListener")<html.indexOf('import { initializeApp }'));
  assert.match(html,/if\(window\.pondoGuestMode\)return;/);
  assert.match(html,/Clear All Data is unavailable in offline mode/);
