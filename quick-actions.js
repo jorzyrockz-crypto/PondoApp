@@ -3,6 +3,17 @@
  'use strict';
  const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),list=$('quickActionList'),status=$('quickActionStatus');
  let previousFocus=null,scope=null,closing=false,timer=null,matches=[],matchKind='exact',stage='actions',chosenActivity='',chosenMonth='';
+ // The key that opens the dialog or selects a result must be released before
+ // another Enter can act. A held key can otherwise repeat into the next form.
+ let enterHeld=false,guardEnter=false;
+ document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||e.isComposing)return;
+  if(guardEnter&&(e.repeat||enterHeld)){e.preventDefault();e.stopImmediatePropagation();return;}
+  enterHeld=true;
+  if(!overlay.hidden&&e.target instanceof Element&&dialog.contains(e.target))guardEnter=true;
+ },true);
+ document.addEventListener('keyup',e=>{if(e.key==='Enter'){enterHeld=false;guardEnter=false}},true);
+ window.addEventListener('blur',()=>{enterHeld=false;guardEnter=false});
  const items=[
   {id:'fund',title:'Add a fund',description:'Create a regular fund source.',keywords:'fund new create source'},
   {id:'project',title:'Add a project',description:'Create a project for the workspace.',keywords:'project new create'},
@@ -113,12 +124,33 @@
   }
   const first=list.querySelector('button');if(first)first.focus();else $('quickActionBack').focus();
  }
+ // These are descriptions of what each existing workflow does, not extra routes
+ // or workspace data. Keep unpaid bills, paid expenses, and reimbursements distinct.
+ const purposes={
+  fund:['organize money into separate funding sources','set aside money for a particular purpose','create a funding pool or pot','pondong gagamitin sa isang layunin'],
+  project:['organize work and track a project budget','plan an initiative and its expenses','badyet para sa proyekto'],
+  activity:['set up member dues for a fundraising drive','start collecting contributions from members','gumawa ng aktibidad para sa koleksyon ng hulog','simulan ang koleksyon ng hulog'],
+  income:['log money coming into a regular fund','record funds received as income','money came into the fund or was deposited','pumasok na pera sa pondo'],
+  expense:['log purchases already paid from a fund','track money spent on supplies','ginastos na pera ng pondo','nabayarang gastos mula sa pondo'],
+  unpaid:['track an invoice from a supplier that has not been paid','record a bill to pay later','hindi pa nababayarang invoice ng supplier'],
+  refund:['pay back a member who spent their own money','claim repayment for personal spending','ibalik ang sariling ginastos ng miyembro'],
+  donation:['log gifts of money from a donor','link a receipt for a cash gift','perang natanggap na donasyon','regalo o donasyong pera mula sa donor'],
+  contribution:['log a member dues payment for an activity','record money collected from a contributor','record a member paying monthly contributions','talaan ng hulog ng miyembro sa aktibidad'],
+  other:['log teacher leave absence payments in a separate register','record a payment for other funds','tala ng bayad para sa leave ng guro'],
+  'death-aid':['help the family of a deceased person with funeral assistance','collect assistance for a bereaved family','assistance when a member passed away or died','tulong sa pamilya ng namatay'],
+  'fund-balance':['check how much cash the workspace has left','see the total cash remaining in funds','magkano ang natitirang pera sa pondo'],
+  'member-balance':['review a person contribution and payment history','find records for an individual member','review payments made by a member','tingnan ang mga tala ng isang miyembro'],
+  'cash-report':['print a summary of money in and out of funds','view financial activity for a date range','i print ang ulat ng pasok at labas ng pera'],
+  'member-statement':['print a person contribution and payment history','prepare a statement for an individual member','print an account report for one member','i print ang tala ng hulog ng miyembro']
+ };
  // Only suggest meaningful keyword or small typo matches; never silently choose
  // an action or route to a financial form based on an unrecognized phrase.
- const searchStop=new Set(['a','an','the','for','to','my','i','want','would','like','what','do','please']);
+ // Preserve negation (not, unpaid, hindi) because it changes financial meaning.
+ const searchStop=new Set(['a','an','the','for','to','my','i','want','would','like','what','do','please','can','could','where','how','is','me','need','find','open','form','using','use','ang','ng','sa','na','para','itala']);
  const phraseKey=text=>tokens(text).join(' ');
- const searchIndex=new Map(items.map(item=>{const text=(item.title+' '+item.description+' '+item.keywords+' '+(synonyms[item.id]||[]).join(' ')).toLocaleLowerCase();return [item.id,{text,vocabulary:[...new Set(tokens(text))]}]}));
- const broadWords=new Set(['record','create','new','add','payment','transaction','action','request','view','print','make','enter']);
+ const meaningfulPhrase=text=>tokens(text).filter(w=>!searchStop.has(w)).join(' ');
+ const searchIndex=new Map(items.map(item=>{const text=(item.title+' '+item.description+' '+item.keywords+' '+(synonyms[item.id]||[]).join(' ')+' '+(purposes[item.id]||[]).join(' ')).toLocaleLowerCase();return [item.id,{text,vocabulary:[...new Set(tokens(text))]}]}));
+ const broadWords=new Set(['record','create','new','add','payment','transaction','action','request','view','print','make','enter','track','tracking','log','check','show','see','look','prepare','review']);
  function tokens(text){return text.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[];}
  function typoDistance(a,b,limit){
   if(Math.abs(a.length-b.length)>limit)return limit+1;
@@ -129,18 +161,35 @@
  function closeScore(item,terms){
   const vocabulary=searchIndex.get(item.id).vocabulary,meaningful=terms.filter(t=>t.length>=3&&t.length<=32&&!broadWords.has(t));let score=0;
   for(const term of meaningful){let best=0;for(const word of vocabulary){if(word===term)best=Math.max(best,4);else if(term.length>=3&&word.startsWith(term)&&term.length>=3)best=Math.max(best,3);else if(term.length>=5&&word.length>=5&&word.length<=32&&Math.abs(term.length-word.length)<=1&&typoDistance(term,word,term.length>=8?2:1)<=(term.length>=8?2:1))best=Math.max(best,2);}score+=best;}
+  // Dues payment requests, including unpaid dues, lead to the contribution
+  // chooser for outstanding balances; they do not assert a payment was made.
+  const has=word=>terms.includes(word),dues=['contribution','contributions','dues','hulog','kontribusyon'].some(has),bill=['bill','invoice','supplier','payable'].some(has);
+  if(score&&item.id==='contribution'&&dues&&!bill&&(['paid','paying','bayad','unpaid'].some(has)))score+=4;
+  if(score&&item.id==='member-balance'&&['member','individual','person','miyembro'].some(has)&&((has('look')&&has('up'))||has('history'))&&!['print','pdf','statement'].some(has))score+=4;
   return score;
+ }
+ // Keep a paid fund purchase separate from a supplier bill not paid yet, and
+ // don't interpret unpaid member dues as a supplier invoice. These rules only
+ // narrow suggestions; selecting a result still never writes any records.
+ function eligibleForQuery(item,terms){
+  const has=word=>terms.includes(word),unpaid=has('unpaid')||((has('not')||has('no')||has('hindi'))&&(has('paid')||has('bayad')));
+  const bill=['bill','invoice','supplier','payable'].some(has),dues=['contribution','contributions','dues','hulog','kontribusyon'].some(has);
+  const reimbursement=['refund','reimbursement','reimburse'].some(has);
+  if(item.id==='unpaid'&&((dues&&!bill)||(reimbursement&&!bill)||(!unpaid&&has('paid')&&bill)))return false;
+  if(item.id==='expense'&&unpaid&&!reimbursement&&(bill||has('expense')||has('purchase')))return false;
+  return true;
  }
  function render(){
   const terms=tokens(query.value.slice(0,160)).filter(w=>!searchStop.has(w)).slice(0,12),text=query.value.toLocaleLowerCase();
-  const exact=terms.length?items.filter(i=>terms.every(term=>searchIndex.get(i.id).text.includes(term))):[];
+  const eligible=items.filter(i=>eligibleForQuery(i,terms));
+  const exact=terms.length?eligible.filter(i=>terms.every(term=>searchIndex.get(i.id).vocabulary.some(word=>word.startsWith(term)))):[];
   matchKind='exact';matches=exact.filter(i=>allowed(i.id));
   if(!exact.length&&terms.length){
-   const ranked=items.map(item=>({item,score:closeScore(item,terms)})),best=Math.max(0,...ranked.map(x=>x.score));
+   const ranked=eligible.map(item=>({item,score:closeScore(item,terms)})),best=Math.max(0,...ranked.map(x=>x.score));
    if(best){matchKind='closest';matches=ranked.filter(x=>x.score===best&&allowed(x.item.id)).map(x=>x.item);}
    else if(allowed('other')){matchKind='fallback';matches=items.filter(i=>i.id==='other');}
   }
-  if(matchKind==='exact'){const normalized=phraseKey(text),rank=i=>phraseKey(i.title)===normalized?3:(synonyms[i.id]||[]).some(p=>phraseKey(p)===normalized)?2:i.title.toLocaleLowerCase().startsWith(text)?1:0;matches.sort((a,b)=>rank(b)-rank(a));}
+  if(matchKind==='exact'){const normalized=phraseKey(text),meaningful=meaningfulPhrase(text),rank=i=>phraseKey(i.title)===normalized?4:(synonyms[i.id]||[]).some(p=>phraseKey(p)===normalized)?3:(purposes[i.id]||[]).some(p=>meaningfulPhrase(p)===meaningful)?2:i.title.toLocaleLowerCase().startsWith(text)?1:0;matches.sort((a,b)=>rank(b)-rank(a));}
   if(!terms.length)matches=items.filter(i=>allowed(i.id));
   stage='actions';showStage();
  }
@@ -152,6 +201,7 @@
  window.openQuickAction=function(){
   if(!overlay.hidden||!availableToOpen())return;
   closeNavMore();closeHeaderMore();window.closeTeamSwitcher?.();window.closeHeaderAvatarMenu?.();window.closeNotifCenter?.();
+  if(enterHeld)guardEnter=true;
   previousFocus=document.activeElement;scope=donationContext();closing=false;clearTimeout(timer);overlay.classList.remove('is-closing');query.value='';
   const raw=window.pondoGuestMode?'':window.pondoCurrentUser?.displayName;const name=typeof raw==='string'?raw.trim().slice(0,80):'';$('quickActionGreeting').textContent=name?'Hello, '+name+'!':'Hello there!';
   overlay.hidden=false;document.body.classList.add('modal-open');render();query.focus();
@@ -160,6 +210,7 @@
  function finishClose(proceed){
   if(proceed&&!$('appDialogOverlay').hidden){overlay.classList.remove('is-closing');closing=false;status.textContent='Close the open message, then choose the action again.';return;}
   overlay.hidden=true;overlay.classList.remove('is-closing');document.body.classList.remove('modal-open');closing=false;
+  query.value='';matches=[];
   if(!$('appDialogOverlay').hidden){previousFocus=null;return;}
   if(proceed){focusEntry();proceed();}
   else {if(previousFocus?.isConnected&&previousFocus.getClientRects().length)previousFocus.focus({preventScroll:true});if(!previousFocus||document.activeElement!==previousFocus)focusEntry();}
@@ -188,7 +239,7 @@
   if(id==='member-balance'||id==='member-statement'){switchTab('report');focusEntry();window.openAccountStatement();}
  }
  query.addEventListener('input',render);
- query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'){const first=list.querySelector('button');if(first){e.preventDefault();first.focus()}}else if(e.key==='Enter'&&stage==='actions'){const first=list.querySelector('button');if(first){e.preventDefault();first.click()}}});
+ query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'){const first=list.querySelector('button');if(first){e.preventDefault();first.focus()}}else if(e.key==='Enter'&&stage==='actions'){e.preventDefault();if(e.repeat||closing||!query.value.trim())return;const first=list.querySelector('button');if(first)first.click()}});
  list.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key))return;const buttons=[...list.querySelectorAll('button')],index=buttons.indexOf(document.activeElement);if(index<0||!buttons.length)return;e.preventDefault();buttons[(index+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length].focus()});
  $('quickActionBack').addEventListener('click',()=>{if(stage==='person'&&activity()&&monthlyContribution(activity()))stage='period';else if(stage==='person'||stage==='period')stage='activity';else stage='actions';showStage();if(stage==='actions')query.focus()});
  $('quickActionClose').addEventListener('click',()=>close());$('quickActionCancel').addEventListener('click',()=>close());overlay.addEventListener('click',e=>{if(e.target===overlay)close()});

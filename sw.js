@@ -7,7 +7,7 @@
 // This comment-only change exists solely to produce a new commit so Pages
 // retries the deploy from scratch.
 
-const CACHE_VERSION = 'pondo-v177';
+const CACHE_VERSION = 'pondo-v178';
 // Cache Storage is shared by every app on this origin. Only prune our own versions.
 const PONDO_CACHE_NAME = /^pondo-v\d+$/;
 // Versioned script URLs prevent a new HTML shell from loading stale cached code.
@@ -26,20 +26,20 @@ const APP_SHELL = [
   './offline-sync.js',
   './team-draft-reconcile.mjs',
   './refund-receipt-sync.mjs',
-  './refund-items.js?v=177',
-  './unified-ledger.js?v=177',
-  './account-statement.js?v=177',
-  './offline-sync.js?v=177',
-  './other-fund-handover-ui.js?v=177',
-  './account-statement-ui.js?v=177',
-  './quick-actions.js?v=177',
-  './organization-firestore.mjs?v=177',
-  './workspace-approval.mjs?v=177',
-  './workspace-membership-recovery.mjs?v=177',
-  './member-refund-service.mjs?v=177',
-  './other-fund-handover.mjs?v=177',
-  './refund-receipt-sync.mjs?v=177',
-  './team-draft-reconcile.mjs?v=177',
+  './refund-items.js?v=178',
+  './unified-ledger.js?v=178',
+  './account-statement.js?v=178',
+  './offline-sync.js?v=178',
+  './other-fund-handover-ui.js?v=178',
+  './account-statement-ui.js?v=178',
+  './quick-actions.js?v=178',
+  './organization-firestore.mjs?v=178',
+  './workspace-approval.mjs?v=178',
+  './workspace-membership-recovery.mjs?v=178',
+  './member-refund-service.mjs?v=178',
+  './other-fund-handover.mjs?v=178',
+  './refund-receipt-sync.mjs?v=178',
+  './team-draft-reconcile.mjs?v=178',
   './manifest.webmanifest',
   './favicon.ico',
   './icons/rounded/favicon.ico',
@@ -158,7 +158,7 @@ self.addEventListener('activate', (event) => {
       const obsolete = keys.filter((key) => PONDO_CACHE_NAME.test(key) && key !== CACHE_VERSION);
       if (obsolete.length) {
         // Best-effort marker for the About panel; never prevent activation if storage is unavailable.
-        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v177', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
+        try { const cache = await caches.open(CACHE_VERSION); await cache.put('./.pondo-update-ready-v178', new Response('updated')); } catch (err) { console.warn('Could not record update marker:', err); }
       }
       await Promise.all(obsolete.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())
