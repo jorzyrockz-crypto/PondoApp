@@ -4,6 +4,9 @@
  const $=id=>document.getElementById(id),overlay=$('quickActionOverlay'),dialog=$('quickActionDialog'),query=$('quickActionQuery'),suggestion=$('quickActionSuggestion'),next=$('quickActionNext'),status=$('quickActionStatus'),requirements=$('quickActionRequirements');
  let previousFocus=null,scope=null,selected=null,closing=false,timer=null,matches=[],matchIndex=0;
  const items=[
+  {id:'fund',title:'Add a fund',description:'Create a regular fund source.',keywords:'fund new create source'},
+  {id:'project',title:'Add a project',description:'Create a project for the workspace.',keywords:'project new create'},
+  {id:'activity',title:'Create a contribution activity',description:'Set up an activity for contributions.',keywords:'contribution activity new create dues'},
   {id:'income',title:'Record income',description:'Add money received by a fund.',keywords:'income received money deposit fund'},
   {id:'expense',title:'Record an expense',description:'Record a payment from a fund.',keywords:'expense spent payment pay purchase out'},
   {id:'refund',title:'Request or record a refund',description:'Start a reimbursement request or record.',keywords:'refund reimburse reimbursement request advance'},
@@ -91,9 +94,9 @@
  function finishClose(proceed){
   overlay.hidden=true;overlay.classList.remove('is-closing');document.body.classList.remove('modal-open');closing=false;
   if(!$('appDialogOverlay').hidden){previousFocus=null;return;}
-  if(proceed){$('quickActionOpen').focus({preventScroll:true});proceed();}
+  if(proceed){$('fab').focus({preventScroll:true});proceed();}
   else if(previousFocus?.isConnected&&previousFocus.getClientRects().length)previousFocus.focus({preventScroll:true});
-  else $('quickActionOpen').focus({preventScroll:true});
+  else $('fab').focus({preventScroll:true});
   previousFocus=null;
  }
  function close(proceed){if(overlay.hidden||closing)return;closing=true;overlay.classList.add('is-closing');timer=setTimeout(()=>finishClose(proceed),reduced()?0:180);}
@@ -103,15 +106,18 @@
    const a=activeActivities().find(x=>x.id===activityId),p=a&&contributionPeopleForMonth(a,monthlyContribution(a)?month:null).find(x=>x.id===personId&&!x.pendingDeletion&&contributionBalance(x)>0);
    if(!a||!p||(monthlyContribution(a)&&!a.monthlyPeriods.includes(month))){appAlert('That activity or contributor is no longer available. Open Quick action again.');return;}
    if(monthlyContribution(a))contributionSelectedPeriod[a.id]=month;
-   switchTab('contributions');$('quickActionOpen').focus({preventScroll:true});openContributionForm('payment',a.id,p.id);return;
+   switchTab('contributions');$('fab').focus({preventScroll:true});openContributionForm('payment',a.id,p.id);return;
   }
+  if(id==='fund'){openFundModal();return;}
+  if(id==='project'){openProjectModal();return;}
+  if(id==='activity'){switchTab('contributions');$('fab').focus({preventScroll:true});openContributionForm('activity');return;}
   if(id==='income'||id==='expense'){openTxModal();$('fabTxType').value=id==='income'?'IN':'OUT';syncTxProjectChoices();return;}
   if(id==='refund'){openRefundRequest();return;}
   if(id==='donation'){openCashDonation();return;}
   if(id==='other'){openOtherPayment();return;}
   if(id==='fund-balance'){switchTab('dashboard');const hero=$('totalRemaining');hero.tabIndex=-1;hero.focus({preventScroll:true});hero.scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});return;}
   if(id==='cash-report'){switchTab('report');$('reportFund').focus({preventScroll:true});$('reportFund').scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});return;}
-  if(id==='member-balance'||id==='member-statement'){switchTab('report');$('quickActionOpen').focus({preventScroll:true});window.openAccountStatement();}
+  if(id==='member-balance'||id==='member-statement'){switchTab('report');$('fab').focus({preventScroll:true});window.openAccountStatement();}
  }
  query.addEventListener('input',render);
  query.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){if(matches.length&&!selected){e.preventDefault();browse(e.key==='ArrowDown'?1:-1)}}else if((e.key==='Enter'||e.key==='Tab')&&!selected&&matches.length){e.preventDefault();choose(matches[matchIndex].id);if(e.key==='Tab'&&!next.disabled)next.focus()}});

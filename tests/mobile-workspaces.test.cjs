@@ -23,5 +23,5 @@ test('add-form selection is announced and has a legible selected state in both t
  const context={fundTxContext:null,cashDonationActive:false,document:{getElementById:id=>elements[id]}};vm.runInNewContext(source,context);context.fabShowForm('fund');
  assert.equal(elements['fabForm-fund'].style.display,'block');assert.equal(elements['fabForm-tx'].style.display,'none');assert.equal(elements['fabTab-fund'].attrs['aria-pressed'],'true');assert.equal(elements['fabTab-tx'].attrs['aria-pressed'],'false');
  assert.match(html,/#fabSheet \.fab-tabs-row button\.fab-tab\.active[\s\S]*?background:#4535c8 !important;[^}]*color:#fff !important/);
- assert.match(html,/id="fab" type="button" aria-label="Add a record"/);
+ assert.match(html,/id="fab" type="button" aria-label="Open quick action"/);
 });
