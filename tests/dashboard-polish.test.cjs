@@ -15,6 +15,6 @@ test('KPI shortcuts support Enter and Space without activating for unrelated key
 test('KPI actions remain keyboard accessible and disclose initial receipts',()=>{
  assert.equal((html.match(/class="hero-stat" role="button" tabindex="0"/g)||[]).length,3);
  assert.match(html,/Initial fund receipts are included here/);assert.match(html,/getElementById\('incomeOpeningNotice'\)\.hidden=filter!=='IN'/);
- assert.doesNotMatch(html,/#fab\s*\{display:none!important\}/);assert.match(html,/id="fab" type="button" aria-label="Open quick action"/);
+ assert.doesNotMatch(html,/^\s*#fab\s*\{display:none!important\}/m);assert.match(html,/body:not\(\.pondo-touch-capable\) #fab\s*\{display:none!important\}/);assert.match(html,/id="fab" type="button" aria-label="Open quick action"/);
  assert.match(html,/#teamHeaderBadgeText \{max-width:none;min-width:0\}/);assert.match(html,/id="appHeaderLogo"><img src="icons\/icon-96\.png"/);
 });

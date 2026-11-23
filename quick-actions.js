@@ -53,7 +53,22 @@
  // A browser cannot reliably enumerate attached keyboards. Infer physical-keyboard
  // use from key events, and restore the button when touch is used. Ignore ordinary
  // text from a touch-only on-screen keyboard; hardware Tab/Escape/modifiers still count.
- const touchUsed=()=>document.body.classList.remove('pondo-keyboard-active');
+ // Detect touch by capability, not viewport width. Some browsers expose touch
+ // points but do not report a coarse pointer; an actual touch also reveals the
+ // button if either capability signal was missing. Media changes handle devices
+ // whose touch input is attached or removed while the app is open.
+ const touchPointer=typeof matchMedia==='function'?matchMedia('(any-pointer: coarse)'):null;
+ let observedTouch=false;
+ function updateTouchCapability(){
+  const capable=!!(observedTouch||touchPointer?.matches||navigator.maxTouchPoints>0);
+  document.body.classList.toggle('pondo-touch-capable',capable);
+  if(!capable&&document.activeElement===$('fab'))focusEntry();
+ }
+ function touchCapabilityChanged(){observedTouch=false;updateTouchCapability();}
+ updateTouchCapability();
+ if(touchPointer?.addEventListener)touchPointer.addEventListener('change',touchCapabilityChanged);
+ else touchPointer?.addListener?.(touchCapabilityChanged);
+ const touchUsed=()=>{observedTouch=true;updateTouchCapability();document.body.classList.remove('pondo-keyboard-active')};
  document.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')touchUsed()},true);
  document.addEventListener('touchstart',touchUsed,{capture:true,passive:true});
  document.addEventListener('keydown',e=>{
