@@ -94,6 +94,27 @@
   if(id==='refund'&&state()?.orgId&&state().role==='reviewer')return memberRefundAvailable();
   return editable();
  }
+ // Only action IDs are stored locally, separated by signed-in account or guest.
+ function preferenceKey(){return 'pondo_quick_actions_v1:'+encodeURIComponent(window.pondoGuestMode?'guest':window.pondoCurrentUser?.uid?'user:'+window.pondoCurrentUser.uid:'personal');}
+ function preferences(){try{const saved=JSON.parse(localStorage.getItem(preferenceKey())||'{}');const clean=v=>Array.isArray(v)?[...new Set(v.filter(id=>items.some(item=>item.id===id)))].slice(0,15):[];return {favorites:clean(saved.favorites),recent:clean(saved.recent)};}catch(e){return {favorites:[],recent:[]};}}
+ function savePreferences(p){try{localStorage.setItem(preferenceKey(),JSON.stringify(p));return true;}catch(e){status.textContent='Favorites or recent actions could not be saved on this device.';return false;}}
+ function rememberAction(id){const p=preferences();p.recent=[id,...p.recent.filter(x=>x!==id)].slice(0,5);savePreferences(p);}
+ function renderShortcuts(){
+  const show=stage==='actions'&&!query.value.trim(),p=preferences(),wrap=$('quickActionShortcuts'),manage=$('quickActionManage'),select=$('quickActionFavoriteSelect');
+  manage.hidden=stage!=='actions';wrap.hidden=!show;
+  if(stage!=='actions')return;
+  const previous=select.value;select.replaceChildren();for(const item of items.filter(x=>allowed(x.id))){const option=document.createElement('option');option.value=item.id;option.textContent=item.title;select.appendChild(option);}if([...select.options].some(o=>o.value===previous))select.value=previous;
+  updateFavoriteToggle();
+  for(const [key,label,id] of [['favorites','Favorites','quickActionFavorites'],['recent','Recent actions','quickActionRecent']]){
+   const box=$(id);box.replaceChildren();box.className='quick-shortcut-group';const available=p[key].map(itemId=>items.find(x=>x.id===itemId)).filter(item=>item&&allowed(item.id));box.hidden=!available.length;
+   if(!available.length)continue;const heading=document.createElement('strong');heading.textContent=label;box.append(heading);
+   for(const item of available){const button=document.createElement('button');button.type='button';button.textContent=item.title;button.addEventListener('click',()=>selectAction(item.id));box.append(button);}
+  }
+  wrap.hidden=!show||(!$('quickActionFavorites').childElementCount&&!$('quickActionRecent').childElementCount);
+ }
+ function updateFavoriteToggle(){const select=$('quickActionFavoriteSelect'),button=$('quickActionFavoriteToggle');button.disabled=!select.value;button.textContent=preferences().favorites.includes(select.value)?'Remove favorite':'Add favorite';}
+ $('quickActionFavoriteSelect').addEventListener('change',updateFavoriteToggle);
+ $('quickActionFavoriteToggle').addEventListener('click',()=>{const id=$('quickActionFavoriteSelect').value;if(!id||!sameContext()||!allowed(id)){status.textContent='Workspace access changed. Reopen Quick Action.';return;}const p=preferences();p.favorites=p.favorites.includes(id)?p.favorites.filter(x=>x!==id):[...p.favorites,id];if(savePreferences(p)){renderShortcuts();status.textContent='Favorites updated on this device.';}});
  function activeActivities(){return contributionActivities.filter(a=>a&&!a.deathAid&&!a.archived&&!a.pendingDeletion);}
  function activity(){return activeActivities().find(a=>a.id===chosenActivity);}
  function accessibleSelection(id,activityId,personId,month){
@@ -117,7 +138,7 @@
   launch(id);
  }
  function showStage(){
-  list.replaceChildren();$('quickActionSearchArea').hidden=stage!=='actions';$('quickActionBack').hidden=stage==='actions';
+  list.replaceChildren();$('quickActionSearchArea').hidden=stage!=='actions';$('quickActionBack').hidden=stage==='actions';renderShortcuts();
   if(stage==='actions'){
    for(const item of matches)addChoice(item.title,matchKind==='fallback'?'No matching action. This is a separate Other Funds payment.':(matchKind==='closest'?'Closest keyword match. ':'')+item.description,()=>selectAction(item.id));
    status.textContent=matches.length?(matchKind==='fallback'?'No matching action. Choose the Other Funds alternative if appropriate.':matchKind==='closest'?'Closest keyword matches. Choose an action.':matches.length+' available action'+(matches.length===1?'':'s')+'. Choose one to open it.'):query.value.trim()?'No available action matches. Try another phrase or check workspace access.':'No actions are currently available.';
@@ -237,9 +258,10 @@
   if(id==='contribution'){
    const a=activeActivities().find(x=>x.id===activityId),p=a&&contributionPeopleForMonth(a,monthlyContribution(a)?month:null).find(x=>x.id===personId&&!x.pendingDeletion&&contributionBalance(x)>0);
    if(!a||!p||(monthlyContribution(a)&&!a.monthlyPeriods.includes(month))){appAlert('That activity or contributor is no longer available. Open Quick action again.');return;}
-   if(monthlyContribution(a))contributionSelectedPeriod[a.id]=month;
+   rememberAction(id);if(monthlyContribution(a))contributionSelectedPeriod[a.id]=month;
    switchTab('contributions');focusEntry();openContributionForm('payment',a.id,p.id);return;
   }
+  rememberAction(id);
   if(id==='fund'){openFundModal();return;}
   if(id==='project'){openProjectModal();return;}
   if(id==='activity'){switchTab('contributions');focusEntry();openContributionForm('activity');return;}
