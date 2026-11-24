@@ -397,3 +397,31 @@ test('a marked fictional payment cannot create an account-confirmed handover',as
  await seed({[root]:{name:'Team'},[root+'/members/a']:{uid:'a',role:'owner'},[root+'/members/b']:{uid:'b',role:'reviewer'},[root+'/data/snapshot']:{_syncRevision:1,updatedBy:'a',otherPayments:[payment]}});
  const a=client('a');await assertFails(setDoc(ref(a,path),{payment,senderUid:'a',receiverUid:'b',initiatorUid:'a',handoverDate:'2026-01-01',notes:'',status:'pending',createdAt:serverTimestamp(),history:[]}));
 });
+
+test('workspace role changes and history commit atomically and remain workspace-scoped',async()=>{
+ const {createWorkspaceRoleHistory}=await import('../workspace-role-history.mjs'),org='role-history',root=`organizations/${org}`;
+ await seed({[root]:{name:'Role history'},[root+'/members/alice']:{uid:'alice',role:'owner'},[root+'/members/bob']:{uid:'bob',role:'reviewer'},[root+'/members/cara']:{uid:'cara',role:'project-manager'},'organizations/other/members/alice':{uid:'alice',role:'owner'}});
+ const s=uid=>({orgId:org,uid,role:uid==='alice'?'owner':uid==='bob'?'reviewer':'project-manager',memberConfirmed:true,baselineReady:true});
+ const make=uid=>{const db=client(uid),state=s(uid);return {db,state,history:createWorkspaceRoleHistory({db,api,getState:()=>state,getUser:()=>({uid}),online:()=>true})}};
+ const a=make('alice'),b=make('bob');
+ const changed=await assertSucceeds(a.history.changeRole({targetUid:'bob',expectedRole:'reviewer',newRole:'owner'}));
+ assert.equal((await getDoc(ref(a.db,root+'/members/bob'))).data().role,'owner');const log=await getDoc(ref(a.db,root+'/roleHistory/'+changed.eventId));assert.equal(log.data().actorUid,'alice');assert.equal(log.data().memberUid,'bob');assert.equal(log.data().oldRole,'reviewer');assert.equal(log.data().newRole,'owner');assert.ok(log.data().createdAt);
+ assert.equal((await b.history.readRecent()).items.length,1);await assertFails(getDocs(collection(client('stranger'),root+'/roleHistory')));await assertFails(getDocs(collection(a.db,root+'/roleHistory')));
+ await assertFails(updateDoc(ref(a.db,root+'/roleHistory/'+changed.eventId),{newRole:'reviewer'}));await assertFails(deleteDoc(ref(a.db,root+'/roleHistory/'+changed.eventId)));
+ await assertFails(updateDoc(ref(a.db,root+'/members/cara'),{role:'owner'}));await assertFails(updateDoc(ref(a.db,root+'/members/cara'),{displayName:'Forged'}));
+ await assertFails(updateDoc(ref(a.db,root+'/members/cara'),{role:'owner',_roleChangeId:changed.eventId}));
+ await assert.rejects(a.history.changeRole({targetUid:'cara',expectedRole:'reviewer',newRole:'owner'}));
+ await assertFails(setDoc(ref(a.db,root+'/roleHistory/fake'),{actorUid:'alice',memberUid:'cara',oldRole:'project-manager',newRole:'owner',createdAt:serverTimestamp()}));
+ await assertFails(getDocs(api.query(collection(client('bob'),'organizations/other/roleHistory'),api.orderBy('createdAt','desc'),api.limit(101))));
+ // Existing manual handover remains two separate role changes, with both owners in between.
+ b.state.role='owner';await assertSucceeds(b.history.changeRole({targetUid:'alice',expectedRole:'owner',newRole:'reviewer'}));
+ assert.equal((await getDoc(ref(b.db,root+'/members/alice'))).data().role,'reviewer');const entries=(await b.history.readRecent()).items;assert.equal(entries.length,2);assert.ok(entries.some(x=>x.actorUid==='bob'&&x.memberUid==='alice'&&x.oldRole==='owner'&&x.newRole==='reviewer'));
+});
+
+test('role history denies forged batches and concurrent role edits cannot silently overwrite',async()=>{
+ const {createWorkspaceRoleHistory}=await import('../workspace-role-history.mjs'),root='organizations/role-race';await seed({[root]:{name:'Race'},[root+'/members/a']:{uid:'a',role:'owner'},[root+'/members/b']:{uid:'b',role:'reviewer'},[root+'/members/c']:{uid:'c',role:'owner'}});
+ const make=uid=>{const db=client(uid),s={orgId:'role-race',uid,role:'owner',memberConfirmed:true,baselineReady:true};return {db,history:createWorkspaceRoleHistory({db,api,getState:()=>s,getUser:()=>({uid}),online:()=>true})}};
+ const a=make('a'),c=make('c'),batch=writeBatch(a.db);batch.update(ref(a.db,root+'/members/b'),{role:'owner',_roleChangeId:'forged'});batch.set(ref(a.db,root+'/roleHistory/forged'),{actorUid:'c',memberUid:'b',oldRole:'reviewer',newRole:'owner',createdAt:serverTimestamp()});await assertFails(batch.commit());
+ const dated=writeBatch(a.db);dated.update(ref(a.db,root+'/members/b'),{role:'owner',_roleChangeId:'dated'});dated.set(ref(a.db,root+'/roleHistory/dated'),{actorUid:'a',memberUid:'b',oldRole:'reviewer',newRole:'owner',createdAt:new Date('2020-01-01')});await assertFails(dated.commit());
+ const attempts=await Promise.allSettled([a.history.changeRole({targetUid:'b',expectedRole:'reviewer',newRole:'owner'}),c.history.changeRole({targetUid:'b',expectedRole:'reviewer',newRole:'disbursing'})]);assert.equal(attempts.filter(x=>x.status==='fulfilled').length,1);assert.equal(attempts.filter(x=>x.status==='rejected').length,1);assert.equal((await a.history.readRecent()).items.length,1);
+});
