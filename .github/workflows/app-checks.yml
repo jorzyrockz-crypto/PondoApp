@@ -56,6 +56,7 @@ jobs:
             node tests/quick-action-enter.browser.cjs
             node tests/quick-action-purpose.browser.cjs
             node tests/quick-status-undo.browser.cjs
+            node tests/workspace-status-preview.browser.cjs
             node tests/other-funds.browser.cjs
             node tests/other-handover.browser.cjs
             node tests/presentation-content.browser.cjs
