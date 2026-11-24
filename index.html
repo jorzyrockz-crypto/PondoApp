@@ -9757,6 +9757,11 @@ body.dark-mode.oled-mode .team-current-summary,body.dark-mode.oled-mode .team-ac
 @media(max-width:520px){.team-invite-controls{grid-template-columns:minmax(0,1fr)}.team-management-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.team-action-trigger:last-child{grid-column:1/-1}.team-action-overlay{padding:14px}.team-action-head{padding:16px}.team-action-body{padding:16px}.team-current-summary{padding:12px}}
 
 }
+/* A locally cached clay portrait replaces initials only where a person's photo is absent. */
+:is(.header-avatar-initial,.avatar-menu-initial,.created-by-avatar-initial,span.team-collab-avatar,span.tm-avatar,.notif-avatar,.member-refund-avatar,.dashboard-action-avatar){background-image:url('./assets/clay-profile-avatar.png')!important;background-position:center!important;background-size:cover!important;color:transparent!important;}
+.header-avatar-initial:not(:empty){display:block;width:100%;height:100%;border-radius:50%;flex:none}.header-avatar-initial:empty,#headerAvatarImg[hidden]{display:none!important}
+.notif-avatar svg{visibility:hidden}
+.clay-picker{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.clay-picker h4{margin:0 0 5px;font-size:14px}.clay-picker p{font-size:12px;color:var(--ink2);line-height:1.45;margin:0 0 10px}.clay-options{display:flex;flex-wrap:wrap;gap:10px}.clay-options button{width:62px;height:62px;padding:3px;border:2px solid transparent;border-radius:50%;background:var(--surface2);cursor:pointer}.clay-options button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}.clay-options button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.clay-options button:disabled{opacity:.5;cursor:not-allowed}.clay-options img{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover}.clay-picker #clayAvatarStatus{margin:10px 0 0}
 </style>
 
 </head>
@@ -10296,6 +10301,7 @@ body.dark-mode.oled-mode .team-current-summary,body.dark-mode.oled-mode .team-ac
     </div>
     <div class="sheet-content" id="settingsContent">
       <div id="settings-appearance" class="settings-panel" style="display:flex; flex-direction:column; gap:18px">
+        <section class="clay-picker" aria-labelledby="clayAvatarTitle"><h4 id="clayAvatarTitle">Clay profile avatar</h4><p>Choose an avatar if your account has no profile photo. Your choice appears in the current workspace and follows you when you open another workspace.</p><div id="clayAvatarOptions" class="clay-options" role="group" aria-labelledby="clayAvatarTitle"><button type="button" data-clay-avatar="classic" aria-label="Classic clay avatar" aria-pressed="false"><img src="./assets/clay-profile-avatar.png" alt=""></button><button type="button" data-clay-avatar="sunny" aria-label="Sunny clay avatar" aria-pressed="false"><img src="./assets/clay-avatar-sunny.png" alt=""></button><button type="button" data-clay-avatar="blossom" aria-label="Blossom clay avatar" aria-pressed="false"><img src="./assets/clay-avatar-blossom.png" alt=""></button><button type="button" data-clay-avatar="sky" aria-label="Sky clay avatar" aria-pressed="false"><img src="./assets/clay-avatar-sky.png" alt=""></button></div><p id="clayAvatarStatus" role="status" aria-live="polite">Sign in to choose a profile avatar.</p></section>
         <div class="preview-card"><p style="font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.75; margin:0">Preview</p><p style="font-family:'Fraunces',serif; font-weight:700; font-size:22px; margin:6px 0 0">Samahan ng Kabataan ng Baco</p><div style="display:flex; gap:6px; margin-top:12px"><span style="padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.18); font-size:11px">Balance ₱68,300</span><span style="padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.18); font-size:11px">Spent ₱20,200</span></div></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Mode — Dynamic Theme</p><div class="appearance-mode-options" role="group" aria-label="Appearance mode"><button class="modeBtn opt" data-mode="light" onclick="setAppearance('mode','light')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> Light</button><button class="modeBtn opt" data-mode="dark" onclick="setAppearance('mode','dark')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Dark</button><button type="button" class="modeBtn opt" data-mode="black" onclick="setAppearance('mode','black')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor" stroke="none"/></svg> True black</button><button class="modeBtn opt" data-mode="system" onclick="setAppearance('mode','system')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg> System</button><button class="modeBtn opt" data-mode="auto" onclick="setAppearance('mode','auto')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Auto</button></div><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">True black uses black-based versions of your selected background. Auto = Dark 6pm–6am, Light otherwise</p></div>
         <div><p style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-weight:700; margin:0 0 8px">Currency</p><select id="currencySelect" class="input" aria-label="Currency" onchange="setCurrency(this.value)"></select><div id="customCurrencySymbolWrap" hidden style="margin-top:8px"><input type="text" id="customCurrencySymbolInput" class="input" maxlength="6" placeholder="Symbol, e.g. kr or Fr" aria-label="Custom currency symbol" oninput="setCustomCurrencySymbol(this.value)"></div><p style="font-size:11px; color:var(--ink2); margin:6px 0 0">Changes how amounts are shown throughout Pondo — for global/non-Philippine users. This only changes the display symbol and number formatting; it does not convert amounts between currencies.</p></div>
@@ -10503,8 +10509,8 @@ body.dark-mode.oled-mode .team-current-summary,body.dark-mode.oled-mode .team-ac
     <button type="button" id="aboutClose" class="about-close" aria-label="Close About and What's New">×</button>
     <h2 id="aboutTitle">Pondo · Fund Tracker</h2>
     <p>Track fund sources, projects, contributions and transactions in one place.</p>
-    <div class="about-version"><div><strong>App version 181</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
-    <div class="about-release"><h3>What’s new</h3><h4>Workspace and appearance improvements</h4><ul><li>Team role changes now appear in workspace role history, recorded together with the change.</li><li>Pin favorite Quick actions, revisit recent actions, see tracker save status and undo a recent activity archive or restore.</li><li>The floating Quick action button is shown on touch-capable devices; keyboard users can still open Quick action with Enter.</li><li>Quick action search recognizes form purposes, and its Enter shortcut no longer repeats into a newly opened form.</li><li>Team management groups workspace and member details, with create, find and invite actions in compact dialogs.</li><li>Workspace owners can preview team icons and colors instantly, with matching icons in the workspace switcher.</li><li>Contribution activity details use a calmer emerald and slate layout; the floating Quick action appears for touch and hides when keyboard use is detected.</li><li>Dialogs share a softer glass-inspired appearance, and the floating plus opens Quick action with an inline suggestion as you type.</li><li>Quick action helps you find a form, check fund balances or prepare statements from any workspace.</li><li>The desktop sidebar now shows your fund cash balance. Pondo Artwork is more visible on True black backgrounds.</li><li>Workspace actions now sit below the headers, giving the illustrations a dedicated space at every screen size.</li><li>Workspace headers share a clearer style and clay-inspired graphics, with a compact sidebar. Account statements are now in Financial Statements alongside cash reports.</li><li>Navigate sections and presentations with horizontal trackpad swipes or mouse dragging; bottom-sheet handles also support desktop gestures on narrow screens.</li><li>Choose True black in Appearance for deep-black surfaces and subtle black-based backgrounds. Choose White for a solid black background.</li><li>Prepare a read-only account statement from selected workspace records, with a separate refund section and print or Save as PDF.</li><li>The welcome screen has a refreshed frosted-glass design, clearer sign-in buttons and the same separate offline tracker.</li><li>The notification menu has compact filters, clearer unread alerts and an expandable browser-alert settings section.</li><li>Reviewer access is shown as a compact expandable indicator instead of covering the page.</li><li>Team collaboration settings have a clearer layout for workspace appearance, discovery, invitations and members.</li><li>Browse fund and contribution cards with new rail controls and compact summaries on Overview.</li><li>Overview has clearer balance, period and recent-activity cards; totals still include all recorded dates.</li><li>Switch workspaces with a clearer, keyboard-friendly menu and a confirmation after a successful switch.</li><li>Reuse saved Other Funds purposes and explore receipt summaries by purpose on Overview and the Other Funds page.</li><li>Accent colors now personalize navigation, controls and previews with improved contrast in light and dark modes.</li><li>Present a clearer workspace overview with separate donation and Other Funds balances, refund and contribution summaries, and scoped fund slides.</li><li>Existing sample sets can add missing Other Funds examples without clearing other records.</li><li>Sample data now includes multiple examples across the available financial forms, including Other Funds.</li><li>Record Other Funds teacher payments separately and request a two-person, account-confirmed handover with a printable acknowledgment.</li><li>Funds has a simpler shared layout and a shortcut to transaction history, while keeping each fund separate.</li><li>Transactions has compact filters, cleaner rows and a streamlined details dialog.</li><li>Transaction names open full record details, with alternating row colors for easier scanning.</li><li>Fund cards use a compact layout and automatic rotating colors.</li><li>Donation receipts now have a searchable table with 20 receipts per page.</li><li>Donation fund cards now match the Funds page layout on desktop and mobile.</li><li>Transactions brings fund activity, contribution payments and refund requests into a searchable history without changing balances.</li><li>Record individual cash donations in a chosen donation fund, save and add another, and review or print receipts.</li><li>Refund forms now distinguish personal reimbursements from unpaid supplier bills, with clearer itemized entries.</li><li>Edit the description, source and date of individual regular-fund income entries, with corrections kept in history.</li><li>Fund details now offer a Fund settings dialog for descriptions, opening details and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refunds.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record cash donations in donation funds, track their use and find receipts in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
+    <div class="about-version"><div><strong>App version 182</strong><p id="aboutUpdateStatus" role="status">Check for a newer version when online.</p></div><button type="button" class="btn btn-light" id="aboutCheckUpdate">Check for updates</button><button type="button" class="btn btn-dark" id="aboutApplyUpdate" hidden>Update now</button></div>
+    <div class="about-release"><h3>What’s new</h3><h4>Workspace and appearance improvements</h4><ul><li>Choose from four clay-style profile avatars when your account has no profile photo.</li><li>Team role changes now appear in workspace role history, recorded together with the change.</li><li>Pin favorite Quick actions, revisit recent actions, see tracker save status and undo a recent activity archive or restore.</li><li>The floating Quick action button is shown on touch-capable devices; keyboard users can still open Quick action with Enter.</li><li>Quick action search recognizes form purposes, and its Enter shortcut no longer repeats into a newly opened form.</li><li>Team management groups workspace and member details, with create, find and invite actions in compact dialogs.</li><li>Workspace owners can preview team icons and colors instantly, with matching icons in the workspace switcher.</li><li>Contribution activity details use a calmer emerald and slate layout; the floating Quick action appears for touch and hides when keyboard use is detected.</li><li>Dialogs share a softer glass-inspired appearance, and the floating plus opens Quick action with an inline suggestion as you type.</li><li>Quick action helps you find a form, check fund balances or prepare statements from any workspace.</li><li>The desktop sidebar now shows your fund cash balance. Pondo Artwork is more visible on True black backgrounds.</li><li>Workspace actions now sit below the headers, giving the illustrations a dedicated space at every screen size.</li><li>Workspace headers share a clearer style and clay-inspired graphics, with a compact sidebar. Account statements are now in Financial Statements alongside cash reports.</li><li>Navigate sections and presentations with horizontal trackpad swipes or mouse dragging; bottom-sheet handles also support desktop gestures on narrow screens.</li><li>Choose True black in Appearance for deep-black surfaces and subtle black-based backgrounds. Choose White for a solid black background.</li><li>Prepare a read-only account statement from selected workspace records, with a separate refund section and print or Save as PDF.</li><li>The welcome screen has a refreshed frosted-glass design, clearer sign-in buttons and the same separate offline tracker.</li><li>The notification menu has compact filters, clearer unread alerts and an expandable browser-alert settings section.</li><li>Reviewer access is shown as a compact expandable indicator instead of covering the page.</li><li>Team collaboration settings have a clearer layout for workspace appearance, discovery, invitations and members.</li><li>Browse fund and contribution cards with new rail controls and compact summaries on Overview.</li><li>Overview has clearer balance, period and recent-activity cards; totals still include all recorded dates.</li><li>Switch workspaces with a clearer, keyboard-friendly menu and a confirmation after a successful switch.</li><li>Reuse saved Other Funds purposes and explore receipt summaries by purpose on Overview and the Other Funds page.</li><li>Accent colors now personalize navigation, controls and previews with improved contrast in light and dark modes.</li><li>Present a clearer workspace overview with separate donation and Other Funds balances, refund and contribution summaries, and scoped fund slides.</li><li>Existing sample sets can add missing Other Funds examples without clearing other records.</li><li>Sample data now includes multiple examples across the available financial forms, including Other Funds.</li><li>Record Other Funds teacher payments separately and request a two-person, account-confirmed handover with a printable acknowledgment.</li><li>Funds has a simpler shared layout and a shortcut to transaction history, while keeping each fund separate.</li><li>Transactions has compact filters, cleaner rows and a streamlined details dialog.</li><li>Transaction names open full record details, with alternating row colors for easier scanning.</li><li>Fund cards use a compact layout and automatic rotating colors.</li><li>Donation receipts now have a searchable table with 20 receipts per page.</li><li>Donation fund cards now match the Funds page layout on desktop and mobile.</li><li>Transactions brings fund activity, contribution payments and refund requests into a searchable history without changing balances.</li><li>Record individual cash donations in a chosen donation fund, save and add another, and review or print receipts.</li><li>Refund forms now distinguish personal reimbursements from unpaid supplier bills, with clearer itemized entries.</li><li>Edit the description, source and date of individual regular-fund income entries, with corrections kept in history.</li><li>Fund details now offer a Fund settings dialog for descriptions, opening details and deletion.</li><li>Owners can update a shared workspace display name; the original registered search name stays the same.</li><li>Refunds can include item quantities and unit prices, with a calculated total.</li><li>Workspace lists stay steady while membership checks finish or a connection is interrupted.</li><li>Refunds can link a recipient to a team member for clearer transparency review.</li><li>My refund requests shows account-linked payments and reversals without creating extra expenses.</li><li>In wide landscape layouts, Needs your review appears at the top of the activity column.</li><li>Overview now focuses on the review queue, with requester photos and clearer action colors. Cash and refund comparison is in Refunds.</li><li>Pay approved refunds without a project using uncommitted fund cash; project allocations remain protected.</li><li>Approved refunds stay unpaid while awaiting funding, with clearer funding guidance.</li><li>While Pondo is open, alerts show an in-app banner and can play your selected app sound. Android system alerts use the app service worker when supported.</li><li>Active member refund requests now highlight the submitter with a profile photo when available.</li><li>Refund requests are consolidated, and viewers are notified when a recent member request is rejected.</li><li>On sign-in, confirmed workspaces referenced by your requests are restored to your list when missing.</li><li>Confirmed member refund requests now appear in dashboard counts and the approver review queue, with a notification for owners and disbursing officers.</li><li>Recognize due and overdue reminders, refunds, and financial activity with category icons where supported. Attributed team updates may show member photos.</li><li>Follow a clearer Death Aid path from creating a record through payments, review, printing and handover.</li><li>Rotate your device to use Pondo in portrait or landscape when supported.</li><li>Team alerts show member profiles when available and open the relevant workspace.</li><li>Long contribution and other office-style reports now continue across pages instead of being cut off when printed from a dialog.</li><li>See recently active team members in a stacked profile view when connected. Presence is approximate.</li><li>Messenger and Instagram in-app browsers now show guidance to open invitation links in Chrome or Safari.</li><li>Expand the names field when adding contributors in bulk.</li><li>Use the resize handle on supported devices to choose a comfortable size.</li><li>Contributor cards on phones have clearer balances, easy-to-reach actions and persistent filters.</li><li>The desktop contributor table keeps its headings visible while scrolling, and the top bar adapts better to narrow windows.</li><li>Record cash donations in donation funds, track their use and find receipts in the Funds register.</li><li>Track Death Aid personal contributions and prepare BaPSTEA remittance reports.</li></ul></div>
     <div class="about-actions"><button type="button" class="btn btn-dark" id="aboutShare">Share app link</button><a class="btn btn-light" href="https://github.com/jorzyrockz-crypto/PondoApp" target="_blank" rel="noopener noreferrer">GitHub</a></div>
     <p id="aboutShareStatus" class="about-feedback" role="status"></p>
   </section>
@@ -10542,14 +10548,14 @@ body.dark-mode.oled-mode .team-current-summary,body.dark-mode.oled-mode .team-ac
  if(media.addEventListener)media.addEventListener('change',place);else if(media.addListener)media.addListener(place);
 })();
 </script>
-<script src="./refund-items.js?v=181"></script>
-<script src="./unified-ledger.js?v=181"></script>
-<script src="./account-statement.js?v=181"></script>
-<script src="./offline-sync.js?v=181"></script>
+<script src="./refund-items.js?v=182"></script>
+<script src="./unified-ledger.js?v=182"></script>
+<script src="./account-statement.js?v=182"></script>
+<script src="./offline-sync.js?v=182"></script>
 <script>
 // Keep this release number and the worker's cache version in sync each release.
 (function setupAboutPondo(){
- const release='181', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
+ const release='182', seenKey='pondo_whats_new_seen', marker='./.pondo-update-ready-v'+release;
  const overlay=document.getElementById('aboutOverlay'), dialog=overlay.querySelector('.about-dialog');
  const close=document.getElementById('aboutClose'),check=document.getElementById('aboutCheckUpdate'),apply=document.getElementById('aboutApplyUpdate');
  const status=document.getElementById('aboutUpdateStatus'),shareStatus=document.getElementById('aboutShareStatus');
@@ -10873,6 +10879,22 @@ function toggleHeaderMore(){const menu=document.getElementById('headerMoreMenu')
 document.addEventListener('click',e=>{if(!e.target.closest('.header-more-wrap'))closeHeaderMore()});
 
 function escapeTeamText(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const CLAY_AVATAR_PATHS=Object.freeze({classic:'./assets/clay-profile-avatar.png',sunny:'./assets/clay-avatar-sunny.png',blossom:'./assets/clay-avatar-blossom.png',sky:'./assets/clay-avatar-sky.png'});
+function clayAvatarPath(id){return Object.hasOwn(CLAY_AVATAR_PATHS,id)?CLAY_AVATAR_PATHS[id]:null;}
+window.clayAvatarPath=clayAvatarPath;
+const clayAvatarMemory=new Map();
+function clayAvatarChoice(uid){if(clayAvatarMemory.has(uid))return clayAvatarMemory.get(uid);try{const id=localStorage.getItem('pondo_clay_avatar_'+uid);return clayAvatarPath(id)?id:'classic'}catch(e){return 'classic'}}
+window.clayAvatarChoice=clayAvatarChoice;
+let clayAvatarRevision=0,clayAvatarBusy=false;
+function applyClayAvatarUI(){const u=window.pondoCurrentUser,choice=u?.uid?clayAvatarChoice(u.uid):'classic',chip=document.getElementById('userChipAvatar'),img=document.getElementById('headerAvatarImg'),initial=document.getElementById('headerAvatarInitial');if(u){if(chip){chip.src=u.photoURL||clayAvatarPath(choice);chip.hidden=false}if(img&&initial){img.src=u.photoURL||clayAvatarPath(choice);img.hidden=false;initial.textContent=''}}
+ for(const b of document.querySelectorAll('[data-clay-avatar]')){b.disabled=!u||!!u.photoURL||clayAvatarBusy;b.setAttribute('aria-pressed',String(!!u&&!u.photoURL&&b.dataset.clayAvatar===choice));}
+ const status=document.getElementById('clayAvatarStatus');if(status)status.textContent=!u?'Sign in to choose a profile avatar.':u.photoURL?'Your account profile photo is used instead.':!navigator.onLine?'Connect to save an avatar choice.':'Choose an avatar. Changes are saved to your account.';window.refreshHeaderAvatarMenuIfOpen?.();}
+function storeClayAvatar(uid,id){if(!uid||!clayAvatarPath(id))return;const changed=clayAvatarChoice(uid)!==id;clayAvatarMemory.set(uid,id);try{localStorage.setItem('pondo_clay_avatar_'+uid,id)}catch(e){}if(window.pondoCurrentUser?.uid===uid){if(changed){window.invalidateClayAvatarWorkspaces?.();window.syncCurrentClayAvatar?.()}applyClayAvatarUI();}}
+window.applyClayAvatarUI=applyClayAvatarUI;
+window.loadClayAvatar=async function(){const uid=window.pondoCurrentUser?.uid,rev=++clayAvatarRevision;if(!uid||!window.pondoClayAvatar)return;try{const id=await window.pondoClayAvatar.load();if(id&&window.pondoCurrentUser?.uid===uid&&rev===clayAvatarRevision)storeClayAvatar(uid,id)}catch(e){console.warn('Could not confirm avatar from account:',e)}};
+document.getElementById('clayAvatarOptions')?.addEventListener('click',async e=>{const b=e.target.closest('[data-clay-avatar]'),u=window.pondoCurrentUser;if(!b||!u||u.photoURL||clayAvatarBusy||!clayAvatarPath(b.dataset.clayAvatar))return;const uid=u.uid,id=b.dataset.clayAvatar;clayAvatarBusy=true;++clayAvatarRevision;applyClayAvatarUI();const status=document.getElementById('clayAvatarStatus');status.textContent='Saving avatar online…';try{if(!window.pondoClayAvatar)throw Error('Account service unavailable.');await window.pondoClayAvatar.save(id);if(window.pondoCurrentUser?.uid===uid){storeClayAvatar(uid,id);status.textContent='Avatar saved. Other workspaces update when you open them.'}}catch(err){if(window.pondoCurrentUser?.uid===uid)status.textContent='Avatar could not be confirmed. Connect and try again.'}finally{clayAvatarBusy=false;for(const button of document.querySelectorAll('[data-clay-avatar]'))button.disabled=!window.pondoCurrentUser||!!window.pondoCurrentUser.photoURL;}});
+window.addEventListener('online',applyClayAvatarUI);window.addEventListener('offline',applyClayAvatarUI);
+
 
 // Helpers for using the signed-in Google account (and the rest of the
 // shared workspace's members) in regular form fields, not just the header.
@@ -10891,7 +10913,8 @@ function createdByBadge(record){
   const members=(window.pondoTeamState&&window.pondoTeamState.members)||[];
   const photoURL=stamp.photoURL||(members.find(m=>m.uid===stamp.uid)||{}).photoURL||null;
   const initial=(stamp.name||'?').trim().charAt(0).toUpperCase();
-  const avatar=photoURL?'<img class="created-by-avatar" src="'+escapeText(photoURL)+'" alt="">':'<span class="created-by-avatar created-by-avatar-initial">'+escapeText(initial)+'</span>';
+  const clay=clayAvatarPath((members.find(m=>m.uid===stamp.uid)||{}).clayAvatar);
+  const avatar=photoURL||clay?'<img class="created-by-avatar" src="'+escapeText(photoURL||clay)+'" alt="">':'<span class="created-by-avatar created-by-avatar-initial">'+escapeText(initial)+'</span>';
   return '<span class="created-by-badge">'+avatar+'<span class="created-by-name">Added by '+escapeText(stamp.name)+'</span></span>';
 }
 function renderTeammateSuggestions(){ const dl=document.getElementById('teammateNameSuggestions'); if(!dl)return; dl.innerHTML=''; const seen=new Set(); teammateNames().forEach(name=>{ const key=name.trim().toLowerCase(); if(!key||seen.has(key))return; seen.add(key); const o=document.createElement('option'); o.value=name; dl.appendChild(o); }); }
@@ -10948,7 +10971,7 @@ function renderHeaderAvatarMenu(){
  const state=window.pondoTeamState||{orgId:null,memberships:[]},user=window.pondoCurrentUser;
  const rawName=(user&&(user.displayName||user.email))||'Signed in',userName=escapeTeamText(rawName);
  const userEmail=(user&&user.displayName&&user.email)?escapeTeamText(user.email):'';
- const avatar=(user&&user.photoURL)?'<img src="'+escapeTeamText(user.photoURL)+'" alt="">':'<span class="avatar-menu-initial">'+escapeTeamText(rawName.trim().charAt(0).toUpperCase()||'?')+'</span>';
+ const avatar=user?'<img src="'+escapeTeamText(user.photoURL||window.clayAvatarPath?.(window.clayAvatarChoice?.(user.uid))||'./assets/clay-profile-avatar.png')+'" alt="">':'<span class="avatar-menu-initial">?</span>';
  const html='<div class="avatar-menu-user">'+avatar+'<span class="avatar-menu-user-text"><span class="avatar-menu-name">'+userName+'</span>'+(userEmail?'<span class="avatar-menu-email">'+userEmail+'</span>':'')+'</span></div><div class="team-switch-divider"></div>'+
  workspaceRowsHtml(state)+workspaceActionHtml('closeHeaderAvatarMenu')+'<button class="header-menu-item workspace-action" type="button" onclick="closeHeaderAvatarMenu();if(window.pondoSignOut)window.pondoSignOut()"><span>Sign out</span></button>';
  updateWorkspaceMenuHtml(menu,html);
@@ -11043,7 +11066,7 @@ function notifActorAvatar(n){
   const member=n.type==='team'&&n.orgId&&state?.orgId===n.orgId&&state.memberConfirmed&&typeof n.actorUid==='string'?(Array.isArray(state.members)?state.members:[]).find(m=>m?.uid===n.actorUid):null;
   const name=typeof member?.displayName==='string'&&member.displayName.trim()?member.displayName:(typeof member?.email==='string'?member.email:'');
   const initial=name.trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x.charAt(0).toUpperCase()).join('');
-  const photo=notificationActorPhotoURL(n);
+  const photo=notificationActorPhotoURL(n)||(!member?.photoURL&&window.clayAvatarPath?.(member?.clayAvatar))||'';
   const fallback=initial?escapeTeamText(initial):'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/></svg>';
   return '<span class="notif-avatar" aria-hidden="true">'+fallback+(photo?'<img src="'+escapeTeamText(photo)+'" alt="" referrerpolicy="no-referrer">':'')+'</span>';
 }
@@ -12290,7 +12313,7 @@ function renderMemberRefundInbox(){
   const person=document.createElement('div'),avatar=document.createElement('span'),copy=document.createElement('div'),label=document.createElement('small'),personName=document.createElement('strong');
   person.className='member-refund-person';avatar.className='member-refund-avatar';avatar.setAttribute('aria-hidden','true');avatar.textContent=name.trim().split(/\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join('')||'?';
   // Only resolve images from confirmed members of the current workspace, not request data.
-  const photo=notificationActorPhotoURL({type:'team',orgId:s.orgId,actorUid:item.uid});
+  const photo=notificationActorPhotoURL({type:'team',orgId:s.orgId,actorUid:item.uid})||(!requester?.photoURL&&s.memberConfirmed&&window.clayAvatarPath?.(requester?.clayAvatar))||'';
   if(photo){const img=document.createElement('img');img.alt='';img.referrerPolicy='no-referrer';img.addEventListener('error',()=>img.remove(),{once:true});img.src=photo;avatar.appendChild(img);}
   copy.className='member-refund-person-copy';label.textContent='Submitted by';personName.textContent=name;copy.append(label,personName);person.append(avatar,copy);row.append(head,detail,person);
   const funding=document.createElement('p');funding.className='member-refund-funding';
@@ -13757,7 +13780,8 @@ function renderDashboardActions() {
     const requesterName=typeof req.requestedBy?.name==='string'&&req.requestedBy.name.trim()?req.requestedBy.name:'a teammate';
     const avatar=document.createElement('span'),who=document.createElement('span');meta.className='dashboard-action-requester';avatar.className='dashboard-action-avatar';avatar.setAttribute('aria-hidden','true');
     avatar.textContent=requesterName.trim().split(/\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join('')||'?';
-    const photo=notificationActorPhotoURL({type:'team',orgId:state.orgId,actorUid:req.requestedBy?.uid});
+    const avatarMember=state.memberConfirmed?state.members?.find(m=>m.uid===req.requestedBy?.uid):null;
+    const photo=notificationActorPhotoURL({type:'team',orgId:state.orgId,actorUid:req.requestedBy?.uid})||(!avatarMember?.photoURL&&window.clayAvatarPath?.(avatarMember?.clayAvatar))||'';
     if(photo){const image=document.createElement('img');image.alt='';image.referrerPolicy='no-referrer';image.addEventListener('error',()=>image.remove(),{once:true});image.src=photo;avatar.appendChild(image);}
     who.textContent=['Requested by '+requesterName,date].filter(Boolean).join(' · ');meta.append(avatar,who);
     info.append(title,detail,meta);
@@ -15201,7 +15225,7 @@ window.startTabGuard=(function(){
 // overwriting a team draft. Verify the same controlled offline shell and draft
 // immediately before leaving; failures do not clear or replace any records.
 const PONDO_RECOVERY_OFFLINE_INTENT='pondo-recovery-offline-intent-v1';
-const PONDO_RECOVERY_SHELL='pondo-v181';
+const PONDO_RECOVERY_SHELL='pondo-v182';
 let recoveryOfflineBusy=false;
 function recoveryOfflineExitStillSafe(exit){
  const s=window.pondoTeamState;
@@ -15213,7 +15237,7 @@ async function recoveryOfflineShellReady(){
  const version=await new Promise(resolve=>{const channel=new MessageChannel();let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);channel.port1.close();resolve(value)};const timer=setTimeout(()=>finish(null),1500);channel.port1.onmessage=e=>finish(e.data?.version);try{worker.postMessage({type:'PONDO_GET_CACHE_VERSION'},[channel.port2])}catch(e){finish(null)}});
  if(version!==PONDO_RECOVERY_SHELL)return false;
  const cache=await caches.open(PONDO_RECOVERY_SHELL);
- for(const path of ['./index.html','./refund-items.js?v=181','./offline-sync.js?v=181','./other-fund-handover-ui.js?v=181','./other-fund-handover.mjs?v=181','./account-statement.js?v=181','./account-statement-ui.js?v=181','./quick-actions.js?v=181','./workspace-role-history.mjs?v=181'])if(!await cache.match(new URL(path,location.href).href))return false;
+ for(const path of ['./index.html','./refund-items.js?v=182','./offline-sync.js?v=182','./other-fund-handover-ui.js?v=182','./other-fund-handover.mjs?v=182','./account-statement.js?v=182','./account-statement-ui.js?v=182','./quick-actions.js?v=182','./workspace-role-history.mjs?v=182'])if(!await cache.match(new URL(path,location.href).href))return false;
  return true;
 }
 async function continueRecoveryOffline(){
@@ -15363,9 +15387,9 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
  location.reload();
 });
 </script>
-<script src="./other-fund-handover-ui.js?v=181"></script>
-<script src="./account-statement-ui.js?v=181"></script>
-<script src="./quick-actions.js?v=181"></script>
+<script src="./other-fund-handover-ui.js?v=182"></script>
+<script src="./account-statement-ui.js?v=182"></script>
+<script src="./quick-actions.js?v=182"></script>
 <script>
 // PWA updates are offered explicitly: never reload an editing window merely
 // because a new service worker activated in another window.
@@ -15647,16 +15671,17 @@ document.getElementById('guestSignInBtn').addEventListener('click',async()=>{
 })();
 </script>
 <script type="module">
-import { createOrganizationDirectory } from "./organization-firestore.mjs?v=181";
-import { createWorkspaceApprovalTracker } from "./workspace-approval.mjs?v=181";
-import { recoverWorkspaceMemberships } from "./workspace-membership-recovery.mjs?v=181";
+import { createOrganizationDirectory } from "./organization-firestore.mjs?v=182";
+import { createWorkspaceApprovalTracker } from "./workspace-approval.mjs?v=182";
+import { recoverWorkspaceMemberships } from "./workspace-membership-recovery.mjs?v=182";
 // Firebase Authentication — gates access to the Pondo fund tracker.
 // Loaded via the official CDN ES-module build (no bundler/build step required).
-import { createMemberRefundService, refundReceiptDigest } from "./member-refund-service.mjs?v=181";
-import { createOtherFundHandoverService } from "./other-fund-handover.mjs?v=181";
-import { planEditorRefundReceipts, writeEditorRefundReceipts } from "./refund-receipt-sync.mjs?v=181";
-import { createTeamDraftReconciler, reviewTeamDraftPlan, checkedTeamDraftPlan } from "./team-draft-reconcile.mjs?v=181";
-import { createWorkspaceRoleHistory } from "./workspace-role-history.mjs?v=181";
+import { createMemberRefundService, refundReceiptDigest } from "./member-refund-service.mjs?v=182";
+import { createOtherFundHandoverService } from "./other-fund-handover.mjs?v=182";
+import { planEditorRefundReceipts, writeEditorRefundReceipts } from "./refund-receipt-sync.mjs?v=182";
+import { createTeamDraftReconciler, reviewTeamDraftPlan, checkedTeamDraftPlan } from "./team-draft-reconcile.mjs?v=182";
+import { createWorkspaceRoleHistory } from "./workspace-role-history.mjs?v=182";
+import { createClayAvatarService } from "./clay-avatar.mjs?v=182";
 window.pondoRefundReceiptDigest = refundReceiptDigest;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
@@ -15871,6 +15896,12 @@ const pondoTeamState = {
   online: navigator.onLine,
 };
 window.pondoTeamState = pondoTeamState;
+window.pondoClayAvatar=createClayAvatarService({db:firestoreDb,api:{doc,getDocFromServer,runTransaction},getState:()=>pondoTeamState,getUser:()=>window.pondoCurrentUser,online:()=>navigator.onLine});
+const claySyncedWorkspaces=new Set(),claySyncingWorkspaces=new Set();let claySyncGeneration=0;
+window.invalidateClayAvatarWorkspaces=()=>{claySyncGeneration++;claySyncedWorkspaces.clear();};
+async function syncClayAvatarWorkspace(orgId,uid){const key=uid+'\0'+orgId,revision=claySyncGeneration;if(claySyncedWorkspaces.has(key)||claySyncingWorkspaces.has(key))return;claySyncingWorkspaces.add(key);try{const synced=await window.pondoClayAvatar.syncWorkspace();if(synced&&revision===claySyncGeneration&&pondoTeamState.uid===uid&&pondoTeamState.orgId===orgId)claySyncedWorkspaces.add(key)}catch(e){console.warn('Could not sync workspace avatar:',e)}finally{claySyncingWorkspaces.delete(key);if(revision!==claySyncGeneration&&pondoTeamState.uid===uid&&pondoTeamState.orgId===orgId)syncClayAvatarWorkspace(orgId,uid)}}
+window.syncCurrentClayAvatar=()=>{if(pondoTeamState.orgId&&pondoTeamState.memberConfirmed&&!window.pondoCurrentUser?.photoURL)syncClayAvatarWorkspace(pondoTeamState.orgId,pondoTeamState.uid)};
+window.addEventListener('online',()=>{window.loadClayAvatar?.();window.syncCurrentClayAvatar()});
 const workspaceRoleHistory=createWorkspaceRoleHistory({db:firestoreDb,api:{doc,collection,runTransaction,serverTimestamp,getDocsFromServer,query,orderBy,limit},getState:()=>pondoTeamState,getUser:()=>window.pondoCurrentUser,online:()=>navigator.onLine});
 let roleHistoryScope='',roleHistoryGeneration=0;
 function roleHistoryKey(){return JSON.stringify([pondoTeamState.orgId||null,pondoTeamState.uid||null,window.pondoCurrentUser?.uid||null,!!pondoTeamState.memberConfirmed,!!pondoTeamState.baselineReady,!!pondoTeamState.recoveryLocked,!!pondoTeamState.listenerError,!!pondoTeamState.syncError]);}
@@ -16074,7 +16105,8 @@ function buildTeamFacepileHtml(members, max = 4) {
   const esc = window.escapeTeamText || ((s) => String(s == null ? '' : s));
   return shown.map((m) => {
     const label = esc(m.displayName || m.email || 'Member');
-    if (m.photoURL) return '<img class="team-collab-avatar" src="' + esc(m.photoURL).replace(/"/g, '&quot;') + '" alt="" title="' + label + '">';
+    const image=m.photoURL||clayAvatarPath(m.clayAvatar);
+    if (image) return '<img class="team-collab-avatar" src="' + esc(image).replace(/"/g, '&quot;') + '" alt="" title="' + label + '">';
     const initial = (m.displayName || m.email || '?').trim().split(/\s+/).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join('')||'?';
     return '<span class="team-collab-avatar" title="' + label + '">' + esc(initial) + '</span>';
   }).join('') + (members.length > max ? '<span class="team-collab-more" title="' + (members.length - max) + ' more member' + (members.length - max === 1 ? '' : 's') + '">+' + (members.length - max) + '</span>' : '');
@@ -16391,7 +16423,7 @@ function subscribeToOrg(orgId) {
     pondoTeamState.members = members;
     const mine = members.find((m) => m.uid === pondoTeamState.uid);
     if (!mine) { if(memberConfirmed) handleRemovedFromOrg(); else renderHeaderTeamPresence(); return; }
-    if(memberConfirmed)startTeamPresence(orgId,pondoTeamState.uid);
+    if(memberConfirmed){startTeamPresence(orgId,pondoTeamState.uid);if(!window.pondoCurrentUser?.photoURL)syncClayAvatarWorkspace(orgId,pondoTeamState.uid);}
     else if(presenceUnsubscribe)stopTeamPresence();
     pondoTeamState.role = mine.role;
     window.pondoValidateNotificationBanner?.();
@@ -16966,10 +16998,10 @@ function renderTeamPanel() {
       const identity = document.createElement('div');
       identity.style.cssText = 'display:flex;align-items:center;gap:10px;min-width:0';
       let avatar;
-      if (m.photoURL) {
+      if (m.photoURL || clayAvatarPath(m.clayAvatar)) {
         avatar = document.createElement('img');
         avatar.className = 'tm-avatar';
-        avatar.src = m.photoURL;
+        avatar.src = m.photoURL || clayAvatarPath(m.clayAvatar);
         avatar.alt = '';
       } else {
         avatar = document.createElement('span');
@@ -17563,12 +17595,8 @@ onAuthStateChanged(auth, (user) => {
     pondoApp.inert = false;
     userChip.hidden = false;
     userChipName.textContent = user.displayName || user.email || 'Signed in';
-    if (user.photoURL) {
-      userChipAvatar.src = user.photoURL;
-      userChipAvatar.hidden = false;
-    } else {
-      userChipAvatar.hidden = true;
-    }
+    userChipAvatar.src = user.photoURL || './assets/clay-profile-avatar.png';
+    userChipAvatar.hidden = false;
     if (headerAvatarImg && headerAvatarInitial) {
       if (user.photoURL) {
         headerAvatarImg.src = user.photoURL;
@@ -17581,6 +17609,7 @@ onAuthStateChanged(auth, (user) => {
     }
     if(pondoTeamState.uid && pondoTeamState.uid !== user.uid) teardownCollaboration();
     window.pondoCurrentUser = user;
+    window.invalidateClayAvatarWorkspaces();window.applyClayAvatarUI?.();window.loadClayAvatar?.();
     startRemovalInbox(user.uid);
     upsertUserProfile(user);
     initCollaboration(user);
@@ -17596,7 +17625,7 @@ onAuthStateChanged(auth, (user) => {
     if (notifBellBtn) notifBellBtn.hidden = true;
     if (window.closeNotifCenter) window.closeNotifCenter();
     if(!signInPending) setGateBusy(false, '');
-    window.pondoCurrentUser = null;
+    window.pondoCurrentUser = null;window.applyClayAvatarUI?.();
     stopRemovalInbox();
     clearTimeout(settingsPushTimer);
     teardownCollaboration();
@@ -17622,6 +17651,14 @@ onAuthStateChanged(auth, (user) => {
  document.getElementById('offlineDemoClose').addEventListener('click',close);document.getElementById('offlineDemoDone').addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
  overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}if(e.key==='Tab'){const nodes=[...dialog.querySelectorAll('button:not([disabled]),select:not([disabled])')].filter(x=>x.getClientRects().length);if(!nodes.length)return;if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes[nodes.length-1].focus()}else if(!e.shiftKey&&document.activeElement===nodes[nodes.length-1]){e.preventDefault();nodes[0].focus()}}});
 })();
+</script>
+<script>
+document.addEventListener('error',function(event){
+ const img=event.target;
+ if(!(img instanceof HTMLImageElement)||!img.matches('#headerAvatarImg,#userChipAvatar,.avatar-menu-user img,img.team-collab-avatar,img.tm-avatar,img.created-by-avatar'))return;
+ const fallback=new URL('./assets/clay-profile-avatar.png',document.baseURI).href;
+ if(img.src!==fallback)img.src=fallback;
+},true);
 </script>
 </body>
 </html>

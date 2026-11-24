@@ -189,6 +189,12 @@ service cloud.firestore {
                        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
                           == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount + 1));
 
+        // A member may update only their own preset avatar; this never changes
+        // role, identity, or any other membership field.
+        allow update: if isMember(orgId) && uid() == memberId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clayAvatar'])
+          && request.resource.data.clayAvatar in ['classic','sunny','blossom','sky'];
+
         // Role changes must create their immutable workspace history entry in
         // the same commit. Older clients must update before changing roles.
         allow update: if isOwner(orgId)

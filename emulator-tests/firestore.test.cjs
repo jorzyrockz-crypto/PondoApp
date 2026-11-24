@@ -425,3 +425,12 @@ test('role history denies forged batches and concurrent role edits cannot silent
  const dated=writeBatch(a.db);dated.update(ref(a.db,root+'/members/b'),{role:'owner',_roleChangeId:'dated'});dated.set(ref(a.db,root+'/roleHistory/dated'),{actorUid:'a',memberUid:'b',oldRole:'reviewer',newRole:'owner',createdAt:new Date('2020-01-01')});await assertFails(dated.commit());
  const attempts=await Promise.allSettled([a.history.changeRole({targetUid:'b',expectedRole:'reviewer',newRole:'owner'}),c.history.changeRole({targetUid:'b',expectedRole:'reviewer',newRole:'disbursing'})]);assert.equal(attempts.filter(x=>x.status==='fulfilled').length,1);assert.equal(attempts.filter(x=>x.status==='rejected').length,1);assert.equal((await a.history.readRecent()).items.length,1);
 });
+
+test('members may change only their own preset clay avatar, never roles or other members',async()=>{
+ const org='clay-avatar',root=`organizations/${org}`;await seed({[root]:{name:'Clay'},[root+'/members/alice']:{uid:'alice',role:'reviewer'},[root+'/members/bob']:{uid:'bob',role:'owner'},'users/alice':{uid:'alice'}});
+ const {createClayAvatarService}=await import('../clay-avatar.mjs'),alice=client('alice'),bob=client('bob'),state={uid:'alice',orgId:org,memberConfirmed:true},user={uid:'alice',photoURL:null},service=createClayAvatarService({db:alice,api,getUser:()=>user,getState:()=>state,online:()=>true});
+ await assertSucceeds(service.save('sunny'));assert.equal((await getDoc(ref(alice,'users/alice'))).data().clayAvatar,'sunny');assert.equal((await getDoc(ref(bob,root+'/members/alice'))).data().clayAvatar,'sunny');
+ await assertFails(updateDoc(ref(alice,root+'/members/alice'),{clayAvatar:'../../unsafe'}));await assertFails(updateDoc(ref(alice,root+'/members/bob'),{clayAvatar:'sky'}));await assertFails(updateDoc(ref(alice,root+'/members/alice'),{clayAvatar:'sky',role:'owner'}));
+ await assertSucceeds(updateDoc(ref(alice,'users/alice'),{clayAvatar:'sky'}));await assertSucceeds(service.syncWorkspace());assert.equal((await getDoc(ref(bob,root+'/members/alice'))).data().clayAvatar,'sky');
+ await assertSucceeds(deleteDoc(ref(bob,root+'/members/alice')));await assertFails(updateDoc(ref(alice,root+'/members/alice'),{clayAvatar:'classic'}));
+});
