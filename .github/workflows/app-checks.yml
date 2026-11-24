@@ -37,6 +37,7 @@ jobs:
             node tests/shell-version.browser.cjs
             node tests/team-reference.browser.cjs
             node tests/team-compact.browser.cjs
+            node tests/workspace-role-history.browser.cjs
             node tests/workspace-switcher.browser.cjs
             node tests/team-draft-reconcile.browser.cjs
             node tests/team-recovery-notice.browser.cjs

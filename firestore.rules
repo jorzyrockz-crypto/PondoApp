@@ -189,8 +189,40 @@ service cloud.firestore {
                        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount
                           == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedCount + 1));
 
-        allow update: if isOwner(orgId);
+        // Role changes must create their immutable workspace history entry in
+        // the same commit. Older clients must update before changing roles.
+        allow update: if isOwner(orgId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role','_roleChangeId'])
+          && resource.data.role in ['owner','disbursing','project-manager','reviewer']
+          && request.resource.data.role in ['owner','disbursing','project-manager','reviewer']
+          && request.resource.data.role != resource.data.role
+          && request.resource.data.get('_roleChangeId','') is string
+          && request.resource.data._roleChangeId.size() > 0 && request.resource.data._roleChangeId.size() <= 128
+          && !exists(/databases/$(database)/documents/organizations/$(orgId)/roleHistory/$(request.resource.data._roleChangeId))
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/roleHistory/$(request.resource.data._roleChangeId)).data.actorUid == uid()
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/roleHistory/$(request.resource.data._roleChangeId)).data.memberUid == memberId
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/roleHistory/$(request.resource.data._roleChangeId)).data.oldRole == resource.data.role
+          && getAfter(/databases/$(database)/documents/organizations/$(orgId)/roleHistory/$(request.resource.data._roleChangeId)).data.newRole == request.resource.data.role;
         allow delete: if isOwner(orgId) || (signedIn() && memberId == uid());
+      }
+
+      match /roleHistory/{eventId} {
+        allow get: if isMember(orgId);
+        allow list: if isMember(orgId) && request.query.limit != null && request.query.limit <= 101;
+        allow create: if isOwner(orgId)
+          && request.resource.data.keys().hasOnly(['actorUid','memberUid','oldRole','newRole','createdAt'])
+          && request.resource.data.keys().hasAll(['actorUid','memberUid','oldRole','newRole','createdAt'])
+          && request.resource.data.actorUid == uid() && request.resource.data.memberUid is string
+          && request.resource.data.memberUid.size() > 0 && request.resource.data.memberUid.size() <= 128
+          && request.resource.data.oldRole in ['owner','disbursing','project-manager','reviewer']
+          && request.resource.data.newRole in ['owner','disbursing','project-manager','reviewer']
+          && request.resource.data.oldRole != request.resource.data.newRole
+          && request.resource.data.createdAt == request.time
+          && exists(memberPath(orgId,request.resource.data.memberUid))
+          && get(memberPath(orgId,request.resource.data.memberUid)).data.role == request.resource.data.oldRole
+          && getAfter(memberPath(orgId,request.resource.data.memberUid)).data.role == request.resource.data.newRole
+          && getAfter(memberPath(orgId,request.resource.data.memberUid)).data._roleChangeId == eventId;
+        allow update, delete: if false;
       }
 
       match /joinRequests/{requester} {
